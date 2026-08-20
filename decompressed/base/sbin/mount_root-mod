@@ -202,9 +202,9 @@ run_mount_checks() {
 		return
 	fi
 	local reboot_needed="no"
-	for check in $(ls -lA $checkdir); do
-		if [ -x $checkdir/$check ]; then
-			$checkdir/$check "$mount_point" || reboot_needed="yes"
+	for check in "$checkdir"/*; do
+		if [ -x "$check" ]; then
+			"$check" "$mount_point" || reboot_needed="yes"
 		fi
 	done
 	if [ "$reboot_needed" = "yes" ]; then

@@ -16,7 +16,7 @@ local function parseCommandToTchLib(command)
 end
 
 function M.isEncrypted(data)
-  return data and #data >=72 and data:match("^$%d%d$%d%d%$") or nil
+  return data and #data >= 72 and data:match("^%$%d%d%$%d%d%$") or nil
 end
 
 function M.isModuleAvailable(name)

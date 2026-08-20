@@ -63,7 +63,7 @@ local function inizializeFile(fname,total,statsData,times)
 	end
 end
 
-local function handleStatsFile(name, statsData,times)
+local function handleStatsFile(name, statsData, times, binit)
 	local fname = datadir .. name
 	
 	local Total
@@ -75,11 +75,11 @@ local function handleStatsFile(name, statsData,times)
 	end
 	
 	if binit then
-		inizializeFile(fname,Total,statsData,times)
+		inizializeFile(fname, Total, statsData, times)
 	else
-		f = io.open(fname, "r")
+		local f = io.open(fname, "r")
 		if not f then
-			inizializeFile(fname,Total,statsData,times)
+			inizializeFile(fname, Total, statsData, times)
 			f = io.open(fname, "r")
 		end
 		if f then
@@ -93,16 +93,17 @@ local function handleStatsFile(name, statsData,times)
 			if f then
 				f:write(Total .. "\n")
 				local insert = false
-				for index,value in ipairs(data) do
+				for index, value in ipairs(data) do
 					if index > 1 and index <= datanum then
-						local oldtimes = tonumber((value:gsub("[0-9]+%s",""):gsub(":","")))--v:match(".*%s")--:gsub("%s+",""):gsub(":","")
-						local ntimes = tonumber((times:gsub(":","")))
-						if oldtimes == ntimes then
+						local timePart = value:match("(%d+:%d+)$")
+						local oldtimes = timePart and tonumber((timePart:gsub(":", "")))
+						local ntimes = tonumber((times:gsub(":", "")))
+						if oldtimes and ntimes and oldtimes == ntimes then
 							if not insert then
 								f:write(statsData .. " " ..  times .. "\n")
 								insert = true
 							end
-						elseif oldtimes > ntimes then
+						elseif oldtimes and ntimes and oldtimes > ntimes then
 							if not insert then
 								f:write(statsData .. " " ..  times .. "\n")
 								insert = true
@@ -170,14 +171,15 @@ local function DataCollector(datadir, binit)
 							local insert = false
 							for index,value in ipairs(data) do
 								if index > 1 and index <= datanum then
-									local oldtimes = tonumber((value:gsub("[0-9]+%s",""):gsub(":","")))--v:match(".*%s")--:gsub("%s+",""):gsub(":","")
-									local ntimes = tonumber((times:gsub(":","")))
-									if oldtimes == ntimes then
+									local timePart = value:match("(%d+:%d+)$")
+									local oldtimes = timePart and tonumber((timePart:gsub(":", "")))
+									local ntimes = tonumber((times:gsub(":", "")))
+									if oldtimes and ntimes and oldtimes == ntimes then
 										if not insert then
 											f:write(ntraffic .. " " ..  times .. "\n")
 											insert = true
 										end
-									elseif oldtimes > ntimes then
+									elseif oldtimes and ntimes and oldtimes > ntimes then
 										if not insert then
 											f:write(ntraffic .. " " ..  times .. "\n")
 											insert = true
@@ -200,8 +202,8 @@ local function DataCollector(datadir, binit)
 		end
 	end
 	
-	handleStatsFile("stats_cpu",processinfo.getCPUUsage(),times)
-	handleStatsFile("stats_mem",getMemFree(),times)
+	handleStatsFile("stats_cpu", processinfo.getCPUUsage(), times, binit)
+	handleStatsFile("stats_mem", getMemFree(), times, binit)
 end
 
 uloop.init()

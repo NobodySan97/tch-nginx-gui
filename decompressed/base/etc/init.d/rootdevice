@@ -283,7 +283,7 @@ erase_bank1_reboot() { # <bootedbank>
     touch /root/.install_gui
   fi
   # Moving running overlay to bank2 if we are on bank1
-  [ "$1" == "bank_1" ] && {
+  [ "$1" = "bank_1" ] && {
     logecho "Moving /overlay/bank_1 to /overlay/bank_2..."
     kecho "Moving /overlay/bank_1 to /overlay/bank_2..."
     mv /overlay/bank_1 /overlay/bank_2
@@ -350,12 +350,12 @@ check_and_apply_obp() {
     kecho "OBP sanity check succeeded."
   else
     #OBP not OK, check if was an user choice otherwise automatically apply (this should be the case called also on first install)
-    if [ "$(uci -q get modgui.var.check_obp)" == "0" ]; then
+    if [ "$(uci -q get modgui.var.check_obp)" = "0" ]; then
       logecho "OBP sanity check FAILED but check_obp set to 0... Not acting"
       kecho "OBP sanity check FAILED but check_obp set to 0... Not acting"
     else
 
-      if [ "$(cat /proc/$PPID/comm)" == "upgradegui" ]; then
+      if [ "$(cat /proc/$PPID/comm 2>/dev/null)" = "upgradegui" ]; then
         logecho "OBP sanity check FAILED but upgrading, postpone planning on next boot..."
         kecho "OBP sanity check FAILED but upgrading, postpone planning on next boot..."
         uci set modgui.var.reboot_reason_msg="apply OBP planning"
@@ -368,7 +368,7 @@ check_and_apply_obp() {
       logecho "OBP sanity check FAILED start autoplanning..."
       kecho "OBP sanity check FAILED start autoplanning..."
 
-      if [ "$bootedbank" == "bank_2" ]; then
+      if [ "$bootedbank" = "bank_2" ]; then
         # Force erase of bank_1 to have a clean modoverlay
         logecho "Erasing bank_1 firmware to prepare modoverlay..."
         kecho "Erasing bank_1 firmware to prepare modoverlay...."
@@ -382,7 +382,7 @@ check_and_apply_obp() {
         mtd write "$bank1_mtd" "$bank2_mtd"
         md5_bank_1=$(md5sum "$bank1_mtd" | awk '{ print $1 }')
         md5_bank_2=$(md5sum "$bank2_mtd" | awk '{ print $1 }')
-        if [ "$md5_bank_1" == "$md5_bank_2" ]; then
+        if [ "$md5_bank_1" = "$md5_bank_2" ]; then
           logecho "Cloning complete, moving to bank_2 overlay..."
           kecho "Cloning complete, moving to bank_2 overlay..."
           # Clean any existing overlay for bank_2 firmware
@@ -407,7 +407,7 @@ check_full_overlay() {
     logecho "DETECTED FULL ROOTFS... TRYING TO RESTORE..."
     kecho "  DETECTED FULL ROOTFS... TRYING TO RESTORE..."
     for dir in /overlay/"$bootedbank"/*; do
-      if [ ! "$dir" == "/overlay/$bootedbank/etc" ]; then
+      if [ "$dir" != "/overlay/$bootedbank/etc" ]; then
         logecho "TRYING TO SAVE ROOT BY REMOVING EVERY DIR EXCEPT /etc"
         kecho "TRYING TO SAVE ROOT BY REMOVING EVERY DIR EXCEPT /etc"
         rm -rf "$dir"

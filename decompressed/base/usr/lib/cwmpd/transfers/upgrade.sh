@@ -9,7 +9,7 @@ CONFIG=cwmp_transfer
 
 char_encoding()
 {
-  lua <<EOF - $1
+  lua - "$1" << 'EOF'
 local name = arg[1]
 local escapes = ":/?#[]@!$&'()*+;="
 local function escape_char(x)
@@ -19,7 +19,7 @@ local function escape_char(x)
     return x
   end
 end
-name =name:gsub(".", escape_char)
+name = name:gsub(".", escape_char)
 io.write(name)
 EOF
 }
@@ -95,7 +95,7 @@ get_url()
 get_uci_id()
 {
   local cmdkey="$1"
-  local id=$(uci show -q $CONFIG | grep ".id='$cmdkey$'" | cut -d. -f2)
+  local id=$(uci show -q $CONFIG | grep "\.id='$cmdkey'" | cut -d. -f2)
   if [ $? -ne 0 ]; then
     id=
   fi
@@ -171,7 +171,7 @@ get_error()
   if [ -z $value ]; then
     value="0"
   fi
-  if is_dual_bank && [ -f /proc/banktable/active ]; then
+  if platform_is_dualbank && [ -f /proc/banktable/active ]; then
     local expected=$(uci get $CONFIG.$id.bank)
     local active=$(cat /proc/banktable/active)
     local booted=$(cat /proc/banktable/booted)
@@ -360,7 +360,7 @@ if [ "$TRANSFER_ACTION" = "cleanup" ]; then
       [ "$TRANSFER_ID" == $(cat /proc/banktable/legacy_upgrade/key | hexdump -v -e '/1 "%02X"') ] && echo "1" > /proc/banktable/erase_upgrade_info
     fi
     # Upgrade finished succesfully, remove database and transfer information from passive bank (for dual bank platform)
-    if is_dual_bank; then
+    if platform_is_dualbank; then
       [ -f /overlay/$(cat /proc/banktable/notbooted 2>/dev/null)/etc/cwmpd.db ] && rm /overlay/$(cat /proc/banktable/notbooted)/etc/cwmpd.db
       [ -f /overlay/$(cat /proc/banktable/notbooted 2>/dev/null)/etc/config/cwmp_transfer ] && rm /overlay/$(cat /proc/banktable/notbooted)/etc/config/cwmp_transfer
     fi

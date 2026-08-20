@@ -111,7 +111,7 @@ if [ "$OVERLAY_TYPE" = "jffs2" ] ; then
 
 	echo "unmounting overlay..."
 	# Unmount the overlay seems to be not working, instead set it as read only
-	mount -type overlayfs -o ro,remount /
+	mount -t overlayfs -o ro,remount /
 	# unmount the overlay lower filesystem
 	umount /overlay
 

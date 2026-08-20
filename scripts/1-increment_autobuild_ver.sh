@@ -6,25 +6,26 @@ if [ "$(echo "$last_log" | grep -o "\[[0-9]\+\.[0-9]\+\.[0-9]\+\]" | tr -d [ | t
 	ver="$(echo "$last_log" | grep -o "\[[0-9]\+\.[0-9]\+\.[0-9]\+\]" | tr -d [ | tr -d ])"
 	echo "Detected manual version: "$ver
 else
-	latest_version_link="https://raw.githubusercontent.com/Ansuel/gui-dev-build-auto/master/latest.version"
+	latest_version_link="https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master/latest.version"
 	cur_ver=$(curl -s $latest_version_link)
 	
 	if [ -f $HOME/gui-dev-build-auto/latest.version ]; then
 		echo "Detected cached latest.version file... Checking it..."
 		cached_version=$(cat $HOME/gui-dev-build-auto/latest.version | awk ' { print $1 } ' )
 		echo "Cached version detected: $cached_version"
+		version="$cur_ver"
 		echo "Remote version detected: $version"
 		rm $HOME/gui-dev-build-auto/latest.version
 		seconds=0
-		if [ $cached_version == $version ]; then
+		if [ "$cached_version" = "$version" ]; then
 			echo "Same version detected..."
 		fi
-		while [ $cached_version == $version ]; do
-			if [[ seconds -gt 120 ]]; then 
-				echo "Race-condition dectedted... Continuing anyway..."
+		while [ "$cached_version" = "$version" ]; do
+			if [ "$seconds" -gt 120 ]; then 
+				echo "Race-condition detected... Continuing anyway..."
 				break
 			fi
-			seconds=$[$seconds +1]
+			seconds=$((seconds + 1))
 			echo -ne 'Waiting new version to publish for '$seconds' seconds \r'
 			version=$(curl -s $latest_version_link)
 			sleep 1

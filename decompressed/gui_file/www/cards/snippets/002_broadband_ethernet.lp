@@ -18,7 +18,8 @@ local ethIntf
 local ethIntfList = proxy.getPN(ethPortPath, true)
 if ethIntfList ~= nil then
     for _,v in pairs(ethIntfList) do
-        if proxy.get(v.path.."wan")[1].value:untaint() == "1" then
+        local wanVal = proxy.get(v.path.."wan")
+        if wanVal and wanVal[1] and wanVal[1].value and wanVal[1].value:untaint() == "1" then
             local startIndex, intfStart = find(v.path, ethPortPath.."@")
             if intfStart ~= nil then
                 local intfEnd = find(sub(v.path, intfStart+1), "%.")

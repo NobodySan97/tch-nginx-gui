@@ -10,7 +10,7 @@ pretranslated_string="--pretranslated: do not change this file"
 minify_lua() {
 	compressed=0
 	append_pretraslate=0
-	if grep -q "$1" -e "$pretranslated_string"; then
+	if grep -q -e "$pretranslated_string" "$1"; then
 		append_pretraslate=1
 	fi
 	echo "Minying $file | Pretranslated:"$append_pretraslate

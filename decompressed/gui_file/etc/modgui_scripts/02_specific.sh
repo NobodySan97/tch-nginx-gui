@@ -13,12 +13,14 @@ extract_with_check() {
 
     if [ ! -f "$MD5_CHECK_DIR/$file" ]; then
       if [ ! -d "/$file" ]; then
-        mkdir "/$file"
+        mkdir -p "/$file"
       fi
       continue
     fi
 
-    grep -q '.md5sum' "$file" && continue
+    case "$file" in
+      *.md5sum*) continue ;;
+    esac
 
     orig_file=/$file
     file=$MD5_CHECK_DIR/$file

@@ -79,11 +79,19 @@ local port_filter = function(data)
 
 	if quantenna_wifi and data.paramindex:match("eth5") then
 		return false
-	elseif data.paramindex:match(ethname) and ( proxy.get("uci.ethernet.port.@"..ethname..".wan")[1].value == "1" ) then
-		data.paramindex = "WAN"
 	else
-		port = data.paramindex:gsub("eth","")
-		data.paramindex = "LAN - " .. tonumber(port)+1
+		local wan_port_val = proxy.get("uci.ethernet.port.@"..ethname..".wan")
+		local is_wan = (wan_port_val and wan_port_val[1] and wan_port_val[1].value == "1")
+		if data.paramindex:match(ethname) and is_wan then
+			data.paramindex = "WAN"
+		else
+			local port_num = tonumber(data.paramindex:match("eth(%d+)"))
+			if port_num then
+				data.paramindex = "LAN - " .. (port_num + 1)
+			else
+				data.paramindex = data.paramindex
+			end
+		end
 	end
 
   return true

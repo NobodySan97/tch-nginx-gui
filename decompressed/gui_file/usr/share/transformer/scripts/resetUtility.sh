@@ -64,7 +64,8 @@ restoreOriginalGui() {
 	cp -d /overlay/$running_bank/etc/rc.d/S94rootdevice $emergencydir/etc/rc.d/
 	
 	#Delete any change from running bank
-	rm -r /overlay/$running_bank
+	rm -rf /overlay/$running_bank
+	mkdir -p /overlay/$running_bank
 	
 	#Restore config to be converted
 	if [ -d $config_tmp ]; then
@@ -77,7 +78,6 @@ restoreOriginalGui() {
 	
 	#Root only
 	emergencydir=/tmp/rootfile/emergency
-	mkdir /overlay/$running_bank
 	cp -dr $emergencydir/* /overlay/$running_bank/
 	reboot
 }

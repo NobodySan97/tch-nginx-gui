@@ -107,7 +107,7 @@ else
 
 	local wan_interface = "wan"
 
-	if wan_mode == "bridge" then
+	if content_uci.wan_mode == "bridge" then
 		wan_interface = content_uci.wan_ifname
 	end
 
@@ -167,6 +167,7 @@ else
 	setmetatable(ipv6_light_map, untaint_mt)
 
 	local status_light
+	local ppp_status, ppp_light, ppp_state, WAN_IP, ipv6_light, ipv6_state
 	local attributes = { light = { } ,span = { } }
 
 	if content_uci.wan_mode == "pppoe" then
@@ -197,7 +198,6 @@ else
 
 		setmetatable(ppp_light_map, untaint_mt)
 
-		local ppp_status
 		if content_uci.wan_auto ~= "0" then
 		-- WAN enabled
 		content_uci.wan_auto = "1"
@@ -220,7 +220,6 @@ else
 		ppp_status = "disabled"
 		end
 
-		local ppp_light, ppp_state, WAN_IP, ipv6_light, ipv6_state
 		if ppp_status then
 			ppp_light = ppp_light_map[ppp_status]
 			ppp_state = ppp_state_map[ppp_status]

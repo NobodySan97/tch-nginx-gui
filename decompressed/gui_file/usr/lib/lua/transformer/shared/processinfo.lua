@@ -41,7 +41,7 @@ function M.getCurrentCPUUsage()
     end
   end
   getData:close()
-  return tostring(cpuUsage) or "0"
+  return (cpuUsage and tostring(cpuUsage)) or "0"
 end
 
 return M

@@ -90,30 +90,6 @@ function M.setpath(path)
   includepath = path
 end
 
-local dataReq = {
-	
-}
-
-local function compareValueFromConfig(dataReq,val2)
-	
-	local result = nil
-	
-	uci:foreach('web', 'card', function(card)
-
-		local rule = rules[card.modal]
-
-		if rule and not card['.anonymous'] then
-			if val1 == val2 then
-				result = rule.target
-			end
-		end
-	end)
-
-	uci:unload('web')
-	
-	return result
-end
-
 --Returns card from modal provided or nil
 function M.get_card_from_modal(ModalSearch)
 	local session = ngx.ctx.session

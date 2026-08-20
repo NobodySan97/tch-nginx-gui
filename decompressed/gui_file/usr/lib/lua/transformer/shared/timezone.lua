@@ -247,11 +247,13 @@ end
 local function parseLocaltimezonename(localTimeZoneName_uci)
   local localtimezonename = get_from_uci(localTimeZoneName_uci)
   local localtimezoneValue, timezoneValue, dsttimezoneValue
-  local timezoneValuePos = string.find(localtimezonename,",")
-  if timezoneValuePos~=nil then
-    localtimezoneValue = string.sub(localtimezonename, 1, timezoneValuePos-1)
-    timezoneValue, dsttimezoneValue = M.getLocaltimezoneWithoutSDTDST(localtimezoneValue)
-  else
+  if localtimezonename then
+    local timezoneValuePos = string.find(localtimezonename,",")
+    if timezoneValuePos ~= nil then
+      localtimezoneValue = string.sub(localtimezonename, 1, timezoneValuePos-1)
+    else
+      localtimezoneValue = localtimezonename
+    end
     timezoneValue, dsttimezoneValue = M.getLocaltimezoneWithoutSDTDST(localtimezoneValue)
   end
   return timezoneValue, dsttimezoneValue

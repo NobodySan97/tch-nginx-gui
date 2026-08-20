@@ -288,7 +288,7 @@ function M.start(cb)
     end
 
     events['line.button'] = function(msg)
-        if msg ~= nil and led.broadband.status == "off" or led.broadband.status == "ip_connected" or led.broadband.status == "ping_ok" or led.broadband.status == "ping_ko" then
+        if msg ~= nil and (led.broadband.status == "off" or led.broadband.status == "ip_connected" or led.broadband.status == "ping_ok" or led.broadband.status == "ping_ko") then
             if msg.lineinfo == "ping OK" then
                 cb('ping_success')
                 update_led_status(cb, "broadband", "ping_ok", "timerled", "green-blink")

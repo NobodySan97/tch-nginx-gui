@@ -67,7 +67,7 @@ local function get_event_socket()
     ok, errmsg = event_socket:bind(event_address)
     if not ok then
       socket_error("bind", errmsg)
-      event_socket.close()
+      event_socket:close()
       event_socket = nil
     end
   end
@@ -81,7 +81,7 @@ local function do_checkevents()
   end
   local data, from = sock:recvfrom()
   while data do
-    local tag, _, _ msg:init_decode(data)
+    local tag, _, _ = msg:init_decode(data)
     if tag == msg.EVENT then
       local event = msg:decode()
       if event then
@@ -255,7 +255,7 @@ local function translate_options_to_mask(options)
     return 0
   end
   local options_table = {}
-  for option in string.gfind(options, "[^,]+") do
+  for option in string.gmatch(options, "[^,]+") do
     options_table[option] = true
   end
 
@@ -327,6 +327,7 @@ local function do_template(uuid, path, strict)
   local paths = proxy.get(uuid, path)
   if not paths then
     print "You can not generate a testsuite template if the get doesn't even work."
+    return
   end
   -- Rearrange the returned paths, so the result can more easily be merged with
   -- the result of get parameter names.
@@ -337,6 +338,7 @@ local function do_template(uuid, path, strict)
   local gpns = proxy.getPN(uuid, path, false)
   if not gpns then
     print "You can not generate a testsuite template if the gpn doesn't even work."
+    return
   end
   -- Merge the returned results with the info from the get parameter values.
   for _, full_path in ipairs(gpns) do

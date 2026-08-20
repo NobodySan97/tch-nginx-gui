@@ -2,8 +2,8 @@
 
 branch_name="$(git branch | grep \* | cut -d ' ' -f2)"
 
-if [ ! -f  $HOME/gui_build/data ]; then
-	mkdir $HOME/gui_build/data
+if [ ! -d "$HOME/gui_build/data" ]; then
+	mkdir -p "$HOME/gui_build/data"
 fi
 
 echo "Detected $branch_name build"

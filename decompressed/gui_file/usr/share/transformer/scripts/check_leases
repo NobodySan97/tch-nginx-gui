@@ -42,7 +42,7 @@ local function poolbase(ipstr,maskstr)
   end
 
   local maskblocks = { match(maskstr, ipmatch) }
-  if #maskstr ~= 4 then
+  if #maskblocks ~= 4 then
     return nil
   end
 

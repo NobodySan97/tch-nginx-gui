@@ -36,7 +36,7 @@ fi
 mkdir tar_tmp
 
 for index in "${modular_dir[@]}"; do
-
+	old_md5=""
 	if [ "$CI" == "true" ] && [ -f $HOME/gui-dev-build-auto/modular/$index.tar.bz2 ]; then
 		old_md5=$(md5sum <(bzcat $HOME/gui-dev-build-auto/modular/$index.tar.bz2) | awk '{print $1}')
 	fi

@@ -46,55 +46,64 @@ po_files = {}
 
 
 def gen_tbl_from_po(lang_path):
-    for root, dirs, files in os.walk(lang_path):
-      for dir in dirs:
-        po_table[dir] = []
-        po_string_table[dir] = {}
-        plur_po_string_table[dir] = {}
-        for root, dirs, files in os.walk(lang_path+"/"+dir):
-          for file in files:
-            translate_table[file.replace(".po", "")] = ()
-            plur_table[file.replace(".po", "")] = ()
-            plurs_table[file.replace(".po", "")] = {}
-            po_table[dir].append(os.path.join(root, file))
-            po_file = open(os.path.join(root, file), 'r', encoding='UTF8')
-            string_file = po_file.read()
-            po_string_table[dir][file.replace(".po", "")] = tuple(
-                [s[1:-1] for s in normal_po_regex.findall(string_file)])
-            plur_po_string_table[dir][file.replace(".po", "")] = tuple(
-                [s[1:-1] for s in plural_po_regex.findall(string_file)])
-            po_file.close()
+    if not os.path.exists(lang_path):
+        return
+    for d in os.listdir(lang_path):
+        d_path = os.path.join(lang_path, d)
+        if os.path.isdir(d_path):
+            po_table[d] = []
+            po_string_table[d] = {}
+            plur_po_string_table[d] = {}
+            for sub_root, sub_dirs, sub_files in os.walk(d_path):
+                for file in sub_files:
+                    if file.endswith(".po"):
+                        base_name = file.replace(".po", "")
+                        translate_table[base_name] = ()
+                        plur_table[base_name] = ()
+                        plurs_table[base_name] = {}
+                        po_table[d].append(os.path.join(sub_root, file))
+                        with open(os.path.join(sub_root, file), 'r', encoding='UTF8') as po_file:
+                            string_file = po_file.read()
+                        po_string_table[d][base_name] = tuple(
+                            [s[1:-1] for s in normal_po_regex.findall(string_file)])
+                        plur_po_string_table[d][base_name] = tuple(
+                            [s[1:-1] for s in plural_po_regex.findall(string_file)])
 
 
 def check_files(scanOnly):
     for root, dirs, files in os.walk("decompressed"):
         for file in files:
             if file.endswith(".lp") or file.endswith(".lua"):
-              search_file = open(os.path.join(root, file),
-                                 'r', encoding='UTF8')
-              string_file = search_file.read()
+              with open(os.path.join(root, file), 'r', encoding='UTF8') as search_file:
+                  string_file = search_file.read()
               po_file = po_find_regex.findall(string_file)
               if len(po_file) != 0:
+                domain = po_file[0]
+                if domain not in translate_table:
+                  translate_table[domain] = ()
+                  plur_table[domain] = ()
+                  plurs_table[domain] = {}
                 if scanOnly == "ScanOnly":
-                  po_files[po_file[0]] = {}
+                  po_files[domain] = {}
                   continue
-                translate_table[po_file[0]] += tuple(
+                translate_table[domain] += tuple(
                     [s[1:-1] for s in normal_trans_regex.findall(string_file)])
-                translate_table[po_file[0]] += tuple(
+                translate_table[domain] += tuple(
                     [s[1:-1].replace('"', '\\\"') for s in accent_trans_regex.findall(string_file)])
                 plural_string = normal_plural_trans_regex.findall(string_file)
                 for string in plural_string:
-                  plur_table[po_file[0]
-                             ] += tuple(normal_first_plur_regex.findall(string))
-                  plurs_table[po_file[0]][normal_first_plur_regex.findall(
-                      string)[0]] = normal_second_plur_regex.findall(string)[0]
+                  first_matches = normal_first_plur_regex.findall(string)
+                  second_matches = normal_second_plur_regex.findall(string)
+                  if first_matches and second_matches:
+                    plur_table[domain] += tuple(first_matches)
+                    plurs_table[domain][first_matches[0]] = second_matches[0]
                 plural_string = accent_plural_trans_regex.findall(string_file)
                 for string in plural_string:
-                  plur_table[po_file[0]] += tuple(s.replace('"', '\\\"')
-                                                  for s in accent_first_plur_regex.findall(string))
-                  plurs_table[po_file[0]][accent_first_plur_regex.findall(string)[0].replace(
-                      '"', '\\\"')] = accent_second_plur_regex.findall(string)[0].replace('"', '\\\"')
-              search_file.close()
+                  first_matches = accent_first_plur_regex.findall(string)
+                  second_matches = accent_second_plur_regex.findall(string)
+                  if first_matches and second_matches:
+                    plur_table[domain] += tuple(s.replace('"', '\\\"') for s in first_matches)
+                    plurs_table[domain][first_matches[0].replace('"', '\\\"')] = second_matches[0].replace('"', '\\\"')
 
 
 def gen_po(lang_path):
@@ -128,7 +137,7 @@ def main(argv):
   operation = ''
   template = ''
   try:
-    opts, args = getopt.getopt(argv, "hdot", ["dir=", "operation=", "template="])
+    opts, args = getopt.getopt(argv, "hd:o:t:", ["dir=", "operation=", "template="])
   except getopt.GetoptError:
     print('update_po.py -d <lang directory> -o <operation>')
     sys.exit(2)
@@ -154,7 +163,7 @@ def main(argv):
         skip_section = 0
         po = open(lang_path+"/"+lang+"/"+file+".po", 'r', encoding='UTF8')
         po_line = po.readlines()
-        po.close
+        po.close()
         po = open(lang_path+"/"+lang+"/"+file+".po", 'w', encoding='UTF8')
         for line in po_line:
           #Skip first 2 lines
@@ -179,13 +188,13 @@ def main(argv):
             #Write everything else
             po.write(line)
         po.close()
-  if operation == "template":
+  elif operation == "template":
     if template == '':
         print("Provide name for lang template")
     else:
         if os.path.exists(lang_path+"/"+template):
-            print("directoy allready exist")
-            quit()
+            print("directory already exists")
+            sys.exit(1)
         os.mkdir(lang_path+"/"+template)
         check_files("ScanOnly")
 

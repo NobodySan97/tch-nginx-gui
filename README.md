@@ -1,4 +1,4 @@
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/AnsuelS) [![License](https://img.shields.io/github/license/Ansuel/tch-nginx-gui.svg?style=flat)](https://github.com/Ansuel/tch-nginx-gui/blob/master/LICENSE) [![Lastest Build](https://img.shields.io/circleci/project/github/Ansuel/tch-nginx-gui.svg?style=flat)](https://circleci.com/gh/Ansuel/tch-nginx-gui/tree/master) [![Lastest Release](https://img.shields.io/github/release/Ansuel/tch-nginx-gui/all.svg?style=flat&label=DEV%20version)](https://github.com/Ansuel/tch-nginx-gui/releases) [![Stable Release](https://img.shields.io/github/release/Ansuel/tch-nginx-gui.svg?style=flat&label=STABLE%20version)](https://github.com/Ansuel/tch-nginx-gui/releases)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/AnsuelS) [![License](https://img.shields.io/github/license/Ansuel/tch-nginx-gui.svg?style=flat)](https://github.com/NobodySan97/tch-nginx-gui/blob/master/LICENSE) [![Lastest Build](https://img.shields.io/circleci/project/github/Ansuel/tch-nginx-gui.svg?style=flat)](https://circleci.com/gh/Ansuel/tch-nginx-gui/tree/master) [![Lastest Release](https://img.shields.io/github/release/Ansuel/tch-nginx-gui/all.svg?style=flat&label=DEV%20version)](https://github.com/NobodySan97/tch-nginx-gui/releases) [![Stable Release](https://img.shields.io/github/release/Ansuel/tch-nginx-gui.svg?style=flat&label=STABLE%20version)](https://github.com/NobodySan97/tch-nginx-gui/releases)
 
 <h3><strong>This is a highly modified and universal version of the GUI installed on all Technicolor Modem/Routers compatibile with (and probably not only):</strong></h3>
   <ul>
@@ -57,12 +57,12 @@ General GUI Topic: https://www.ilpuntotecnico.com/forum/index.php/topic,81461.0.
 <h3>Then execute these commands (Active WAN/Internet connection required):</h3>
 
 ```
-curl -k https://raw.githubusercontent.com/Ansuel/gui-dev-build-auto/master/GUI.tar.bz2 --output /tmp/GUI.tar.bz2
+curl -k https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master/GUI.tar.bz2 --output /tmp/GUI.tar.bz2
 bzcat /tmp/GUI.tar.bz2 | tar -C / -xvf -
 /etc/init.d/rootdevice force
 ```
 
-You can find all of the autobuilt GUI versions at this link: https://github.com/Ansuel/gui-dev-build-auto
+You can find all of the autobuilt GUI versions at this link: https://github.com/NobodySan97/gui-dev-build-auto
 
 If you get an error during the download process or you have no Internet/WAN connection on the device, just manually download the GUI.tar.bz2 file and put in /tmp folder via SCP then execute the other (non curl) commands listed above.
 

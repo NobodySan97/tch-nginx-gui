@@ -24,8 +24,11 @@ local getBackUpValues = content_helper.convertResultToObject("uci.dhcp.relayback
 content_helper.getExactContent(relay_Params)
 
 local server_addr = proxy.get("uci.dhcp.relay.@relay.server_addr")
+local local_addr = proxy.get("uci.dhcp.relay.@relay.local_addr")
+local server_val = server_addr and server_addr[1] and server_addr[1].value or ""
+local local_val = local_addr and local_addr[1] and local_addr[1].value or ""
 
-if not server_addr or (server_addr[1].value == "" and proxy.get("uci.dhcp.relay.@relay.local_addr")[1].value == "") then
+if not server_addr or (server_val == "" and local_val == "") then
   dhcprelay_state = "disabled"
   if getBackUpValues and next(getBackUpValues) then
     for _, v in pairs(getBackUpValues) do

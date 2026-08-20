@@ -26,8 +26,8 @@
 STABLE_VERSION="stable.version"
 DEV_VERSION="latest.version"
 PREVIEW_VERSION="preview.version"
-CURRENT_VERSION=$(grep /etc/init.d/rootdevice -e 'version_gui' | sed 's/version_gui=//' | cut -d'-' -f1)
-BASE_DIR="https://raw.githubusercontent.com/Ansuel/gui-dev-build-auto/master"
+CURRENT_VERSION=$(grep -e 'version_gui' /etc/init.d/rootdevice | sed 's/version_gui=//' | cut -d'-' -f1)
+BASE_DIR="https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master"
 
 ############TRANSFORMER UTILITY##################
 set_transformer() {
@@ -115,7 +115,7 @@ if [ $connectivity == "yes" ]; then
         uci set modgui.gui.outdated_ver=0
         uci set modgui.gui.new_ver="Unknown"
     fi
-	uci commit env
+	uci commit modgui
 else
     logger -s -t "CheckVer Script" "No connection detected!"
 fi

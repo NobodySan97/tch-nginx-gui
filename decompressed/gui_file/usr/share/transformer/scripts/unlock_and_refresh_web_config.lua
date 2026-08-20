@@ -123,14 +123,14 @@ end
 local cardset = {}
 
 --Pupulate cardset table with card list from config
-uci:foreach('web', 'ruleset', function(s)
+uci:foreach('web', 'card', function(s)
 	cardset[#cardset+1] = s['.name']
   end)
   
 local card_check_rule = {
 	{ name = 'gateway_card', card = '001_gateway.lp', modal = 'gatewaymodal' },
 	{ name = 'modgui_card', card = '001_modgui.lp', modal = 'modguimodal' },
-	{ name = 'boradband_card', card = '002_broadband.lp', modal = 'broadbandmodal' },
+	{ name = 'broadband_card', card = '002_broadband.lp', modal = 'broadbandmodal' },
 	{ name = 'internet_card', card = '003_internet.lp', modal = 'internetmodal' },
 	{ name = 'wireless_card', card = '004_wireless.lp', modal = 'wirelessmodal' },
 	{ name = 'lan_card', card = '005_LAN.lp', modal = 'ethernetmodal' },

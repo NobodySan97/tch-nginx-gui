@@ -61,7 +61,7 @@ msgid "50% of max Frequency in ASYNC mode"
 msgstr "50% der maximalen Frequenz im ASYNC-Modus"
 
 msgid "<p>Remote assistance is currently disabled.</p><p> By clicking on the 'Apply' button with the 'Enabled' checkbox enabled your gateway will be accessible from your broadband connection. After %s minutes of inactivity, or on reboot, remote assistance will be automatically disabled for 'Temporary' mode. </p><p> Please provide the following parameters to your ISP:</p>"
-msgstr "<p>Fernwartung ist aktuell deaktiviert.</p><p> Durch Drücken des 'Anwenden'-Knopfs mit eingeschalteter Checkbox wird Ihr Gateway von der Breitbandseite aus zugreifbar sein. Nach %d Minuten Inaktivität oder beim Neustart wird die Fernwartung im 'Temporären' Modus automatisch wieder deaktiviert. </p><p> Bitte teilen Sie Ihrem Internet Service Provider folgende Parameter mit:</p>"
+msgstr "<p>Fernwartung ist aktuell deaktiviert.</p><p> Durch Drücken des 'Anwenden'-Knopfs mit eingeschalteter Checkbox wird Ihr Gateway von der Breitbandseite aus zugreifbar sein. Nach %s Minuten Inaktivität oder beim Neustart wird die Fernwartung im 'Temporären' Modus automatisch wieder deaktiviert. </p><p> Bitte teilen Sie Ihrem Internet Service Provider folgende Parameter mit:</p>"
 
 msgid "<p>Remote assistance is currently enabled. </p><p>Click 'Apply' button with the 'Enabled' checkbox disabled to disable remote assistance on your gateway </p>"
 msgstr "<p>Fernwartung ist aktuell aktiviert.</p><p> Durch Drücken des 'Anwenden'-Knopfs mit ausgeschalteter Checkbox wird Ihr Gateway von der Breitbandseite nicht mehr zugreifbar sein.</p>"
@@ -2929,8 +2929,8 @@ msgstr "Punkt"
 msgid "<p>%s GUI Version "
 msgstr "<p>%s GUI Version "
 
-msgid "<p>Coded & Expanded by <font style=\"color:#0088cc;\">Ansuel</font> and <a href=\"https://github.com/Ansuel/tch-nginx-gui/graphs/contributors\">these GitHub users.</a><br/>Unlock Utility by <font style=\"color:#0088cc;\">ADeltaX</font>"
-msgstr "<p>Geschrieben und erweitert von <font style=\"color:#0088cc;\">Ansuel</font> und <a href=\"https://github.com/Ansuel/tch-nginx-gui/graphs/contributors\">diesen GitHub Nutzern.</a><br/>Entsperrwerkzeug von <font style=\"color:#0088cc;\">ADeltaX</font>"
+msgid "<p>Coded & Expanded by <font style=\"color:#0088cc;\">Ansuel</font> and <a href=\"https://github.com/NobodySan97/tch-nginx-gui/graphs/contributors\">these GitHub users.</a><br/>Unlock Utility by <font style=\"color:#0088cc;\">ADeltaX</font>"
+msgstr "<p>Geschrieben und erweitert von <font style=\"color:#0088cc;\">Ansuel</font> und <a href=\"https://github.com/NobodySan97/tch-nginx-gui/graphs/contributors\">diesen GitHub Nutzern.</a><br/>Entsperrwerkzeug von <font style=\"color:#0088cc;\">ADeltaX</font>"
 
 msgid " && Translated by <font style=\"color:#0088cc;\">%s</font>"
 msgstr " && Übersetzt von <font style=\"color:#0088cc;\">%s</font>"
@@ -4139,8 +4139,8 @@ msgstr "Bestimmte App ist schon installiert"
 msgid "Specific App"
 msgstr "Bestimmte App"
 
-msgid "If you don't have connection, specific app can be downloaded here ( https://raw.githubusercontent.com/Ansuel/gui-dev-build-auto/master/modular/upgrade-pack-specific%s.tar.bz2 ) and installed manually here."
-msgstr "Wenn Sie keine Verbindung haben, kann die bestimmte App hier heruntergeladen werden ( https://raw.githubusercontent.com/Ansuel/gui-dev-build-auto/master/modular/upgrade-pack-specific%s.tar.bz2 ) und hier manuell installiert."
+msgid "If you don't have connection, specific app can be downloaded here ( https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master/modular/upgrade-pack-specific%s.tar.bz2 ) and installed manually here."
+msgstr "Wenn Sie keine Verbindung haben, kann die bestimmte App hier heruntergeladen werden ( https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master/modular/upgrade-pack-specific%s.tar.bz2 ) und hier manuell installiert."
 
 msgid "Install Specific App Online"
 msgstr "Installieren bestimmte App Online"
