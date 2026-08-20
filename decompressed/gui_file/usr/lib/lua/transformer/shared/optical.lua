@@ -97,8 +97,10 @@ function M.getTrsvInfo(info, paramName)
     log:error(string.format("Cannot retrieve trsv info %s\n", info))
     return nil
   end
-  local data = result[info]
-  local key, val = "", ""
+  local data = result and result[info]
+  if type(data) ~= "table" then
+    return nil
+  end
   for key, val in pairs (data) do
     key = key:match ("[%S]+")
     if (key == paramName) then
@@ -120,8 +122,10 @@ function M.getWanconf(paramName)
     log:error("Cannot retrieve wanconf info\n")
     return nil
   end
-  local data = result["WanConf"]
-  local key, val = "", ""
+  local data = result and result["WanConf"]
+  if type(data) ~= "table" then
+    return nil
+  end
   for key, val in pairs (data) do
     if (key == paramName) then
       return val

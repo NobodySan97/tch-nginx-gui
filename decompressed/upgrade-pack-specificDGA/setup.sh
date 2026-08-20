@@ -29,7 +29,7 @@ if [ -z "${kernel_ver##3.4*}" ]; then
     logecho "Checking UPnP.."
     if [ -f /etc/init.d/miniupnpd ]; then
       if [ "$(uci get -q upnpd.config.enable_upnp)" ]; then
-        if [ "$(uci get -q upnpd.config.enable_upnp)" == "1" ]; then
+        if [ "$(uci get -q upnpd.config.enable_upnp)" = "1" ]; then
           logecho "Disabling miniupnpd-tch and redirecting to miniupnpd"
           /etc/init.d/miniupnpd-tch stop
           /etc/init.d/miniupnpd-tch disable
@@ -45,8 +45,8 @@ if [ -z "${kernel_ver##3.4*}" ]; then
   }
   enable_new_upnp
 
-  if [ ! -f /etc/config/dland ]; then
-    touch /etc/config/dland
+  if [ ! -f /etc/config/dlnad ]; then
+    touch /etc/config/dlnad
     uci set dlnad.config=dlnad
     uci set dlnad.config.manufacturer_url='http://www.technicolor.com'
     uci set dlnad.config.model_url='http://www.technicolor.com'
@@ -58,8 +58,8 @@ if [ -z "${kernel_ver##3.4*}" ]; then
 
   #Use custom driver to remove downgrade limitation... thx @Roleo
   logecho "Checking downgrade limitation bit..."
-  if [ "$(uci get -q env.rip.board_mnemonic)" == "VBNT-S" ] &&
-    [ "$(uci get -q env.var.prod_number)" == "4132" ] &&
+  if [ "$(uci get -q env.rip.board_mnemonic)" = "VBNT-S" ] &&
+    [ "$(uci get -q env.var.prod_number)" = "4132" ] &&
     [ -f /proc/rip/0123 ]; then
     logecho "Downgrade limitation bit detected... Removing..."
     rmmod keymanager

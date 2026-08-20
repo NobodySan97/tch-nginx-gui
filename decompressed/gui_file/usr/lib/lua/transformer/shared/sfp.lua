@@ -36,16 +36,22 @@ end
 
 function M.getSfpctlFormat(option)
   local ctl = popen("sfpi2cctl -get -format " .. option)
+  if not ctl then
+    return ""
+  end
   local output = ctl:read("*a")
   ctl:close()
-  return output
+  return output or ""
 end
 
 function M.getSfpStatus()
-  local ctl = popen("cat /proc/sfp_status")
+  local ctl = popen("cat /proc/sfp_status 2>/dev/null")
+  if not ctl then
+    return ""
+  end
   local output = ctl:read("*a")
   ctl:close()
-  return output
+  return output or ""
 end
 
 function M.getTxDis()
@@ -57,15 +63,21 @@ function M.getTxDis()
 end
 
 function M.getCrossbarStatus()
-  local ctl = popen("cat /proc/crossbar_status")
+  local ctl = popen("cat /proc/crossbar_status 2>/dev/null")
+  if not ctl then
+    return ""
+  end
   local output = ctl:read("*a")
   ctl:close()
-  return output
+  return output or ""
 end
 
 function M.getLinkStatus(port)
-  local link = ""
+  local link = "Down"
   local ctl = popen("ethctl eth4 media-type port " .. port .. " 2>&1")
+  if not ctl then
+    return "Down"
+  end
   local output = ctl:read("*a")
   ctl:close()
   if output then

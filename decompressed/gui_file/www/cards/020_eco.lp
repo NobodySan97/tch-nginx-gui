@@ -8,12 +8,13 @@ local proxy = require("datamodel")
 local content_helper = require("web.content_helper")
 
 local prod_friendly_name = proxy.get("uci.env.var.prod_friendly_name")
+local prod_name = prod_friendly_name and prod_friendly_name[1] and prod_friendly_name[1].value or ""
 
 local content = {
 	cpuspeed = "uci.power.cpu.cpuspeed",
 	eee = "uci.power.ethernet.eee",
 }
-if prod_friendly_name[1].value:match("DGA4131") then
+if prod_name:match("DGA4131") then
 	content.eco_led = "uci.ledfw.ambient.active"
 else
 	content.eco_led = "uci.ledfw.status_led.enable"
@@ -21,7 +22,7 @@ end
 
 content_helper.getExactContent(content)
 
-if prod_friendly_name[1].value:match("DGA4131") then
+if prod_name:match("DGA4131") then
 	if content.eco_led == "1" then
 		content.eco_led_text = T"Ambient LED".." ".."enabled"
 	else

@@ -40,7 +40,7 @@ local xdsl_params = {
 
 content_helper.getExactContent(xdsl_params)
 
-if find(xdsl_params["dsl_type"], "ADSL") == 1 or find(xdsl_params["dsl_type"], "ADLS") == 1 then
+if xdsl_params["dsl_type"] and (find(xdsl_params["dsl_type"], "ADSL") == 1 or find(xdsl_params["dsl_type"], "ADLS") == 1) then
   is_adsl = true
 end
 local content_rpc_gpon = {}

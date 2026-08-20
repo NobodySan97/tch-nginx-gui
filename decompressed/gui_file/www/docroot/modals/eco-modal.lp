@@ -10,6 +10,7 @@ local post_helper = require("web.post_helper")
 local content_helper = require("web.content_helper")
 
 local prod_friendly_name = proxy.get("uci.env.var.prod_friendly_name")
+local prod_name = prod_friendly_name and prod_friendly_name[1] and prod_friendly_name[1].value or ""
 local vB = post_helper.validateBoolean
 
 local mapValid = {
@@ -37,7 +38,7 @@ local mapParams = {
 
 }
 
-if prod_friendly_name[1].value:match("DGA4131") then
+if prod_name:match("DGA4131") then
 	mapValid.ledfw_ambient = vB
 	mapParams.ledfw_ambient = "uci.ledfw.ambient.active"
 else
@@ -95,11 +96,11 @@ ngx.print(ui_helper.createMessages(message_helper.popMessages()))
 	    
 	    local html = {}
 	    html[#html + 1] = '<legend>' .. T"LED Settings" .. '</legend>'
-		if prod_friendly_name[1].value:match("4130") or  prod_friendly_name[1].value:match("4132") or prod_friendly_name[1].value:match("TG789") then
+		if prod_name:match("4130") or prod_name:match("4132") or prod_name:match("TG789") then
 			html[#html + 1] = ui_helper.createAlertBlock(T"Turn the WiFi LEDs on if at least one client is connected to the corresponding radio.", info_box)
 			html[#html + 1] = ui_helper.createSwitch(T"WiFi NSC", "ledfw_wifinsc", content["ledfw_wifinsc"])
 		end
-		if prod_friendly_name[1].value:match("DGA4131") then
+		if prod_name:match("DGA4131") then
 			html[#html + 1] = ui_helper.createSwitch(T"Ambient LED", "ledfw_ambient", content["ledfw_ambient"])
 		else
 			html[#html + 1] = ui_helper.createAlertBlock(T"Turn off all LEDs except “Info” if all services are up and running. Press the “Info” / “WiFi” button to show the current LEDs status.", info_box)
