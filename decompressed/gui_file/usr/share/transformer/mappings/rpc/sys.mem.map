@@ -63,7 +63,7 @@ mtd3: 02e60000 00020000 "bank_1"
 mtd4: 02e60000 00020000 "bank_2"
 mtd5: 00020000 00020000 "eripv2"
 mtd6: 00040000 00020000 "rawstorage"
-mtd7: 00000003 00020000 "blversion
+mtd7: 00000003 00020000 "blversion"
 
 flashTotal = 08000000 ( /1000 will be in KB)
 

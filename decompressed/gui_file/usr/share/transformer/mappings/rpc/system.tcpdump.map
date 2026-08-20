@@ -240,7 +240,7 @@ local function createscript()
 interface=\$2\
 count=\$3\
 file=\$4\
-if [ \$type = pcap ]; then\
+if [ "\$type" = pcap ]; then\
   /usr/sbin/tcpdump -i \$interface -w \$file -c \$count;\
 else\
   /usr/sbin/tcpdump -i \$interface -l -c \$count | tee \$file\
