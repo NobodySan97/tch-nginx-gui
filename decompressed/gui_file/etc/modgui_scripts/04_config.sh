@@ -629,6 +629,18 @@ logecho "Checking mobiled libs..."
 mobiled_lib_add
 logecho "Checking if intercept is enabled and disabling if it is..."
 disable_intercept #Intercept check
+
+disable_upload_coredump_and_reboot() {
+  if [ "$(uci get -q system.@coredump[0].action)" != "ignore" ]; then
+    uci set system.@coredump[0].action="ignore"
+    uci commit system
+  fi
+  if [ "$(uci get -q system.@coredump[0].reboot)" != "0" ]; then
+    uci set system.@coredump[0].reboot='0'
+    uci commit system
+  fi
+}
+
 logecho "Disabling coredump reboot..."
 disable_upload_coredump_and_reboot
 logecho "Restoring nginx additional options if needed..."

@@ -34,10 +34,10 @@ restore_original_mapper() {
 		logecho "Restored device-specific transformer mapping files"
 	fi
 	if [ ! -f $target/bbf/VoiceService.VoiceProfile.Line.map ]; then
-		cp $orig_dir/bbf/VoiceService.VoiceProfile.Line.map $orig_dir/bbf/
+		cp $orig_dir/bbf/VoiceService.VoiceProfile.Line.map $target/bbf/
 	elif [ "$(md5sum $orig_dir/bbf/VoiceService.VoiceProfile.Line.map | awk '{print $1}')" != "$(md5sum $target/bbf/VoiceService.VoiceProfile.Line.map | awk '{print $1}')" ]; then
-		rm "$target/bbf/VoiceService.VoiceProfile.Line.map"
-		cp "$orig_dir/bbf/VoiceService.VoiceProfile.Line.map" "$orig_dir/bbf/"
+		rm -f "$target/bbf/VoiceService.VoiceProfile.Line.map"
+		cp "$orig_dir/bbf/VoiceService.VoiceProfile.Line.map" "$target/bbf/"
 	fi #Solve some problems with cwmp AGTEF_1.0.3
 
 	#Remove ignored Root device naming from transformer
@@ -71,7 +71,7 @@ transformer_lib_check() {
 			gui_pos=/tmp/GUI_dev.tar.bz2
 		fi
 		logecho "Found gui here: "$gui_pos
-		if [ $gui_pos != "" ] && [ -s $gui_pos ]; then
+		if [ -n "$gui_pos" ] && [ -s "$gui_pos" ]; then
 			bzcat $gui_pos | tar -C / -xf - usr #reapply the upgrade as in the gui we store some of this file that we restored
 			logecho "Restoring transformer lib" #What is going on here? Doesn't even restart transformer???
 		fi
@@ -81,11 +81,11 @@ transformer_lib_check() {
 
 check_wansensing() {
 	#Make sure that wansensing is under the correct dir
-	if [ -d /usr/lib/lua/wansensing ] && [ ! -d /usr/lib/lua/wansensingfw ] ; then
-    logecho "Old build detected, moving wansensing file"
-		rm /usr/lib/lua/wansensing/scripthelpers.lua
-		mv /usr/lib/lua/wansensingfw/scripthelpers.lua /usr/lib/lua/wansensing/scripthelpers.lua
-		rm -r /usr/lib/lua/wansensing
+	if [ -d /usr/lib/lua/wansensingfw ] && [ ! -d /usr/lib/lua/wansensing ]; then
+		logecho "Old build detected, moving wansensing file"
+		mkdir -p /usr/lib/lua/wansensing
+		cp -r /usr/lib/lua/wansensingfw/* /usr/lib/lua/wansensing/
+		rm -rf /usr/lib/lua/wansensingfw
 	fi
 }
 

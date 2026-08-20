@@ -224,7 +224,7 @@ if ! type 'kill_remaining' >/dev/null 2>/dev/null; then
         [ $loop -eq 1 ] && run=true
       done
 
-      let loop_limit--
+      loop_limit=$((loop_limit - 1))
       [ $loop_limit -eq 0 ] && {
         echo
         echo "Failed to kill all processes."

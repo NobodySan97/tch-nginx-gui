@@ -282,7 +282,11 @@ if ngx.req.get_method() == "POST" then
                 return sendcmd("checkver")
         end
         if action == "getVendor" then
-                ngx.print(call_popen(untaint("! grep -q " .. post_args.mac:gsub('_.*','') .. " /tmp/mac_cache && (curl -fksm 2 https://api.maclookup.app/v2/macs/" .. post_args.mac:gsub('_.*','') .. "/company/name >> /tmp/mac_cache && echo '|" .. post_args.mac:gsub('_.*','') .. "' >> /tmp/mac_cache); grep " .. post_args.mac:gsub('_.*','') .. " /tmp/mac_cache | cut -d'|' -f1"), "r"))
+                local raw_mac = post_args.mac and tostring(post_args.mac):gsub('_.*', '') or ""
+                local safe_mac = raw_mac:match("^([%x:]+)$")
+                if safe_mac and #safe_mac >= 6 then
+                    ngx.print(call_popen(untaint("! grep -q '" .. safe_mac .. "' /tmp/mac_cache 2>/dev/null && (curl -fksm 2 'https://api.maclookup.app/v2/macs/" .. safe_mac .. "/company/name' >> /tmp/mac_cache && echo '|" .. safe_mac .. "' >> /tmp/mac_cache); grep '" .. safe_mac .. "' /tmp/mac_cache 2>/dev/null | cut -d'|' -f1"), "r"))
+                end
                 ngx.exit(ngx.HTTP_OK)
                 return
         end

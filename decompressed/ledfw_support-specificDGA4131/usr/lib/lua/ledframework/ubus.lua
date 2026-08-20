@@ -301,7 +301,7 @@ function M.start(cb)
     end
 
     events['wireless.button'] = function(msg)
-        if msg ~= nil and msg.action ~= nil then
+        if msg ~= nil and msg.action ~= nil and type(msg.radioinfo) == "table" then
             if msg.radioinfo["2G_state"] == "off" and msg.radioinfo["5G_state"] == "off" then
                 cb('wifi_both_radio_off')
                 update_led_status(cb, "wireless", "radio_off", "timerled", "red-solid")
@@ -383,14 +383,16 @@ function M.start(cb)
 
                 reset_timer = uloop.timer(function() cb('reset_ongoing') end, reset_timeout)
             elseif msg.action == "released" then
-                if string.match(msg.resetinfo, "factory") == "factory" then
+                if msg.resetinfo and string.match(msg.resetinfo, "factory") == "factory" then
                     -- Broadband led status will be controlled according to pattern when reset pressed, don't change its status.
                     -- Ambient led has been set during the pre-condition pattern 'reset_prepare', no need to reset here.
                     cb('reset_ongoing')
-                elseif string.match(msg.resetinfo, "abort") == "abort" or string.match(msg.resetinfo, "complete") == "complete" then
+                elseif msg.resetinfo and (string.match(msg.resetinfo, "abort") == "abort" or string.match(msg.resetinfo, "complete") == "complete") then
                     cb('reset_noaction')
-                    reset_timer:cancel()
-                    reset_timer = nil
+                    if reset_timer then
+                        reset_timer:cancel()
+                        reset_timer = nil
+                    end
 
                     if led.broadband.status == "off" and (led.wireless.status == "off" or led.wireless.status == "initial") and (led.wps.status == "off" or led.wps.status == "initial") then
                         -- Always update ambient status inspite of its pattern, so that status can be represent as soon as it gets active.

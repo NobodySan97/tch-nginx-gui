@@ -2,37 +2,38 @@
 gettext.textdomain('webui-mobiled')
 
 local json = require("dkjson")
-local content_helper = require("web.content_helper")
 local ngx = ngx
+local tonumber, tostring = tonumber, tostring
+local format = string.format
 
-local proxy = require("datamodel")
-local content_helper = require("web.content_helper")
-local ui_helper = require("web.ui_helper")
-local post_helper = require("web.post_helper")
-local string, ngx, os = string, ngx, os
-local tonumber = tonumber
-local format, match = string.format, string.match
+local old_rx_value = "1000"
+local old_tx_value = "1000"
+local interface = "ptm0"
 
-local old_rx_value
-local old_tx_value
-local interface
-
-if ngx.req.get_method() == "POST" then
-  old_rx_value = ngx.req.get_uri_args().oldrx or "1000"
-  old_tx_value = ngx.req.get_uri_args().oldtx or "1000"
-  interface = ngx.req.get_uri_args().interface
+local args = ngx.req.get_uri_args()
+if args then
+  old_rx_value = args.oldrx or "1000"
+  old_tx_value = args.oldtx or "1000"
+  if args.interface and tostring(args.interface):match("^[a-zA-Z0-9_%.%-]+$") then
+    interface = tostring(args.interface)
+  end
 end
 
-local int_rx = format("/sys/class/net/%s/statistics/rx_bytes",interface or "ptm0")
-local int_tx = format("/sys/class/net/%s/statistics/tx_bytes",interface or "ptm0")
+local function read_net_stat(intf, stat)
+  local path = format("/sys/class/net/%s/statistics/%s", intf, stat)
+  local f = io.open(path, "r")
+  if f then
+    local val = f:read("*l") or f:read("*a")
+    f:close()
+    if val then
+      return val:gsub("%s+", "")
+    end
+  end
+  return "0"
+end
 
-local file = io.open(int_rx,"r")
-local rx_traffic = file:read()
-file:close()
-
-local file = io.open(int_tx,"r")
-local tx_traffic = file:read()
-file:close()
+local rx_traffic = read_net_stat(interface, "rx_bytes")
+local tx_traffic = read_net_stat(interface, "tx_bytes")
 
 local data = {
 	old_rx_traffic = old_rx_value,
@@ -42,9 +43,7 @@ local data = {
 }
 
 local buffer = {}
-if not interface then
-	ngx.say("Invalid interface in args")
-elseif json.encode (data, { indent = false, buffer = buffer }) then
+if json.encode(data, { indent = false, buffer = buffer }) then
 	ngx.say(buffer)
 else
 	ngx.say("{}")

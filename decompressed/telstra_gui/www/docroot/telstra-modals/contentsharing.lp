@@ -115,7 +115,7 @@ content_helper.getExactContent(content_samba)
   local html = {}
   if check_dlna("available") then
 	html[#html + 1] = ui_helper.createCheckboxSwitch(T"Enable DLNA Server", "dlna_enabled", dlna_content["dlna_enabled"], attributes)
-	html[#html + 1] = ui_helper.createInputText(T"Media Server Name", "media_server_name", dlna_content["dlna_friendly_name"], attributes)
+	html[#html + 1] = ui_helper.createInputText(T"Media Server Name", "dlna_friendly_name", dlna_content["dlna_friendly_name"], attributes)
   end
   html[#html + 1] = ui_helper.createLabel(T"Media Server IP", content_intf_lan.ipaddr)
 --  html[#html + 1] = ui_helper.createLabel(T"FTP Server State", str_ftp_server_enable)

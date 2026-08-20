@@ -14,12 +14,14 @@ local ifacepath = "uci.wireless.wifi-iface.@"
 local appath = "uci.wireless.wifi-ap.@"
 
 local secmodes = setmetatable({
-     ["none"] =  "nopass" ,
+     ["none"] = "nopass",
      ["wpa2-psk"] = "WPA",
      ["wpa-wpa2-psk"] = "WPA",
      ["wpa2"] = "WPA",
-     ["wpa-wpa2"] =  "WPA",
-     ["wep"] =  "WEP",
+     ["wpa-wpa2"] = "WPA",
+     ["wpa3-sae"] = "WPA",
+     ["wpa2-wpa3"] = "WPA",
+     ["wep"] = "WEP",
 }, untaint_mt )
 
 local content = {
@@ -32,9 +34,13 @@ local content = {
 content_helper.getExactContent(content)
 
 local keypassphrases = setmetatable({
-    ["none"] = "" ,
+    ["none"] = "",
     ["wpa2-psk"] = content.wpakey,
     ["wpa-wpa2-psk"] = content.wpakey,
+    ["wpa2"] = content.wpakey,
+    ["wpa-wpa2"] = content.wpakey,
+    ["wpa3-sae"] = content.wpakey,
+    ["wpa2-wpa3"] = content.wpakey,
     ["wep"] = content.wepkey,
 }, untaint_mt )
 

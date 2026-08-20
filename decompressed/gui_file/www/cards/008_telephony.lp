@@ -80,13 +80,14 @@ ngx.print('\
 	  for name, value in pairs (sipprofile_info) do
 	  	local res = datamodel.get (sipprofile_ubus_path..name..".sipRegisterState")
 	  	local enYN = datamodel.get (sipprofile_ubus_path..name..".enable")
-	  	if (type(res) == "table") then
+	  	if (type(res) == "table" and res[1]) then
+	  		local is_enabled = (type(enYN) == "table" and enYN[1] and enYN[1].value == "true")
 	  		if (res[1].value == "Registered") then
-	  			reged = reged +1
-	  		elseif (enYN[1].value == "true") and (res[1].value == "Unregistered") then
-	  			notreged = notreged +1
-	  		elseif (enYN[1].value == "true") and (res[1].value == "Registering") then
-	  			reging = reging +1
+	  			reged = reged + 1
+	  		elseif is_enabled and (res[1].value == "Unregistered") then
+	  			notreged = notreged + 1
+	  		elseif is_enabled and (res[1].value == "Registering") then
+	  			reging = reging + 1
 	  		end
 	  	end
 	  end

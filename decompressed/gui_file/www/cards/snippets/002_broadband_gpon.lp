@@ -55,7 +55,10 @@ end
     local html = {}
       html[#html + 1] = format("<strong>%s</strong><br/>",T"GPON Status")
       html[#html + 1] = ui_helper.createSimpleLight(nil, gpon_state_map[gpon_status], { light = { class = gpon_light_map[gpon_status] } })
-      html[#html + 1] = format('<p id="Line_Rate_Down" class="subinfos">&emsp; <i class="fas fa-certificate"></i>%.2f dBm</p>', tonumber(content["optical_signal_level"])/1000)
+      local opt_lvl = tonumber(content["optical_signal_level"])
+      if opt_lvl then
+        html[#html + 1] = format('<p id="Line_Rate_Down" class="subinfos">&emsp; <i class="fas fa-certificate"></i>%.2f dBm</p>', opt_lvl/1000)
+      end
     ngx.print(html)
 
 ngx.print('\

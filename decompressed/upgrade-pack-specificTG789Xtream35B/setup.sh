@@ -4,8 +4,8 @@
 
 move_files_and_clean(){
   for file in $(find "$1"*/ -xdev | cut -d '/' -f4-); do
-    if [[ -d "$1$file" && ! -d "/$file" ]]; then
-			mkdir "/$file"
+    if [ -d "$1$file" ] && [ ! -d "/$file" ]; then
+			mkdir -p "/$file"
 			continue
 		fi
 

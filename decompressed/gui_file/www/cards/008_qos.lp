@@ -30,13 +30,15 @@ ngx.print('\
 		<div class="divtable">\
 			');
                 local html = {}
+				local nQueues = tonumber(dataQoS.numQueues) or 0
+				local nClassify = tonumber(dataQoS.numClassify) or 0
 				html[#html + 1] = "<span class=\"simple-desc\">"
-                html[#html + 1] = '<i " class="fas fa-list-ul" aria-hidden="true" href="#">&nbsp</i>'
-                html[#html + 1] = format(N("<strong>%s queue</strong> active","<strong>%s queues</strong> active"), dataQoS.numQueues,dataQoS.numQueues)
+                html[#html + 1] = '<i class="fas fa-list-ul" aria-hidden="true">&nbsp;</i>'
+                html[#html + 1] = format(N("<strong>%d queue</strong> active","<strong>%d queues</strong> active", nQueues), nQueues)
 				html[#html + 1] = "</span>"
 				html[#html + 1] = "<span class=\"simple-desc\">"
-                html[#html + 1] = '<i " class="fas fa-list-ul" aria-hidden="true" href="#">&nbsp</i>'
-                html[#html + 1] = format(N("<strong>%s classify rule</strong> active","<strong>%s classify rules</strong> active"), dataQoS.numClassify,dataQoS.numQueues)
+                html[#html + 1] = '<i class="fas fa-list-ul" aria-hidden="true">&nbsp;</i>'
+                html[#html + 1] = format(N("<strong>%d classify rule</strong> active","<strong>%d classify rules</strong> active", nClassify), nClassify)
 				html[#html + 1] = "</span>"
                 ngx.print (html)
             ngx.print('\

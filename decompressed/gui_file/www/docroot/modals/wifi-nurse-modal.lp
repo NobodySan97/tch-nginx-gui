@@ -73,45 +73,42 @@ for x = 1, #hosts, 1 do
 				if tostring(n_status) == "true" then
 					datarows[index]={}
 					datarows[index][1] = hosts[x].HostName
-					datarows[index][2] = stationConf["capabilities"]
-					datarows[index][3] = tostring(tonumber(stationConf["tx_phy_rate"])/1000).." ".."Mbps"
+					datarows[index][2] = stationConf["capabilities"] or ""
+					local tx_rate = tonumber(stationConf["tx_phy_rate"])
+					datarows[index][3] = tx_rate and (tostring(tx_rate/1000).." Mbps") or "0 Mbps"
 					datarows[index][4] = "5"
 
 					local lastRSSI = tonumber(stationConf["last_rssi"])
-					if stationConf["state"] ~= "Disconnected" then
+					if stationConf["state"] ~= "Disconnected" and lastRSSI then
 						if lastRSSI > -41 then
 							datarows[index][5] = T"Excellent"
 							datarows[index][4] = "1"
+						elseif lastRSSI > -55 then
+							datarows[index][5] = T"Good"
+							datarows[index][4] = "1"
+						elseif lastRSSI > - 71 then
+							datarows[index][5] = T"Ok"
+							datarows[index][4] = "1"
+						elseif lastRSSI > - 81 then
+							datarows[index][5] = T"Satisfactoy"
+							datarows[index][4] = "3"
 						else
-							if lastRSSI > -55 then
-								datarows[index][5] = T"Good"
-								datarows[index][4] = "1"
-							else
-								if lastRSSI > - 71 then
-									datarows[index][5] = T"Ok"
-									datarows[index][4] = "1"
-								else
-									if lastRSSI > - 81 then
-										datarows[index][5] = T"Satisfactoy"
-										datarows[index][4] = "3"
-									else
-										datarows[index][5] = T"Limited. Expect dropouts."
-										datarows[index][4] = "4"
-									end
-								end
-							end
+							datarows[index][5] = T"Limited. Expect dropouts."
+							datarows[index][4] = "4"
 						end
 					else
 						datarows[index][5] = T"Disconnected"
 						datarows[index][4] = "5"
 					end
 
-					datarows[index][6] = stationConf["last_rssi"]
-					datarows[index][7] = stationConf["av_rssi"]
-					datarows[index][8] = stationConf["rssi"]
-					datarows[index][9] = format("%.1f KB",tostring(tonumber(stationConf["tx_bytes"])/1000))
-					datarows[index][10] = format("%.1f KB",tostring(tonumber(stationConf["rx_bytes"])/1000))
-					datarows[index][11] = stationConf["radio"]
+					datarows[index][6] = stationConf["last_rssi"] or ""
+					datarows[index][7] = stationConf["av_rssi"] or ""
+					datarows[index][8] = stationConf["rssi"] or ""
+					local tx_b = tonumber(stationConf["tx_bytes"]) or 0
+					local rx_b = tonumber(stationConf["rx_bytes"]) or 0
+					datarows[index][9] = format("%.1f KB", tx_b/1000)
+					datarows[index][10] = format("%.1f KB", rx_b/1000)
+					datarows[index][11] = stationConf["radio"] or ""
 					index = index + 1
 				end
 

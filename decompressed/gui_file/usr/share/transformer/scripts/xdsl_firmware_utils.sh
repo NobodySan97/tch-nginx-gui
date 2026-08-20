@@ -97,7 +97,7 @@ else
 	[ "$1" = "clean" ] && CLEAN=1
 fi
 
-installed_driver=$(xdslctl --version 2>&1 >/dev/null | grep 'version -' | awk '{print $6}' | sed 's/\..*//')
+installed_driver=$(xdslctl --version 2>&1 | grep 'version -' | awk '{print $6}' | sed 's/\..*//')
 request_driver="$1"
 
 if [ "$(grep </proc/cpuinfo Processor | grep ARM)" ]; then
@@ -113,7 +113,7 @@ download_Driver() {
 
 test_apply() {
 	if [ -f "/tmp/$request_driver" ]; then
-		rm "/tmp/$request_driver"
+		rm -f "/tmp/$request_driver"
 	fi
 	connectivity="yes"
 	if ping -q -c 1 -W 1 8.8.8.8 >/dev/null; then
@@ -122,10 +122,12 @@ test_apply() {
 		connectivity="no"
 	fi
 
-	if [ $connectivity == "yes" ]; then
+	if [ "$connectivity" = "yes" ]; then
 		if [ "$installed_driver" != "$request_driver" ]; then
 			download_Driver
-			if [ "$(echo $checksums | grep $(md5sum /tmp/$request_driver | awk '{print $1}'))" ]; then
+			if [ -f "/tmp/$request_driver" ] && [ -s "/tmp/$request_driver" ]; then
+				dl_md5=$(md5sum "/tmp/$request_driver" | awk '{print $1}')
+				if [ -n "$dl_md5" ] && echo "$checksums" | grep -q "$dl_md5"; then
 
 				log "Testing driver $request_driver... If the modem crash, reset the driver on next boot"
 				rm /etc/adsl/adsl_phy.bin

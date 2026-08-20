@@ -3,8 +3,8 @@ local proxy = require("datamodel")
 local M = {}
 
 local function notEmpty(path)
-
-	if proxy.get(path)[1].value ~= "" then
+	local res = proxy.get(path)
+	if res and res[1] and res[1].value and res[1].value ~= "" then
 		return true
 	end
 
@@ -18,7 +18,8 @@ function M.getIpv6Content()
 		ip6prefix = "rpc.network.interface.@wan.ip6prefix",
 	}
 
-	for i,v in ipairs(proxy.getPN("rpc.network.interface.", true)) do
+	local pns = proxy.getPN("rpc.network.interface.", true)
+	for i,v in ipairs(pns or {}) do
 		local intf = string.match(v.path, "rpc%.network%.interface%.@([^%.]+)%.")
 		if intf then
 			if intf == "6rd" then

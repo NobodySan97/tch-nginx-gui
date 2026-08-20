@@ -34,10 +34,12 @@ function get_all_profiles(profile_list)
     cursor:foreach("mmpbx", "service", function(s)
         if (s.type == "DND") then
             local profiles = s["profile"]
-            if #profiles >= 1 then
-                for _, profile_name in ipairs (profiles) do
+            if type(profiles) == "table" then
+                for _, profile_name in ipairs(profiles) do
                     profile_list[#profile_list + 1] = profile_name
                 end
+            elseif type(profiles) == "string" and profiles ~= "" then
+                profile_list[#profile_list + 1] = profiles
             end
         end
     end)

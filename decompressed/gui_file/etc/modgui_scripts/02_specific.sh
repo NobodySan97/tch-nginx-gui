@@ -59,7 +59,7 @@ apply_right_opkg_repo() {
 
   if [ "$cpu_type" = "armv7l" ]; then
     case $marketing_version in
-    "19."*)
+    "19."* | "20."*)
       sed -i '/homeware\/18\/brcm63xx-tch/d' /etc/opkg.conf #remove old setted feeds
       sed -i '/Ansuel\/GUI_ipk\/kernel-4.1/d' /etc/opkg.conf #remove old setted feeds
       sed -i '/repository\.macoers\.com\/homeware\/19\/brcm6xxx-tch/d' /etc/opkg.conf #remove broken 19 macoers feeds
@@ -195,7 +195,7 @@ ledfw_extract() {
 }
 
 ledfw_rework_TG788() {
-  if [ ! "$(uci get -q button.info)" ] || [ "$(uci get -q button.info)" = "BTN_3" ]; then
+  if [ ! "$(uci get -q button.info.button)" ] || [ "$(uci get -q button.info.button)" = "BTN_3" ]; then
     logecho "Setting up status (wifi) button..."
     uci del button.easy_reset
     uci set button.info=button
@@ -292,7 +292,7 @@ case $marketing_version in
   }
   [ "$cpu_type" = "mips" ] && install_specific TG789
   ;;
-"18."*)
+"18."* | "19."* | "20."*)
   [ "$cpu_type" = "armv7l" ] && install_specific DGA
   [ "$cpu_type" = "mips" ] && logecho "Unknown what specific_app to install on $marketing_version $cpu_type"
   ;;
@@ -307,7 +307,6 @@ uci commit modgui
 [ -z "${device_type##*DGA4130*}" ] && ledfw_extract "DGA"
 [ -z "${device_type##*DGA4132*}" ] && ledfw_extract "DGA"
 [ -z "${device_type##*DGA4131*}" ] && ledfw_extract "DGA4131"
-[ -z "${device_type##*TG788*}" ] && ledfw_extract "TG788"
 [ -z "${device_type##*TG788*}" ] && ledfw_rework_TG788
 [ -z "${device_type##*TG789*}" ] && ledfw_extract "TG789"
 [ -z "${device_type##*TG589*}" ] && ledfw_rework_TG799

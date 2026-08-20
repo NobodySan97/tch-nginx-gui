@@ -5,7 +5,7 @@
 check_new_dlnad() {
   logecho "Enable DLNAd"
 	#This function will check to see which dlna server daemon is installed
-	if [ -f /etc/init.d/dland ] && [ ! -f /etc/rc.d/S98dlnad ] && [ -f /etc/init.d/minidlna ]; then
+	if [ -f /etc/init.d/dlnad ] && [ ! -f /etc/rc.d/S98dlnad ] && [ -f /etc/init.d/minidlna ]; then
 		if [ "$(pgrep "minidlna")" ] ; then
 			/etc/init.d/minidlna stop
 		fi

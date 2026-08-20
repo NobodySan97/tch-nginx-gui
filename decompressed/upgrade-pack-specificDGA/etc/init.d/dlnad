@@ -46,7 +46,7 @@ start()
    local mountdir
    config_get mountdir mountd path
 
-   if [ $enabled == "1" ]; then
+   if [ "$enabled" = "1" ]; then
      if [ ! -f $CONF_FILE ]; then
        echo "enabled=$enabled" >> $CONF_FILE
        echo "manufacturer_url=$manufacturer_url" >> $CONF_FILE
@@ -79,7 +79,7 @@ start()
      logger -t dlnad "Starting dlnad"
      mkdir -m 0777 -p /tmp/dlnad
      #Added a extra check for the existence of the dlnad process to prevent recursive case
-     if ! pgrep -x "/usr/bin/dlnad" > /dev/null; then
+     if ! pgrep -f "$DLNAD_BIN" > /dev/null 2>&1; then
        $DLNAD_BIN -f $CONF_FILE &
      fi
      pid_dlnad=$(ps | grep $DLNAD_BIN | grep -v grep | awk '{print $1}')
@@ -94,7 +94,7 @@ reload() {
   local dlnad_enabled
   config_load dlnad
   config_get dlnad_enabled config enabled
-  if [[ "$dlnad_enabled" = "0" ]]; then
+  if [ "$dlnad_enabled" = "0" ]; then
     logger -t dlnad "Reload: WARNING DLNA Disabled, Stopping DLNAD"
     stop
   else
@@ -110,15 +110,15 @@ stop()
    logger -t dlnad "Stopping dlnad"
    service_stop $DLNAD_BIN
 
-   if [ -f $DLNAD_PID_FILE ]; then
-     rm -f $DLNAD_PID_FILE
+   if [ -f "$DLNAD_PID_FILE" ]; then
+     rm -f "$DLNAD_PID_FILE"
    fi
 
-   if [ -f $CONF_FILE ]; then
-     rm -f $CONF_FILE
+   if [ -f "$CONF_FILE" ]; then
+     rm -f "$CONF_FILE"
    fi
 
-   if [ -f $MNT_FILE ]; then
-     rm -f $CONF_FILE
+   if [ -f "$MNT_FILE" ]; then
+     rm -f "$MNT_FILE"
    fi
 }

@@ -21,18 +21,22 @@ else
 end
 
 local function get_wansensing()
-	if proxy.get("uci.wansensing.global.enable") then
-		return proxy.get("uci.wansensing.global.enable")[1].value
+	local ws = proxy.get("uci.wansensing.global.enable")
+	if ws and ws[1] and ws[1].value then
+		return ws[1].value
 	end
 	return ""
 end
 
 -- find requested interface in the uci network file, device section
 local function findwan(interface)
-	for i,v in ipairs(proxy.getPN("uci.network.device.", true)) do
-		local result = match(v.path, "uci%.network%.device%.@.*".. interface .. ".*%.")
-		if result then
-			return (result:gsub("uci%.network%.device%.",""):gsub("%.",""))
+	local pns = proxy.getPN("uci.network.device.", true)
+	if pns then
+		for i,v in ipairs(pns) do
+			local result = match(v.path, "uci%.network%.device%.@.*".. interface .. ".*%.")
+			if result then
+				return (result:gsub("uci%.network%.device%.",""):gsub("%.",""))
+			end
 		end
 	end
 

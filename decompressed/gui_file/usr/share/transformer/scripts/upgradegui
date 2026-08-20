@@ -150,9 +150,7 @@ if [ ! -f $WORKING_DIR/$FILE_NAME ]; then #Check if file exist as offline upload
   fi
 
   # Clean older GUI archive if present
-  for file in "$WORKING_DIR"/*; do
-    rm -f "$FILE_NAME"*
-  done
+  rm -f "$WORKING_DIR/$FILE_NAME"* "$WORKING_DIR/GUI"*
 
   # Download new GUI to /tmp
   if ! $curl $URL_BASE/$FILE_NAME --output $WORKING_DIR/$FILE_NAME; then

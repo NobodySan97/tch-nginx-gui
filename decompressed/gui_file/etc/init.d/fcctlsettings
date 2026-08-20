@@ -4,7 +4,7 @@ START=99
 
 setup_state() {
     config_get enabled state enabled 1
-	if [ $enabled == 1 ]; then
+	if [ "$enabled" = "1" ]; then
 		fcctl enable > /dev/null
 		logger -t "Flow Cache" "Starting service..."
 	else

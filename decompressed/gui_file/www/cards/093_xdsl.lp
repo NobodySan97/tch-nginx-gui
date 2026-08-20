@@ -20,13 +20,13 @@ local content = {
   }
 content_helper.getExactContent(content)
 
-if content.dslam_chipset:match("BDCM") then
-	content.dslam_chipset = "Broadcom"
-elseif content.dslam_chipset:match("IFTN") then
-	content.dslam_chipset = "Infineon"
-end
-
-if not content.dslam_chipset then
+if content.dslam_chipset and content.dslam_chipset ~= "" then
+	if content.dslam_chipset:match("BDCM") then
+		content.dslam_chipset = "Broadcom"
+	elseif content.dslam_chipset:match("IFTN") then
+		content.dslam_chipset = "Infineon"
+	end
+else
 	content.dslam_chipset = T"Not Up"
 	content.dslam_version = " "
 end

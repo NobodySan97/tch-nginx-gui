@@ -142,21 +142,19 @@ local function getWifiTodListFromIndex(index)
 	return nil
 end
 
-local function checkApInConfig(apInConfig,apToCheck)
-	local ap_list = {}
-  
+local function checkApInConfig(apInConfig, apToCheck)
 	if not apInConfig then
 		return false
 	end
   
-	for i,v in ipairs(apInConfig) do
-		local ap_index = proxy.get(v.path.."value")[1].value
-		ap_list[#ap_conf+1] = ap_list:match("(.*)_")
-	end
-	
-	for _, ap in pairs(ap_list) do
-		if ap == apToCheck then
-			return true
+	for i, v in ipairs(apInConfig) do
+		local val_res = proxy.get(v.path .. "value")
+		local ap_index = val_res and val_res[1] and val_res[1].value
+		if ap_index then
+			local ap_name = ap_index:match("(.*)_") or ap_index
+			if ap_name == apToCheck or ap_index == apToCheck then
+				return true
+			end
 		end
 	end
 		

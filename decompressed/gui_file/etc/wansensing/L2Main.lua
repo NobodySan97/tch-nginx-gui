@@ -37,7 +37,7 @@ function M.check(runtime)
 	-- check if wan ethernet port is up
 	if scripthelpers.l2HasCarrier("eth4") and not ( ethernet_mode == "0" ) then
 				logger:notice("SFP connection: "..sfp.getSfpPhyState())
-				if sfp.getSfpPhyState() == "connect" and sfp.getSfpVendName() ~= "" then
+				if sfp.getSfpPhyState() == "connect" and sfp.getSFPVendorName() ~= "" then
 					logger:notice("SFP connected")
 					return "L3Sense", "SFP"
 				else
@@ -57,14 +57,15 @@ function M.check(runtime)
 	end
 	--DR Section to check if wwan is enabled and if not enable it (covered config errors) 
    local mobile = x:get("network", "wwan", "auto")
-	logger:notice("WAN Sensing Mobile: "..mobile)
-    
-	if mobile == "0" then 
-		 logger:notice("WAN Sensing - Enabling Mobile interface")
-		 x:set("network", "wwan", "auto", "1")
-		 x:commit("network")
-		 conn:call("network.interface.wwan", "up", { })
-	end
+   if mobile then
+       logger:notice("WAN Sensing Mobile: "..mobile)
+       if mobile == "0" then 
+           logger:notice("WAN Sensing - Enabling Mobile interface")
+           x:set("network", "wwan", "auto", "1")
+           x:commit("network")
+           conn:call("network.interface.wwan", "up", { })
+       end
+   end
 	return "L2Sense"
 end
 

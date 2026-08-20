@@ -32,14 +32,14 @@ local disableBandSteer = bandsteer_helper.disableBandSteer
 local getargs = ngx.req.get_uri_args()
 local radio, wl, ap, bspeerwl, bspeerap
 
-if getargs.guest == "2g_1" then
-    radio = "radio_2G"
-    wl = "wl0_1"
-    ap = "ap2"
-elseif getargs.guest == "5g_1" then
+if getargs.guest == "5g_1" then
     radio = "radio_5G"
     wl = "wl1_1"
     ap = "ap3"
+else
+    radio = "radio_2G"
+    wl = "wl0_1"
+    ap = "ap2"
 end
 
 --To get the bandsteer peer nodes

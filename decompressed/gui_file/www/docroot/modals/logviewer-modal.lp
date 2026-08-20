@@ -79,8 +79,8 @@ end)
 -- Reverse table to show most recent first
 local size = #log_array
 local t = {}
-for i,v in ipairs(log_array) do
-    t[size-i] = v
+for i = size, 1, -1 do
+    t[#t+1] = log_array[i]
 end
 log_array = t
 

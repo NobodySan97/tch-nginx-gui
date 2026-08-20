@@ -26,13 +26,15 @@ if ngx.req.get_method() == "POST" and assistant:username() ~= username then
     rc = session:changePassword(args.salt, args.verifier)
     --if the user is default_user with role:admin and the legacy_salt is not null, reset it to null
     local legacy_salt = dm.get("uci.web.user.@usr_admin.legacy_salt")
-    if legacy_salt and legacy_salt[1].value and ("admin" == session:getrole()) and (username == dm.get("uci.web.user.@usr_admin.name")[1].value) then
+    local admin_name = dm.get("uci.web.user.@usr_admin.name")
+    local admin_username = admin_name and admin_name[1] and admin_name[1].value
+    if legacy_salt and legacy_salt[1].value and ("admin" == session:getrole()) and (username == admin_username) then
       dm.set("uci.web.user.@usr_admin.legacy_salt", "")
       dm.apply()
     end
   end
   if rc then
-    if #args.default_user == 2 then
+    if args.default_user and #args.default_user == 2 then
       session:toggleDefaultUser(true)
       dm.set("uci.web.uiconfig.@uidefault.defaultuser", username)
     else

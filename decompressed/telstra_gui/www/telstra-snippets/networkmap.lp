@@ -247,7 +247,7 @@ local content_wwan = {
 }
 content_helper.getExactContent(content_wwan)
 
-if content_wwan.ipaddr:len() ~= 0 then
+if content_wwan.ipaddr and content_wwan.ipaddr:len() ~= 0 then
   wan_intf = "wwan"
 end
 
@@ -263,13 +263,16 @@ content_helper.getExactContent(content)
 
 if content.fwversion then
     local version = content.fwversion
-    content.fwversion = sub(version, 1, find(version, "%-") - 1)
+    local dash_pos = find(version, "%-")
+    if dash_pos then
+        content.fwversion = sub(version, 1, dash_pos - 1)
+    end
 end
 
 local wan_type = "Ethernet"
-if find(content.wan_ll_intf, "atm_") == 1 then
+if content.wan_ll_intf and find(content.wan_ll_intf, "atm_") == 1 then
    wan_type = "ADSL"
-elseif find(content.wan_ll_intf, "ptm") == 1 then
+elseif content.wan_ll_intf and find(content.wan_ll_intf, "ptm") == 1 then
    wan_type = "VDSL"
 elseif wan_intf == "wwan" then
    wan_type = "Mobile"

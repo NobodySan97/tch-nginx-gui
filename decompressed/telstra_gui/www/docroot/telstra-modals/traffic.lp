@@ -53,9 +53,10 @@ table.sort(wls, function(a,b)
     end
 end)
 
-local wan_intf ="wan"
-local ipaddr = proxy.get("rpc.network.interface.@wwan.ipaddr")[1].value
-if ipaddr:len() ~= 0 then
+local wan_intf = "wan"
+local ip_res = proxy.get("rpc.network.interface.@wwan.ipaddr")
+local ipaddr = ip_res and ip_res[1] and ip_res[1].value or ""
+if ipaddr ~= "" then
   wan_intf = "wwan"
 end
 

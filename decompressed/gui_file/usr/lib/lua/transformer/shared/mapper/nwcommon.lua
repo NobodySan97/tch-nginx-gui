@@ -538,16 +538,18 @@ function M.loadRoutes(onlyDefault)
         fields.destip = "0.0.0.0/0"
       end
       fields.gateway = line:match("via%s(%S+)") or "0.0.0.0"
-      fields.ifname = line:match("dev%s(%S+)")
+      fields.ifname = line:match("dev%s(%S+)") or ""
       fields.metric = line:match("metric%s+(%d+)%s$") or "0"
-      key = fields.destip .. fields.ifname
-      if onlyDefault and fields.destip == "0.0.0.0/0" then
-        defaultRoute = fields.ifname
-        break
-      end
-      if not keys[key] then
-        keys[key] = true
-        routes[#routes+1] = fields
+      if fields.destip and fields.ifname ~= "" then
+        key = fields.destip .. fields.ifname
+        if onlyDefault and fields.destip == "0.0.0.0/0" then
+          defaultRoute = fields.ifname
+          break
+        end
+        if not keys[key] then
+          keys[key] = true
+          routes[#routes+1] = fields
+        end
       end
     end
     fd:close()

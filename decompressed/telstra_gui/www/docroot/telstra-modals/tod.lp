@@ -55,7 +55,7 @@ tod_mac_to_hostname(tod_data)
 <div class="row">\
 <div class="span11">\
 \
-<form class="form-horizontal" method="post" action="/tod.lp">\
+<form class="form-horizontal" method="post" action="tod.lp">\
 \
 ');  
 ngx.print(ui_helper.createMessages(message_helper.popMessages()))

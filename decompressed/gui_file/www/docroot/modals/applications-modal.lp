@@ -20,12 +20,15 @@ local app_list = {
 	"amule",
 }
 
-local marketing_version = proxy.get("uci.version.version.@version[0].marketing_version")
-local cputype = proxy.get("rpc.system.modgui.CPUtype")[1].value
-local specific_app = proxy.get("uci.modgui.app.specific_app")[1].value or "0"
-if marketing_version then
-	marketing_version = tonumber(marketing_version[1].value:sub(1,4))
+local mver = proxy.get("uci.version.version.@version[0].marketing_version")
+local marketing_version = 0
+if mver and mver[1] and mver[1].value then
+	marketing_version = tonumber(mver[1].value:sub(1,4)) or 0
 end
+local cputype_res = proxy.get("rpc.system.modgui.CPUtype")
+local cputype = cputype_res and cputype_res[1] and cputype_res[1].value or ""
+local specific_app_res = proxy.get("uci.modgui.app.specific_app")
+local specific_app = specific_app_res and specific_app_res[1] and specific_app_res[1].value or "0"
 
 local function appapply(action)
 	proxy.set("rpc.system.modgui.app.sendcmd",action)
@@ -41,10 +44,13 @@ local function appapply(action)
 end
 
 if ngx.req.get_method() == "POST" then
-	local action = string.untaint(ngx.req.get_post_args().action)
-	if action:match("install") or action:match("remove") or
-		action:match("start") or action:match("stop") then
-		return appapply(action)
+	local post_args = ngx.req.get_post_args()
+	local raw_action = post_args and post_args.action
+	if raw_action then
+		local action = string.untaint(tostring(raw_action))
+		if action:match("^[a-zA-Z0-9_]+$") and (action:match("install") or action:match("remove") or action:match("start") or action:match("stop")) then
+			return appapply(action)
+		end
 	end
 end
 

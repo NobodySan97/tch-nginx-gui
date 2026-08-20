@@ -7,7 +7,8 @@ local ui_helper = require("web.ui_helper")
 local content_helper = require("web.content_helper")
 
 local datamodel = require("datamodel")
-local variant = datamodel.get("uci.env.var.prod_friendly_name")[1].value or ""
+local var_res = datamodel.get("uci.env.var.prod_friendly_name")
+local variant = var_res and var_res[1] and var_res[1].value or ""
 
 if ( variant == "DJN2130" ) or ( variant == "Technicolor TG800vac" ) then
   local content_nfc = {

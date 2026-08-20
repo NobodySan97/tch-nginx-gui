@@ -35,7 +35,7 @@ local pathIndexList = {}
     <div class="content card_bg" data-bg-text="&#xf02f;">\
 	  <div class="divtable">\
       ');  ngx.print(ui_helper.createSimpleLight(content["printersharing_enabled"], printersharing_state, attributes,"fa fa-print")); ngx.print('\
-      ');  for _,v in ipairs(printer_info) do
+      ');  for _,v in ipairs(printer_info or {}) do
         local pathIndex = match(v.path, "^sys%.usb%.device%.(%d+)%.interface%.%d+%.")
 	if pathIndex then
           if v.param == "bInterfaceClass" and v.value == "07" then -- bInterfaceClass value "07" indicates printer device

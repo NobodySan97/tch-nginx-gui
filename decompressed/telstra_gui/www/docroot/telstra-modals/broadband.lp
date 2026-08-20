@@ -39,12 +39,12 @@ if content_wan.wan_proto == ""  then
   -- wansensing is in L3Sense state
   wan_mode = "PPPoE"
   l3sense = true
-  if content_wan.wwan_ipaddr:len() ~= 0 then
+  if content_wan.wwan_ipaddr and content_wan.wwan_ipaddr:len() ~= 0 then
     wan_intf = "wwan"
     wan_mode = "Mobile"
   end
 else
-  if content_wan.wwan_ipaddr:len() ~= 0 or content_wan.wwan_ip6addr:len() ~= 0 then
+  if (content_wan.wwan_ipaddr and content_wan.wwan_ipaddr:len() ~= 0) or (content_wan.wwan_ip6addr and content_wan.wwan_ip6addr:len() ~= 0) then
     wan_intf = "wwan"
     wan_mode = "Mobile"
   elseif content_wan.wan_proto == "pppoe" then
@@ -141,7 +141,7 @@ if wan_mode ~= "Mobile" and not l3sense then
   elseif content_wan6.ip6dns ~= "" then
     primary_ip6dns=content_wan6.ip6dns
   end
-elseif wan_mode == "Mobile" and content_wan.wwan_ip6addr:len() ~= 0 then
+elseif wan_mode == "Mobile" and content_wan.wwan_ip6addr and content_wan.wwan_ip6addr:len() ~= 0 then
   wanip6addr = content_wan.wwan_ip6addr
   ipv6status = "IPv6 connected"
 end
@@ -149,7 +149,7 @@ end
 if content_rpc.ipaddr=="" then
    content_rpc.ipaddr ="0.0.0.0"
 elseif (wan_mode == "PPPoE" and content_rpc.wan_ppp_state == "connected" and content_rpc.dns ~="")
-  or (wan_mode == "IPoE") or (wan_mode == "Mobile" and content_wan.wwan_ipaddr:len() ~= 0) then
+  or (wan_mode == "IPoE") or (wan_mode == "Mobile" and content_wan.wwan_ipaddr and content_wan.wwan_ipaddr:len() ~= 0) then
    ipv4status = "IPv4 connected"
 end
 

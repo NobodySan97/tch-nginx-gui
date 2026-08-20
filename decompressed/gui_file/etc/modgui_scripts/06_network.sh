@@ -2,6 +2,8 @@
 
 . /etc/init.d/rootdevice
 
+restart_dnsmasq=0
+
 add_ipoe() {
   if [ ! "$(uci -q get network.ipoe)" ]; then
     logecho "Adding ipoe in network config..."
@@ -260,7 +262,7 @@ disable_tcp_Sack
 check_xtm_atmwan #needed for UNO firmware
 
 logecho "Restarting dnsmasq if needed..."
-if [ "$restart_dnsmasq" -eq 1 ]; then
+if [ "$restart_dnsmasq" = "1" ]; then
   uci commit
   killall dnsmasq
   /etc/init.d/dnsmasq restart

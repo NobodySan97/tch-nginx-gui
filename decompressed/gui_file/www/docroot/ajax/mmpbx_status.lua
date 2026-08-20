@@ -86,7 +86,7 @@ local mmpbxd_filter = function(data)
         return false
     end
     local originuri = data.uri
-    if data.uri and data.uri:match("+") then
+    if data.uri and data.uri:match("%+") then
         data.uri = data.uri:sub(4)
     end
 
@@ -111,8 +111,8 @@ local mmpbxd_filter = function(data)
             local pf_path = proxy.get("rpc.mmpbx.calllog.info.")
             local pf_data = content_helper.convertResultToObject("rpc.mmpbx.calllog.info.",pf_path)
             for i = #pf_data, 1, -1 do
-                v = pf_data[i]
-                if v.Localparty  == originuri then
+                local v = pf_data[i]
+                if v and v.Localparty == originuri then
                     statestr = statestr .. "\n" .. v.Remoteparty
                     if ( data.callState == "MMPBX_CALLSTATE_CONNECTED" ) then
                         local Duration = ""

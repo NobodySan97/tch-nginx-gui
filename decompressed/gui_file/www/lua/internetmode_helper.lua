@@ -1,7 +1,9 @@
 gettext.textdomain('webui-core')
 local proxy = require("datamodel")
-local ifnames = proxy.get("uci.network.interface.@lan.ifname")[1].value
-local wan_ifname = proxy.get("uci.network.interface.@wan.ifname")[1].value
+local ifnames_res = proxy.get("uci.network.interface.@lan.ifname")
+local ifnames = ifnames_res and ifnames_res[1] and ifnames_res[1].value or "eth0 eth1 eth2 eth3"
+local wan_res = proxy.get("uci.network.interface.@wan.ifname")
+local wan_ifname = wan_res and wan_res[1] and wan_res[1].value or "eth4"
 local gsub = string.gsub
 
 return {

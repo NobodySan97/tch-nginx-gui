@@ -159,7 +159,8 @@ check_and_apply_root() {
       if [ -f /root/.reapply_due_to_upgrade ]; then
         logecho "Setting root password from password saved in config"
         kecho "Setting root password from password saved in config"
-        major_system_version="$(uci get version.@version[0].marketing_version | sed 's#\.##' | grep -o -E '[0-9]+')"
+        major_system_version="$(uci get -q version.@version[0].marketing_version | tr -d '.' | grep -o -E '^[0-9]{2,3}' | head -n 1)"
+        major_system_version="${major_system_version:-0}"
         #firmware 16.x store a stripped 13char hash (not salted) that cannot be migrated to >=17.x (and viceversa)
         if { [ ${#saved_encrypted_pass} -le 13 ] && [ "$major_system_version" -lt 170 ]; } || { [ ${#saved_encrypted_pass} -gt 13 ] && [ "$major_system_version" -ge 170 ]; }; then
           sed -i -e "s:^root\:[^\:]*\::root\:$saved_encrypted_pass\::" /etc/shadow
@@ -231,8 +232,8 @@ check_and_apply_root() {
 
 install_gui() {
 
-  [[ -z "$log_progress" ]] && log_progress=0
-  [[ -z "$restart_dnsmasq" ]] && restart_dnsmasq=0
+  [ -z "$log_progress" ] && log_progress=0
+  [ -z "$restart_dnsmasq" ] && restart_dnsmasq=0
 
   logecho_always "Installing in progress..."
 

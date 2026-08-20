@@ -30,10 +30,12 @@ function get_all_profiles(profile_list)
     cursor:foreach("mmpbx", "service", function(s)
         if (s.type == "DND") then
             local profiles = s["profile"]
-            if #profiles >= 1 then
-                for _, profile_name in ipairs (profiles) do
+            if type(profiles) == "table" then
+                for _, profile_name in ipairs(profiles) do
                     profile_list[#profile_list + 1] = profile_name
                 end
+            elseif type(profiles) == "string" and profiles ~= "" then
+                profile_list[#profile_list + 1] = profiles
             end
         end
     end)
@@ -71,7 +73,7 @@ function update_ringing_schedule()
 
     if (is_ringing_enabled == "0") then
         if (timer_and_action_modified == "1") then
-            os.execute("sleep " .. tonumber(time_mon_freq))
+            os.execute("sleep " .. (tonumber(time_mon_freq) or 1))
             cursor:set("tod", "voicednd","timerandactionmodified", "0")
             cursor:commit("tod")
             cursor:unload("tod")

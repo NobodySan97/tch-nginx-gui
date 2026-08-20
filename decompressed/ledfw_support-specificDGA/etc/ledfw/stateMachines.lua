@@ -6,7 +6,7 @@ local itf_depending_led
 local function find_itf_depending_led(parms)
    local led=get_depending_led(parms.itf)
    if led then
-      itf_depending_led=(led..":"..parms.color or "green")
+      itf_depending_led=(led..":"..(parms.color or "green"))
    else
       itf_depending_led=nil
    end

@@ -40,7 +40,7 @@ end
 local function export_set_error(export_mapdata, info)
   export_mapdata.state = "Error"
   export_mapdata.info = info or ""
-  log:error("Error: " .. info or "?")
+  log:error("Error: " .. (info or "?"))
 end
 
 local crypto = require("lcrypto")
@@ -234,7 +234,10 @@ end
 local function export_compose_header(export_data)
   local header = {}
   local function add_header_uci(key)
-    local value, err = uci_cursor:get(uci_path_header[key])
+    local value = uci_cursor:get(uci_path_header[key])
+    if not value and key == "BUILDVERSION" then
+      value = uci_cursor:get("env.var.friendly_sw_version") or "unknown"
+    end
     if not value then throw_error() end
     header[#header+1] = { key = key, value = value }
   end

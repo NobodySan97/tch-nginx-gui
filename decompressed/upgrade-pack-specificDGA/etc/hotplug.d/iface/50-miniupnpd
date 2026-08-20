@@ -13,11 +13,11 @@
 
 [ ! "$ACTION" = "ifup" ] && service_check /usr/sbin/miniupnpd && exit 0
 
-local iface
-local ifname
-local tmpconf="/var/etc/miniupnpd.conf"
-local extiface=$(uci get upnpd.config.external_iface)
-local extzone=$(uci get upnpd.config.external_zone)
+iface=""
+ifname=""
+tmpconf="/var/etc/miniupnpd.conf"
+extiface=$(uci -q get upnpd.config.external_iface)
+extzone=$(uci -q get upnpd.config.external_zone)
 
 . /lib/functions/network.sh
 

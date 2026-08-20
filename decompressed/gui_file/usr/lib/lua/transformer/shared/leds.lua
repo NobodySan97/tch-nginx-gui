@@ -159,7 +159,10 @@ local function getLedMixBrightness(red, green, blue)
       return bLevel.."%"
     end
   end
-  local rounded = ledtotal/leddivider
+  if leddivider == 0 then
+    return "0%"
+  end
+  local rounded = math.floor(ledtotal/leddivider)
   return rounded.."%"
 end
 
@@ -181,41 +184,38 @@ function M.getLedsInfo()
       local ledFile = ledPath .. file
       if lfs.attributes(ledFile, "mode") == "directory" then
         local fd = open(ledFile .. "/trigger", "r")
-        if not fd then
-          break
-        end
-        local output = fd:read("*all")
-        if output then
-          local trigger = match(output, "%[(.+)%]")
-          if trigger then
-            ledsInfo[name][color].trigger = trigger
+        if fd then
+          local output = fd:read("*all")
+          if output then
+            local trigger = match(output, "%[(.+)%]")
+            if trigger then
+              ledsInfo[name][color].trigger = trigger
+            end
           end
+          fd:close()
         end
-        fd:close()
         fd = open(ledFile .. "/brightness", "r")
-        if not fd then
-          break
-        end
-        output = fd:read("*all")
-        if output then
-          local brightness = tonumber(output)
-          if brightness then
-            ledsInfo[name][color].brightness = brightness
+        if fd then
+          local output = fd:read("*all")
+          if output then
+            local brightness = tonumber(output)
+            if brightness then
+              ledsInfo[name][color].brightness = brightness
+            end
           end
+          fd:close()
         end
-        fd:close()
         fd = open(ledFile .. "/max_brightness", "r")
-        if not fd then
-          break
-        end
-        output = fd:read("*all")
-        if output then
-          local max_brightness = tonumber(output)
-          if max_brightness then
-            ledsInfo[name][color].max_brightness = max_brightness
+        if fd then
+          local output = fd:read("*all")
+          if output then
+            local max_brightness = tonumber(output)
+            if max_brightness then
+              ledsInfo[name][color].max_brightness = max_brightness
+            end
           end
+          fd:close()
         end
-        fd:close()
       end
     end
   end

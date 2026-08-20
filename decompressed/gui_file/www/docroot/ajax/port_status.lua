@@ -122,17 +122,22 @@ elseif wifi_content.wifi5_mode == "an" then
 	wifi_content.wifi5_mode = "a/n"
 end
 
+local speed24 = tonumber(wifi_content.wifi24_speed)
+local speed24_str = (wifi_content.wifi24_status == "1" and speed24) and (speed24 / 1000 .. " Mbps") or ""
+local speed5 = tonumber(wifi_content.wifi5_speed)
+local speed5_str = (wifi_content.wifi5_status == "1" and speed5) and (speed5 / 1000 .. " Mbps") or ""
+
 port_data[#port_data+1] = {
 	"Wi-Fi 2.4 Ghz", --type
 	ui_helper.createSimpleLight(wifi_content.wifi24_status, "", {}, "fa fa-wifi"), --status
-	( wifi_content.wifi24_status == "1" ) and ( wifi_content.wifi24_speed / 1000 .. " Mbps" ) or "", --speed
+	speed24_str, --speed
 	( wifi_content.wifi24_status == "1" ) and wifi_content.wifi24_mode or "", --mode
 }
 
 port_data[#port_data+1] = {
 	"Wi-Fi 5 Ghz", --type
 	ui_helper.createSimpleLight(wifi_content.wifi5_status, "", {}, "fa fa-wifi"), --status
-	( wifi_content.wifi5_status == "1" ) and ( wifi_content.wifi5_speed / 1000 .. " Mbps" ) or "", --speed
+	speed5_str, --speed
 	( wifi_content.wifi5_status == "1" ) and wifi_content.wifi5_mode or "", --mode
 }
 

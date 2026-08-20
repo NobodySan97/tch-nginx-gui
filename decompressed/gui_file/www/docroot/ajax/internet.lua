@@ -8,8 +8,10 @@ local json = require("dkjson")
 local post_helper = require("web.post_helper")
 local ngx = ngx
 
+local datatype
 if ngx.req.get_method() == "POST" then
-	datatype = ngx.req.get_uri_args().datatype
+	local uri_args = ngx.req.get_uri_args()
+	datatype = uri_args and uri_args.datatype
 end
 
 local data= {}
@@ -18,7 +20,7 @@ if datatype and datatype== "xdsl" then
 	local sub, format, floor = string.sub, string.format, math.floor
 
 	data = {
-		status = "sys.class.xdsl.@line0.LinkStatus",
+		status = "sys.class.xdsl.@line0.Status",
 		dsl_linerate_up_max = "sys.class.xdsl.@line0.UpstreamMaxRate",
 		dsl_linerate_down_max = "sys.class.xdsl.@line0.DownstreamMaxRate",
 		dsl_linerate_up = "sys.class.xdsl.@line0.UpstreamCurrRate",
@@ -56,18 +58,18 @@ if datatype and datatype== "xdsl" then
 			(floor(tonumber(data.dsl_linerate_down_max) / 10) / 100 .. " Mbps") or
 			"Can't recover data"
 
-		if not ( data.dsl_type:match("ADSL") ) then
+		if data.dsl_type and not ( data.dsl_type:match("ADSL") ) then
 			data.dsl_margin_down = data.dsl_margin_SNRM_down
 			data.dsl_margin_up = data.dsl_margin_SNRM_up
 		end
 
-		if data.dslam_chipset:match("BDCM") then
+		if data.dslam_chipset and data.dslam_chipset:match("BDCM") then
 			data.dslam_chipset = "Broadcom" .. " ( " .. data.dslam_chipset .. " )"
-		elseif data.dslam_chipset:match("IFTN") then
+		elseif data.dslam_chipset and data.dslam_chipset:match("IFTN") then
 			data.dslam_chipset = "Infineon" .. " ( " .. data.dslam_chipset .. " )"
 		end
 
-		if not ( data.dslam_version_raw:sub(0,2) == "0x" ) then
+		if data.dslam_version_raw and not ( data.dslam_version_raw:sub(0,2) == "0x" ) then
 			if data.dslam_version_raw == "" then
 				data.dslam_chipset = T"Can't recover DSLAM version."
 			else
@@ -77,12 +79,12 @@ if datatype and datatype== "xdsl" then
 
 		data.dslam_version_raw = nil
 
-		if data["status"]:match("Showtime") then
+		if data["status"] and data["status"]:match("Showtime") then
 			data["status"] = T"Connected"
 		elseif data["status"] == "" then
 			data["status"] = T"Disconnected"
 		else
-			data["status"] = T(data.status)
+			data["status"] = T(data.status or "")
 		end
 	else
 		for index in pairs(data) do

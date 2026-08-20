@@ -6,7 +6,7 @@
 ######################################################################
 DATE=$(date +%Y-%m-%d-%H%M)
 guiver=$(grep /etc/init.d/rootdevice -e 'version_gui' | sed 's/version_gui=//')
-dsl=$(xdslctl --version 2>&1 >/dev/null | grep 'version -' | awk '{print $6}' | sed 's/\..*//')
+dsl=$(xdslctl --version 2>&1 | grep 'version -' | awk '{print $6}' | sed 's/\..*//')
 
 
 log() {
@@ -71,9 +71,9 @@ log "Scanning for log errors..."
 
 log "XDSL stats..."
 {
-  echo "__________________________________LOG_________________________________________"
-  logread |grep daemon.err
-}> ./error.log
+  echo "__________________________________XDSL STATS_________________________________________"
+  xdslctl info --stats 2>&1
+}> ./xdsl.log
 
 ###########################################################################################################################################################
 

@@ -103,10 +103,12 @@ function M.isIPinOtherRange(ipAdd, ipNet, all_intfs, curintf)
 
 	for _,intf in pairs(all_intfs) do
 		if intf.paramindex ~= curintf then
-			local ipaddr = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".ipaddr")[1].value
-			local mask = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".netmask")[1].value
-			local baseip = post_helper.validateStringIsIP(ipaddr) and post_helper.ipv42num(ipaddr)
-			local netmask = post_helper.validateStringIsIP(mask) and post_helper.ipv42num(mask)
+			local ip_data = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".ipaddr")
+			local mask_data = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".netmask")
+			local ipaddr = ip_data and ip_data[1] and ip_data[1].value
+			local mask = mask_data and mask_data[1] and mask_data[1].value
+			local baseip = ipaddr and post_helper.validateStringIsIP(ipaddr) and post_helper.ipv42num(ipaddr)
+			local netmask = mask and post_helper.validateStringIsIP(mask) and post_helper.ipv42num(mask)
 
 			local network, ipmax
 			if baseip and netmask then

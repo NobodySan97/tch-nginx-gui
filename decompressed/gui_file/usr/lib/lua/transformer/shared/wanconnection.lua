@@ -483,7 +483,7 @@ local function active_getKeys(self, interface)
 		local entry = add_entry(self, "ACTIVE|"..interface, vlaninfo or {})
 		entry.active = active
 		entry.status = status
-		if not entry.interace then
+		if not entry.interface then
 			entry.interface = interface
 		end
 	end

@@ -29,7 +29,7 @@ local static_light_map = {
   connected = "1",--"green",
 }
 
-if content_rpc["uci_wan_auto"] ~= "0" and content_rpc["ipaddr"]:len() > 0 then
+if content_rpc["uci_wan_auto"] ~= "0" and content_rpc["ipaddr"] and content_rpc["ipaddr"]:len() > 0 then
     content_rpc["uci_wan_auto"] = "1"
     static_state = "connected"
 end

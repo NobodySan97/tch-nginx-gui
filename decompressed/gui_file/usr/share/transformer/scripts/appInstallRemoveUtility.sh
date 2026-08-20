@@ -87,7 +87,7 @@ app_transmission() {
       [ "$cpu_type" = "armv7l" ] && install_from_github FrancYescO/sharing_tg789 transmission-xtream
       [ "$cpu_type" = "mips" ] && install_from_github FrancYescO/sharing_tg789 transmission
       ;;
-    "16."* | "17."* | "18."* | "19."*)
+    "16."* | "17."* | "18."* | "19."* | "20."*)
       [ "$cpu_type" = "armv7l" ] && install_arm
       [ "$cpu_type" = "mips" ] && install_from_github FrancYescO/sharing_tg789 transmission
       ;;
@@ -227,7 +227,7 @@ app_luci() {
       }
       [ "$cpu_type" = "mips" ] && luci_install_mips
       ;;
-    "18."* | "19."*)
+    "18."* | "19."* | "20."*)
       [ "$cpu_type" = "armv7l" ] && luci_install_arm
       [ "$cpu_type" = "mips" ] && luci_install_mips
       ;;
@@ -309,8 +309,11 @@ app_amule() {
   stop)
     stop
     ;;
-  *)
+  remove)
     remove
+    ;;
+  *)
+    echo "Unknown command: $1"
     return 1
     ;;
   esac
@@ -355,7 +358,7 @@ app_aria2() {
       [ "$cpu_type" = "armv7l" ] && install_from_github FrancYescO/sharing_tg789 aria2-xtream
       [ "$cpu_type" = "mips" ] && install_from_github FrancYescO/sharing_tg789 aria2
       ;;
-    "16."* | "17."* | "18."* | "19."*)
+    "16."* | "17."* | "18."* | "19."* | "20."*)
       [ "$cpu_type" = "armv7l" ] && install_arm
       [ "$cpu_type" = "mips" ] && install_from_github FrancYescO/sharing_tg789 aria2
       ;;
