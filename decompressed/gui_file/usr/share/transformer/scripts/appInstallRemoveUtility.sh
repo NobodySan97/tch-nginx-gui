@@ -529,7 +529,7 @@ app_xupnp() {
 install_specific_files() {
 
   install() {
-    install_from_github Ansuel/gui-dev-build-auto/master/modular "upgrade-pack-specific$1" specificapp
+    install_from_github NobodySan97/gui-dev-build-auto/master/modular "upgrade-pack-specific$1" specificapp
     uci set modgui.app.specific_app=1
     uci commit
   }
