@@ -87,7 +87,7 @@ end
    <fieldset>\
         <center>\
             <div id="qrcode"></div>\
-        <center>\
+        </center>\
     </fieldset>\
     </form>\
 </div>\

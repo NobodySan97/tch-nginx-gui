@@ -53,9 +53,15 @@ local deviceip, deviceindex
 for k,v in ipairs(devices) do
     if v[2] == devicemac then
         deviceip = v[1]
-        deviceindex = indexes[k].paramindex
+        deviceindex = indexes[k] and indexes[k].paramindex
         break
     end
+end
+
+if not deviceindex then
+    ngx.print('<script>window.location="/gateway.lp";</script>')
+    ngx.exit(ngx.HTTP_OK)
+    return
 end
 
 local devtypes = {

@@ -468,7 +468,7 @@ ngx.print('\
 	local html = {}
 	
     html[#html+1] = ui_helper.createSwitch(T"Ringing Schedule", "todStatus", ring_data["todStatus"], nil, ring_helpmsg["todStatus"])
-    html[#html+1] = '<div id = "parent_switch"">'
+    html[#html+1] = '<div id = "parent_switch">'
 	html[#html+1] = ui_helper.createSwitch(T"During this time ringing is", "ringstate_enable", ring_data["profileStatus"]=="on" and '1' or'0', nil, ring_helpmsg["profileStatus"])
 	html[#html+1] = '</div>'
     html[#html+1] = ui_helper.createTable(tod_columns, tod_data, tod_options, nil, nil)

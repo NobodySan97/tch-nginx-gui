@@ -14,7 +14,7 @@ local function getStatsData(dtype)
     local data = {}
 	local datatime = {}
     local filename = format("/tmp/trafficmon/stats_%s", dtype)
-    f = io.open(filename, "r")
+    local f = io.open(filename, "r")
     if f then
         for line in f:lines() do
             if (nline < 2 ) then
@@ -116,7 +116,7 @@ var CPUGraph = new Chart(cpu_ctx, {\
 					if (value %1 == 0 ) \
 						return value+"%"}, \
 				min: 0, \
-				max:'); ngx.print(stats.cpu.total); ngx.print(',\
+				max:'); ngx.print(tonumber(stats.cpu.total) or 100); ngx.print(',\
 				stepSize: 20,}}]},\
 		tooltips: {\
                 enabled: true,\
@@ -146,7 +146,7 @@ var RAMGraph = new Chart(ram_ctx, {\
 					return formatBytes(value,2) \
 				},\
 				min: 0,\
-				max:'); ngx.print(stats.ram.total); ngx.print('}}]},\
+				max:'); ngx.print(tonumber(stats.ram.total) or 0); ngx.print('}}]},\
 		tooltips: {\
                 enabled: true,\
                 mode: "single",\

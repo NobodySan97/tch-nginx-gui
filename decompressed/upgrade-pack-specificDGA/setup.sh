@@ -6,20 +6,21 @@ kernel_ver="$(cat /proc/version | awk '{print $3}')"
 
 logecho "Installing specificDGA package..."
 
+move_files_and_clean(){
+  for file in $(find "$1"*/ -xdev | cut -d '/' -f4-); do
+    if [ -d "$1$file" ] && [ ! -d "/$file" ]; then
+      mkdir -p "/$file"
+      continue
+    fi
+
+    [ ! -d "$1$file" ] && mv "$1$file" "/$file"
+
+  done
+  rm -rf "$1"
+}
+
 if [ -z "${kernel_ver##3.4*}" ]; then
 
-  move_files_and_clean(){
-    for file in $(find "$1"*/ -xdev | cut -d '/' -f4-); do
-      if [ -d "$1$file" ] && [ ! -d "/$file" ]; then
-        mkdir -p "/$file"
-        continue
-      fi
-
-      [ ! -d "$1$file" ] && mv "$1$file" "/$file"
-
-    done
-    rm -rf "$1"
-  }
   move_files_and_clean /tmp/upgrade-pack-specificDGA/
 
   opkg install /tmp/3.4_ipk/*
@@ -60,15 +61,15 @@ if [ -z "${kernel_ver##3.4*}" ]; then
   logecho "Checking downgrade limitation bit..."
   if [ "$(uci get -q env.rip.board_mnemonic)" = "VBNT-S" ] &&
     [ "$(uci get -q env.var.prod_number)" = "4132" ] &&
-    [ -f /proc/rip/0123 ]; then
+    ( [ -f /proc/rip/0123 ] || [ -f /proc/rip/0122 ] ); then
     logecho "Downgrade limitation bit detected... Removing..."
     rmmod keymanager 2>/dev/null
     rmmod ripdrv 2>/dev/null
     mv /lib/modules/3.4.11/ripdrv.ko /lib/modules/3.4.11/ripdrv.ko_back
     mv /tmp/ripdrv.ko /lib/modules/3.4.11/ripdrv.ko
     insmod /lib/modules/3.4.11/ripdrv.ko 2>/dev/null || insmod ripdrv 2>/dev/null
-    echo 0123 >/proc/rip/delete # RIP_ID_RESTRICTED_DOWNGR_TS (0x122)
-    echo 0122 >/proc/rip/delete # RIP_ID_RESTRICTED_DOWNGR_OPT (0x123)
+    echo 0123 >/proc/rip/delete # RIP_ID_RESTRICTED_DOWNGR_OPT (0x123)
+    echo 0122 >/proc/rip/delete # RIP_ID_RESTRICTED_DOWNGR_TS (0x122)
     rmmod ripdrv 2>/dev/null
     logecho "Restoring original driver"
     rm -f /lib/modules/3.4.11/ripdrv.ko
@@ -82,13 +83,14 @@ if [ -z "${kernel_ver##3.4*}" ]; then
 
 elif [ -z "${kernel_ver##4.1.38*}" ]; then
 
+  move_files_and_clean /tmp/upgrade-pack-specificDGA/
   #Install telnet, openssl-util and update openssl (for security reason)
-  opkg install /tmp/upgrade-pack-specificDGA/tmp/4.1.38_ipk/*
-  rm -rf /tmp/upgrade-pack-specificDGA
+  opkg install /tmp/4.1.38_ipk/*
+  rm -rf /tmp/4.1.38_ipk
 
 else #unsupported kernels (ie 19.x using 4.1.52)
 
-  rm -rf /tmp/upgrade-pack-specificDGA
+  move_files_and_clean /tmp/upgrade-pack-specificDGA/
   echo "No packages to install for kernel: $kernel_ver"
 
 fi

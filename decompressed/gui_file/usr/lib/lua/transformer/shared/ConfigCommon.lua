@@ -982,13 +982,15 @@ end
 
 -- reset state and info
 function M.import_reset(import_mapdata)
-  import_mapdata.state = "None"
-  import_mapdata.info = ""
+  if import_mapdata then
+    import_mapdata.state = "None"
+    import_mapdata.info = ""
+  end
 end
 
 function M.import_init(location)
   local import_mapdata = {}
-  M.import_reset()
+  M.import_reset(import_mapdata)
   if location then
     import_mapdata.location = location
   else

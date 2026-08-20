@@ -156,6 +156,7 @@ test_apply() {
 				fi
 			fi
 		fi
+	fi
 	else
 		log "No internet connection detected, Terminating."
 	fi

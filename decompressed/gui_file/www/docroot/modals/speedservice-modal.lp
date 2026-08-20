@@ -30,7 +30,7 @@ if ngx.var.request_method == "POST" then
   local post_content, success = ngx.req.get_post_args(), false
   local maxsteps_chk=true
   if post_content.action == "Speed" then
-    if post_content["Algorithm"] ~= "RxRate" and post_content["MaxSteps"] < "1" then
+    if post_content["Algorithm"] ~= "RxRate" and (tonumber(post_content["MaxSteps"]) or 0) < 1 then
         maxsteps_chk = false
     end
     local setTable = {}
@@ -175,9 +175,9 @@ local attrSpeedSelect = {select = { ["data-for"] = "Speed"}}
       html[#html+1] = ui_helper.createInputText(T"Acceptable Percentage Loss", "AcceptablePercentageLoss",SpeedService.AcceptablePercentageLoss,attrSpeed)
       html[#html+1] = "</div>"
       if SpeedService.DiagnosticsState ~= "Requested"  then
-        html[#html+1] = "<div class='controls'><div id='send-config_Speed' class='btn' data-name='action' data-value='Speed'>Run Speed Diagnostics</div></div>"
+        html[#html+1] = "<div class='controls'><div id='send-config_Speed' class='btn' data-name='action' data-value='Speed'>" .. T"Run Speed Diagnostics" .. "</div></div>"
       else
-        html[#html+1] = "<div class='controls'><div id='send-config_Speed' class='btn' data-name='action' data-value='SpeedStop'>Stop Speed Diagnostics</div></div>"
+        html[#html+1] = "<div class='controls'><div id='send-config_Speed' class='btn' data-name='action' data-value='SpeedStop'>" .. T"Stop Speed Diagnostics" .. "</div></div>"
       end
       html[#html+1] = "<fieldset><legend>" .. T"Speed Diagnostics Result History" .. "</legend>"
       html[#html+1] = ui_helper.createTable(table_columms, column_data, speed_options)

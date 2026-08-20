@@ -18,12 +18,13 @@ local message_helper = require("web.uimessage_helper")
 local proxy = require("datamodel")
 
 local assistance = require("web.assistance")
-local path = proxy.get("uci.web.assistance.")[1].path
+local assist_res = proxy.get("uci.web.assistance.")
+local path = assist_res and assist_res[1] and assist_res[1].path or ""
 local _, _, secname = string.find(path, "web%.assistance%.@([^%.]*)%.")
-local assistant = assistance.getAssistant(secname)
+local assistant = secname and assistance.getAssistant(secname)
 local gVChkbox = post_helper.getValidateCheckboxSwitch()
 
-local state = assistant:enabled() and "1" or "0"
+local state = (assistant and assistant:enabled()) and "1" or "0"
 local error
 
 local mode_map = {

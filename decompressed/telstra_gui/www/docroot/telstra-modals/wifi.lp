@@ -38,11 +38,18 @@ local radio, wl, ap, bspeerwl, bspeerap
 if getargs.radio == "5" then
     radio = "radio_5G"
     wl = "wl1"
-    ap = "ap1"
 else
     radio = "radio_2G"
-    ap = "ap0"
     wl = "wl0"
+end
+
+ap = (wl == "wl1") and "ap2" or "ap0"
+for _, tap in ipairs(proxy.getPN("uci.wireless.wifi-ap.", true) or {}) do
+    local iface_res = proxy.get(tap.path .. "iface")
+    if iface_res and iface_res[1] and iface_res[1].value == wl then
+        ap = (tap.path:gsub("uci%.wireless%.wifi%-ap%.@", ""):gsub("%.", ""))
+        break
+    end
 end
 
 --To get the bandsteer peer nodes

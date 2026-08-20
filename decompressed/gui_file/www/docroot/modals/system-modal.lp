@@ -33,10 +33,11 @@ content_helper.getExactContent(env)
 
 -- Check availability of file, return true if found, else false
 local function file_check(file_name)
-  local file_found=io.open(file_name, "rb")
-  if file_found==nil then
+  local file_found = io.open(file_name, "rb")
+  if file_found == nil then
     return false
   else
+    file_found:close()
     return true
   end
 end

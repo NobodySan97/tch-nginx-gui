@@ -90,7 +90,7 @@ for x = 1, #hosts, 1 do
 							datarows[index][5] = T"Ok"
 							datarows[index][4] = "1"
 						elseif lastRSSI > - 81 then
-							datarows[index][5] = T"Satisfactoy"
+							datarows[index][5] = T"Satisfactory"
 							datarows[index][4] = "3"
 						else
 							datarows[index][5] = T"Limited. Expect dropouts."
@@ -117,11 +117,12 @@ for x = 1, #hosts, 1 do
 				if tostring(n_status) == "true" then
 					datarows[index]={}
 					datarows[index][1] = hosts[x].HostName
-					datarows[index][2] = stationConf["capabilities"]
-					datarows[index][3] = tostring(tonumber(stationConf["tx_phy_rate"])/1000).." ".."Mbps"
+					datarows[index][2] = stationConf["capabilities"] or ""
+					local tx_phy = (tonumber(stationConf["tx_phy_rate"]) or 0)/1000
+					datarows[index][3] = tostring(tx_phy).." ".."Mbps"
 					datarows[index][4] = "5"
 
-					local lastRSSI = tonumber(stationConf["last_rssi"])
+					local lastRSSI = tonumber(stationConf["last_rssi"]) or -100
 					if stationConf["state"] ~= "Disconnected" then
 						if lastRSSI > -41 then
 							datarows[index][5] = T"Excellent"
@@ -150,12 +151,14 @@ for x = 1, #hosts, 1 do
 						datarows[index][4] = "5"
 					end
 
-					datarows[index][6] = stationConf["last_rssi"]
-					datarows[index][7] = stationConf["av_rssi"]
-					datarows[index][8] = stationConf["rssi"]
-					datarows[index][9] = format("%.1f KB",tostring(tonumber(stationConf["tx_bytes"])/1000))
-					datarows[index][10] = format("%.1f KB",tostring(tonumber(stationConf["rx_bytes"])/1000))
-					datarows[index][11] = stationConf["radio"]
+					datarows[index][6] = stationConf["last_rssi"] or ""
+					datarows[index][7] = stationConf["av_rssi"] or ""
+					datarows[index][8] = stationConf["rssi"] or ""
+					local tx_b5 = (tonumber(stationConf["tx_bytes"]) or 0) / 1000
+					local rx_b5 = (tonumber(stationConf["rx_bytes"]) or 0) / 1000
+					datarows[index][9] = format("%.1f KB", tx_b5)
+					datarows[index][10] = format("%.1f KB", rx_b5)
+					datarows[index][11] = stationConf["radio"] or ""
 					index = index + 1
 				end
 			end

@@ -139,7 +139,7 @@ removeDuplicateEntry(usbpart_data)
   <form class="form-horizontal" method="post" action="modals/printersharing-modal.lp">\
     ');  ngx.print(ui_helper.createMessages(message_helper.popMessages())); ngx.print('\
     ');  
-      html = {}
+      local html = {}
       html[#html+1] = ui_helper.createSwitch(T"Enabled", "printersharing_enabled", content["printersharing_enabled"], attributes)
       html[#html+1] = ui_helper.createSwitch(T"Web Interface", "printersharing_webui", content["printersharing_webui"], attributes)
       html[#html+1] = ui_helper.createAlertBlock(format(T"CUPS Web Interface at <a href=\"http://%s:631\">http://%s:631</a> or <a href=\"http://%s:631\">http://%s:631</a>",content_samba.localdevIP,content_samba.localdevIP,content_samba.hostname,content_samba.hostname), info_box)

@@ -337,14 +337,18 @@ end
                 class = "span6"
             }
           }
-         html[#html+1] = ui_helper.createLabel(T"PHY Rate", format("%s %.0f Mbps %s %.0f Mbps",iconUp,output_details["rx_phy_rate"]/1000,iconDown,output_details["rx_phy_rate"]/1000), PHY_style )
+         local tx_phy = (tonumber(output_details["tx_phy_rate"]) or 0) / 1000
+         local rx_phy = (tonumber(output_details["rx_phy_rate"]) or 0) / 1000
+         html[#html+1] = ui_helper.createLabel(T"PHY Rate", format("%s %.0f Mbps %s %.0f Mbps",iconUp,tx_phy,iconDown,rx_phy), PHY_style )
          local DATA_style = {
            span = {
                 id = "Data_Rate",
                 class = "span6"
             }
           }
-         html[#html+1] = ui_helper.createLabel(T"Data Rate", format("%s %.0f Mbps %s %.0f Mbps",iconUp,output_details["rx_data_rate"]/1000,iconDown,output_details["rx_data_rate"]/1000), DATA_style )
+         local tx_data = (tonumber(output_details["tx_data_rate"]) or 0) / 1000
+         local rx_data = (tonumber(output_details["rx_data_rate"]) or 0) / 1000
+         html[#html+1] = ui_helper.createLabel(T"Data Rate", format("%s %.0f Mbps %s %.0f Mbps",iconUp,tx_data,iconDown,rx_data), DATA_style )
 
          local Packets_Tx_style = {
            span = {

@@ -107,7 +107,7 @@ local ongoing_statistics_columns = {
 
 local ongoing_statistics_options = {
     basepath = "rpc.mmpbx.callstatistics.ongoing.",
-    tableid = "historicalstatistics",
+    tableid = "ongoingstatistics",
     canApply = false,
     canEdit = false,
     canAdd = false,
@@ -138,7 +138,7 @@ ngx.print('\
             <center>\
                 '); ngx.print( ui_helper.createSimpleButton(T"Clear historical logs", "icon-bolt", clear_call_log)); ngx.print('\
             </center>\
-        </fiedset>\
+        </fieldset>\
         <fieldset>\
             <legend>'); ngx.print( T"Ongoing Statistics" ) ngx.print('</legend>\
             '); ngx.print(ui_helper.createTable(ongoing_statistics_columns, ongoing_statistics_data, ongoing_statistics_options)); ngx.print('\

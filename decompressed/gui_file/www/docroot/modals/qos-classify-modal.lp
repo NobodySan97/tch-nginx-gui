@@ -8,7 +8,7 @@ gettext.textdomain('webui-qos')
 -- Dependencies
 ----------------------------------------------------------------------------------
 local tinsert, smatch, sformat = table.insert, string.match, string.format
-remove = table.remove
+local remove = table.remove
 local untaint = string.untaint
 
 local proxy             = require("datamodel")
@@ -120,8 +120,8 @@ local label_filter = function(data)
 end
 
 local label_valid = {
-    labelName = vNES,
-    trafficidLabelName = gVIES(options_trafficid)
+    [labelName] = vNES,
+    [trafficidLabelName] = gVIES(options_trafficid)
 }
 local label_data, label_helpMsg = post_helper.handleTableQuery(label_columns, label_options, label_filter, nil, label_valid)
 

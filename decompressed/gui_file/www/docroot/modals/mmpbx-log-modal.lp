@@ -411,7 +411,7 @@ ngx.print('\
 		ngx.print(html)
 		
 		ngx.print('\
-        </fiedset>\
+        </fieldset>\
    </form>\
 </div>\
 '); ngx.print( ui_helper.createFooter() )

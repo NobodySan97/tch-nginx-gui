@@ -486,8 +486,8 @@ cumulative_check_gui() {
   clean_version_gui=$(echo "$version_gui" | cut -d'-' -f1)
 
   #This is to fix a bug in older gui when stable gui is wrongly saved as dev and never replaced.
-  major_ver="$(echo "$clean_version_gui" | cut -d. -f 0)"
-  if [ "$major_ver" -lt 9 ]; then
+  major_ver="$(echo "$clean_version_gui" | cut -d. -f 1)"
+  if [ -n "$major_ver" ] && [ "$major_ver" -lt 9 ]; then
     if [ -f /root/GUI.tar.bz2 ] && [ -f /root/GUI_dev.tar.bz2 ]; then
       rm /root/GUI.tar.bz2
       mv /root/GUI_dev.tar.bz2 /root/GUI.tar.bz2

@@ -38,16 +38,19 @@ local gAV = post_helper.getAndValidation
 --@return nil+error message
 local function validateRelay(value, object, key)
   if vSII(value) then
-    local ipaddr = proxy.get("rpc.network.interface.@lan.ipaddr")[1].value
-    local wan_ipaddr = proxy.get("rpc.network.interface.@wan.ipaddr")[1].value
-    if ipaddr == value then
+    local lan_res = proxy.get("rpc.network.interface.@lan.ipaddr")
+    local ipaddr = lan_res and lan_res[1] and lan_res[1].value or ""
+    local wan_res = proxy.get("rpc.network.interface.@wan.ipaddr")
+    local wan_ipaddr = wan_res and wan_res[1] and wan_res[1].value or ""
+    if ipaddr ~= "" and ipaddr == value then
        return nil, T"Cannot use the gateway IP address."
     end
-    if wan_ipaddr == value then
+    if wan_ipaddr ~= "" and wan_ipaddr == value then
        return nil, T"Cannot use the gateway WAN IP address."
     end
     --Adding localdevicemask in post to find the input is a network or broadcast IPv4 address in advancedIPValidation
-    object["localdevmask"] = proxy.get("uci.network.interface.@lan.netmask")[1].value
+    local mask_res = proxy.get("uci.network.interface.@lan.netmask")
+    object["localdevmask"] = mask_res and mask_res[1] and mask_res[1].value or ""
     return true
   end
 end
@@ -109,22 +112,27 @@ if (ngx.req.get_method() == "POST") then
   if  (ngx.req.get_post_args().uci_relay_status == "0") then
 	  getRelayBackUpValues()
   end
-  if  (ngx.req.get_post_args().uci_pppoerelay_status == "1") then
-	  proxy.set(relay_Params["uci_pppoerelay_laninterface"], proxy.get("uci.network.interface.@wan.ifname")[1].value )
+  if (ngx.req.get_post_args().uci_pppoerelay_status == "1") then
+    local wanif_res = proxy.get("uci.network.interface.@wan.ifname")
+    local wanif = wanif_res and wanif_res[1] and wanif_res[1].value or ""
+    proxy.set(relay_Params["uci_pppoerelay_laninterface"], wanif)
   else
-	  proxy.set(relay_Params["uci_pppoerelay_laninterface"], "" )
+    proxy.set(relay_Params["uci_pppoerelay_laninterface"], "" )
   end
   proxy.apply()
 end
 
-server_addr = proxy.get("uci.dhcp.relay.@relay.server_addr")
+local server_addr = proxy.get("uci.dhcp.relay.@relay.server_addr")
+local local_addr = proxy.get("uci.dhcp.relay.@relay.local_addr")
+local s_val = server_addr and server_addr[1] and server_addr[1].value or ""
+local l_val = local_addr and local_addr[1] and local_addr[1].value or ""
 
-if not server_addr or ( server_addr[1].value == "" and proxy.get("uci.dhcp.relay.@relay.local_addr")[1].value == "" )  then
+if s_val == "" and l_val == "" then
   getRelayBackUpValues()
 end
 
 local relay_Values, helpmsg = post_helper.handleQuery(relay_Params, relay_valid)
-if server_addr and server_addr[1].value ~= "" and proxy.get("uci.dhcp.relay.@relay.local_addr")[1].value ~= "" then
+if s_val ~= "" and l_val ~= "" then
   uci_relay_status = "1"
 end
 local title = T"Relay Setup"

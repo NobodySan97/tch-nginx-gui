@@ -47,8 +47,8 @@ $(document).ready(function () {\
 </script>\
 ')
 
-uci_path = "uci.system.system.@system[0].wizard_accessed"
+local uci_path = "uci.system.system.@system[0].wizard_accessed"
 local result = proxy.get(uci_path)
-if result and result[1].value ~= "1" then
+if result and result[1] and result[1].value ~= "1" then
   proxy.set(uci_path, "1")
 end

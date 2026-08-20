@@ -234,10 +234,10 @@ if [ ! -f $WORKING_DIR/$FILE_NAME ]; then #Check if file exist as offline upload
         if [ -f $PERMANENT_STORE_DIR/$FILE_NAME ]; then
           saved_stable_md5=$(md5sum $PERMANENT_STORE_DIR/$FILE_NAME | cut -d' ' -f1)
 
-          if [ $saved_stable_md5 != $stable_md5 ]; then
+          if [ "$saved_stable_md5" != "$stable_md5" ]; then
             logecho "Permanent package md5 is not same of latest Stable GUI. Replacing..."
             rm "$PERMANENT_STORE_DIR/$FILE_NAME"
-            cp $WORKING_DIR/$STABLE_FILE_NAME $PERMANENT_STORE_DIR/
+            cp "$WORKING_DIR/$STABLE_FILE_NAME" "$PERMANENT_STORE_DIR/"
           fi
         fi
 

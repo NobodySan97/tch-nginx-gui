@@ -1,20 +1,20 @@
 #!/bin/sh
 get_alive_processes(){
-	if [[ $1 != "PID" && $1 != "NAME" ]]; then echo; exit; fi
+	if [ "$1" != "PID" ] && [ "$1" != "NAME" ]; then echo; exit; fi
 	alive_processes=""
 	for i in $(find /proc/[0-9]* -name exe -maxdepth 1); do
 		name=$(readlink $i);
-		if [[ ! -z $name ]]; then
+		if [ -n "$name" ]; then
 			basename_process=$(basename $name)
 			case $basename_process in
 				busybox|rtfd|dropbear|boot|procd)
 					# exclude some processes that might hang while killing
 					;;
 				*)
-					if [[ $1 == "NAME" ]]; then
+					if [ "$1" = "NAME" ]; then
 						alive_processes="$(basename $name) $alive_processes";
 					fi
-					if [[ $1 == "PID" ]]; then
+					if [ "$1" = "PID" ]; then
 						alive_processes="$(echo $i | sed 's|/proc/\([0-9]*\)/exe|\1|') $alive_processes";
 					fi
 					;;
@@ -47,11 +47,11 @@ kill_running_processes() {
 
 #Stop mmpbx kindly if's not yet stopped and give it time of 30 sec max
 	if [ -f /var/state/mmpbx ]; then
-	   last_mmpbx_state=`cat /var/state/mmpbx | grep "mmpbx.state" | tail -1`;
-		if [ $last_mmpbx_state != "mmpbx.state='NA'" ]; then
+	   last_mmpbx_state=`cat /var/state/mmpbx 2>/dev/null | grep "mmpbx.state" | tail -1`;
+		if [ -n "$last_mmpbx_state" ] && [ "$last_mmpbx_state" != "mmpbx.state='NA'" ]; then
 
 			#if stopping is on progress, then don't stop again, and let it continue to stop
-			if [ $last_mmpbx_state != "mmpbx.state='STOPPING'" ]; then
+			if [ "$last_mmpbx_state" != "mmpbx.state='STOPPING'" ]; then
 			echo "mmpbx is in state $last_mmpbx_state => stop it";
 			/etc/init.d/mmpbxd stop
 			else
@@ -61,10 +61,10 @@ kill_running_processes() {
 			timeout=30;
 			wait_time=0;
 			# wait maximum 30s for mmpbx to be completely stopped
-			while [ $last_mmpbx_state != "mmpbx.state='NA'" ] && [ $wait_time -lt $timeout ]; do
+			while [ -n "$last_mmpbx_state" ] && [ "$last_mmpbx_state" != "mmpbx.state='NA'" ] && [ $wait_time -lt $timeout ]; do
 			sleep 1;
 			wait_time=`expr $wait_time + 1`;
-			last_mmpbx_state=`cat /var/state/mmpbx | grep "mmpbx.state" | tail -1`; #last state is written in the last line of /var/state/mmpbx
+			last_mmpbx_state=`cat /var/state/mmpbx 2>/dev/null | grep "mmpbx.state" | tail -1`; #last state is written in the last line of /var/state/mmpbx
 			echo "$last_mmpbx_state , time is $wait_time seconds";
 			done
 		fi
@@ -82,7 +82,7 @@ kill_running_processes() {
 	done
 	# Now it is really time to shut down remaining processes...
 	alive_processes_pid=$(get_alive_processes PID)
-	if [[ -n "$alive_processes_pid" ]]; then
+	if [ -n "$alive_processes_pid" ]; then
 		echo "Still some processes alive, hard kill them ($alive_processes_pid)"
 		kill -9 $alive_processes_pid
 	fi
@@ -111,7 +111,7 @@ if [ "$OVERLAY_TYPE" = "jffs2" ] ; then
 
 	echo "unmounting overlay..."
 	# Unmount the overlay seems to be not working, instead set it as read only
-	mount -t overlayfs -o ro,remount /
+	mount -o ro,remount /
 	# unmount the overlay lower filesystem
 	umount /overlay
 

@@ -482,7 +482,7 @@ function M.start(cb)
 		end
 	end)
 	if not nl then
-		error("Failed to register with netlink" .. err)
+		error("Failed to register with netlink: " .. tostring(err or ""))
 	end
 
 	uloop.run()

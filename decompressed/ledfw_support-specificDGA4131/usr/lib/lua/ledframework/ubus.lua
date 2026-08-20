@@ -191,7 +191,7 @@ function M.start(cb)
     end 
 
     events['FaultMgmt.Event'] = function(msg)
-        if msg ~= nil and msg.EventType:match("ACS provisioning") ~= nil and msg.ProbableCause:match("Inform success") ~= nil then
+        if msg ~= nil and msg.EventType and msg.EventType:match("ACS provisioning") and msg.ProbableCause and msg.ProbableCause:match("Inform success") then
             if wan_status == "ifup" then
                 if led.broadband.status == "no_line" or led.broadband.status == "sync" then
                     cb('network_interface_wan_ifup')
@@ -375,20 +375,24 @@ function M.start(cb)
                 -- However we still need to set the ambient led 'off' since line led 'on' during 'reset_prepare' and 'reset_ongoing'.
 
                 if led.broadband.status ~= "initial" then
-                    cb('reset_prepare')
+                    cb('reset_pressed')
                     cb('service_led_on')
                     led.ambient.status = "off"
                     export_led_color("ambient", "off")
                 end
 
-                reset_timer = uloop.timer(function() cb('reset_ongoing') end, reset_timeout)
+                reset_timer = uloop.timer(function() cb('reset_factory') end, reset_timeout)
             elseif msg.action == "released" then
                 if msg.resetinfo and string.match(msg.resetinfo, "factory") == "factory" then
                     -- Broadband led status will be controlled according to pattern when reset pressed, don't change its status.
                     -- Ambient led has been set during the pre-condition pattern 'reset_prepare', no need to reset here.
-                    cb('reset_ongoing')
+                    cb('reset_factory')
                 elseif msg.resetinfo and (string.match(msg.resetinfo, "abort") == "abort" or string.match(msg.resetinfo, "complete") == "complete") then
-                    cb('reset_noaction')
+                    if string.match(msg.resetinfo, "complete") == "complete" then
+                        cb('reset_complete')
+                    else
+                        cb('reset_abort')
+                    end
                     if reset_timer then
                         reset_timer:cancel()
                         reset_timer = nil
@@ -462,7 +466,7 @@ function M.start(cb)
     end)
 
     if not nl then
-        error("Failed to register with netlink" .. err)
+        error("Failed to register with netlink: " .. tostring(err or ""))
     end
 
     uloop.run()

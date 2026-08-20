@@ -843,7 +843,7 @@ if ngx.req.get_method() == "POST" then
     local args = ngx.req.get_post_args()
     local action = args["action"]
     local pin = args["wps_device_pin_code"]
-    if action == "wps_device_pin_code" and content["wps_enabled"] == "1" and isguest ~= 0 then
+    if action == "wps_device_pin_code" and content["wps_enabled"] == "1" and (isguest == "0" or isguest == 0) then
         local res, help = vPIN(pin)
         content["wps_device_pin_code"] = pin
 
@@ -856,7 +856,7 @@ if ngx.req.get_method() == "POST" then
     end
   -- End of device PIN code support
   -- triggered only on a POST with action set wps_pbc
-    if action == "wps_pbc" and content["wps_enabled"] == "1" and isguest ~= 0 then
+    if action == "wps_pbc" and content["wps_enabled"] == "1" and (isguest == "0" or isguest == 0) then
         proxy.set("rpc.wireless.wps_button","1")
     end
   -- End of WPS PBC code support

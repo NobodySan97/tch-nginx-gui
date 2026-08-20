@@ -4,7 +4,7 @@ sfp_presence=$(uci get env.rip.sfp)
 sfp_wanlan_mode=$(uci get -q ethernet.globals.eth4lanwanmode)
 
 check_wan() {
-	if [ $eth4_mode == "1" ]; then
+	if [ "$eth4_mode" = "1" ]; then
 		#uci delete ethernet.eth4.wan
 		#uci delete network.waneth4
 		uci delete -q qos.eth4

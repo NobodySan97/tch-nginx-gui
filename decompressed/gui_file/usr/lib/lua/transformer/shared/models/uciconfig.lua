@@ -73,7 +73,8 @@ end
 function Loader:config_changed()
 	local changed = false
 	for cfg, mod in pairs(self._configs) do
-		if mod< last_config_mod_time(cfg) then
+		local last_mod = last_config_mod_time(cfg)
+		if last_mod and mod and mod < last_mod then
 			changed = true
 			break
 		end

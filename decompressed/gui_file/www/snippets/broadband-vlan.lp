@@ -27,7 +27,7 @@ else
 	ethname =  "eth3"
 end
 
-function getValidateNumberInRange(min, max, value)
+local function getValidateNumberInRange(min, max, value)
     local helptext = T"Input must be a number"
     if min and max then
         helptext = string.format(T"Input must be a number between %d and %d included", min, max)
@@ -112,7 +112,7 @@ end
 if ngx.var.request_method == "POST" then
     local content = ngx.req.get_post_args()
 	if content["action"]=="SAVE" then
-		range, helpmes = getValidateNumberInRange(2, 2048, content["intf_vlanid"])
+		local range, helpmes = getValidateNumberInRange(2, 2048, content["intf_vlanid"])
 		if content["auswahlliste"] == "devnot" then
 			if range and (content["intf_vlanid"]~=vid or content["intf_vlan"]~="0") then
 				if proxy.get(path) then
@@ -244,7 +244,7 @@ ngx.print('\
 \
   <legend>'); ngx.print( T"Internet channel" ); ngx.print('</legend>');
 
-	liste = {	{"devnot", T"Device &nbsp;"},
+	local liste = {	{"devnot", T"Device &nbsp;"},
 				{"dotnot", T"Dot"},
 			}
 	

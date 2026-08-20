@@ -127,7 +127,13 @@ local function do_set(model, upper, lower, typepath)
 end
 
 local function setLL(model, upper, lower, typepath, ...)
-  local lowerkey, lowertype = tokey(lower, typepath, ...)
+  local tokey = model.tokey or (model.mapper and model.mapper.tokey)
+  local lowerkey, lowertype
+  if tokey then
+    lowerkey, lowertype = tokey(lower, typepath, ...)
+  else
+    lowerkey, lowertype = lower, typepath
+  end
   if not lowerkey then
     return nil, "Not a valid link reference"
   end
@@ -137,8 +143,8 @@ end
 local function unsetLL(model, upper)
   local ucikey = model:getUciKey(upper)
   uci_set(ucikey, "ifname", "")
-  propagate_options(ucikey, "ifname")
-  if uci_get(ucikey, "proto"):match("^ppp")  then
+  propagate_options(ucikey, {"ifname"})
+  if uci_get(ucikey, "proto"):match("^ppp") then
     -- current lowerlayer is PPP.Interface
     uci_set(ucikey, "proto", "")
   end

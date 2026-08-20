@@ -281,7 +281,7 @@ function M.add_sip_dial_plan_entry(id, sip_net, transactions, commitapply)
             end
         end
     end)
-    mmpbx_binding.sectionname = "dial_plan_entry_generic_"..max_dial_plan+1
+    mmpbx_binding.sectionname = "dial_plan_entry_generic_" .. (max_dial_plan + 1)
     set_on_uci(mmpbx_binding,"dial_plan_entry",commitapply)
     local _key = uci_helper.generate_key()
     mmpbx_binding.option = "_key"
@@ -428,7 +428,7 @@ local function delete_services(profile, transactions, commitapply)
                      new_profiles[#new_profiles+1] = v
                  end
              end
-             if #new_profiles == 0 and services_default_cfg and services_default_cfg["add"][s["type"]] then
+             if #new_profiles == 0 and services_default_cfg and services_default_cfg["add"] and services_default_cfg["add"][s["type"]] then
                 entries[#entries+1] = s[".name"]
              else
                 binding.sectionname = s[".name"]

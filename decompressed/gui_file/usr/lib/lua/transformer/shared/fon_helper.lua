@@ -30,7 +30,7 @@ local function getHotspotWiFiInterfaces()
     greBinding.sectionname = s['.name']
     if type(s.wifi_iface) == "string" then
       interfaces[#interfaces + 1] = s.wifi_iface
-    else
+    elseif type(s.wifi_iface) == "table" then
       for _, iface in pairs(s.wifi_iface) do
         interfaces[#interfaces + 1] = iface
       end

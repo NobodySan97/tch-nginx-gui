@@ -374,7 +374,7 @@ ngx.print('\
 	
 	if content and content["mmpbx_enabled"] == "1" then
 		if session:hasAccess("/modals/mmpbx-dect-modal.lp") and
-				( variant == "Technicolor TG800vac" ) or ( variant == "Technicolor TG799vac" ) then
+				( ( variant == "Technicolor TG800vac" ) or ( variant == "Technicolor TG799vac" ) ) then
 			html[#html+1] = '<fieldset>'
 			html[#html+1] = '<legend>' .. T"DECT Emission" .. '</legend>'
 			if emission_state == "0" then

@@ -406,8 +406,14 @@ local intfStatsEntries = {
 }
 
 function M.getIntfstats(intf, param)
+  if not intf or intf == "" then
+    return "0"
+  end
   local gponPath = string.format("/sys/class/net/%s/statistics/", intf)
   param = intfStatsEntries[param]
+  if not param then
+    return "0"
+  end
   local value
   if lfs.attributes(gponPath, "mode") == "directory" then
     local statsFile = gponPath .. param
@@ -494,7 +500,7 @@ function M.getAllStats()
   if wanType == "xepon_ae" then
     return M.getPonAeAllStats()
   elseif wanType == "xepon_ae_p2p" then
-    return getP2pAllStats()
+    return M.getP2pAllStats()
   elseif wanType == "gpon" then
     return M.getGponAllStats()
   end
@@ -503,22 +509,24 @@ end
 
 function M.getCrossbarStatus()
   local ctl = popen("cat /proc/ethernet/crossbar_status")
-  local output = ctl:read("*a")
-  ctl:close()
+  local output = ""
+  if ctl then
+    output = ctl:read("*a") or ""
+    ctl:close()
+  end
   return output
 end
 
 function M.getPortStatus(port)
-  local link = ""
+  local link = "Down"
   local ctl = popen("ethctl eth4 media-type port " .. port .. " 2>&1")
-  local output = ctl:read("*a")
-  ctl:close()
-  if output then
-    if match(output, "Link is up") then
-      link = "Up"
-    else
-      link = "Down"
-    end
+  local output = ""
+  if ctl then
+    output = ctl:read("*a") or ""
+    ctl:close()
+  end
+  if output and match(output, "Link is up") then
+    link = "Up"
   end
   return link
 end

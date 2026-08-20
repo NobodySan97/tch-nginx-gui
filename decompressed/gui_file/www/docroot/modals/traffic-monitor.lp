@@ -186,8 +186,8 @@ local function getTrafficData(dtype, name)
     local nline = 1
     local data = {}
 	local datatime = {}
-    filename = format("/tmp/trafficmon/%s_%s", name, dtype)
-    f = io.open(filename, "r")
+    local filename = format("/tmp/trafficmon/%s_%s", name, dtype)
+    local f = io.open(filename, "r")
     if f then
         for line in f:lines() do
             if (nline < 2 ) then
@@ -340,7 +340,7 @@ ngx.print(ui_helper.createHeader(T"Traffic Monitor", false, true) ); ngx.print('
       html[#html+1] =  "</ul>"
 	  html[#html+1] = '<div style="height:400px"><canvas id="LANChart"></canvas></div>'
 	  html[#html+1] = "</fieldset>"
-	  html[#html+1] = "&nbsp"
+	  html[#html+1] = "&nbsp;"
 	  html[#html+1] = '<fieldset id="WifiSection">'
       html[#html+1] = '<ul class="nav nav-tabs">'
       for i,v in ipairs(wls) do

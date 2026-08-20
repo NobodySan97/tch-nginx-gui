@@ -118,6 +118,7 @@ local devices_filter = function(data)
       end
     end
   end
+  return true
 end
 
 local devices_data, devices_helpmsg = post_helper.handleTableQuery(devices_columns, devices_options, devices_filter , nil, device_valid)
