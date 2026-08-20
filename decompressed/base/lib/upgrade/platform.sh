@@ -206,7 +206,7 @@ if ! type 'kill_remaining' >/dev/null 2>/dev/null; then
         name="${name#(}"; name="${name%)}"
 
         # Skip PID1, our parent, ourself and our children
-        [ $pid -ne 1 -a $pid -ne $proc_ppid -a $pid -ne $$ -a $ppid -ne $$ ] || continue
+        [ "$pid" -ne 1 ] && [ "$pid" -ne "$proc_ppid" ] && [ "$pid" -ne "$$" ] && [ "$ppid" -ne "$$" ] || continue
 
         local cmdline
         read cmdline < /proc/$pid/cmdline
