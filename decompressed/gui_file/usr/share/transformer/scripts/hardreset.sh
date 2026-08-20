@@ -89,9 +89,11 @@ kill_running_processes() {
 }
 
 OVERLAY_TYPE=""
-if ( mount | grep 'on /overlay type jffs2' >/dev/null ) ; then
+if ( mount | grep -q 'on /overlay type jffs2' ) ; then
 	OVERLAY_TYPE="jffs2"
-elif ( mount | grep 'ubi0:user on /overlay type ubifs' >/dev/null ) ; then
+elif ( mount | grep -q 'on /overlay type ubifs' || mount | grep -q 'type ubifs' ) ; then
+	OVERLAY_TYPE="ubifs"
+elif [ -d "/overlay" ]; then
 	OVERLAY_TYPE="ubifs"
 else
 	echo "Error: Unknown overlay type"
