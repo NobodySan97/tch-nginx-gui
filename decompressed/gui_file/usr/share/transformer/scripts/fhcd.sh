@@ -9,6 +9,5 @@ fhcd_running=$(ubus list -S fhcd)
 	exit
 }
 
-doublequote='"'
-backslash='\'
-ubus call fhcd config_changed '{"action":"'"${action//$doublequote/$backslash$doublequote}"'"}'
+clean_action=$(echo "$action" | sed 's/"/\\"/g')
+ubus call fhcd config_changed '{"action":"'"$clean_action"'"}'
