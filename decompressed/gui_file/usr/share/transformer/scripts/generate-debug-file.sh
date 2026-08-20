@@ -5,7 +5,7 @@
 
 ######################################################################
 DATE=$(date +%Y-%m-%d-%H%M)
-guiver=$(grep /etc/init.d/rootdevice -e 'version_gui' | sed 's/version_gui=//')
+guiver=$(grep -e 'version_gui' /etc/init.d/rootdevice 2>/dev/null | sed 's/version_gui=//')
 dsl=$(xdslctl --version 2>&1 | grep 'version -' | awk '{print $6}' | sed 's/\..*//')
 
 
@@ -21,7 +21,7 @@ rm -R /tmp/DebugHelper* > /dev/null 2>&1
 
 log "Creating dir"
 mkdir "/tmp/DebugHelper-$DATE/" > /dev/null 2>&1
-cd "/tmp/DebugHelper-$DATE/"
+cd "/tmp/DebugHelper-$DATE/" || exit 1
 
 #################################################################################################################################################################
 log "Gathering device info..."
@@ -46,7 +46,7 @@ log "Gathering device info..."
   pwrctl show
   echo "--------------banktable---------------"
   for f in /proc/banktable/*; do
-    echo -n "$f "
+    printf "%s " "$f"
     cat "$f"
     echo
   done

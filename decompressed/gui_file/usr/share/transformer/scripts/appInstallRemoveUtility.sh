@@ -8,13 +8,13 @@ cpu_type="$(uname -m)"
 #  3rd arg : raw or normal. Raw is used to download specific file from specific dir
 #  4th arg : addtional command to append to setup.sh (usefull if setup.sh contains also uninstall command)
 install_from_github() {
-  mkdir "/tmp/$2"
+  mkdir -p "/tmp/$2"
 
   if [ "$3" = "specificapp" ]; then
     if [ ! -f "/tmp/$2.tar.bz2" ]; then
       if ! ping -q -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; then
         echo "No internet connection detected, download manually!"
-        exit 0
+        return 1
       fi
       curl -sLk "https://raw.githubusercontent.com/$1/$2.tar.bz2" --output "/tmp/$2.tar.bz2"
     fi
@@ -29,7 +29,7 @@ install_from_github() {
     if [ ! -f "/tmp/$2.tar.gz" ]; then
       if ! ping -q -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; then
         echo "No internet connection detected, download manually!"
-        exit 0
+        return 1
       fi
       curl -sLk "https://github.com/$1/tarball/$2" --output "/tmp/$2.tar.gz"
     fi
@@ -39,7 +39,7 @@ install_from_github() {
     fi
     tar -xzf "/tmp/$2.tar.gz" -C "/tmp/$2"
     rm "/tmp/$2.tar.gz"
-    cd /tmp/"$2"/*
+    cd /tmp/"$2"/* || return 1
   fi
 
   chmod +x ./setup.sh
@@ -243,7 +243,7 @@ app_luci() {
   }
   remove() {
     luci_remove_arm() {
-      [ -f /etc/init.d/uhttpd ] && /etc/init.d/uhttpd stop 2>/dev/null && /etc/init.d/uhttpd disable 2>/dev/null
+      [ -f /etc/init.d/uhttpd ] && { /etc/init.d/uhttpd stop 2>/dev/null; /etc/init.d/uhttpd disable 2>/dev/null; }
       opkg remove --force-removal-of-dependent-packages uhttpd rpcd libuci-lua luci luci-*
       [ ! -f /rom/usr/lib/libjson-c.so.2 ] && rm -f /usr/lib/libjson-c.so.2 #workaround for 18.x feeds used on 19.x firmware
       [ -f /rom/usr/lib/lua/uci.so ] && cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ #restore lib as it gets removed by libuci-lua

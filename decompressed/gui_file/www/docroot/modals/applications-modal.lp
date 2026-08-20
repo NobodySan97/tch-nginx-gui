@@ -32,9 +32,6 @@ local specific_app = specific_app_res and specific_app_res[1] and specific_app_r
 
 local function appapply(action)
 	proxy.set("rpc.system.modgui.app.sendcmd",action)
-	if ( action == "install_blacklist_empty" ) then
-		action = "install_blacklist"
-	end
 	ngx.header.content_type = "application/json"
 	ngx.print('{ "success":"true" }')
 	ngx.timer.at(0, function()
@@ -202,7 +199,7 @@ if StateParams["transmission_webui"] ~= nil then
 	html[#html+1] = "<br/>"
 	if mapParams["transmission_webui"] and mapParams["transmission_webui"] == "1" then
         if cputype:match("mips") then
-            html[#html+1] = ui_helper.createSimpleButton(T"Start".." Tansmission", "fa fa-play", btn_table.transmission.start)
+            html[#html+1] = ui_helper.createSimpleButton(T"Start".." Transmission", "fa fa-play", btn_table.transmission.start)
             html[#html+1] = ui_helper.createSimpleButton(T"Stop".." Transmission", "fa fa-stop", btn_table.transmission.stop)
         end
 		html[#html+1] = ui_helper.createSimpleButton(T"Remove".." Transmission", "fa fa-times-circle", btn_table.transmission.remove)

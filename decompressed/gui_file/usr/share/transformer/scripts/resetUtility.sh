@@ -34,7 +34,7 @@ showUsage() {
 
 
 restoreOriginalGui() {
-	running_bank=$(cat /proc/banktable/booted 2>/dev/null || echo "bank_1")
+	running_bank="$(cat /proc/banktable/booted 2>/dev/null)"; running_bank="${running_bank:-bank_1}"
 	config_tmp=/tmp/config_tmp
 	
 	#Copying config simulating a firmware upgrade
@@ -80,7 +80,7 @@ restoreOriginalGui() {
 }
 
 resetConfig() {
-	running_bank=$(cat /proc/banktable/booted 2>/dev/null || echo "bank_1")
+	running_bank="$(cat /proc/banktable/booted 2>/dev/null)"; running_bank="${running_bank:-bank_1}"
 	[ -d "/overlay/$running_bank/etc/uci-defaults" ] && rm -rf "/overlay/$running_bank/etc/uci-defaults"
 	rm -rf /etc/config/*
 	cp -r /rom/etc/config/* /etc/config/

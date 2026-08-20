@@ -2,10 +2,10 @@
 get_alive_processes(){
 	if [ "$1" != "PID" ] && [ "$1" != "NAME" ]; then echo; exit; fi
 	alive_processes=""
-	for i in $(find /proc/[0-9]* -name exe -maxdepth 1); do
-		name=$(readlink $i);
+	for i in $(find /proc/[0-9]* -maxdepth 1 -name exe 2>/dev/null); do
+		name=$(readlink "$i");
 		if [ -n "$name" ]; then
-			basename_process=$(basename $name)
+			basename_process=$(basename "$name")
 			case $basename_process in
 				busybox|rtfd|dropbear|boot|procd)
 					# exclude some processes that might hang while killing
@@ -47,7 +47,7 @@ kill_running_processes() {
 
 #Stop mmpbx kindly if's not yet stopped and give it time of 30 sec max
 	if [ -f /var/state/mmpbx ]; then
-	   last_mmpbx_state=`cat /var/state/mmpbx 2>/dev/null | grep "mmpbx.state" | tail -1`;
+	   last_mmpbx_state=$(grep "mmpbx.state" /var/state/mmpbx 2>/dev/null | tail -1);
 		if [ -n "$last_mmpbx_state" ] && [ "$last_mmpbx_state" != "mmpbx.state='NA'" ]; then
 
 			#if stopping is on progress, then don't stop again, and let it continue to stop
@@ -63,8 +63,8 @@ kill_running_processes() {
 			# wait maximum 30s for mmpbx to be completely stopped
 			while [ -n "$last_mmpbx_state" ] && [ "$last_mmpbx_state" != "mmpbx.state='NA'" ] && [ $wait_time -lt $timeout ]; do
 			sleep 1;
-			wait_time=`expr $wait_time + 1`;
-			last_mmpbx_state=`cat /var/state/mmpbx 2>/dev/null | grep "mmpbx.state" | tail -1`; #last state is written in the last line of /var/state/mmpbx
+			wait_time=$((wait_time + 1));
+			last_mmpbx_state=$(grep "mmpbx.state" /var/state/mmpbx 2>/dev/null | tail -1); #last state is written in the last line of /var/state/mmpbx
 			echo "$last_mmpbx_state , time is $wait_time seconds";
 			done
 		fi

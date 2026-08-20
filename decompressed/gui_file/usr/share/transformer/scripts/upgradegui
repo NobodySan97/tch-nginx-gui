@@ -64,7 +64,7 @@ if [ "$1" ]; then
     hour="$(echo $time | sed "s|:.*||")"
     minute="$(echo $time | sed "s|.*:||")"
     autoupgrade="$(uci get modgui.gui.autoupgrade)"
-    if [ "$(cat /etc/crontabs/root | grep upgradegui)" ]; then
+    if [ -f /etc/crontabs/root ] && grep -q upgradegui /etc/crontabs/root 2>/dev/null; then
       sed -i '/upgradegui/d' /etc/crontabs/root
     fi
     if [ "$autoupgrade" = "1" ]; then
@@ -93,9 +93,9 @@ fi
 URL_BASE="https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master"
 
 # Check update_branch
-if [ ! "$(uci get -q modgui.gui.update_branch)" ] || [ "$(uci get modgui.gui.update_branch)" == "stable" ]; then
+if [ ! "$(uci get -q modgui.gui.update_branch)" ] || [ "$(uci get -q modgui.gui.update_branch)" = "stable" ]; then
   update_branch=""
-elif [ "$(uci get modgui.gui.update_branch)" == "preview" ]; then
+elif [ "$(uci get -q modgui.gui.update_branch)" = "preview" ]; then
   update_branch="_preview"
 else
   update_branch="_dev"
@@ -224,7 +224,7 @@ if [ ! -f $WORKING_DIR/$FILE_NAME ]; then #Check if file exist as offline upload
 
       logecho "Downloaded $update_branch version: $dev_version_norm"
 
-      if [ $(enum $stable_version_norm) -gt $(enum $dev_version_norm) ]; then
+      if [ "$(enum "$stable_version_norm")" -gt "$(enum "$dev_version_norm")" ]; then
         logecho "Found newer version in stable branch, using it..."
         rm "$WORKING_DIR/$FILE_NAME"
         FILE_NAME="$STABLE_FILE_NAME"
