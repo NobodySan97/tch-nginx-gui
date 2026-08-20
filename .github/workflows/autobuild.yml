@@ -11,6 +11,9 @@ on:
         required: false
         default: ''
 
+permissions:
+  contents: write
+
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
@@ -51,4 +54,21 @@ jobs:
             NEW_VER=$(cat latest.version)
             git commit -m "Autobuild release v${NEW_VER} from commit ${{ github.sha }}"
             git push origin master
+          fi
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.AUTOBUILD_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          NEW_VER=$(cat gui-dev-build-auto/latest.version)
+          if gh release view "v${NEW_VER}" --repo NobodySan97/tch-nginx-gui >/dev/null 2>&1; then
+            echo "Release v${NEW_VER} already exists."
+          else
+            echo "Creating GitHub Release v${NEW_VER}..."
+            gh release create "v${NEW_VER}" \
+              "gui-dev-build-auto/GUI.tar.bz2#GUI.tar.bz2" \
+              "gui-dev-build-auto/GUI_dev.tar.bz2#GUI_dev.tar.bz2" \
+              --repo NobodySan97/tch-nginx-gui \
+              --title "Release v${NEW_VER}" \
+              --generate-notes
           fi
