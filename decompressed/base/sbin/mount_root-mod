@@ -28,7 +28,7 @@ find_mtd_part() {
 #Since Linux 3.18-rc6, overlayfs has been renamed overlay
 legacy_overlayfs() {
 	local ovl
-	ovl=$(cat /proc/filesystems | grep "\overlay\b" | awk '{print $2}')
+	ovl=$(cat /proc/filesystems | grep "overlay" | awk '{print $2}')
 	[ "$ovl" != "overlay" ]
 }
 
@@ -39,7 +39,7 @@ find_mount_jffs2() {
 	local dir="$1"
 
 	options=$(grep "^mount=" /etc/jffs2_options 2>/dev/null | sed "s/^mount=//" )
-	if [ ! -z $options ]; then
+	if [ -n "$options" ]; then
 		options="-o $options"
 	fi
 

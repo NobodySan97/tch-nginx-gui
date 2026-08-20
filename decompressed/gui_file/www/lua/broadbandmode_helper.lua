@@ -65,12 +65,12 @@ tablecontent[#tablecontent + 1] = {
     card = "002_broadband_xdsl.lp",
     check = function()
         if get_wansensing() == "1" then
-            local L2 = proxy.get("uci.wansensing.global.l2type")[1].value
+            local L2_raw = proxy.get("uci.wansensing.global.l2type"); local L2 = L2_raw and L2_raw[1] and L2_raw[1].value or ""
             if L2 == "ADSL" then
                 return true
             end
         else
-            local ifname = proxy.get("uci.network.interface.@wan.ifname")[1].value
+            local ifname_raw = proxy.get("uci.network.interface.@wan.ifname"); local ifname = ifname_raw and ifname_raw[1] and ifname_raw[1].value or ""
 
             local iface = match(ifname, "atm")
 
@@ -83,8 +83,7 @@ tablecontent[#tablecontent + 1] = {
 		local interface = findwan("atm") or "@wanatmwan"
         local difname = proxy.get("uci.network.device." .. interface .. ".ifname")
         if difname then
-            local dname = proxy.get("uci.network.device." .. interface .. ".name")[1].value
-            difname = proxy.get("uci.network.device." .. interface .. ".ifname")[1].value
+            local dname_raw = proxy.get("uci.network.device." .. interface .. ".name"); local dname = dname_raw and dname_raw[1] and dname_raw[1].value or ""; local difname_val = proxy.get("uci.network.device." .. interface .. ".ifname"); difname = difname_val and difname_val[1] and difname_val[1].value or ""
             if difname ~= "" and difname ~= nil then
                 proxy.set("uci.network.interface.@wan.ifname", dname)
             else
@@ -97,7 +96,7 @@ tablecontent[#tablecontent + 1] = {
             proxy.set("uci.ethernet.globals.eth4lanwanmode", "1")
         end
         if ethname == "eth3" then
-            local ifnames = proxy.get("uci.network.interface.@lan.ifname")[1].value
+            local ifnames_raw = proxy.get("uci.network.interface.@lan.ifname"); local ifnames = ifnames_raw and ifnames_raw[1] and ifnames_raw[1].value or ""
             proxy.set({
                 ["uci.network.interface.@lan.ifname"] = ifnames ..' '.. ethname,
                 ["uci.ethernet.port.@eth3.wan"] = "0"
@@ -114,12 +113,12 @@ tablecontent[#tablecontent + 1] = {
     card = "002_broadband_xdsl.lp",
     check = function()
         if get_wansensing() == "1" then
-            local L2 = proxy.get("uci.wansensing.global.l2type")[1].value
+            local L2_raw = proxy.get("uci.wansensing.global.l2type"); local L2 = L2_raw and L2_raw[1] and L2_raw[1].value or ""
             if L2 == "VDSL" then
                 return true
             end
         else
-            local ifname = proxy.get("uci.network.interface.@wan.ifname")[1].value
+            local ifname_raw = proxy.get("uci.network.interface.@wan.ifname"); local ifname = ifname_raw and ifname_raw[1] and ifname_raw[1].value or ""
 
             local iface = match(ifname, "ptm0")
 
@@ -132,8 +131,7 @@ tablecontent[#tablecontent + 1] = {
 		local interface = findwan("ptm") or "@wanptm0"
         local difname = proxy.get("uci.network.device." .. interface .. ".ifname")
         if difname then
-            local dname = proxy.get("uci.network.device." .. interface .. ".name")[1].value
-            difname = proxy.get("uci.network.device." .. interface .. ".ifname")[1].value
+            local dname_raw = proxy.get("uci.network.device." .. interface .. ".name"); local dname = dname_raw and dname_raw[1] and dname_raw[1].value or ""; local difname_val = proxy.get("uci.network.device." .. interface .. ".ifname"); difname = difname_val and difname_val[1] and difname_val[1].value or ""
             if difname ~= "" and difname ~= nil then
                 proxy.set("uci.network.interface.@wan.ifname", dname)
             else
@@ -146,7 +144,7 @@ tablecontent[#tablecontent + 1] = {
             proxy.set("uci.ethernet.globals.eth4lanwanmode", "1")
         end
         if ethname == "eth3" then
-            local ifnames = proxy.get("uci.network.interface.@lan.ifname")[1].value
+            local ifnames_raw = proxy.get("uci.network.interface.@lan.ifname"); local ifnames = ifnames_raw and ifnames_raw[1] and ifnames_raw[1].value or ""
             proxy.set({
                 ["uci.network.interface.@lan.ifname"] = ifnames ..' '.. ethname,
                 ["uci.ethernet.port.@eth3.wan"] = "0"
@@ -163,16 +161,16 @@ tablecontent[#tablecontent + 1] = {
     card = "002_broadband_ethernet.lp",
     check = function()
         if get_wansensing() == "1" then
-            local L2 = proxy.get("uci.wansensing.global.l2type")[1].value
+            local L2_raw = proxy.get("uci.wansensing.global.l2type"); local L2 = L2_raw and L2_raw[1] and L2_raw[1].value or ""
             if L2 == "ETH" then
                 return true
             end
         else
-            local ifname = proxy.get("uci.network.interface.@wan.ifname")[1].value
+            local ifname_raw = proxy.get("uci.network.interface.@wan.ifname"); local ifname = ifname_raw and ifname_raw[1] and ifname_raw[1].value or ""
 
             local iface = match(ifname, ethname) or match(ifname, "lan") --the or is in case wan iface is br-lan
             if sfp == 1 then
-                local lwmode = proxy.get("uci.ethernet.globals.eth4lanwanmode")[1].value
+                local lwmode_raw = proxy.get("uci.ethernet.globals.eth4lanwanmode"); local lwmode = lwmode_raw and lwmode_raw[1] and lwmode_raw[1].value or ""
                 if iface and lwmode == "0" then
                     return true
                 end
@@ -187,8 +185,7 @@ tablecontent[#tablecontent + 1] = {
 		local interface = findwan(ethname) or "@waneth4"
         local difname = proxy.get("uci.network.device." .. interface .. ".ifname")
         if difname then
-            local dname = proxy.get("uci.network.device." .. interface .. ".name")[1].value
-            difname = proxy.get("uci.network.device." .. interface .. ".ifname")[1].value
+            local dname_raw = proxy.get("uci.network.device." .. interface .. ".name"); local dname = dname_raw and dname_raw[1] and dname_raw[1].value or ""; local difname_val = proxy.get("uci.network.device." .. interface .. ".ifname"); difname = difname_val and difname_val[1] and difname_val[1].value or ""
             if difname ~= "" and difname ~= nil then
                 proxy.set("uci.network.interface.@wan.ifname", dname)
             else
@@ -201,7 +198,7 @@ tablecontent[#tablecontent + 1] = {
             proxy.set("uci.ethernet.globals.eth4lanwanmode", "0")
         end
         if ethname == "eth3" then
-            local ifnames = proxy.get("uci.network.interface.@lan.ifname")[1].value
+            local ifnames_raw = proxy.get("uci.network.interface.@lan.ifname"); local ifnames = ifnames_raw and ifnames_raw[1] and ifnames_raw[1].value or ""
             proxy.set({
                 ["uci.network.interface.@lan.ifname"] = string.gsub(string.gsub(ifnames, ethname, ""), "%s$", ""),
                 ["uci.ethernet.port.@eth3.wan"] = "1"
@@ -220,19 +217,19 @@ if sfp == 1 then
         card = "002_broadband_gpon.lp",
         check = function()
             if get_wansensing() == "1" then
-                local L2 = proxy.get("uci.wansensing.global.l2type")[1].value
+                local L2_raw = proxy.get("uci.wansensing.global.l2type"); local L2 = L2_raw and L2_raw[1] and L2_raw[1].value or ""
                 local gponState = proxy.get("rpc.optical.Interface.1.Status")
                 local gponState = gponState and gponState[1].value or ""
                 if L2 == "SFP" or gponState == "Dormant" then
                     return true
                 end
             else
-                local ifname = proxy.get("uci.network.interface.@wan.ifname")[1].value
+                local ifname_raw = proxy.get("uci.network.interface.@wan.ifname"); local ifname = ifname_raw and ifname_raw[1] and ifname_raw[1].value or ""
 
                 local iface = match(ifname, ethname)
 
                 if sfp == 1 then
-                    local lwmode = proxy.get("uci.ethernet.globals.eth4lanwanmode")[1].value
+                    local lwmode_raw = proxy.get("uci.ethernet.globals.eth4lanwanmode"); local lwmode = lwmode_raw and lwmode_raw[1] and lwmode_raw[1].value or ""
                     if iface and lwmode == "1" then
                         return true
                     end

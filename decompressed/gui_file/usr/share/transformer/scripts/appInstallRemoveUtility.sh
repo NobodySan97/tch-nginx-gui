@@ -71,11 +71,11 @@ app_transmission() {
         echo 'last_usb=$(ls -t /dev/sd* | tail -n 1)'
         echo 'last_usb=${last_usb#"/dev/"}'
         echo 'usb_count=$(find /tmp/run/mountd/ -mindepth 1 -maxdepth 1 -type d | wc -l)'
-        echo '[ "$usb_count" == "0" ] && /etc/init.d/transmission stop || [ -d "/tmp/run/mountd/$last_usb/sharing/config/transmission" ] && /etc/init.d/transmission restart'
+        echo '[ "$usb_count" = "0" ] && /etc/init.d/transmission stop || [ -d "/tmp/run/mountd/$last_usb/sharing/config/transmission" ] && /etc/init.d/transmission restart'
     } >/etc/hotplug.d/usb/60-transmission
 
     cp -r /usr/share/transmission /www/docroot/
-    rm /www/docroot/transmission/web/index.html /www/docroot/transmission/web/LICENSE
+    rm -f /www/docroot/transmission/web/index.html /www/docroot/transmission/web/LICENSE
 
     /etc/init.d/transmission enable
     /etc/init.d/transmission restart
@@ -102,10 +102,10 @@ app_transmission() {
   remove() {
     opkg remove --force-removal-of-dependent-packages transmission-daemon-openssl transmission-web
     [ ! -f /rom/usr/lib/libmbedcrypto.so.1 ] && opkg install libmbedtls #workaround for 19.x firmware
-    rm -r /www/docroot/transmission
-    rm -r /etc/config/transmission*
-    rm -r /var/transmission
-    rm /etc/hotplug.d/usb/60-transmission
+    rm -rf /www/docroot/transmission
+    rm -rf /etc/config/transmission*
+    rm -rf /var/transmission
+    rm -f /etc/hotplug.d/usb/60-transmission
     uci set modgui.app.transmission_webui="0"
     uci commit modgui
   }
@@ -140,7 +140,7 @@ app_telstra() {
   install() {
     curl -k https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master/modular/telstra_gui.tar.bz2 --output /tmp/telstra_gui.tar.bz2
     bzcat /tmp/telstra_gui.tar.bz2 | tar -C / -xf -
-    rm /tmp/telstra_gui.tar.bz2
+    rm -f /tmp/telstra_gui.tar.bz2
     /etc/init.d/nginx restart
     uci set modgui.app.telstra_webui="1"
     uci commit modgui
@@ -148,14 +148,14 @@ app_telstra() {
 
   remove() {
     if [ -d /www/telstra-snippets ]; then
-      rm -r /www/telstra-snippets
-      rm /www/gateway-snippets/telstra-gui.lp
-      rm /www/docroot/telstra-gui.lp
-      rm -r /www/docroot/telstra-modals
-      rm -r /www/docroot/telstra-helpfiles
-      rm -r /www/docroot/img/telstra
-      rm /www/docroot/js/main-telstra-min.js
-      rm /www/docroot/css/gw-telstra.css/gw-telstra.css
+      rm -rf /www/telstra-snippets
+      rm -f /www/gateway-snippets/telstra-gui.lp
+      rm -f /www/docroot/telstra-gui.lp
+      rm -rf /www/docroot/telstra-modals
+      rm -rf /www/docroot/telstra-helpfiles
+      rm -rf /www/docroot/img/telstra
+      rm -f /www/docroot/js/main-telstra-min.js
+      rm -f /www/docroot/css/gw-telstra.css
       /etc/init.d/nginx restart
       uci set modgui.app.telstra_webui="0"
       uci commit modgui
@@ -329,15 +329,16 @@ app_aria2() {
       opkg update
       opkg install aria2 libstdcpp
       curl -sLk https://github.com/mayswind/AriaNg-DailyBuild/tarball/master --output /tmp/ariang.tar.gz
+      rm -rf /www/docroot/aria
       tar -xzf /tmp/ariang.tar.gz -C /www/docroot/
-      rm /tmp/ariang.tar.gz
+      rm -f /tmp/ariang.tar.gz
       mv /www/docroot/*AriaNg* /www/docroot/aria
 
       ARIA2_DIR="/etc/aria2"
 
-      mkdir $ARIA2_DIR
-      touch $ARIA2_DIR/aria2.conf
-      touch $ARIA2_DIR/aria2.session
+      mkdir -p "$ARIA2_DIR"
+      touch "$ARIA2_DIR/aria2.conf"
+      touch "$ARIA2_DIR/aria2.session"
       {
         echo 'enable-rpc=true'
         echo 'rpc-allow-origin-all=true'
@@ -347,14 +348,14 @@ app_aria2() {
         echo 'save-session=/etc/aria2/aria2.session'
         echo 'save-session-interval=300'
         echo 'dir=/mnt/usb/USB-A1'
-      } >>$ARIA2_DIR/aria2.conf
+      } >>"$ARIA2_DIR/aria2.conf"
 
       # add aria2 in /etc/rc.local to start the daemon after a reboot
       sed -i '/exit 0/i \
 			aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --daemon=true --conf-path=/etc/aria2/aria2.conf' /etc/rc.local
 
       # start the daemon
-      aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --daemon=true --conf-path=$ARIA2_DIR/aria2.conf
+      aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --daemon=true --conf-path="$ARIA2_DIR/aria2.conf"
     }
 
     case $marketing_version in
@@ -374,11 +375,11 @@ app_aria2() {
     uci commit modgui
   }
   remove() {
-    killall aria2c
+    killall aria2c 2>/dev/null
     opkg remove aria2
-    rm -r /www/docroot/aria
-    rm -r /etc/aria2
-    sed -i '/aria2c/d' /etc/rc.local
+    rm -rf /www/docroot/aria
+    rm -rf /etc/aria2
+    sed -i '/aria2c/d' /etc/rc.local 2>/dev/null
     uci set modgui.app.aria2_webui="0"
     uci commit modgui
   }
@@ -537,8 +538,8 @@ install_specific_files() {
 
   install() {
     install_from_github NobodySan97/gui-dev-build-auto/master/modular "upgrade-pack-specific$1" specificapp
-    uci set modgui.app.specific_app=1
-    uci commit
+    uci set modgui.app.specific_app="1"
+    uci commit modgui
   }
   remove() {
     echo "Specific files cannot be removed. Reset the router instead."
@@ -604,6 +605,6 @@ install | remove | stop | start | refresh)
   ;;
 *)
   echo "usage: install|remove APP_NAME" 1>&2
-  return 1
+  exit 1
   ;;
 esac

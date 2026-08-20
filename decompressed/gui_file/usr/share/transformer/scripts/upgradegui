@@ -59,7 +59,7 @@ logecho() {
 }
 
 if [ "$1" ]; then
-  if [ "$1" == "SetTime" ]; then
+  if [ "$1" = "SetTime" ]; then
     time="$(uci get modgui.gui.autoupgrade_hour)"
     hour="$(echo $time | sed "s|:.*||")"
     minute="$(echo $time | sed "s|.*:||")"
@@ -67,15 +67,15 @@ if [ "$1" ]; then
     if [ "$(cat /etc/crontabs/root | grep upgradegui)" ]; then
       sed -i '/upgradegui/d' /etc/crontabs/root
     fi
-    if [ "$autoupgrade" == "1" ]; then
+    if [ "$autoupgrade" = "1" ]; then
       echo "$minute $hour * * * /usr/share/transformer/scripts/upgradegui AutoUpgrade >/dev/null 2>&1" >>/etc/crontabs/root
     fi
     exit 0
   fi
 
-  if [ "$1" == "AutoUpgrade" ]; then
+  if [ "$1" = "AutoUpgrade" ]; then
     /usr/share/transformer/scripts/checkver
-    if [ "$(uci get modgui.gui.outdated_ver)" == "0" ]; then
+    if [ "$(uci get modgui.gui.outdated_ver)" = "0" ]; then
       logecho "Already at latest version. Aborting upgrade."
       exit 0
     fi
@@ -180,7 +180,7 @@ if [ ! -f $WORKING_DIR/$FILE_NAME ]; then #Check if file exist as offline upload
   logecho "Downloaded GUI with hash: $downloaded_md5"
 
   if [ "$update_branch" ]; then
-    if [ "$update_branch" == "_dev" ] || [ "$update_branch" == "_preview" ]; then
+    if [ "$update_branch" = "_dev" ] || [ "$update_branch" = "_preview" ]; then
 
       logecho "Dev branch detected... Checking for newer version in stable..."
 
@@ -305,7 +305,7 @@ if [ -f /root/GUI.tar.gz ]; then
   rm /root/GUI.tar.gz
 fi
 
-if [ -z "$update_branch" ] || [ $FORCE_SAVE_GUI == 1 ]; then
+if [ -z "$update_branch" ] || [ "$FORCE_SAVE_GUI" = "1" ]; then
   logecho "Copying file to permanent dir..."
   #Copy GUI file to permanent dir
   if [ -f "$PERMANENT_STORE_DIR/$FILE_NAME" ]; then
@@ -314,7 +314,7 @@ if [ -z "$update_branch" ] || [ $FORCE_SAVE_GUI == 1 ]; then
   cp "$WORKING_DIR/$FILE_NAME" "$PERMANENT_STORE_DIR/$STABLE_FILE_NAME"
 fi
 
-if [ "$update_branch" == "_dev" ] || [ "$update_branch" == "_preview" ]; then
+if [ "$update_branch" = "_dev" ] || [ "$update_branch" = "_preview" ]; then
   logecho "Saving md5sum of dev gui to /root ..."
   md5sum "$WORKING_DIR/$FILE_NAME" | cut -d' ' -f1 >/root/gui_dev.md5sum
 fi

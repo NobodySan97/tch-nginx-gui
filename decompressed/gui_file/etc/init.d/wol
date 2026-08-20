@@ -22,7 +22,7 @@ start_service() {
     config_get dest_intf config dest_intf "lan"
     config_get src_intf config src_intf "wan"
 
-    if [ -n "$dest_ip" -a -n "$dest_intf" ]; then
+    if [ -n "$dest_ip" ] && [ -n "$dest_intf" ]; then
         # Add route entry
         ip route add ${dest_ip}/32 dev $dest_intf
         # Add a static ARP spoofing entry
@@ -66,7 +66,7 @@ stop_service() {
     config_get dest_intf config dest_intf "lan"
     config_get src_intf config src_intf "wan"
 
-    if [ -n "$dest_ip" -a -n "$dest_intf" ]; then
+    if [ -n "$dest_ip" ] && [ -n "$dest_intf" ]; then
         # Delete route entry
         ip route del ${dest_ip}/32 dev $dest_intf
         # Delete a static ARP spoofing entry

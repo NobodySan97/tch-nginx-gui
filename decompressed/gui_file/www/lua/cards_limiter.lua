@@ -23,7 +23,7 @@ function M.get_limit_info()
 end
 
 function M.card_limited(info, cardname)
-	if info.isLTEBoard then
+	if info and info.isLTEBoard then
 		return lte_exclude_list[cardname]
 	end
 	return false

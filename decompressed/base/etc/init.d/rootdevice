@@ -167,7 +167,7 @@ check_and_apply_root() {
         else
           logecho "Incompatible password saved in config, resetting password to root!"
           kecho "Incompatible password saved in config, resetting password to root!"
-          echo -e "root\nroot" | passwd >/dev/null
+          printf "root\nroot\n" | passwd >/dev/null
         fi
       else
         logecho "Shadow contains different pass than saved one. Save it!"
@@ -182,7 +182,7 @@ check_and_apply_root() {
     logecho "Resetting password to root..."
     kecho "Resetting password to root..."
     #Set the password to root as we have an unknown password
-    echo -e "root\nroot" | passwd >/dev/null
+    printf "root\nroot\n" | passwd >/dev/null
     store_pass_in_uci
   fi
 
