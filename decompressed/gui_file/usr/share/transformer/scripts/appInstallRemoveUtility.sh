@@ -180,32 +180,35 @@ app_luci() {
   install() {
     luci_install_arm() {
       opkg update
-      [ ! -f /rom/usr/lib/libjson-c.so.2 ] && ln -s /usr/lib/libjson-c.so.4 /usr/lib/libjson-c.so.2 #workaround for 18.x feeds used on 19.x firmware
+      [ ! -f /rom/usr/lib/libjson-c.so.2 ] && [ -f /usr/lib/libjson-c.so.4 ] && ln -sf /usr/lib/libjson-c.so.4 /usr/lib/libjson-c.so.2 #workaround for 18.x feeds used on 19.x firmware
       rm -rf /etc/config/uhttpd
-      rm /usr/lib/lua/uci.so #remove to avoid lua-uci conflict during install
+      rm -f /usr/lib/lua/uci.so #remove to avoid lua-uci conflict during install
       opkg install --force-reinstall libuci-lua luci rpcd
       [ ! -f /etc/init.d/uhttpd ] && opkg install uhttpd # only on 19.x is not getting installed as dependency?
-      mkdir /www_luci
-      mv /www/cgi-bin /www_luci/
-      mv /www/luci-static /www_luci/
-      mv /www/index.html /www_luci/
-      cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ #restore lib as it gets removed by libuci-lua
-      sed -i 's/require "uci"/require "uci_luci"/g' /usr/lib/lua/luci/model/uci.lua #modify luci to load his original lib with different name
+      mkdir -p /www_luci
+      [ -d /www/cgi-bin ] && mv /www/cgi-bin /www_luci/
+      [ -d /www/luci-static ] && mv /www/luci-static /www_luci/
+      [ -f /www/index.html ] && mv /www/index.html /www_luci/
+      [ -f /rom/usr/lib/lua/uci.so ] && cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ #restore lib as it gets removed by libuci-lua
+      [ -f /usr/lib/lua/luci/model/uci.lua ] && sed -i 's/require "uci"/require "uci_luci"/g' /usr/lib/lua/luci/model/uci.lua #modify luci to load his original lib with different name
 
-      if [ ! "$(uci get uhttpd.main.listen_http | grep 9080)" ]; then
-        uci del_list uhttpd.main.listen_http='0.0.0.0:80'
+      if [ ! "$(uci get uhttpd.main.listen_http 2>/dev/null | grep 9080)" ]; then
+        uci del_list uhttpd.main.listen_http='0.0.0.0:80' 2>/dev/null
         uci add_list uhttpd.main.listen_http='0.0.0.0:9080'
-        uci del_list uhttpd.main.listen_http='[::]:80'
+        uci del_list uhttpd.main.listen_http='[::]:80' 2>/dev/null
         uci add_list uhttpd.main.listen_http='[::]:9080'
-        uci del_list uhttpd.main.listen_https='0.0.0.0:443'
+        uci del_list uhttpd.main.listen_https='0.0.0.0:443' 2>/dev/null
         uci add_list uhttpd.main.listen_https='0.0.0.0:9443'
-        uci del_list uhttpd.main.listen_https='[::]:443'
+        uci del_list uhttpd.main.listen_https='[::]:443' 2>/dev/null
         uci add_list uhttpd.main.listen_https='[::]:9443'
         uci set uhttpd.main.home='/www_luci'
       fi
 
       uci commit uhttpd
-      /etc/init.d/uhttpd restart
+      if [ -f /etc/init.d/uhttpd ]; then
+        /etc/init.d/uhttpd enable
+        /etc/init.d/uhttpd restart
+      fi
     }
 
     luci_install_mips() {
@@ -223,7 +226,7 @@ app_luci() {
       [ "$cpu_type" = "armv7l" ] && {
         luci_install_arm
         opkg install --force-reinstall --force-overwrite libuci-lua
-        sed -i 's/require "uci_luci"/require "uci"/g' /usr/lib/lua/luci/model/uci.lua
+        [ -f /usr/lib/lua/luci/model/uci.lua ] && sed -i 's/require "uci_luci"/require "uci"/g' /usr/lib/lua/luci/model/uci.lua
       }
       [ "$cpu_type" = "mips" ] && luci_install_mips
       ;;
@@ -240,17 +243,18 @@ app_luci() {
   }
   remove() {
     luci_remove_arm() {
+      [ -f /etc/init.d/uhttpd ] && /etc/init.d/uhttpd stop 2>/dev/null && /etc/init.d/uhttpd disable 2>/dev/null
       opkg remove --force-removal-of-dependent-packages uhttpd rpcd libuci-lua luci luci-*
-      [ ! -f /rom/usr/lib/libjson-c.so.2 ] && rm -rf /usr/lib/libjson-c.so.2 #workaround for 18.x feeds used on 19.x firmware
-      cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ #restore lib as it gets removed by libuci-lua
+      [ ! -f /rom/usr/lib/libjson-c.so.2 ] && rm -f /usr/lib/libjson-c.so.2 #workaround for 18.x feeds used on 19.x firmware
+      [ -f /rom/usr/lib/lua/uci.so ] && cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ #restore lib as it gets removed by libuci-lua
 
       rm -rf /www_luci
       rm -rf /etc/config/uhttpd
       rm -rf /etc/config/luci
 
       #needed cause of a bug (?) macoers repos will keep trying to install wrong (newer) versions of luci and libubox
-      sed -i '/^Package: luci/,/^$/d' /usr/lib/opkg/status
-      sed -i '/^Package: uhttpd/,/^$/d' /usr/lib/opkg/status
+      sed -i '/^Package: luci/,/^$/d' /usr/lib/opkg/status 2>/dev/null
+      sed -i '/^Package: uhttpd/,/^$/d' /usr/lib/opkg/status 2>/dev/null
     }
 
     luci_remove_mips() {
