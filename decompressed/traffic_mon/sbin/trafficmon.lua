@@ -93,8 +93,9 @@ local function handleStatsFile(name, statsData, times, binit)
 			if f then
 				f:write(Total .. "\n")
 				local insert = false
-				for index, value in ipairs(data) do
-					if index > 1 and index <= datanum then
+				local start_idx = (#data > datanum) and (#data - datanum + 2) or 2
+				for index = start_idx, #data do
+					local value = data[index]
 						local timePart = value:match("(%d+:%d+)$")
 						local oldtimes = timePart and tonumber((timePart:gsub(":", "")))
 						local ntimes = tonumber((times:gsub(":", "")))

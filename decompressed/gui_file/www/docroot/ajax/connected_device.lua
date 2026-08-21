@@ -71,21 +71,20 @@ local devices_data = content_helper.loadTableData(devices_options.basepath, devi
 
 local device_table = ui_helper.createTable(devices_columns, devices_data, devices_options, nil, nil)
 
-local device_string = {}
-
-local function concat_table(device_table) 
+local function concat_table(device_table, out) 
 	for _ , table_string in pairs(device_table) do
 		if type(table_string) == "table" then
-			concat_table(table_string)
+			concat_table(table_string, out)
 		elseif type(table_string) == "userdata" then
-			device_string[#device_string+1] = string.untaint(table_string)
+			out[#out+1] = string.untaint(table_string)
 		else
-			device_string[#device_string+1] = table_string
+			out[#out+1] = table_string
 		end
 	end
 end
 
-concat_table(device_table)
+local device_string = {}
+concat_table(device_table, device_string)
 
 local data = {
 	device_table = table.concat(device_string) or ""
