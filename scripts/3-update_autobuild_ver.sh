@@ -1,10 +1,10 @@
 #!/bin/bash
 
-if [ "$CI" == "true" ]; then
+if [ "$CI" = "true" ]; then
 	TYPE="$(cat $HOME/gui_build/data/type)"
-	if [ $TYPE == "PREVIEW" ]; then
+	if [ "$TYPE" = "PREVIEW" ]; then
 		type="_preview"
-	elif [ $TYPE == "DEV" ]; then
+	elif [ "$TYPE" = "DEV" ]; then
 		type="_dev"
 	elif [ $TYPE != "STABLE" ]; then
 		type="_"$TYPE
@@ -30,18 +30,18 @@ cp compressed/GUI$type.tar.bz2 $HOME/gui-dev-build-auto/ -r;
 
 cd $HOME/gui-dev-build-auto/;
 
-if [ "$CI" == "true" ]; then
+if [ "$CI" = "true" ]; then
 	build_type_name=$(cat ~/gui_build/data/type)
 
-	if [ $build_type_name == "STABLE" ]; then
+	if [ "$build_type_name" = "STABLE" ]; then
 		echo $version > stable.version
-	elif  [ $build_type_name == "PREVIEW" ]; then
+	elif  [ "$build_type_name" = "PREVIEW" ]; then
 		echo $version > preview.version
 	elif [ $build_type_name != "DEV" ]; then
 		echo $version > $build_type_name.version
 	fi
 
-	if [ $build_type_name == "STABLE" ] || [ $build_type_name == "DEV" ]; then
+	if [ "$build_type_name" = "STABLE" ] || [ "$build_type_name" = "DEV" ]; then
 		echo $version > latest.version
 		git add -A;
 	else

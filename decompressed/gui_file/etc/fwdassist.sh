@@ -19,7 +19,7 @@ load_value()
   local DATAFILE=$1
   local KEY=$2
   local L=$(grep $KEY $DATAFILE)
-  if [ -n $L ]; then
+  if [ -n "$L" ]; then
     echo $L | cut -d'=' -f 2 | tr -d ' '
   fi  
 }
@@ -63,7 +63,7 @@ apply()
 
 apply_rules()
 {
-  if [ -z $WAN_IP ]; then
+  if [ -z "$WAN_IP" ]; then
     return
   fi
   
@@ -137,7 +137,7 @@ redirect()
   LAN_PORT=$(load_value $DATAFILE lanport)
   local WAN_PORT=$(load_value $DATAFILE wanport)
 
-  if [ -z $IFNAME ]; then
+  if [ -z "$IFNAME" ]; then
     return
   fi
   WAN_IP=$(lua -e "dm=require'datamodel';r=dm.get('rpc.network.interface.@$IFNAME.ipaddr'); \
