@@ -5,7 +5,6 @@ gettext.textdomain('webui-core')
 local items = {
     {"wanservices-modal.lp", T"Port Forward"},
     {"upnp-modal.lp", T"UPnP"},
-    {"nat-alg-helper-modal.lp", T"NAT Helpers"},
     {"wol-modal.lp", T"WoL / WoW"},
 	{"customdns-modal.lp", T"Custom DNS"},
 	{"dyndns-modal.lp", T"DDNS"},

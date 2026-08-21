@@ -35,36 +35,28 @@ if session:hasAccess(modalPath) then
           <div class="divtable">\
               ');  if enabled_count ~= 0 then  ngx.print('\
                 <span class="simple-desc">\
-               <i class="fas fa-check-circle" style="color: #2ecc71;" aria-hidden="true">&nbsp;</i>\
+               <i " class="fas fa-info-circle" aria-hidden="true" href="#">&nbsp</i>\
                 ');  
                 ngx.print(format( N('<strong %1$s>%2$d Enabled Helper</strong>',
                                     '<strong %1$s>%2$d Enabled Helpers</strong>', enabled_count),
                                     modal_link, enabled_count))
-                ngx.print('\
+                  ngx.print('\
                 </span>\
                 ');  
               end
               if disabled_count ~= 0 then  ngx.print('\
                 <span class="simple-desc">\
-               <i class="fas fa-times-circle" style="color: #e74c3c;" aria-hidden="true">&nbsp;</i>\
+               <i " class="fas fa-info-circle" aria-hidden="true" href="#">&nbsp</i>\
                 ');  
                 ngx.print(format( N('<strong %1$s>%2$d Disabled Helper</strong>',
                                     '<strong %1$s>%2$d Disabled Helpers</strong>', disabled_count),
                                     modal_link, disabled_count))
-                ngx.print('\
+                  ngx.print('\
                 </span>\
-              ');  end
-              if enabled_count == 0 and disabled_count == 0 then ngx.print('\
-                <span class="simple-desc">\
-               <i class="fas fa-info-circle" aria-hidden="true">&nbsp;</i>\
-                ');
-                ngx.print(format('<strong %1$s>%2$s</strong>', modal_link, T"Default system helpers active"))
-                ngx.print('\
-                </span>\
-              '); end ngx.print('\
+              ');  end  ngx.print('\
            </div>\
            </div>\
       </div>\
   </div>\
-');
+');  
 end

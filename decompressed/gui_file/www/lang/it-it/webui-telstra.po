@@ -25,7 +25,7 @@ msgid "Status"
 msgstr "Stato"
 
 msgid "Uptime"
-msgstr "Tempo attivitàà"
+msgstr "Tempo attività"
 
 msgid "Data Transfered"
 msgstr "Dati trasferiti"
@@ -115,7 +115,7 @@ msgid "Mass Storage"
 msgstr "Mass storage"
 
 msgid "Add new port mapping"
-msgstr "Aggiungià nuova mappatura porta"
+msgstr "Aggiungi nuova mappatura porta"
 
 msgid "Device Name"
 msgstr "Nome dispositivo"
@@ -175,7 +175,7 @@ msgid "Use Random Password"
 msgstr "Usa password casuale"
 
 msgid "Add New Rule"
-msgstr "Aggiungià nuova regola"
+msgstr "Aggiungi nuova regola"
 
 msgid "Changes saved successfully"
 msgstr "Salvataggio modifiche completato"
@@ -286,7 +286,7 @@ msgid "MAC Address"
 msgstr "Indirizzo MAC"
 
 msgid "Add new MAC address"
-msgstr "Aggiungià nuovo indirizzo MAC"
+msgstr "Aggiungi nuovo indirizzo MAC"
 
 msgid "Wi-Fi Radio"
 msgstr "Radio Wi-Fi"

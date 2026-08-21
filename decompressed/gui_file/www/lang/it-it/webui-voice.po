@@ -43,7 +43,7 @@ msgid "Activate"
 msgstr "Attivato"
 
 msgid "Add new contact"
-msgstr "Aggiungià nuovo contatto"
+msgstr "Aggiungi nuovo contatto"
 
 msgid "Base Name"
 msgstr "Nome base"
@@ -130,7 +130,7 @@ msgid "Duration"
 msgstr "Durata"
 
 msgid "Emission Mode"
-msgstr "Modalitàà emissione"
+msgstr "Modalità emissione"
 
 msgid "Enable Pos"
 msgstr "Abilita Pos"
@@ -303,8 +303,8 @@ msgstr "Registrar primario"
 msgid "Primary RegistrarPort"
 msgstr "Porta registrar primario"
 
-msgid "Prioritày"
-msgstr "Prioritàà"
+msgid "Priority"
+msgstr "Priorità"
 
 msgid "Profile"
 msgstr "Profilo"
@@ -313,7 +313,7 @@ msgid "Profile Number"
 msgstr "Numero profilo"
 
 msgid "Quality Log"
-msgstr "Registro qualitàà"
+msgstr "Registro qualità"
 
 msgid "ReceiveInterarrivalJitter"
 msgstr "Jitter ricezione"
