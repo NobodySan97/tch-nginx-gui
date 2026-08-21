@@ -80,6 +80,19 @@ orig_config_gen() {
     uci set fcctlsettings.option.mcast_learn='1'
     uci commit fcctlsettings
   fi
+  # Ensure default NAT ALG helpers exist in firewall config
+  if [ -f /etc/config/firewall ] && ! uci show firewall | grep -q "helper"; then
+    uci set firewall.ftp=helper; uci set firewall.ftp.name='ftp'; uci set firewall.ftp.helper='ftp'; uci set firewall.ftp.dest_port='21'; uci set firewall.ftp.proto='tcp'; uci set firewall.ftp.enable='1'
+    uci set firewall.tftp=helper; uci set firewall.tftp.name='tftp'; uci set firewall.tftp.helper='tftp'; uci set firewall.tftp.dest_port='69'; uci set firewall.tftp.proto='udp'; uci set firewall.tftp.enable='1'
+    uci set firewall.snmp=helper; uci set firewall.snmp.name='snmp'; uci set firewall.snmp.helper='snmp'; uci set firewall.snmp.dest_port='161'; uci set firewall.snmp.proto='udp'; uci set firewall.snmp.enable='1'
+    uci set firewall.pptp=helper; uci set firewall.pptp.name='pptp'; uci set firewall.pptp.helper='pptp'; uci set firewall.pptp.dest_port='1723'; uci set firewall.pptp.proto='tcp'; uci set firewall.pptp.enable='1'
+    uci set firewall.sip=helper; uci set firewall.sip.name='sip'; uci set firewall.sip.helper='sip'; uci set firewall.sip.dest_port='5060'; uci set firewall.sip.proto='udp'; uci set firewall.sip.enable='1'
+    uci set firewall.irc=helper; uci set firewall.irc.name='irc'; uci set firewall.irc.helper='irc'; uci set firewall.irc.dest_port='6667'; uci set firewall.irc.proto='tcp'; uci set firewall.irc.enable='1'
+    uci set firewall.amanda=helper; uci set firewall.amanda.name='amanda'; uci set firewall.amanda.helper='amanda'; uci set firewall.amanda.dest_port='10080'; uci set firewall.amanda.proto='udp'; uci set firewall.amanda.enable='1'
+    uci set firewall.rtsp=helper; uci set firewall.rtsp.name='rtsp'; uci set firewall.rtsp.helper='rtsp'; uci set firewall.rtsp.dest_port='554'; uci set firewall.rtsp.proto='tcp'; uci set firewall.rtsp.enable='1'
+    uci set firewall.ipsec=helper; uci set firewall.ipsec.name='ipsec'; uci set firewall.ipsec.helper='ipsec'; uci set firewall.ipsec.dest_port='500'; uci set firewall.ipsec.proto='udp'; uci set firewall.ipsec.enable='1'
+    uci commit firewall
+  fi
 }
 
 dropbear_config_check() {
