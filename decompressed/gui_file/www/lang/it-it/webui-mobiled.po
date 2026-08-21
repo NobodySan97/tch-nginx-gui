@@ -22,10 +22,10 @@ msgid "Access Technology"
 msgstr "Tecnologia di accesso"
 
 msgid "Add new profile"
-msgstr "Aggiungi nuovo profilo"
+msgstr "Aggiungià nuovo profilo"
 
 msgid "Airplane mode"
-msgstr "Modalità aereo"
+msgstr "Modalitàà aereo"
 
 msgid "Allow Roaming"
 msgstr "Consenti roaming"
@@ -40,7 +40,7 @@ msgid "Authenticating"
 msgstr "Autenticazione"
 
 msgid "Authentication Type"
-msgstr "Modalità autenticazione"
+msgstr "Modalitàà autenticazione"
 
 msgid "Blocked"
 msgstr "Bloccato"
@@ -191,7 +191,7 @@ msgid "Linked Profile"
 msgstr "Profilo collegato"
 
 msgid "Low-power mode"
-msgstr "Modalità basso consumo"
+msgstr "Modalitàà basso consumo"
 
 msgid "Manual"
 msgstr "Manuale"
@@ -293,7 +293,7 @@ msgid "Radio Type"
 msgstr "Tipologia radio"
 
 msgid "Read messages"
-msgstr "Messaggi letti"
+msgstr "Messaggià letti"
 
 msgid "Received"
 msgstr "Ricevuto"
@@ -398,7 +398,7 @@ msgid "Unplugged"
 msgstr "Scollegato"
 
 msgid "Unread messages"
-msgstr "Messaggi non letti"
+msgstr "Messaggià non letti"
 
 msgid "Upgrading firmware"
 msgstr "Aggiornamento firmware"
@@ -775,8 +775,8 @@ msgstr "Percorso codice area modificato"
 msgid "Location Area Code Changes"
 msgstr "Modifiche percorso codice area"
 
-msgid "No signal quality history available for the selected period"
-msgstr "Nessuna cronologia qualità segnale disponibile per il periodo selezionato"
+msgid "No signal qualitày history available for the selected period"
+msgstr "Nessuna cronologia qualitàà segnale disponibile per il periodo selezionato"
 
 msgid "Network Registered"
 msgstr "Rete registrata"

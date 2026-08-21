@@ -26,13 +26,13 @@ msgstr[0] "<strong>%s</strong> coda attiva"
 msgstr[1] "<strong>%s</strong> code attive"
 
 msgid "Add New Label"
-msgstr "Aggiungi nuova etichetta"
+msgstr "Aggiungià nuova etichetta"
 
 msgid "Add New Rule"
-msgstr "Aggiungi nuova regola"
+msgstr "Aggiungià nuova regola"
 
 msgid "Add new queue"
-msgstr "Aggiungi nuova coda"
+msgstr "Aggiungià nuova coda"
 
 msgid "Algorithm"
 msgstr "Algoritmo"
@@ -67,8 +67,8 @@ msgstr "Nome"
 msgid "Port(s)"
 msgstr "Porta/e"
 
-msgid "Priority"
-msgstr "Priorità"
+msgid "Prioritày"
+msgstr "Prioritàà"
 
 msgid "Protocol"
 msgstr "Protocollo"
@@ -106,11 +106,11 @@ msgstr "Host/IP sorgente"
 msgid "Source Port(s)"
 msgstr "Porta/e sorgente"
 
-msgid "Strict Priority"
-msgstr "Priorità rigorosa"
+msgid "Strict Prioritày"
+msgstr "Prioritàà rigorosa"
 
-msgid "Strict Priority and Weighted Round Robin"
-msgstr "Priorità rigorosa e round robin pesato"
+msgid "Strict Prioritày and Weighted Round Robin"
+msgstr "Prioritàà rigorosa e round robin pesato"
 
 msgid "Traffic ID"
 msgstr "ID traffico"
@@ -138,3 +138,21 @@ msgstr "Porta virtuale"
 
 msgid "QoS"
 msgstr "QoS"
+
+msgid "<strong>%d queue</strong> active"
+msgstr "<strong>%d</strong> coda attiva"
+
+msgid "<strong>%d queues</strong> active"
+msgstr "<strong>%d</strong> code attive"
+
+msgid "<strong>%d classify rule</strong> active"
+msgstr "<strong>%d</strong> regola classificazione attiva"
+
+msgid "<strong>%d classify rules</strong> active"
+msgstr "<strong>%d</strong> regole classificazione attive"
+
+msgid "QoS Queues"
+msgstr "Code QoS"
+
+msgid "QoS Classification"
+msgstr "Classificazione QoS"

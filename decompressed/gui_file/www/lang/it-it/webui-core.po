@@ -40,16 +40,16 @@ msgid "%s Mbps"
 msgstr "%s Mbps"
 
 msgid "10% of max Frequency in ASYNC mode"
-msgstr "10% clock max CPU in modalità ASYNC"
+msgstr "10% clock max CPU in modalitàà ASYNC"
 
 msgid "100% of max Frequency in ASYNC mode"
-msgstr "100% clock max CPU in modalità ASYNC"
+msgstr "100% clock max CPU in modalitàà ASYNC"
 
 msgid "100% of max Frequency in SYNC mode"
-msgstr "100% clock max CPU in modalità SYNC"
+msgstr "100% clock max CPU in modalitàà SYNC"
 
 msgid "25% of max Frequency in ASYNC mode"
-msgstr "25% clock max CPU in modalità ASYNC"
+msgstr "25% clock max CPU in modalitàà ASYNC"
 
 msgid "2nd Demod Cap Mask"
 msgstr "Seconda maschera Cap Demod"
@@ -58,10 +58,10 @@ msgid "2nd Demod Cap Value"
 msgstr "Secondo valore Cap Demod"
 
 msgid "50% of max Frequency in ASYNC mode"
-msgstr "50% clock max CPU in modalità ASYNC"
+msgstr "50% clock max CPU in modalitàà ASYNC"
 
 msgid "<p>Remote assistance is currently disabled.</p><p> By clicking on the 'Apply' button with the 'Enabled' checkbox enabled your gateway will be accessible from your broadband connection. After %s minutes of inactivity, or on reboot, remote assistance will be automatically disabled for 'Temporary' mode. </p><p> Please provide the following parameters to your ISP:</p>"
-msgstr "<p>L'assistenza remota è attualmente disabilitata.</p><p> Facendo clic sul pulsante 'Applica' con la casella 'Abilitata' spuntata il gateway sarà accessibile dalla tua connessione a banda larga. Dopo %s minuti di inattività, oppure al riavvio, l'assistenza remota verrà automaticamente disabilitata in modalità 'Temporanea'. </p><p>Fornisci i seguenti parametri all'ISP.</p>"
+msgstr "<p>L'assistenza remota è attualmente disabilitata.</p><p> Facendo clic sul pulsante 'Applica' con la casella 'Abilitata' spuntata il gateway sarà accessibile dalla tua connessione a banda larga. Dopo %s minuti di inattivitàà, oppure al riavvio, l'assistenza remota verrà automaticamente disabilitata in modalitàà 'Temporanea'. </p><p>Fornisci i seguenti parametri all'ISP.</p>"
 
 msgid "<p>Remote assistance is currently enabled. </p><p>Click 'Apply' button with the 'Enabled' checkbox disabled to disable remote assistance on your gateway </p>"
 msgstr "<p>L'assistenza remota è attualmente abilitata. </p><p>Fai clic sul pulsante 'Applica' con la casella 'Abilitata' disattivata per disabilitare l'assistenza remota nel gateway </p>"
@@ -88,7 +88,7 @@ msgstr[1] "<strong %1$s>%2$d instradamenti</strong>"
 
 msgid "<strong %s>%d Access Control</strong> rule defined"
 msgid_plural "<strong %s>%d Access Control</strong> rule defined"
-msgstr[0] "<strong %s>%d  regola controllo accessi</strong>"
+msgstr[0] "<strong %s>%d è regola controllo accessi</strong>"
 msgstr[1] "<strong %s>%d regole controllo accessi</strong>"
 
 msgid "<strong %s>%d UPnP</strong> rule is active"
@@ -201,61 +201,61 @@ msgid "Active Version"
 msgstr "Versione attiva"
 
 msgid "Add New DNS"
-msgstr "Aggiungi nuovo DNS"
+msgstr "Aggiungià nuovo DNS"
 
 msgid "Add New Rule"
-msgstr "Aggiungi nuova regola"
+msgstr "Aggiungià nuova regola"
 
 msgid "Add new IPv4 Ping WhiteList rule"
-msgstr "Aggiungi nuova regola IPv4 autorizzati ping"
+msgstr "Aggiungià nuova regola IPv4 autorizzati ping"
 
 msgid "Add new IPv4 firewall rule"
-msgstr "Aggiungi nuova regola firewall IPv4"
+msgstr "Aggiungià nuova regola firewall IPv4"
 
 msgid "Add new IPv4 port mapping"
-msgstr "Aggiungi nuova mappatura porta IPv4"
+msgstr "Aggiungià nuova mappatura porta IPv4"
 
 msgid "Add new IPv6 Ping WhiteList rule"
-msgstr "Aggiungi nuova regola IPv6 autorizzati ping"
+msgstr "Aggiungià nuova regola IPv6 autorizzati ping"
 
 msgid "Add new IPv6 firewall rule"
-msgstr "Aggiungi nuova regola firewall IPv6"
+msgstr "Aggiungià nuova regola firewall IPv6"
 
 msgid "Add new IPv6 forwarding rule"
-msgstr "Aggiungi nuova regola mappatura IPv6"
+msgstr "Aggiungià nuova regola mappatura IPv6"
 
 msgid "Add new MAC address"
-msgstr "Aggiungi nuovo indirizzo MAC"
+msgstr "Aggiungià nuovo indirizzo MAC"
 
 msgid "Add new NTP server"
-msgstr "Aggiungi nuovo server NTP"
+msgstr "Aggiungià nuovo server NTP"
 
 msgid "Add new Syslog Filter"
-msgstr "Aggiungi nuovo filtro Syslog"
+msgstr "Aggiungià nuovo filtro Syslog"
 
 msgid "Add new bridge"
-msgstr "Aggiungi un nuovo bridge"
+msgstr "Aggiungià un nuovo bridge"
 
 msgid "Add new dns rule"
-msgstr "Aggiungi nuova regola DNS"
+msgstr "Aggiungià nuova regola DNS"
 
 msgid "Add new host rule"
-msgstr "Aggiungi nuova regola host"
+msgstr "Aggiungià nuova regola host"
 
 msgid "Add new policy"
-msgstr "Aggiungi nuova regola"
+msgstr "Aggiungià nuova regola"
 
 msgid "Add new rule"
-msgstr "Aggiungi nuova regola"
+msgstr "Aggiungià nuova regola"
 
 msgid "Add new static IPv4 route"
-msgstr "Aggiungi nuovo instradamento IPv4 statico"
+msgstr "Aggiungià nuovo instradamento IPv4 statico"
 
 msgid "Add new static lease"
-msgstr "Aggiungi nuovo indirizzo IP statico"
+msgstr "Aggiungià nuovo indirizzo IP statico"
 
 msgid "Add new user"
-msgstr "Aggiungi nuovo utente"
+msgstr "Aggiungià nuovo utente"
 
 msgid "Admin"
 msgstr "Amministratore"
@@ -372,7 +372,7 @@ msgid "Bridge Grouping"
 msgstr "Raggruppamento bridge"
 
 msgid "Bridge Mode Active"
-msgstr "Modalità bridge attiva"
+msgstr "Modalitàà bridge attiva"
 
 msgid "Bridge connected"
 msgstr "Bridge connesso"
@@ -513,7 +513,7 @@ msgid "Connection Type"
 msgstr "Tipo connessione"
 
 msgid "Connection mode"
-msgstr "Modalità connessione"
+msgstr "Modalitàà connessione"
 
 msgid "Connections"
 msgstr "Connessioni"
@@ -549,7 +549,7 @@ msgid "Cyclic-Delay Diversity"
 msgstr "Diversità ritardo-ciclico"
 
 msgid "DECT Emission Mode "
-msgstr "Modalità emissione DECT "
+msgstr "Modalitàà emissione DECT "
 
 msgid "DHCP End Address is Invalid"
 msgstr "Indirizzo finale DHCP non valido"
@@ -648,7 +648,7 @@ msgid "DSL Hlog"
 msgstr "Hlog DSL"
 
 msgid "DSL Mode"
-msgstr "Modalità DSL"
+msgstr "Modalitàà DSL"
 
 msgid "DSL QLN"
 msgstr "QLN DSL"
@@ -663,7 +663,7 @@ msgid "DSL Type"
 msgstr "Tipologia DSL"
 
 msgid "DSL Uptime"
-msgstr "Tempo attività DSL"
+msgstr "Tempo attivitàà DSL"
 
 msgid "DSL stats"
 msgstr "Statistiche DSL"
@@ -762,13 +762,13 @@ msgid "Dialing"
 msgstr "Composizione"
 
 msgid "Direction Mode"
-msgstr "Modalità direzione"
+msgstr "Modalitàà direzione"
 
 msgid "Direction:"
 msgstr "Direzione:"
 
 msgid "Disable VN Mode"
-msgstr "Disabilita modalità VN"
+msgstr "Disabilita modalitàà VN"
 
 msgid "Disabled"
 msgstr "Disabilitato"
@@ -840,7 +840,7 @@ msgid "Duplicate contents are not allowed"
 msgstr "Non sono consentiti duplicati"
 
 msgid "DDNS disabled"
-msgstr "DDNS  disabilitato"
+msgstr "DDNS è disabilitato"
 
 msgid "DDNS enabled"
 msgstr "DDNS abilitato"
@@ -894,13 +894,13 @@ msgid "Enhanced Tim"
 msgstr "TIM avanzato"
 
 msgid "Entering BOOTP, please wait..."
-msgstr "Avvio modalità BOOTP..."
+msgstr "Avvio modalitàà BOOTP..."
 
 msgid "ErrS Packet Drop"
 msgstr "Pacchetto ErrS scartato"
 
 msgid "ErrS Packet Send"
-msgstr "Pacchetto ErrS  inviato"
+msgstr "Pacchetto ErrS è inviato"
 
 msgid "ErrS Stat Drop"
 msgstr "Statistica ERRS scartata"
@@ -1016,13 +1016,13 @@ msgstr "Firmware non presente in questo banco"
 msgid "Firmware update failed."
 msgstr "Aggiornamento firmware fallito."
 
-msgid "Firmware update failed.  Insufficient free memory available. Please reboot and try again."
+msgid "Firmware update failed. è Insufficient free memory available. Please reboot and try again."
 msgstr "Aggiornamento firmware fallito. Memoria libera disponibile insufficiente. Riavvia e riprova."
 
-msgid "Firmware update failed.  Invalid file used: expected file with extension rbi.  Please use correct firmware."
+msgid "Firmware update failed. è Invalid file used: expected file with extension rbi. è Please use correct firmware."
 msgstr "Aggiornamento firmware fallito. File non valido. Era atteso file con estensione .RBI. Usa il firmware corretto."
 
-msgid "Firmware update failed.  Invalid file used: file too large.  Please use correct firmware."
+msgid "Firmware update failed. è Invalid file used: file too large. è Please use correct firmware."
 msgstr "Aggiornamento firmware fallito. File non valido: file troppo grande. Usa il firmware corretto."
 
 msgid "Firmware update failed; build signed with wrong key"
@@ -1191,7 +1191,7 @@ msgid "Idle"
 msgstr "Non attivo"
 
 msgid "Input the latest stock firmware version in this field to spoof it. This is necessary because if a newer version of the firmware is available on the ACS server, CWMPD will try to update the device and break remote monitoring from the “MyTIM” mobile app."
-msgstr "Inserisci in questo campo la versione più recente del firmware stock. Questo è necessario poichè se è disponibile una versione più recente del firmware stock nel server ACS, CWMPD proverà ad aggiornare il firmware e questo interromperà il monitoraggio con l'app  mobile “My TIM”."
+msgstr "Inserisci in questo campo la versione più recente del firmware stock. Questo è necessario poichè se è disponibile una versione più recente del firmware stock nel server ACS, CWMPD proverà ad aggiornare il firmware e questo interromperà il monitoraggio con l'app è mobile “My TIM”."
 
 msgid "If you haven't changed it, the default password can be found on the sticker under your gateway (it's called <strong>\"access code\"</strong>)"
 msgstr "Se non l´hai cambiata, puoi trovare la password predefinita sotto il gateway (è quella chiamata <strong>'codice accesso'</strong>)"
@@ -1217,17 +1217,17 @@ msgstr "Importa file non firmato"
 msgid "Importing configuration, please wait..."
 msgstr "Importazione..."
 
-msgid "Importing failed; Invalid file used: expected file with extension bin.  Please use correct file."
+msgid "Importing failed; Invalid file used: expected file with extension bin. è Please use correct file."
 msgstr "Importazione fallita. L´estensione del file deve essere .BIN."
 
-msgid "Importing failed; Invalid file used: file too large.  Please use correct.  Please use correct file.."
+msgid "Importing failed; Invalid file used: file too large. è Please use correct. è Please use correct file.."
 msgstr "Importazione fallita. File non valido perché troppo grande. Usa il file corretto."
 
 msgid "Importing failed; please try again."
 msgstr "Importazione fallita. Riprova."
 
 msgid "In <strong>high mode</strong>, firewall allows outgoing connections to HTTP, HTTPS, SMTP, POP3, IMAP, SSH services and silently drops unknown incoming connections. This may impact on web services like Internet Speed Test."
-msgstr "Impostando il <strong>livello alto</strong>, il firewall consentirà le connessioni in uscita ai servizi HTTP, HTTPS, SMTP, POP3, IMAP, SSH e scarterà silenziosamente le connessioni sconosciute in ingresso. Questo può avere impatto su servizi web quali il test di velocità internet."
+msgstr "Impostando il <strong>livello alto</strong>, il firewall consentirà le connessioni in uscita ai servizi HTTP, HTTPS, SMTP, POP3, IMAP, SSH e scarterà silenziosamente le connessioni sconosciute in ingresso. Questo può avere impatto su servizi web quali il test di velocitàà internet."
 
 msgid "In <strong>low mode</strong>, firewall allows all outbound connections and rejects unknown incoming connections but acknowledges presence of the gateway."
 msgstr "Impostando il <strong>livello basso</strong>, il firewall consentirà ogni connessione in uscita. Rifiuterà connessioni sconosciute in ingresso, ma il router sarà raggiungibile dall’esterno."
@@ -1464,10 +1464,10 @@ msgid "Mirror Interface:"
 msgstr "Interfaccia Mirror:"
 
 msgid "Mode"
-msgstr "Modalità"
+msgstr "Modalitàà"
 
 msgid "Modes"
-msgstr "Modalità"
+msgstr "Modalitàà"
 
 msgid "Change the SNR margin to increase stability or performance when in “ADSL Mode”. Changing this value in “VDSL Mode” won’t have any effect."
 msgstr "La modifica del valore SNR avrà effetto solo con connessioni ADSL. Con una connessione VDSL non ci sarà alcun effetto sulla modifica di questo valore!"
@@ -1530,7 +1530,7 @@ msgid "No Update found"
 msgstr "Nessun aggiornamento disponibile"
 
 msgid "No configuration available for internet connectivity when in bridge mode."
-msgstr "Nessuna configurazione disponibile per la connettività internet nella modalità bridge."
+msgstr "Nessuna configurazione disponibile per la connettività internet nella modalitàà bridge."
 
 msgid "No error received from server"
 msgstr "Nessun errore ricevuto dal server"
@@ -1956,7 +1956,7 @@ msgid "RpFilter"
 msgstr "Filtro Rp"
 
 msgid "Rx BitSwap Mode"
-msgstr "Modalità BitSwap Rx"
+msgstr "Modalitàà BitSwap Rx"
 
 msgid "Rx Errors"
 msgstr "Errori Rx"
@@ -1992,7 +1992,7 @@ msgid "Second DNS Server Ping"
 msgstr "Ping secondo server DNS"
 
 msgid "Secure Mode Enabled"
-msgstr "Modalità sicurezza abilitata"
+msgstr "Modalitàà sicurezza abilitata"
 
 msgid "Security Mode"
 msgstr "Tipo sicurezza"
@@ -2022,7 +2022,7 @@ msgid "Service"
 msgstr "Servizio"
 
 msgid "Select the services to check on before turning the “Info” LED green and turning the services LEDs off (if ECO LED has been enabled)."
-msgstr "Seleziona i servizi da controllare prima di attivare il led  verde “Info” e spegnere i led dei servizi (se ECO LED è stato abilitato)."
+msgstr "Seleziona i servizi da controllare prima di attivare il led è verde “Info” e spegnere i led dei servizi (se ECO LED è stato abilitato)."
 
 msgid "Set PIN code"
 msgstr "Imposta codice PIN"
@@ -2127,7 +2127,7 @@ msgid "Stop"
 msgstr "Arresta"
 
 msgid "Stop Ping Request"
-msgstr "Interrompi ping"
+msgstr "Interrompiù ping"
 
 msgid "Stop Time"
 msgstr "Orario fine"
@@ -2160,7 +2160,7 @@ msgid "Support site: "
 msgstr "Sito supporto: "
 
 msgid "Switch connection mode"
-msgstr "Modifica modalità connessione"
+msgstr "Modifica modalitàà connessione"
 
 msgid "SwitchBank"
 msgstr "Commuta banco"
@@ -2427,10 +2427,10 @@ msgid "Uploading firmware, please wait..."
 msgstr "Caricamento firmware..."
 
 msgid "Uptime"
-msgstr "Tempo attività"
+msgstr "Tempo attivitàà"
 
 msgid "Uptime: <strong>%s</strong>"
-msgstr "Tempo attività: <strong>%s</strong>"
+msgstr "Tempo attivitàà: <strong>%s</strong>"
 
 msgid "Use"
 msgstr "Uso"
@@ -2502,7 +2502,7 @@ msgid "Violet"
 msgstr "Viola"
 
 msgid "Voice Mode Active"
-msgstr "Modalità voce attiva"
+msgstr "Modalitàà voce attiva"
 
 msgid "WAN Available"
 msgstr "WAN disponibile"
@@ -2553,7 +2553,7 @@ msgid "WPS AP PIN code"
 msgstr "PIN WPS AP"
 
 msgid "WPS Buttom Mode"
-msgstr "Modalità pulsante WPS"
+msgstr "Modalitàà pulsante WPS"
 
 msgid "WPS Device PIN code"
 msgstr "PIN dispositivo WPS"
@@ -2948,7 +2948,7 @@ msgid "Prefer IPv6"
 msgstr "Preferibilmente iPv6"
 
 msgid "Add new DNS server"
-msgstr "Aggiungi nuovo server DNS"
+msgstr "Aggiungià nuovo server DNS"
 
 msgid "Invalid Password"
 msgstr "Password non valida"
@@ -3773,7 +3773,7 @@ msgid "Updated"
 msgstr "Aggiornato"
 
 msgid "Add new DDNS Rule"
-msgstr "Aggiungi nuova regola DDNS"
+msgstr "Aggiungià nuova regola DDNS"
 
 msgid "Update Info"
 msgstr "Info aggiornamento"
@@ -3802,7 +3802,7 @@ msgid "You must select at leat one ap"
 msgstr "Devi scegliere almeno un punto di accesso"
 
 msgid "Speed Test"
-msgstr "Test velocità"
+msgstr "Test velocitàà"
 
 msgid "Downstream"
 msgstr "Downstream"
@@ -3856,7 +3856,7 @@ msgid "Send"
 msgstr "Invia"
 
 msgid "Speed Diagnostics Result History"
-msgstr "Cronologia risultati diagnostica velocità"
+msgstr "Cronologia risultati diagnostica velocitàà"
 
 msgid "Max Steps"
 msgstr "Step max"
@@ -3892,7 +3892,7 @@ msgid "Invalid gateway IP."
 msgstr "IP gateway non valido."
 
 msgid "Initiate A Speed Diagnostic"
-msgstr "Avvia diagnostica velocità"
+msgstr "Avvia diagnostica velocitàà"
 
 msgid "Changes not saved"
 msgstr "Modifiche non salvate"
@@ -3901,7 +3901,7 @@ msgid "Adjusted Received Rate"
 msgstr "Valore ricevuti adattato"
 
 msgid "Speed Service"
-msgstr "Servizio velocità"
+msgstr "Servizio velocitàà"
 
 msgid "Mode:"
 msgstr "Modo:"
@@ -3969,7 +3969,7 @@ msgstr "<strong>Abilitando questo sovrascriverai la selezione ping IPv4 internet
 msgid "<strong>Enabling this will overwrite InternetIPv6 ping selections</strong>,firewall will drop all ICMPv6 services for incoming connections"
 msgstr "<strong>Abilitando questo sovrascriverai la selezione ping IPv6 internet</strong>. Il firewall ignorerà tutti i servizi ICMPv6 per le connessioni in entrata"
 
-msgid "Schedule failed :  please select correct Time and date."
+msgid "Schedule failed : è please select correct Time and date."
 msgstr "Pianificazioni fallita. Seleziona la data e ora corretta."
 
 msgid "Overlapping times are not allowed."
@@ -3982,7 +3982,7 @@ msgid "During this time ringing is"
 msgstr "Durante questo orario la suoneria è"
 
 msgid "Add a New Ringing Schedule"
-msgstr "Aggiungi nuova pianificazione suoneria"
+msgstr "Aggiungià nuova pianificazione suoneria"
 
 msgid "Start time should be less than Stop time."
 msgstr "L'orario inziale deve essere inferiore all'orario finale."
@@ -4085,8 +4085,8 @@ msgstr "Anteprima"
 msgid "Normal"
 msgstr "Normale"
 
-msgid "Priority"
-msgstr "Priorità"
+msgid "Prioritày"
+msgstr "Prioritàà"
 
 msgid "Driver Version"
 msgstr "Versione driver"
@@ -4354,3 +4354,51 @@ msgstr "Rapporto debug e impostazioni avanzate"
 
 msgid "Change the default page in system-extra to set this GUI as default"
 msgstr "Modifica la pagina predefinita in Funzioni extra di sistema per impostare questa GUI come predefinita"
+
+msgid "<strong>%d Enabled Helper</strong>"
+msgstr "<strong>%d</strong> Helper abilitato"
+
+msgid "<strong>%d Enabled Helpers</strong>"
+msgstr "<strong>%d</strong> Helper abilitati"
+
+msgid "<strong>%d Disabled Helper</strong>"
+msgstr "<strong>%d</strong> Helper disabilitato"
+
+msgid "<strong>%d Disabled Helpers</strong>"
+msgstr "<strong>%d</strong> Helper disabilitati"
+
+msgid "<strong>%d Connected user</strong>"
+msgstr "<strong>%d</strong> Utente connesso"
+
+msgid "<strong>%d Connected users</strong>"
+msgstr "<strong>%d</strong> Utenti connessi"
+
+msgid "<strong class="total-users">%d</strong> Connected user"
+msgstr "<strong class="total-users">%d</strong> Utente connesso"
+
+msgid "<strong class="total-users">%d</strong> Connected users"
+msgstr "<strong class="total-users">%d</strong> Utenti connessi"
+
+msgid "Voipblock for asterisk"
+msgstr "Blocco chiamate indesiderate (Asterisk)"
+
+msgid "Voipblock for mmpbx"
+msgstr "Blocco chiamate indesiderate (MMPBX)"
+
+msgid "Debug Report & Advanced settings"
+msgstr "Report di Debug e Impostazioni Avanzate"
+
+msgid "Disable CWMP Update. Any firmware update from CWMP will be rejected and not flashed. "
+msgstr "Disabilita aggiornamenti automatici da remoto (CWMP/TR-069)."
+
+msgid "Periodic Inform is <strong>%s</strong> (every %s s)"
+msgstr "Inform periodico è <strong>%s</strong> (ogni %s s)"
+
+msgid "Datapump version <strong>%s</strong>"
+msgstr "Versione Datapump: <strong>%s</strong>"
+
+msgid "<strong>%d</strong> incoming rules"
+msgstr "<strong>%d</strong> regole in ingresso"
+
+msgid "<strong>%d</strong> Active rules"
+msgstr "<strong>%d</strong> regole attive"

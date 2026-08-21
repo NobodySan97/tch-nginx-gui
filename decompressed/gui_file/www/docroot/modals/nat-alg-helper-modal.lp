@@ -80,7 +80,8 @@ end
 
   ngx.print('\
 \
-');  ngx.print(ui_helper.createHeader(T"NAT Helpers (ALG's)", false, false))   ngx.print('\
+');  ngx.print(ui_helper.createHeader(T"NAT Helpers (ALG's)", false, true))
+  ngx.print('\n'); lp.include("tabs-wanservices.lp")   ngx.print('\
 <div class="modal-body update">\
   <form class="form-horizontal" method="post" action="modals/nat-alg-helper-modal.lp">\
     ');  
