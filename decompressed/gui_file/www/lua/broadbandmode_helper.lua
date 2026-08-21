@@ -244,7 +244,7 @@ if sfp == 1 then
 			local interface = findwan(ethname) or "@waneth4"
             local difname = proxy.get("uci.network.device." .. interface .. ".ifname")
             if difname then
-                local dname = proxy.get("uci.network.device." .. interface .. ".name")[1].value
+                local _dn = proxy.get("uci.network.device." .. interface .. ".name"); local dname = (_dn and _dn[1] and _dn[1].value) or interface
                 difname = proxy.get("uci.network.device." .. interface .. ".ifname")[1].value
                 if difname ~= "" and difname ~= nil then
                     proxy.set("uci.network.interface.@wan.ifname", dname)
