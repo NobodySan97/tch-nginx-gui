@@ -161,6 +161,12 @@ update_dhcp_config() {
     uci set dhcp.lan.ignore='0'
   fi
   uci commit dhcp
+
+  # Ensure lan_alias is in the firewall zone for LAN
+  if [ "$(uci get -q network.lan_alias)" ] && ! uci get firewall.lan.network | grep -q "lan_alias"; then
+    uci add_list firewall.lan.network='lan_alias'
+    uci commit firewall
+  fi
 }
 
 wan_sensing_clean() {
