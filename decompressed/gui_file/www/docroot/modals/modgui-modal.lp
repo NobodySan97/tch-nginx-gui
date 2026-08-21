@@ -126,9 +126,9 @@ end
 
 local function getSupportedModel()
 
-        local friendly_name = proxy.get("uci.env.var.prod_friendly_name")[1].value
+        local _fn = proxy.get("uci.env.var.prod_friendly_name"); local friendly_name = (_fn and _fn[1] and _fn[1].value) or ""
         local marketing_version = proxy.get("uci.version.version.@version[0].marketing_version")
-        local cputype = proxy.get("rpc.system.modgui.CPUtype")[1].value
+        local _ct = proxy.get("rpc.system.modgui.CPUtype"); local cputype = (_ct and _ct[1] and _ct[1].value) or ""
         if marketing_version then
                 marketing_version = tonumber(marketing_version[1].value:sub(1,4))
         end
@@ -397,7 +397,7 @@ local function validateVersionSpoofMode(value, object, key)
 
         if valid then
                 local version_path="uci.versioncusto.override.fwversion_override"
-                local version_real=proxy.get(version_path.."_real")[1].value
+                local _vr = proxy.get(version_path.."_real"); local version_real = (_vr and _vr[1] and _vr[1].value) or ""
                 if value == "disabled" then
                         proxy.set(version_path, version_real)
                 end

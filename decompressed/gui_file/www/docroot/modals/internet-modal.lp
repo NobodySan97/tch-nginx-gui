@@ -30,7 +30,7 @@ else
 	wan_ppp_ll_intf = ""
 end
 
-local wan_mode = proxy.get("uci.network.config.wan_mode")[1].value
+local _wm = proxy.get("uci.network.config.wan_mode"); local wan_mode = (_wm and _wm[1] and _wm[1].value) or "routed"
 
 local isp_cwmp_known = {
 	{"TIM", T"TIM (Italy)"},

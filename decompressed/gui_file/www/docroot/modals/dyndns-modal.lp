@@ -136,11 +136,11 @@ local function onUpdateDDns(index, content)
 	local interface = untaint(content.Domain)
 
 	if not domain then
-		domain = proxy.get(ddns_path..".domain")[1].value
+		local _dom = proxy.get(ddns_path..".domain"); domain = (_dom and _dom[1] and _dom[1].value) or ""
 	end
 	
 	if not interface then
-		interface = proxy.get(ddns_path..".interface")[1].value
+		local _intf = proxy.get(ddns_path..".interface"); interface = (_intf and _intf[1] and _intf[1].value) or ""
 	end
 	
 	local ddns_lookup_host_path = ddns_path..".lookup_host"

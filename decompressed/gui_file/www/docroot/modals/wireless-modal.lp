@@ -157,7 +157,7 @@ for i,v in ipairs(wl_list) do
     if (v.value == getiface) or (not getiface and v.value == curiface) then
         curiface = v.value
         curap = match(v.path, "rpc%.wireless%.ap%.@([^%.]+)%.")
-        isguest = proxy.get(v.path .. "ap_isolation")[1].value
+        local _ig = proxy.get(v.path .. "ap_isolation"); isguest = (_ig and _ig[1] and _ig[1].value) or "0"
         cur_ssid = values[2].value
     end
  end
@@ -192,7 +192,7 @@ end
 
 if ngx.req.get_method() == "GET" and ngx.req.get_uri_args().action == "get_reg_status"  then
     local acl_ap = ngx.req.get_uri_args().curap
-    local reg_status = proxy.get("rpc.wireless.ap.@"..acl_ap..".acl.state")[1].value
+    local _rst = proxy.get("rpc.wireless.ap.@"..acl_ap..".acl.state"); local reg_status = (_rst and _rst[1] and _rst[1].value) or "0"
     ngx.print(reg_status)
     ngx.exit(ngx.HTTP_OK)
 end

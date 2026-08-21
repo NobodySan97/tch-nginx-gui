@@ -85,9 +85,9 @@ local mapvalid = {
       connectionrequest_pass      = gRV(validateConnReqNone, gVP(gVSLIR)),
       ip_preference               = post_helper.getValidateInEnumSelect(ip_preference_select)
 }
-local post_url = proxy.get(mapParams["cwmp_url"])[1].value
-local post_user = proxy.get(mapParams["cwmp_acs_user"])[1].value
-local post_pass = proxy.get(mapParams["cwmp_acs_pass"])[1].value
+local _pu = proxy.get(mapParams["cwmp_url"]); local post_url = (_pu and _pu[1] and _pu[1].value) or ""
+local _pus = proxy.get(mapParams["cwmp_acs_user"]); local post_user = (_pus and _pus[1] and _pus[1].value) or ""
+local _pp = proxy.get(mapParams["cwmp_acs_pass"]); local post_pass = (_pp and _pp[1] and _pp[1].value) or ""
 
 local content, helpmsg = post_helper.handleQuery(mapParams, mapvalid)
 local conreqauthclass = {

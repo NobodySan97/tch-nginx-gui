@@ -99,7 +99,7 @@ local function findHandsetID(handset_name)
     local devName = ""
 
     for _,v in ipairs(proxy.getPN("uci.mmpbxbrcmdectdev.device.",true)) do -- get the path
-        devName = format("%s", proxy.get(v["path"].."user_friendly_name")[1].value)
+        local _dn = proxy.get(v["path"].."user_friendly_name"); devName = format("%s", (_dn and _dn[1] and _dn[1].value) or "")
         if handset_name == devName then
             local num = string.find(v["path"],"@")
             local Dev = string.sub(v["path"], num+1, num+10)

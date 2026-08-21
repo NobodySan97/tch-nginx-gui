@@ -385,7 +385,7 @@ session:store(tablesessionindexes, tod_index)
 local action_list = content_helper.convertResultToObject(tod_action_path, proxy.get(tod_action_path))
 local timer_list = content_helper.convertResultToObject(tod_timer_path, proxy.get(tod_timer_path))
 local voicednd_list = content_helper.convertResultToObject(tod_voicednd_path, proxy.get(tod_voicednd_path))
-local ringingStatus = proxy.get("uci.tod.todvoicednd.ringing")[1].value
+local _rs = proxy.get("uci.tod.todvoicednd.ringing"); local ringingStatus = (_rs and _rs[1] and _rs[1].value) or "off"
 local timer_data = {}
 
 --To filter out timer section created by ringing schedule rule

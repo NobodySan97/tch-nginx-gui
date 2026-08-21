@@ -277,7 +277,7 @@ local function onDelete(success)
   
   if wifiTodList then
 	for i,v in ipairs(wifiTodList) do
-		delObject[#delObject+1] = format("uci.tod.ap.@%s.",proxy.get(v.path.."value")[1].value)
+		local _val = proxy.get(v.path.."value"); if _val and _val[1] then delObject[#delObject+1] = format("uci.tod.ap.@%s.", _val[1].value) end
 	end
   end
 
@@ -336,13 +336,13 @@ local function getApSelected(index)
 	end
 	
 	for _,v in ipairs(wifiTodList) do
-		local ap_index = proxy.get(v.path.."value")[1].value
+		local _api = proxy.get(v.path.."value"); local ap_index = (_api and _api[1] and _api[1].value) or ""
 		local ap = ap_index:match("(.*)_")
 		local ssid_get = proxy.get("rpc.wireless.ap.@"..ap..".ssid")
 		wifi_selected[#wifi_selected+1] = ap
 		if ssid_get then
 			local ssid = ssid_get[1].value
-			local name = proxy.get("rpc.wireless.ssid.@"..ssid..".ssid")[1].value
+			local _nm = proxy.get("rpc.wireless.ssid.@"..ssid..".ssid"); local name = (_nm and _nm[1] and _nm[1].value) or ssid
 			
 			local freq = proxy.get("rpc.wireless.ssid.@"..ssid..".radio")
 			freq = freq and freq[1].value

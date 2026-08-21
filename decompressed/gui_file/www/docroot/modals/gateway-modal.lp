@@ -250,7 +250,7 @@ end
 local function upgradefwstatus()
   local fwupgrade_rpc_path = "rpc.system.fwupgrade."
 
-  local state = proxy.get(fwupgrade_rpc_path .. "state")[1].value
+  local _st = proxy.get(fwupgrade_rpc_path .. "state"); local state = (_st and _st[1] and _st[1].value) or ""
 
   ngx.header.content_type = "application/json"
   if state == "Requested" then

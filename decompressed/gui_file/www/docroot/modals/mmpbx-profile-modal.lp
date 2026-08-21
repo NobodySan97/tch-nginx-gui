@@ -20,7 +20,7 @@ local sipnet_options={}
 for i,v in ipairs(proxy.getPN("uci.mmpbxrvsipnet.network.", true)) do
     local sipnet = string.match(v.path, "uci%.mmpbxrvsipnet%.network%.@([^%.]+)%.")
     if sipnet then
-        local sipnet_name = proxy.get(v.path .. "user_friendly_name")[1].value
+        local _sn = proxy.get(v.path .. "user_friendly_name"); local sipnet_name = (_sn and _sn[1] and _sn[1].value) or ""
         sipnet_options[#sipnet_options+1]={sipnet, sipnet_name}
     end
 end

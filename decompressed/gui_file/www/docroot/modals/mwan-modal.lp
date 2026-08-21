@@ -192,7 +192,7 @@ local policy_data, policy_helpmsg = post_helper.handleTableQuery(policy_columns,
 -----------------------------------------------------------
 for k, v in pairs (policy_data) do
   if v[2] ~= "" then
-  local result = proxy.get("uci.network.interface.@" .. v[2] .. ".ip4table")[1].value
+  local _res = proxy.get("uci.network.interface.@" .. v[2] .. ".ip4table"); local result = (_res and _res[1] and _res[1].value) or ""
   v[3] = result
   end
 end
