@@ -63,12 +63,15 @@ restoreOriginalGui() {
 	rm -rf /overlay/$running_bank
 	mkdir -p /overlay/$running_bank
 	
-	#Restore config to be converted
+	#Restore config to be converted and preserve in running bank
 	if [ -d "$config_tmp" ]; then
 		mkdir -p /overlay/homeware_conversion/etc/config
+		mkdir -p /overlay/$running_bank/etc/config
 		cp -r $config_tmp/* /overlay/homeware_conversion/etc/config/ 2>/dev/null
+		cp -r $config_tmp/* /overlay/$running_bank/etc/config/ 2>/dev/null
 		[ -f "$config_tmp/modgui" ] && cp $config_tmp/modgui /overlay/homeware_conversion/etc/modgui_old 2>/dev/null
 		[ -f "/tmp/shadow_file/shadow" ] && cp /tmp/shadow_file/shadow /overlay/homeware_conversion/etc/ 2>/dev/null
+		[ -f "/tmp/shadow_file/shadow" ] && cp /tmp/shadow_file/shadow /overlay/$running_bank/etc/shadow 2>/dev/null
 		[ -f "/tmp/shadow_file/shadow" ] && cp /tmp/shadow_file/shadow /overlay/$running_bank/shadow_old 2>/dev/null
 	fi
 	
