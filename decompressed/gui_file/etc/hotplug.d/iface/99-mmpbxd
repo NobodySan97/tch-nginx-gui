@@ -10,8 +10,8 @@ iface1="$(uci -q get mmpbxrvsipnet.@network[1].interface)"
 
 if [ "$ACTION" = "ifup" ]; then
 	if [ -n "$iface0" ] && [ "$INTERFACE" = "$iface0" ]; then
-		/etc/init.d/mmpbxd reload
+		/etc/init.d/mmpbxd reload &
 	elif [ -n "$iface1" ] && [ "$INTERFACE" = "$iface1" ]; then
-		/etc/init.d/mmpbxd reload
+		/etc/init.d/mmpbxd reload &
 	fi
 fi

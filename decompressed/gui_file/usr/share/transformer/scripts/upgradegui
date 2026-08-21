@@ -41,7 +41,7 @@ ${NC}
 "
 }
 
-curl="/usr/bin/curl -k -s"
+curl="/usr/bin/curl -m 30 -k -s"
 bzcat=/usr/bin/bzcat
 tar=/bin/tar
 rootdevice_call="debug"

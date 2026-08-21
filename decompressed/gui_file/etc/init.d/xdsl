@@ -224,10 +224,12 @@ start() {
 			fi
 		fi
 	
-		# Increase priority of kthread dsl0
-		while [ -z `pidof dsl0` ]; do
+		# Increase priority of kthread dsl0 (with bounded timeout)
+		local retries=0
+		while [ -z "$(pidof dsl0)" ] && [ $retries -lt 30 ]; do
 			echo "Waiting for dsl0 thread"
 			sleep 1
+			retries=$((retries + 1))
 		done
 		setrtprio dsl0 5
 		rm /etc/adsl/.restore_on_next_boot

@@ -139,6 +139,9 @@ boot() {
 
       sync
 
+      # Cleanup ram_dir and upperdir_backup to avoid RAM leak in tmpfs
+      rm -rf "$ram_dir" "$upperdir_backup"
+
       kecho "migration done!"
 
       need_reboot="1"
