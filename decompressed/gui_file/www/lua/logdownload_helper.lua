@@ -61,7 +61,14 @@ function M.export_log(export_way_assign)
     local export_path = ("/tmp/log.msg")
     local f = io.open(export_path, "r")
     if f then
-        ngx.print(f:read("*all"))
+        local chunk
+        repeat
+            chunk = f:read(8192)
+            if chunk then
+                ngx.print(chunk)
+                ngx.flush(true)
+            end
+        until not chunk
         f:close()
         -- cleanup (reset state and remove export file)
         proxy.set(export_state, "None")

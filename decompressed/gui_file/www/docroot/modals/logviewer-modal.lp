@@ -64,17 +64,20 @@ end
 
 local log_array = {}
 local processes_list = {}
-local pattern = "([^%s]+%s+%d+ %d+:%d+:%d+) [^%s]+ ([^%s]+) ([^%s]+): ([^\n]+)"
+local line_pattern = "^([^%s]+%s+%d+ %d+:%d+:%d+) [^%s]+ ([^%s]+) ([^%s:]+):%s*(.*)$"
 
-logdata:gsub(pattern, function(date, facility, process, message)
-    local p = string.match(process, "[^%[]+")
-    if not current_process or p == current_process then
-        log_array[#log_array+1] = { date, facility, process, message }
+for line in string.gmatch(logdata or "", "([^\r\n]+)") do
+    local date, facility, process, message = string.match(line, line_pattern)
+    if date and process then
+        local p = string.match(process, "[^%[]+") or process
+        if not current_process or p == current_process then
+            log_array[#log_array+1] = { date, facility, process, message or "" }
+        end
+        if p then
+            processes_list[p] = true
+        end
     end
-    if p then
-        processes_list[p] = true
-    end
-end)
+end
 
 -- Reverse table to show most recent first
 local size = #log_array

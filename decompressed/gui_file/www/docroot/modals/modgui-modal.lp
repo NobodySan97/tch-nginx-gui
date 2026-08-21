@@ -285,7 +285,22 @@ if ngx.req.get_method() == "POST" then
                 local raw_mac = post_args.mac and tostring(post_args.mac):gsub('_.*', '') or ""
                 local safe_mac = raw_mac:match("^([%x:]+)$")
                 if safe_mac and #safe_mac >= 6 then
-                    ngx.print(call_popen(untaint("! grep -q '" .. safe_mac .. "' /tmp/mac_cache 2>/dev/null && (curl -fksm 2 'https://api.maclookup.app/v2/macs/" .. safe_mac .. "/company/name' >> /tmp/mac_cache && echo '|" .. safe_mac .. "' >> /tmp/mac_cache); grep '" .. safe_mac .. "' /tmp/mac_cache 2>/dev/null | cut -d'|' -f1"), "r"))
+                    local f = io.open("/tmp/mac_cache", "r")
+                    local found = false
+                    if f then
+                        for l in f:lines() do
+                            if l:find(safe_mac, 1, true) then
+                                local vendor = l:match("^(.-)|") or l
+                                ngx.print(vendor)
+                                found = true
+                                break
+                            end
+                        end
+                        f:close()
+                    end
+                    if not found then
+                        ngx.print("Unknown")
+                    end
                 end
                 ngx.exit(ngx.HTTP_OK)
                 return

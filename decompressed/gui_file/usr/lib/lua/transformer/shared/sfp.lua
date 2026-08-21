@@ -39,9 +39,9 @@ function M.getSfpctlFormat(option)
   if not ctl then
     return ""
   end
-  local output = ctl:read("*a")
+  local status, output = pcall(ctl.read, ctl, "*a")
   ctl:close()
-  return output or ""
+  return (status and output) or ""
 end
 
 function M.getSfpStatus()

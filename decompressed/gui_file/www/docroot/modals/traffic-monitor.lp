@@ -137,17 +137,18 @@ local lanrx = s2n(content_lan.rx_bytes)
 
 local wifitx, wifirx = 0, 0
 local content_wifi = {}
+local batch_wifi = {}
 for i,v in ipairs(wls) do
-	if proxy.get("sys.class.net.@" .. v.iface .. ".") then
-		if quantenna_wifi and v.iface == "wl1" then
-			v.iface = "eth5"
-		end
-		content_wifi["tx_bytes"] = "sys.class.net.@" .. v.iface .. ".statistics.tx_bytes"
-		content_wifi["rx_bytes"] = "sys.class.net.@" .. v.iface .. ".statistics.rx_bytes"
-		content_helper.getExactContent(content_wifi)
-		wifitx = wifitx + s2n(content_wifi.tx_bytes)
-		wifirx = wifirx + s2n(content_wifi.rx_bytes)
-	end 
+	if quantenna_wifi and v.iface == "wl1" then
+		v.iface = "eth5"
+	end
+	batch_wifi["tx_" .. i] = "sys.class.net.@" .. v.iface .. ".statistics.tx_bytes"
+	batch_wifi["rx_" .. i] = "sys.class.net.@" .. v.iface .. ".statistics.rx_bytes"
+end
+content_helper.getExactContent(batch_wifi)
+for i,v in ipairs(wls) do
+	wifitx = wifitx + s2n(batch_wifi["tx_" .. i])
+	wifirx = wifirx + s2n(batch_wifi["rx_" .. i])
 end
 
 local content_result = getFile(traffic_data_file)
