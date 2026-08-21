@@ -142,6 +142,17 @@ check_dnsmasq_name() {
 
 update_dhcp_config() {
   logecho "Sync DHCP configuration for new GUI"
+  if [ ! "$(uci get -q dhcp.lan)" ]; then
+    uci set dhcp.lan=dhcp
+    uci set dhcp.lan.interface='lan'
+    uci set dhcp.lan.start='1'
+    uci set dhcp.lan.limit='250'
+    uci set dhcp.lan.leasetime='24h'
+    uci set dhcp.lan.instance='dnsmasq_lan'
+    uci set dhcp.lan.dhcpv6='server'
+    uci set dhcp.lan.ra='server'
+    uci set dhcp.lan.force='1'
+  fi
   if [ "$(uci get -q dhcp.lan.dhcpv4)" ]; then
     #REMOVE DHCPV4 this is for odhcpd daemon to tell him to run also for ipv4 dhcp...
     #by removing the entities we solve the problem
