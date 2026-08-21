@@ -76,11 +76,14 @@ check_free_RAM() {
 protect_system_libraries() {
   # Ensure native system libraries from ROM are always healthy
   for lib in libcrypto.so.1.0.0 libssl.so.1.0.0 liblua.so.5.1.5; do
-    if [ -f "/rom/usr/lib/$lib" ] && [ ! -f "/usr/lib/$lib" ]; then
-      cp -f "/rom/usr/lib/$lib" "/usr/lib/$lib" 2>/dev/null || true
+    if [ -f "/rom/usr/lib/$lib" ]; then
+      # If missing or size mismatch with ROM, restore from ROM
+      if [ ! -f "/usr/lib/$lib" ] || [ "$(ls -l /usr/lib/$lib | awk '{print $5}')" != "$(ls -l /rom/usr/lib/$lib | awk '{print $5}')" ]; then
+        cp -f "/rom/usr/lib/$lib" "/usr/lib/$lib" 2>/dev/null || true
+      fi
     fi
   done
-  for lib in libubox.so libubus.so libuci.so libblobmsg_json.so; do
+  for lib in libubox.so libubus.so libuci.so libblobmsg_json.so libpcre.so.1; do
     if [ -f "/rom/lib/$lib" ] && [ ! -f "/lib/$lib" ]; then
       cp -f "/rom/lib/$lib" "/lib/$lib" 2>/dev/null || true
     fi
@@ -88,6 +91,10 @@ protect_system_libraries() {
       cp -f "/rom/usr/lib/$lib" "/usr/lib/$lib" 2>/dev/null || true
     fi
   done
+  # Restore native ROM www/lua modules if missing (e.g. generic/app.lua)
+  if [ -d /rom/www/lua ]; then
+    cp -r -n /rom/www/lua/* /www/lua/ 2>/dev/null || true
+  fi
 }
 
 protect_system_libraries

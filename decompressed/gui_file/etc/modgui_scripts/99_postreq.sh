@@ -17,33 +17,14 @@ check_gui_tmp() {
 }
 
 start_stop_nginx() {
-	while [ "$(pgrep "nginx")" ]; do
-		if [ -f /var/run/nginx.pid ]; then
-			kill -KILL "$(cat /var/run/nginx.pid)"
-			rm /var/run/nginx.pid
-		fi
-		for pid in $(pgrep nginx); do
-			kill -KILL "$pid"
-		done
-		/etc/init.d/nginx stop 2>/dev/null
-	done
-
-	nginx_count=0
-	while [ "$(curl 127.0.0.1 --max-time 20 -I -s | head -n 1 | cut -d' ' -f2)" != "200" ] && [ $nginx_count -lt 5 ]; do
-		if [ $nginx_count -gt 3 ]; then
-			if [ -f /var/run/nginx.pid ]; then
-				kill -KILL "$(cat /var/run/nginx.pid)"
-				rm /var/run/nginx.pid
-			fi
-			for pid in $(pgrep nginx); do
-				kill -KILL "$pid"
-			done
-		fi
-		logecho "Restarting nginx..."
-		/etc/init.d/nginx restart 2>/dev/null
-		sleep 5
-		nginx_count=$((nginx_count+1))
-	done
+	logecho "Ensuring nginx is running properly..."
+	/etc/init.d/nginx restart 2>/dev/null
+	sleep 2
+	if ! pgrep -f "/usr/sbin/nginx" >/dev/null 2>&1; then
+		logecho "Nginx not running, forcing start..."
+		/etc/init.d/nginx start 2>/dev/null
+		sleep 1
+	fi
 }
 
 if [ "$(cat /proc/banktable/booted)" = "bank_1" ] && [ ! "$(uci get -q modgui.var.check_obp)" ]; then
