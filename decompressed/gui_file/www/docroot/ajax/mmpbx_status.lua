@@ -81,6 +81,7 @@ local function convert2Sec(value)
     return 0
 end
 
+local cached_calllog_data
 local mmpbxd_filter = function(data)
     if ( data.enable == "false" ) or ( data.sipRegisterState == "" ) then
         return false
@@ -108,8 +109,11 @@ local mmpbxd_filter = function(data)
         local statestr = callStateMap[data.callState] or data.callState
 		
         if ( data.callState ~= "MMPBX_CALLSTATE_IDLE" ) then
-            local pf_path = proxy.get("rpc.mmpbx.calllog.info.")
-            local pf_data = content_helper.convertResultToObject("rpc.mmpbx.calllog.info.",pf_path)
+            if not cached_calllog_data then
+                local pf_path = proxy.get("rpc.mmpbx.calllog.info.")
+                cached_calllog_data = content_helper.convertResultToObject("rpc.mmpbx.calllog.info.",pf_path)
+            end
+            local pf_data = cached_calllog_data or {}
             for i = #pf_data, 1, -1 do
                 local v = pf_data[i]
                 if v and v.Localparty == originuri then

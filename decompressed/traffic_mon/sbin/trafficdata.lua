@@ -158,15 +158,15 @@ local function reCalculateContent()
 		end
 	end)
 	local wifitx, wifirx = 0, 0
-	local content_wifi = {}
+	local batch_wifi = {}
 	for i,v in ipairs(wls) do
-		if proxy.get("sys.class.net.@" .. v.iface .. ".") then
-			content_wifi["tx_bytes"] = "sys.class.net.@" .. v.iface .. ".statistics.tx_bytes"
-			content_wifi["rx_bytes"] = "sys.class.net.@" .. v.iface .. ".statistics.rx_bytes"
-			content_helper.getExactContent(content_wifi)
-			wifitx = wifitx + s2n(content_wifi.tx_bytes)
-			wifirx = wifirx + s2n(content_wifi.rx_bytes)
-		end 
+		batch_wifi["tx_" .. i] = "sys.class.net.@" .. v.iface .. ".statistics.tx_bytes"
+		batch_wifi["rx_" .. i] = "sys.class.net.@" .. v.iface .. ".statistics.rx_bytes"
+	end
+	content_helper.getExactContent(batch_wifi)
+	for i,v in ipairs(wls) do
+		wifitx = wifitx + s2n(batch_wifi["tx_" .. i])
+		wifirx = wifirx + s2n(batch_wifi["rx_" .. i])
 	end
 	
 	local content_common = {
