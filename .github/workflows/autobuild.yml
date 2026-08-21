@@ -53,6 +53,7 @@ jobs:
           else
             NEW_VER=$(cat latest.version)
             git commit -m "Autobuild release v${NEW_VER} from commit ${{ github.sha }}"
+            git pull --rebase origin master || true
             git push origin master
           fi
 

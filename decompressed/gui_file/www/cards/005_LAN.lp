@@ -74,7 +74,7 @@ end
         ngx.print(
             ui_helper.createSimpleLight(dhcpState, dhcpState_text, nil,"fa fa-home" ),
             '<p class="subinfos">',
-            format(T'Gateway IP is <strong id="Gateway_Ip">%s</strong> and Mask is <strong id="Netmask_Ip">%s</strong>', mapParams["localdevIP"], mapParams["localdevmask"]),
+            format(T'Gateway IP is <strong id="Gateway_Ip">%s</strong> and Mask is <strong id="Netmask_Ip">%s</strong>', mapParams["localdevIP"] or "", mapParams["localdevmask"] or ""),
             '</p>',
 			ui_helper.createSimpleLight(ipv6_light_map[LANv6] or "4" --[[ red ]], ipv6_state_map[LANv6] or T "Unknown", nil, "fa fa-home")
         )

@@ -116,9 +116,11 @@ for k,v in ipairs(all_intfs) do
         local name = ""
         local w1_exist = proxy.get("rpc.wireless.ssid.@"..v["ppp.ll_dev"]..".ssid")
         if match(v["ppp.ll_dev"], "wl") then
-            if w1_exist and proxy.get("rpc.wireless.ssid.@"..v["ppp.ll_dev"]..".ssid")[1].value then
-                name = proxy.get("rpc.wireless.ssid.@"..v["ppp.ll_dev"]..".ssid")[1].value
-                if match(proxy.get("rpc.wireless.ssid.@"..v["ppp.ll_dev"]..".radio")[1].value, "radio_5G") then
+            local ssid_res = proxy.get("rpc.wireless.ssid.@"..v["ppp.ll_dev"]..".ssid")
+            if ssid_res and ssid_res[1] and ssid_res[1].value then
+                name = ssid_res[1].value
+                local radio_res = proxy.get("rpc.wireless.ssid.@"..v["ppp.ll_dev"]..".radio")
+                if radio_res and radio_res[1] and radio_res[1].value and match(radio_res[1].value, "radio_5G") then
                     radio = "5GHz"
                 else
                     radio = "2,4GHz"
@@ -228,8 +230,10 @@ end
 local IP6assign = "uci.network.interface.@" .. curintf .. ".ip6assign"
 
 local function setupIpv6TIM(active)
-	local envIPv6 = proxy.get("uci.modgui.var.ppp_realm_ipv6")[1].value or nil
-    local envIPv4 = proxy.get("uci.modgui.var.ppp_realm_ipv4")[1].value or nil
+	local envIPv6_res = proxy.get("uci.modgui.var.ppp_realm_ipv6")
+	local envIPv4_res = proxy.get("uci.modgui.var.ppp_realm_ipv4")
+	local envIPv6 = (envIPv6_res and envIPv6_res[1] and envIPv6_res[1].value) or ""
+	local envIPv4 = (envIPv4_res and envIPv4_res[1] and envIPv4_res[1].value) or ""
 	local pppuser = "uci.network.interface.@wan.username"
 	local wan_voip_path = "uci.network.interface.@wan_voip."
 	local wan_path = "uci.network.interface.@wan."
@@ -269,7 +273,9 @@ local mapParam = {
 }
 local function validateIPv6(value, object, key)
     local valid, msg = post_helper.validateBoolean(value, object, key)
-    if valid and value ~= proxy.get("uci.network.interface.@" .. curintf .. ".ipv6")[1].value then
+    local cur_v6_res = proxy.get("uci.network.interface.@" .. curintf .. ".ipv6")
+    local cur_v6 = (cur_v6_res and cur_v6_res[1] and cur_v6_res[1].value) or ""
+    if valid and value ~= cur_v6 then
         local isp = proxy.get("uci.modgui.var.isp")
         local device = proxy.get("uci.network.device.")
         local devifn = content_helper.convertResultToObject("uci.network.device.",device)
@@ -652,8 +658,9 @@ end
 function isQtnGuestWiFi(intf)
     if wireless_radio[untaint(intf)] then
         local radio = proxy.get(format("rpc.wireless.ssid.@%s.radio", intf))
-        local isRemote = proxy.get(format("rpc.wireless.radio.@%s.remotely_managed", radio[1].value))
-        if isRemote and isRemote[1].value == "1" then
+        local radio_val = (radio and radio[1] and radio[1].value) or ""
+        local isRemote = radio_val ~= "" and proxy.get(format("rpc.wireless.radio.@%s.remotely_managed", radio_val))
+        if isRemote and isRemote[1] and isRemote[1].value == "1" then
             for _, v in ipairs(proxy.getPN("rpc.wireless.ap.", true)) do
                 local isGuest = proxy.get(v.path.."ap_isolation")
                 if isGuest and isGuest[1].value == "1" then
@@ -867,8 +874,10 @@ local function validateGWIP(value, object, key)
         --NG-100782>
         for _,intf in pairs(all_intfs) do
             if intf.paramindex ~= curintf then
-                local ipaddr = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".ipaddr")[1].value
-                local mask = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".netmask")[1].value
+                local ip_res = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".ipaddr")
+                local mask_res = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".netmask")
+                local ipaddr = (ip_res and ip_res[1] and ip_res[1].value) or ""
+                local mask = (mask_res and mask_res[1] and mask_res[1].value) or ""
                 local baseip = post_helper.validateStringIsIP(ipaddr) and ipv42num(ipaddr)
                 local netmask = post_helper.validateStringIsIP(mask) and ipv42num(mask)
                 local sfplocalip = proxy.get("uci.network.interface.@"..sfpintf..".ipaddr")
@@ -934,8 +943,10 @@ local function validateSFPIP(value, object, key)
         --NG-100782>
         for _,intf in pairs(all_intfs) do
             if intf.paramindex ~= sfpintf then
-                local ipaddr = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".ipaddr")[1].value
-                local mask = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".netmask")[1].value
+                local ip_res = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".ipaddr")
+                local mask_res = proxy.get("uci.network.interface.@" .. intf.paramindex .. ".netmask")
+                local ipaddr = (ip_res and ip_res[1] and ip_res[1].value) or ""
+                local mask = (mask_res and mask_res[1] and mask_res[1].value) or ""
                 local baseip = post_helper.validateStringIsIP(ipaddr) and ipv42num(ipaddr)
                 local netmask = post_helper.validateStringIsIP(mask) and ipv42num(mask)
                 local lanip = proxy.get("uci.network.interface.@lan.ipaddr")
@@ -1116,7 +1127,8 @@ if dnsRemoved then
     content["dnsServer"] = ""
 end
 if content["dnsServer"] == nil then
-    local localIP = proxy.get("uci.network.interface.@" .. curintf .. ".ipaddr")[1].value
+    local localIP_res = proxy.get("uci.network.interface.@" .. curintf .. ".ipaddr")
+    local localIP = (localIP_res and localIP_res[1] and localIP_res[1].value) or ""
     content["dnsServer"] = localIP
 else
     if content["dnsServer"]:find("^6,") == 1 then
@@ -1260,7 +1272,8 @@ if curintf == "lan" then
         html[#html + 1] = ui_helper.createAlertBlock(T"Switch the WAN port to a normal LAN port", info_box)
         html[#html + 1] = ui_helper.createSwitch(T"WAN-Port LAN Mode", "ethsfp", content_sfp["ethsfp"])
     end
-    local IPv6addr = proxy.get("rpc.network.interface.@"..curintf..".ip6prefix_assignment")[1].value
+    local v6_res = proxy.get("rpc.network.interface.@"..curintf..".ip6prefix_assignment")
+    local IPv6addr = (v6_res and v6_res[1] and v6_res[1].value) or ""
     if IPv6addr == "" then
         html[#html + 1] = ui_helper.createLabel(T"LAN IPv6", T"IPv6 not assigned", advanced)
     else
