@@ -242,8 +242,10 @@ local function IPv6andUsername(value, object, key)
 
   local ipv6_state = proxy.get("uci.network.interface.@wan.ipv6")[1].value
   if valid and ipv6_state ~= value then
-    local ipv6_realm = proxy.get("uci.env.var.ppp_realm_ipv6")[1].value
-    local ipv4_realm = proxy.get("uci.env.var.ppp_realm_ipv4")[1].value
+    local r6 = proxy.get("uci.env.var.ppp_realm_ipv6")
+local ipv6_realm = (r6 and r6[1] and r6[1].value) or ""
+    local r4 = proxy.get("uci.env.var.ppp_realm_ipv4")
+local ipv4_realm = (r4 and r4[1] and r4[1].value) or ""
     if value == "1" then
       proxy.set("uci.network.interface.@wan6.auto", "1")
       proxy.set("uci.network.interface.@wan.username", ipv6_realm)

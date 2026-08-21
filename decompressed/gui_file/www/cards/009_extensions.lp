@@ -9,7 +9,8 @@ local content_helper = require("web.content_helper")
 local insert, format = table.insert, string.format
 
 local marketing_version = proxy.get("uci.version.version.@version[0].marketing_version")
-local cputype = proxy.get("rpc.system.modgui.CPUtype")[1].value
+local cputype_res = proxy.get("rpc.system.modgui.CPUtype")
+local cputype = (cputype_res and cputype_res[1] and cputype_res[1].value) or ""
 
 local extension_supported = 0
 

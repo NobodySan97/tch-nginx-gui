@@ -26,13 +26,15 @@ gettext.textdomain('web-framework-tch')
 
 local includepath
 
-module ("wizard")
+local M = {}
+local includepath
+local wizard_cards = {}
 
-function setpath(path)
+function M.setpath(path)
   includepath = path
 end
 
-function cards()
+function M.cards()
   local result = {}
   if includepath and lfs.attributes(includepath, 'mode') == 'directory' then
     for file in lfs.dir(includepath) do
@@ -151,3 +153,5 @@ function handleQuery(mapParams, mapValidation)
 
     return content, helpmsg
 end
+
+return M

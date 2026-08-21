@@ -76,8 +76,8 @@ if string.match(iface, "eth") then
 		vid = string.match(difname, "[^"..ethname.."%.]+")
 	else
 		if proxy.get(path) then
-			vid = proxy.get(path.."vid")[1].value
-			dname = proxy.get(path.."name")[1].value
+			local _v = proxy.get(path.."vid"); vid = (_v and _v[1] and _v[1].value) or ""
+			local _n = proxy.get(path.."name"); dname = (_n and _n[1] and _n[1].value) or ""
 			difname = proxy.get(path.."ifname")[1].value
 		end
 	end
@@ -89,8 +89,8 @@ elseif string.match(iface, "atm") then
 		vid = string.match(difname, "[^atmwan%.]+")
 	else
 		if proxy.get(path) then
-			vid = proxy.get(path.."vid")[1].value
-			dname = proxy.get(path.."name")[1].value
+			local _v = proxy.get(path.."vid"); vid = (_v and _v[1] and _v[1].value) or ""
+			local _n = proxy.get(path.."name"); dname = (_n and _n[1] and _n[1].value) or ""
 			difname = proxy.get(path.."ifname")[1].value
 		end
 	end
@@ -102,8 +102,8 @@ else
 		vid = string.match(difname, "[^ptm0%.]+")
 	else
 		if proxy.get(path) then
-			vid = proxy.get(path.."vid")[1].value
-			dname = proxy.get(path.."name")[1].value
+			local _v = proxy.get(path.."vid"); vid = (_v and _v[1] and _v[1].value) or ""
+			local _n = proxy.get(path.."name"); dname = (_n and _n[1] and _n[1].value) or ""
 			difname = proxy.get(path.."ifname")[1].value
 		end
 	end
@@ -116,7 +116,7 @@ if ngx.var.request_method == "POST" then
 		if content["auswahlliste"] == "devnot" then
 			if range and (content["intf_vlanid"]~=vid or content["intf_vlan"]~="0") then
 				if proxy.get(path) then
-					dname = proxy.get(path.."name")[1].value
+					local _n = proxy.get(path.."name"); dname = (_n and _n[1] and _n[1].value) or ""
 					proxy.set(path.."vid", content["intf_vlanid"])
 					proxy.set(pathifname, dname)
 					ngx.print(dname)
@@ -126,7 +126,7 @@ if ngx.var.request_method == "POST" then
 					proxy.set(path.."type","8021q")
 					proxy.set(path.."name","wan"..connection)
 					proxy.set(path.."macaddr", proxy.get("uci.env.rip.eth_mac")[1].value)
-					dname = proxy.get(path.."name")[1].value
+					local _n = proxy.get(path.."name"); dname = (_n and _n[1] and _n[1].value) or ""
 					proxy.set(path.."vid", content["intf_vlanid"])
 					proxy.set(pathifname, dname)
 					proxy.set(path.."ifname", connection)
@@ -157,8 +157,8 @@ if ngx.var.request_method == "POST" then
 				vid = string.match(difname, "[^"..ethname.."%.]+")
 			else
 				if proxy.get(path) then
-					vid = proxy.get(path.."vid")[1].value
-					dname = proxy.get(path.."name")[1].value
+					local _v = proxy.get(path.."vid"); vid = (_v and _v[1] and _v[1].value) or ""
+					local _n = proxy.get(path.."name"); dname = (_n and _n[1] and _n[1].value) or ""
 					difname = proxy.get(path.."ifname")[1].value
 				end
 			end
@@ -170,8 +170,8 @@ if ngx.var.request_method == "POST" then
 				vid = string.match(difname, "[^ptm0%.]+")
 			else
 				if proxy.get(path) then
-					vid = proxy.get(path.."vid")[1].value
-					dname = proxy.get(path.."name")[1].value
+					local _v = proxy.get(path.."vid"); vid = (_v and _v[1] and _v[1].value) or ""
+					local _n = proxy.get(path.."name"); dname = (_n and _n[1] and _n[1].value) or ""
 					difname = proxy.get(path.."ifname")[1].value
 				end
 			end
@@ -183,8 +183,8 @@ if ngx.var.request_method == "POST" then
 				vid = string.match(difname, "[^atmwan%.]+")
 			else
 				if proxy.get(path) then
-					vid = proxy.get(path.."vid")[1].value
-					dname = proxy.get(path.."name")[1].value
+					local _v = proxy.get(path.."vid"); vid = (_v and _v[1] and _v[1].value) or ""
+					local _n = proxy.get(path.."name"); dname = (_n and _n[1] and _n[1].value) or ""
 					difname = proxy.get(path.."ifname")[1].value
 				end
 			end

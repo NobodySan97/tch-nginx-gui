@@ -91,7 +91,7 @@ end
 local upnpstate_text
 local upnpstate
 if wan_services_data["upnp_enabled"] == "1" then
-  upnpstate_text = format( N("<strong %s>%d UPnP</strong> rule is active",
+  local upnpstate_text = format( N("<strong %s>%d UPnP</strong> rule is active",
                       "<strong %s>%d UPnP</strong> rules are active", n_upnp_rules),
                       modal_link_upnp, n_upnp_rules)
   upnpstate = "1"

@@ -27,7 +27,7 @@ local ssid_list = wirelessSSID_helper.getSSID()
 
 for i,v in ipairs(ssid_list) do
   if i <= 4 then
-	wifi_text = format('<strong>%s</strong>(%s)',v.ssid or nil ,v.radio or nil)
+	local wifi_text = format('<strong>%s</strong>(%s)',v.ssid or '' ,v.radio or '')
   end
   attributes.light.id = "WiFi_Enabled_Led"
   attributes.span.id = "WiFi_Enabled"
