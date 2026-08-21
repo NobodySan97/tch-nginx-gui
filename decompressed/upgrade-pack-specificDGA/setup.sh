@@ -83,13 +83,17 @@ if [ -z "${kernel_ver##3.4*}" ]; then
 
 elif [ -z "${kernel_ver##4.1.38*}" ]; then
 
+  # Do NOT overwrite native glibc libraries on 4.1.x kernels
+  rm -rf /tmp/upgrade-pack-specificDGA/usr/lib/libcrypto.so* /tmp/upgrade-pack-specificDGA/usr/lib/libssl.so* /tmp/upgrade-pack-specificDGA/usr/lib/libpcre* 2>/dev/null || true
   move_files_and_clean /tmp/upgrade-pack-specificDGA/
   #Install telnet, openssl-util and update openssl (for security reason)
   opkg install /tmp/4.1.38_ipk/*
   rm -rf /tmp/4.1.38_ipk
 
-else #unsupported kernels (ie 19.x using 4.1.52)
+else #unsupported kernels (ie 19.x/20.x using 4.1.52)
 
+  # Do NOT overwrite native glibc libraries on modern kernels
+  rm -rf /tmp/upgrade-pack-specificDGA/usr/lib/libcrypto.so* /tmp/upgrade-pack-specificDGA/usr/lib/libssl.so* /tmp/upgrade-pack-specificDGA/usr/lib/libpcre* 2>/dev/null || true
   move_files_and_clean /tmp/upgrade-pack-specificDGA/
   echo "No packages to install for kernel: $kernel_ver"
 

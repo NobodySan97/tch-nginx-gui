@@ -73,6 +73,24 @@ check_free_RAM() {
   fi
 }
 
+protect_system_libraries() {
+  # Ensure native system libraries from ROM are always healthy
+  for lib in libcrypto.so.1.0.0 libssl.so.1.0.0 liblua.so.5.1.5; do
+    if [ -f "/rom/usr/lib/$lib" ] && [ ! -f "/usr/lib/$lib" ]; then
+      cp -f "/rom/usr/lib/$lib" "/usr/lib/$lib" 2>/dev/null || true
+    fi
+  done
+  for lib in libubox.so libubus.so libuci.so libblobmsg_json.so; do
+    if [ -f "/rom/lib/$lib" ] && [ ! -f "/lib/$lib" ]; then
+      cp -f "/rom/lib/$lib" "/lib/$lib" 2>/dev/null || true
+    fi
+    if [ -f "/rom/usr/lib/$lib" ] && [ ! -f "/usr/lib/$lib" ]; then
+      cp -f "/rom/usr/lib/$lib" "/usr/lib/$lib" 2>/dev/null || true
+    fi
+  done
+}
+
+protect_system_libraries
 logecho "Disabling watchdog..."
 /etc/init.d/watchdog-tch stop > /dev/null
 
