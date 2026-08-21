@@ -777,6 +777,8 @@ end
 
 html[#html + 1] = '<legend>'.. T"Key Info" ..'</legend>'
 html[#html + 1] = ui_helper.createLabel(T"Config decrypt key", content["rip_key_B"] , basic)
+html[#html + 1] = '<legend>'.. T"Support & Donations" ..'</legend>'
+html[#html + 1] = ui_helper.createLabel(T"Support Project", '<a target="_blank" class="btn btn-primary" href="https://ko-fi.com/nobodysan" style="background-color:#ff5e5b;border-color:#ff5e5b;color:#ffffff;"><i class="fa fa-coffee"></i> Support on Ko-fi</a>', basic)
 html[#html + 1] = '</form>'
 html[#html + 1] = '</fieldset>'
 html[#html + 1] = '</div>'

@@ -4390,3 +4390,9 @@ msgstr "Cancellazione overlay e ripristino valori di fabbrica in corso, attender
 
 msgid "Are you sure you want to perform a complete factory reset? <br/><strong>This will wipe all custom files and remove root SSH access permanently.</strong>"
 msgstr "Sei sicuro di voler eseguire un reset di fabbrica completo? <br/><strong>Questo cancellerà tutti i file personalizzati e rimuoverà l'accesso root SSH in modo permanente.</strong>"
+
+msgid "Support & Donations"
+msgstr "Supporto e Donazioni"
+
+msgid "Support Project"
+msgstr "Supporta il Progetto"

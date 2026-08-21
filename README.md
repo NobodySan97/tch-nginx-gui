@@ -1,4 +1,4 @@
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/AnsuelS) [![License](https://img.shields.io/github/license/NobodySan97/tch-nginx-gui.svg?style=flat)](https://github.com/NobodySan97/tch-nginx-gui/blob/master/LICENSE) [![Build Status](https://github.com/NobodySan97/tch-nginx-gui/actions/workflows/autobuild.yml/badge.svg)](https://github.com/NobodySan97/tch-nginx-gui/actions) [![Release](https://img.shields.io/github/v/release/NobodySan97/tch-nginx-gui?label=Release)](https://github.com/NobodySan97/tch-nginx-gui/releases)
+[![Donate Ko-fi](https://img.shields.io/badge/Donate-Ko--fi-ff5e5b.svg)](https://ko-fi.com/nobodysan) [![Donate PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/AnsuelS) [![License](https://img.shields.io/github/license/NobodySan97/tch-nginx-gui.svg?style=flat)](https://github.com/NobodySan97/tch-nginx-gui/blob/master/LICENSE) [![Build Status](https://github.com/NobodySan97/tch-nginx-gui/actions/workflows/autobuild.yml/badge.svg)](https://github.com/NobodySan97/tch-nginx-gui/actions) [![Release](https://img.shields.io/github/v/release/NobodySan97/tch-nginx-gui?label=Release)](https://github.com/NobodySan97/tch-nginx-gui/releases)
 
 <h3><strong>This is a highly modified and universal version of the GUI installed on all Technicolor Modem/Routers compatibile with (and probably not only):</strong></h3>
   <ul>
@@ -76,8 +76,9 @@ Stats:
 Cards:
 <img src="https://i.ibb.co/5BDrRnx/odemcards.jpg">
 
-<h2><strong>Donation</strong></h2>
+<h2><strong>Support & Donations</strong></h2>
 
-If you want to donate to the developer of this modified gui use the button below
+If you appreciate the work on this GUI and want to support the ongoing development, maintenance, and new features:
 
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.me/AnsuelS)
+* **Support NobodySan97 on Ko-fi:** [![Support on Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/nobodysan)
+* **Donate via PayPal (Original Author Ansuel):** [![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.me/AnsuelS)
