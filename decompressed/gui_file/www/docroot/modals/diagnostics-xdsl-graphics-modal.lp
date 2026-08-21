@@ -30,13 +30,18 @@ gettext.textdomain('webui-core')
 local proxy = require("datamodel")
 local ui_helper = require("web.ui_helper")
 
+local function getBand(key)
+    local res = proxy.get("rpc.xdslctl." .. key)
+    return (res and res[1] and tonumber(res[1].value)) or -1
+end
+
 local band = {
-	Ds1Band = tonumber(proxy.get("rpc.xdslctl.Ds1ScannedBand")[1].value) or -1,
-	Ds2Band = tonumber(proxy.get("rpc.xdslctl.Ds2ScannedBand")[1].value) or -1,
-	Us1Band = tonumber(proxy.get("rpc.xdslctl.Us1ScannedBand")[1].value) or -1,
-	Us2Band = tonumber(proxy.get("rpc.xdslctl.Us2ScannedBand")[1].value) or -1,
-	Us3Band = tonumber(proxy.get("rpc.xdslctl.Us3ScannedBand")[1].value) or -1,
-	Us4Band = tonumber(proxy.get("rpc.xdslctl.Us4ScannedBand")[1].value) or -1,
+	Ds1Band = getBand("Ds1ScannedBand"),
+	Ds2Band = getBand("Ds2ScannedBand"),
+	Us1Band = getBand("Us1ScannedBand"),
+	Us2Band = getBand("Us2ScannedBand"),
+	Us3Band = getBand("Us3ScannedBand"),
+	Us4Band = getBand("Us4ScannedBand"),
 }
 
 local function xdslctlget(request,bandtype)

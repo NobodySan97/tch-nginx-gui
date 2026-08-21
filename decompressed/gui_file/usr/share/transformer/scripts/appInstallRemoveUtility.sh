@@ -16,7 +16,7 @@ install_from_github() {
         echo "No internet connection detected, download manually!"
         return 1
       fi
-      curl -sLk "https://raw.githubusercontent.com/$1/$2.tar.bz2" --output "/tmp/$2.tar.bz2"
+      curl -m 30 -sLk "https://raw.githubusercontent.com/$1/$2.tar.bz2" --output "/tmp/$2.tar.bz2"
     fi
     if [ ! -f "/tmp/$2.tar.bz2" ]; then
       echo "Error installing App: Cannot find/download  $2.tar.bz2"
@@ -31,7 +31,7 @@ install_from_github() {
         echo "No internet connection detected, download manually!"
         return 1
       fi
-      curl -sLk "https://github.com/$1/tarball/$2" --output "/tmp/$2.tar.gz"
+      curl -m 30 -sLk "https://github.com/$1/tarball/$2" --output "/tmp/$2.tar.gz"
     fi
     if [ ! -f "/tmp/$2.tar.gz" ]; then
       echo "Error installing App: Cannot find/download  $2.tar.gz"
