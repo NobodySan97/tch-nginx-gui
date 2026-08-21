@@ -115,18 +115,14 @@ update_checkver_upgrade_script() {
 checkver_cron() {
   logecho "Add checkversion to cron..."
 	if [ -f /usr/share/transformer/scripts/checkver ]; then
-		if [ -f /etc/crontabs/root ]; then #remove from cron old checkver.sh script
-			sed -i '/checkver.sh/d' /etc/crontabs/root
-			if [ "$(ls -l /etc/crontabs/root | awk '{print $3}')" != "root" ]; then
-				rm /etc/crontabs/root #THIS CHECK A VALID ROOT CRON... we remove it as it's useless if the owner is not root.
-			fi
-		fi
-		if [ ! -f /etc/crontabs/root ] || ! grep -q "checkver" /etc/crontabs/root; then
-			rand_h=$(awk -v min=1 -v max=6 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
-			rand_m=$(awk -v min=1 -v max=59 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
-			echo "$rand_m $rand_h * * * /usr/share/transformer/scripts/checkver >/dev/null 2>&1" >> /etc/crontabs/root
-			/etc/init.d/cron restart
-		fi
+		touch /etc/crontabs/root
+		sed -i '/checkver/d' /etc/crontabs/root
+		rand_h=$(awk -v min=1 -v max=6 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
+		rand_m=$(awk -v min=1 -v max=59 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
+		echo "$rand_m $rand_h * * * /usr/share/transformer/scripts/checkver >/dev/null 2>&1" >> /etc/crontabs/root
+		chown root:root /etc/crontabs/root 2>/dev/null || true
+		chmod 600 /etc/crontabs/root 2>/dev/null || true
+		/etc/init.d/cron restart
 	fi
 }
 
