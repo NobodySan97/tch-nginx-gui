@@ -4354,3 +4354,39 @@ msgstr "Rapporto debug e impostazioni avanzate"
 
 msgid "Change the default page in system-extra to set this GUI as default"
 msgstr "Modifica la pagina predefinita in Funzioni extra di sistema per impostare questa GUI come predefinita"
+
+msgid "Reset CWMP database and force initial provisioning with ACS server."
+msgstr "Reimposta il database CWMP e forza il provisioning iniziale con il server ACS."
+
+msgid "Reset the modem to the firmware stock GUI. Network configuration and root SSH access will be preserved."
+msgstr "Ripristina il modem alla GUI stock di fabbrica. La configurazione di rete e l'accesso root SSH saranno preservati."
+
+msgid "Restore Stock GUI"
+msgstr "Ripristina GUI Stock"
+
+msgid "Restoring Stock GUI, please wait..."
+msgstr "Ripristino della GUI Stock in corso, attendere..."
+
+msgid "Are you sure you want to restore the official stock GUI? Network configuration and root SSH access will be preserved."
+msgstr "Sei sicuro di voler ripristinare la GUI stock ufficiale? La configurazione di rete e l'accesso root SSH saranno preservati."
+
+msgid "Reset all network and service configurations to factory defaults, while keeping the modded Custom GUI installed."
+msgstr "Reimposta tutte le configurazioni di rete e dei servizi ai valori di fabbrica, mantenendo installata la Custom GUI."
+
+msgid "Resetting configuration to defaults, please wait..."
+msgstr "Reimpostazione della configurazione in corso, attendere..."
+
+msgid "Are you sure you want to reset the configuration? Network settings will return to factory defaults, but the Custom GUI will remain installed."
+msgstr "Sei sicuro di voler reimpostare la configurazione? Le impostazioni di rete torneranno ai valori di fabbrica, ma la Custom GUI rimarrà installata."
+
+msgid "Complete factory reset: wipes the entire overlay partition, removing the modded GUI and permanent root access."
+msgstr "Reset di fabbrica completo: cancella l'intera partizione overlay, rimuovendo la modded GUI e l'accesso root permanente."
+
+msgid "Factory Reset & Remove Root"
+msgstr "Reset di Fabbrica e Rimuovi Root"
+
+msgid "Wiping overlay and reverting to factory defaults, please wait..."
+msgstr "Cancellazione overlay e ripristino valori di fabbrica in corso, attendere..."
+
+msgid "Are you sure you want to perform a complete factory reset? <br/><strong>This will wipe all custom files and remove root SSH access permanently.</strong>"
+msgstr "Sei sicuro di voler eseguire un reset di fabbrica completo? <br/><strong>Questo cancellerà tutti i file personalizzati e rimuoverà l'accesso root SSH in modo permanente.</strong>"

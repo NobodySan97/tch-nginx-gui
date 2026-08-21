@@ -640,7 +640,7 @@ local remove_root = {
         },
         button = {
                 id = "btn-remove-root",
-                class = "custom-handler"
+                class = "btn-danger custom-handler"
         }
 }
 local remove_config = {
@@ -666,6 +666,11 @@ local info_box = {
                 class = "alert alert-info",
         }
 }
+local warning_box = {
+        alert = {
+                class = "alert alert-error",
+        }
+}
 local resetting = {
         alert = {
                 class = "alert hide",
@@ -685,19 +690,27 @@ local resetting_config = {
         }
 }
 
+-- 1. Reset CWMP
+html[#html + 1] = ui_helper.createAlertBlock(T"Reset CWMP database and force initial provisioning with ACS server.", info_box)
 html[#html + 1] = ui_helper.createButton(T"Force CWMP provisioning", T"Reset CWMP", "icon-refresh", reset_cwmp)
+html[#html + 1] = '<hr style="margin: 15px 0;" />'
 
-html[#html + 1] = ui_helper.createAlertBlock(T"Reset the modem to the firmware stock GUI. Some config and root SSH access will be preserved. This roll back without a full reset can cause unexpected behaviours or instability", info_box)
+-- 2. Restore Stock GUI
+html[#html + 1] = ui_helper.createAlertBlock(T"Reset the modem to the firmware stock GUI. Network configuration and root SSH access will be preserved.", info_box)
 html[#html + 1] = ui_helper.createAlertBlock(T"Resetting to default GUI, please wait...", resetting)
-html[#html + 1] = ui_helper.createButton(T"Restore GUI", T"Restore", "icon-refresh", reset_gui)
+html[#html + 1] = ui_helper.createButton(T"Restore Stock GUI", T"Restore GUI", "icon-repeat", reset_gui)
+html[#html + 1] = '<hr style="margin: 15px 0;" />'
 
-html[#html + 1] = ui_helper.createAlertBlock(T"Reset the router to factory settings and remove the custom firmware files.", info_box)
-html[#html + 1] = ui_helper.createAlertBlock(T"Unrooting and reverting to factory defaults, please wait...", unrooting)
-html[#html + 1] = ui_helper.createButton(T"Reset to Factory", T"Remove Root", "icon-refresh", remove_root)
-
-html[#html + 1] = ui_helper.createAlertBlock(T"Reset the router to factory settings and mantain modded GUI.", info_box)
+-- 3. Reset Config (Keep Modded GUI)
+html[#html + 1] = ui_helper.createAlertBlock(T"Reset all network and service configurations to factory defaults, while keeping the modded Custom GUI installed.", info_box)
 html[#html + 1] = ui_helper.createAlertBlock(T"Resetting config to default, please wait...", resetting_config)
-html[#html + 1] = ui_helper.createButton(T"Reset config to Factory", T"Remove Config", "icon-refresh", remove_config)
+html[#html + 1] = ui_helper.createButton(T"Reset Configuration", T"Remove Config", "icon-refresh", remove_config)
+html[#html + 1] = '<hr style="margin: 15px 0;" />'
+
+-- 4. Factory Reset & Remove Root
+html[#html + 1] = ui_helper.createAlertBlock(T"Complete factory reset: wipes the entire overlay partition, removing the modded GUI and permanent root access.", warning_box)
+html[#html + 1] = ui_helper.createAlertBlock(T"Unrooting and reverting to factory defaults, please wait...", unrooting)
+html[#html + 1] = ui_helper.createButton(T"Factory Reset & Remove Root", T"Remove Root", "icon-trash", remove_root)
 html[#html + 1] = '</form>'
 
 local import_backup = {
@@ -836,27 +849,27 @@ ngx.print('\
   };\
 \
   $("#btn-reset-gui").on("click", function() { return genericButtonFunction(\
-                "');  ngx.print(T'Restore GUI'); ngx.print('",\
-                "');  ngx.print(T'Restoring...'); ngx.print('",\
-                "');  ngx.print(T'Do you want to continue?'); ngx.print('",\
+                "');  ngx.print(T'Restore Stock GUI'); ngx.print('",\
+                "');  ngx.print(T'Restoring Stock GUI, please wait...'); ngx.print('",\
+                "');  ngx.print(T'Are you sure you want to restore the official stock GUI? Network configuration and root SSH access will be preserved.'); ngx.print('",\
                 "#resetting-msg",\
                 "#btn-reset-gui",\
                 "system_reset_gui"\
         )}\
   );\
   $("#btn-remove-root").on("click", function() { return genericButtonFunction(\
-                "');  ngx.print(T'Remove root'); ngx.print('",\
-                "');  ngx.print(T'Resetting...'); ngx.print('",\
-                "');  ngx.print(T"Are you sure you want to remove root from this modem? <br/><strong> This could be permanent, so it\\'s not recommended.</strong>"); ngx.print('",\
+                "');  ngx.print(T'Factory Reset & Remove Root'); ngx.print('",\
+                "');  ngx.print(T'Wiping overlay and reverting to factory defaults, please wait...'); ngx.print('",\
+                "');  ngx.print(T"Are you sure you want to perform a complete factory reset? <br/><strong>This will wipe all custom files and remove root SSH access permanently.</strong>"); ngx.print('",\
                 "#unrooting-msg",\
                 "#btn-remove-root",\
                 "system_remove_root"\
         )}\
   );\
   $("#btn-remove-config").on("click", function() { return genericButtonFunction(\
-                "');  ngx.print(T'Reset config'); ngx.print('",\
-                "');  ngx.print(T'Resetting...'); ngx.print('",\
-                "');  ngx.print(T"Are you sure you want to reset config of this modem? <br/><strong> This is permanent, save any config before this action.</strong>"); ngx.print('",\
+                "');  ngx.print(T'Reset Configuration'); ngx.print('",\
+                "');  ngx.print(T'Resetting configuration to defaults, please wait...'); ngx.print('",\
+                "');  ngx.print(T"Are you sure you want to reset the configuration? Network settings will return to factory defaults, but the Custom GUI will remain installed."); ngx.print('",\
                 "#config-resetting-msg",\
                 "#btn-remove-config",\
                 "system_reset_config"\
