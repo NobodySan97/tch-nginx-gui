@@ -229,15 +229,14 @@ local function convert2Sec(value)
     return 0
 end
 
--- It will check the given URI/NUMBER is present in config.
--- Return true if it is present, false if it is deleted.
+local mapTable1_set = {}
+for _, uri in pairs(mapTable1 or {}) do
+    mapTable1_set[uri] = true
+end
+
+-- Fast O(1) hash set lookup
 local function isLocalPartyValid(localParty)
-    for _,uri in pairs(mapTable1) do
-	    if uri == localParty then
-		    return true
-		end
-	end
-	return false
+    return (localParty and mapTable1_set[localParty]) and true or false
 end
 
 for k,v in ipairs(logTable) do

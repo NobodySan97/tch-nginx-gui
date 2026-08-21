@@ -44,9 +44,11 @@ then
 	fi
 
 	echo -e "\n=========================== PROFILE BASED SERVICE DETAILS =============================== \n" >> $logfile
-	TMPFILE=`mktemp -t diagnostics_dataXXXXXXX` && {
-		TMPFILE2=`mktemp -t diagnostics_dataXXXXXXX` && {
-			TMPURI=`mktemp -t uri_XXXXXXX` && {
+	TMPFILE=`mktemp -t diagnostics_dataXXXXXXX`
+	TMPFILE2=`mktemp -t diagnostics_dataXXXXXXX`
+	TMPURI=`mktemp -t uri_XXXXXXX`
+	trap 'rm -f "$TMPFILE" "$TMPFILE2" "$TMPURI"' EXIT INT TERM
+	if [ -n "$TMPFILE" ] && [ -n "$TMPFILE2" ] && [ -n "$TMPURI" ]; then
 			awk '/(option uri )|(config profile)/{print $NF}' /etc/config/mmpbxrvsipnet | sed "s/'//g" >> $TMPURI
 			echo "$(transformer-cli get $root.Services.VoiceService.1.VoiceProfile.1.Line.)" > $TMPFILE
 			while read line1
@@ -58,10 +60,8 @@ then
 				echo -e "\n" >> $logfile
 				cut -d . -f10 $TMPFILE2  | sed 's/\[.*\]//' | sed -e "s/$line2/$maskedUri/g" | sed "s/Number.*/Number = $maskedUri/" >> $logfile
 			done < $TMPURI
-			}
-		}
-	}
-	rm $TMPFILE $TMPFILE2 $TMPURI
+	fi
+	rm -f "$TMPFILE" "$TMPFILE2" "$TMPURI"
 	echo -e "\n======================== SIP UA DETAILS =====================================      \n" >> $logfile
 	for i in `awk '/config profile/{print $NF}' /etc/config/mmpbxrvsipnet`;
 	do
