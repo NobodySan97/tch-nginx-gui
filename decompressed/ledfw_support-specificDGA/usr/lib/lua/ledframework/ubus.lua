@@ -185,8 +185,8 @@ function M.start(cb)
 	end
 
 	events['xdsl'] = function(msg)
-		if msg ~= nil then
-			cb('xdsl_' .. msg.statuscode)
+		if msg ~= nil and msg.statuscode ~= nil then
+			cb('xdsl_' .. tostring(msg.statuscode))
 		end
 	end
 
@@ -359,7 +359,7 @@ function M.start(cb)
 	end
 
 	events['mmpbx.outgoingcallstart'] = function(data)
-		if data ~= nil then
+		if data ~= nil and type(data.device) == "string" then
 			if (data.device == "fxs_dev_0") then
 				cb("outgoing_call_line_1")
 			elseif (data.device == "fxs_dev_1") then

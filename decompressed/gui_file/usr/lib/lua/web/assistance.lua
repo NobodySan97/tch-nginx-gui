@@ -514,7 +514,7 @@ function assistant_startTimer(self)
         if not ok then
             ngx.log(ngx.ERR, "failed to create assistant timer ", err)
         else
-            self._timerrunning = true
+            self._timerRunning = true
         end
     end
 end

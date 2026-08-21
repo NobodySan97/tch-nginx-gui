@@ -209,6 +209,7 @@ ledfw_rework_TG788() {
     uci set button.acl.min='5'
     uci set ledfw.iptv.check='0'
     uci commit ledfw
+    uci commit button
   fi
 
   ledfw_extract "TG788"
@@ -226,6 +227,7 @@ ledfw_rework_TG799() {
     uci set button.info.max='2'
     uci set ledfw.iptv.check='0'
     uci commit ledfw
+    uci commit button
   fi
 
   ledfw_extract "TG799"
@@ -245,6 +247,7 @@ ledfw_rework_TG800() {
     uci set button.wifi_on_off_toggle.max='8'
     uci set ledfw.iptv.check='0'
     uci commit ledfw
+    uci commit button
   fi
 
   ledfw_extract "TG800"

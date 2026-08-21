@@ -51,8 +51,8 @@ local config = get_cards_from_config()
 local function card_visible(session, config, cardname)
   local card = config[cardname]
   if card then
-    local access
-    if card.modal then
+    local access = false
+    if session and card.modal then
       access = session:hasAccess(card.modal)
     end
     if not access and card.hide then

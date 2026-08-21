@@ -32,21 +32,22 @@ fi
 #Restore Wifi LED(s) status
 connected_wl0=0
 connected_wl1=0
-num_dev=$(transformer-cli get rpc.hosts.HostNumberOfEntries | cut -d= -f 2)
+num_dev=$(transformer-cli get rpc.hosts.HostNumberOfEntries 2>/dev/null | cut -d= -f 2 | tr -dc '0-9')
+num_dev="${num_dev:-0}"
 i=0
-while [ "$num_dev" ] && [ "$num_dev" -gt 0 ]; do
-    if [ "$(transformer-cli get rpc.hosts.host.$i. | grep 'ERROR')" ]; then
-        i=$((i+1))
-    else
-        num_dev=$((num_dev-1))
-        if [ "$(transformer-cli get rpc.hosts.host.$i.State | grep '= 1')" ]; then
-            if [ "$(transformer-cli get rpc.hosts.host.$i.L2Interface | grep '= wl0')" ]; then
-                connected_wl0=$((connected_wl0+1))
-            elif [ "$(transformer-cli get rpc.hosts.host.$i.L2Interface | grep '= wl1')" ]; then
-                connected_wl1=$((connected_wl1+1))
-            fi
-        fi
+max_scan=64
+while [ "$num_dev" -gt 0 ] && [ "$i" -lt "$max_scan" ]; do
+  if [ -n "$(transformer-cli get rpc.hosts.host.$i. 2>/dev/null | grep 'ERROR')" ]; then
+    i=$((i+1))
+  else
+    num_dev=$((num_dev-1))
+    if transformer-cli get rpc.hosts.host.$i.State 2>/dev/null | grep -q '= 1'; then
+      l2intf="$(transformer-cli get rpc.hosts.host.$i.L2Interface 2>/dev/null | cut -d= -f 2 | tr -d ' ')"
+      [ "$l2intf" = "wl0" ] && connected_wl0=$((connected_wl0+1))
+      [ "$l2intf" = "wl1" ] && connected_wl1=$((connected_wl1+1))
     fi
+    i=$((i+1))
+  fi
 done
 
 for i in 0 1

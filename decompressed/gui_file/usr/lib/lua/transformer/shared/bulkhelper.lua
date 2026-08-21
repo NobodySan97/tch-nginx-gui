@@ -66,7 +66,7 @@ end
 -- @returns a list (table) of keys to pass to transformer
 function ProfileMap:getParamKeys(id, parentkey)
   self.keys = {}
-  if type(M.entries[parentkey][id]) == "table" then
+  if M.entries[parentkey] and type(M.entries[parentkey][id]) == "table" then
     for i,_ in ipairs(M.entries[parentkey][id]) do
       local key = format("%s|%s|%d", parentkey, id,  #self.keys+1)
       self.keys[#self.keys+1] = key

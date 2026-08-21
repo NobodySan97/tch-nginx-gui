@@ -329,7 +329,9 @@ mobiled_lib_add() {
 
   if [ -f /rom/usr/lib/lua/libat/huawei.lua ]; then
     cmp -s /rom/usr/lib/lua/libat/huawei.lua /usr/lib/lua/libat/huawei.lua || cp /rom/usr/lib/lua/libat/huawei.lua /usr/lib/lua/libat/huawei.lua
-    grep -q "1003" /usr/lib/lua/libat/huawei.lua || sed -i '/^.*or device.pid == "1c05" then -- E173/i or device.pid == "1003" -- E156G E17X' /usr/lib/lua/libat/huawei.lua
+    if [ -f /usr/lib/lua/libat/huawei.lua ]; then
+      grep -q "1003" /usr/lib/lua/libat/huawei.lua || sed -i 's/device.pid == "1c05"/device.pid == "1c05" or device.pid == "1003"/' /usr/lib/lua/libat/huawei.lua
+    fi
   fi
 
   if [ ! -d /usr/lib/lua/mobiled ]; then
@@ -364,8 +366,9 @@ mobiled_lib_add() {
   fi
   [ -f /tmp/ltedoctor ] && rm /tmp/ltedoctor
 
-  major_system_version="$(uci get version.@version[0].marketing_version | sed 's#\.##' | grep -o -E '[0-9]+')"
-  if [ "$major_system_version" -lt 173 ]; then #if fw <17.3
+  major_system_version="$(uci get -q version.@version[0].marketing_version | tr -d '.' | grep -o -E '^[0-9]{2,3}' | head -n 1)"
+  major_system_version="${major_system_version:-0}"
+  if [ "$major_system_version" -lt 173 ] && [ "$major_system_version" -gt 0 ]; then #if fw <17.3
     #Restore original lte-doctor related webui files
     [ -f /rom/www/docroot/ajax/radioparameters.lua ] && cp /rom/www/docroot/ajax/radioparameters.lua /www/docroot/ajax/radioparameters.lua
     [ -f /rom/www/docroot/modals/lte-doctor.lp ] && cp /rom/www/docroot/modals/lte-doctor.lp /www/docroot/modals/lte-doctor.lp

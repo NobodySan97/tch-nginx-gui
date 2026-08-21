@@ -37,6 +37,9 @@ end
 -- @param time #string holds the givenTime specified by the user
 -- @return boolean true if given time is valid and a future time, else returns nil
 local function validateTime(time)
+  if not time or type(time) ~= "string" then
+    return nil
+  end
   local date = {}
   date.year, date.month, date.day, date.hour, date.min, date.sec = time:match("(%d%d%d%d)%-(%d%d)%-(%d%d)T(%d%d):(%d%d):(%d%d)")
   if not date.year then

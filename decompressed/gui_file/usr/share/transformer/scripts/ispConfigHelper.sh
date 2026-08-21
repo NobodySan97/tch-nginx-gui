@@ -2,6 +2,7 @@
 
 restart_dnsmasq=0
 
+debug="${debug:-0}"
 logecho() {
   if [ "$debug" -eq 1 ]; then
     logger -t "IspConfigHelper" "$1"

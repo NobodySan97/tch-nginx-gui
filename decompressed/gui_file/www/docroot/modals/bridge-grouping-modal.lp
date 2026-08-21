@@ -245,18 +245,18 @@ end
 local bridge_data, bridge_helpmsg = post_helper.handleTableQuery(bridge_columns, bridge_options, bridge_filter, nil, bridge_validate)
 local function getIntfName(intf)
   local returnval = ""
-  if intf == "wan1" then
-    returnval = wanintfs[1][2]
-  elseif intf == "wan2" then
-    returnval = wanintfs[2][2]
-  elseif intf == "wan3" then
-    returnval = wanintfs[3][2]
-  elseif intf == "wan4" then
-    returnval = wanintfs[4][2]
-  elseif intf == "voip" then
-    returnval = wanintfs[#wanintfs - 1][2]
-  elseif intf == "wan" then
-    returnval = wanintfs[#wanintfs][2]
+  if intf == "wan1" and wanintfs[1] then
+    returnval = wanintfs[1][2] or ""
+  elseif intf == "wan2" and wanintfs[2] then
+    returnval = wanintfs[2][2] or ""
+  elseif intf == "wan3" and wanintfs[3] then
+    returnval = wanintfs[3][2] or ""
+  elseif intf == "wan4" and wanintfs[4] then
+    returnval = wanintfs[4][2] or ""
+  elseif intf == "voip" and #wanintfs >= 2 and wanintfs[#wanintfs - 1] then
+    returnval = wanintfs[#wanintfs - 1][2] or ""
+  elseif intf == "wan" and #wanintfs >= 1 and wanintfs[#wanintfs] then
+    returnval = wanintfs[#wanintfs][2] or ""
   end
   return returnval
 end
