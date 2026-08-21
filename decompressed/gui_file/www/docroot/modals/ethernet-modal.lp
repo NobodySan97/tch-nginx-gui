@@ -598,11 +598,11 @@ local dnsRemoved = false
 
 -- Check if there is a custom DNS server, if so, then retrieve its index
 -- we'll update the parameters list to include it for retrieval
-dhcp.options = proxy.get(baseDHCPOptions)
+dhcp.options = proxy.get(baseDHCPOptions) or {}
 dnsIndex = #dhcp.options + 1 -- by default index is end of list
 
 for i,v in ipairs(dhcp.options) do
-    if v.value:find("^6,") == 1 then
+    if v.value and v.value:find("^6,") == 1 then
         dnsIndex = tonumber(string.match(v.path, "%.@(%d+)%.$"))
     end
 end
@@ -1090,7 +1090,7 @@ content, helpmsg = post_helper.handleQuery(mapParams, mapValid)
 
 if (ngx.var.request_method == "POST")  and not next(helpmsg) then
    local dhcp_options_path = "uci.dhcp.dhcp.@"..cur_dhcp_intf..".dhcp_option."
-   local dhcp_options = content_helper.convertResultToObject(dhcp_options_path,proxy.get(dhcp_options_path))
+   local dhcp_options = content_helper.convertResultToObject(dhcp_options_path, proxy.get(dhcp_options_path) or {})
     for _,v in ipairs(dhcp_options) do
       if v.value:match("^3,") then
         proxy.del(dhcp_options_path..v.paramindex..".")
