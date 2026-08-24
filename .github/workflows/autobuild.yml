@@ -15,6 +15,14 @@ on:
       - 'inizialize_gui.sh'
   workflow_dispatch:
     inputs:
+      channel:
+        description: 'Release channel (stable or preview)'
+        required: true
+        type: choice
+        options:
+          - stable
+          - preview
+        default: 'stable'
       custom_version:
         description: 'Specific version override (e.g. 9.8.0), leave empty for auto-increment'
         required: false
@@ -46,7 +54,9 @@ jobs:
           python-version: '3.11'
 
       - name: Run Build and Release Script
+        id: build_step
         env:
+          RELEASE_CHANNEL: ${{ github.event.inputs.channel }}
           CUSTOM_VERSION: ${{ github.event.inputs.custom_version }}
         run: |
           python scripts/build_release.py "$GITHUB_WORKSPACE/gui-dev-build-auto"
@@ -60,8 +70,9 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            NEW_VER=$(cat latest.version)
-            git commit -m "Autobuild release v${NEW_VER} from commit ${{ github.sha }}"
+            NEW_VER="${{ steps.build_step.outputs.version }}"
+            CHANNEL="${{ steps.build_step.outputs.channel }}"
+            git commit -m "Autobuild ${CHANNEL} release v${NEW_VER} from commit ${{ github.sha }}"
             git pull --rebase origin master || true
             git push origin master
           fi
@@ -70,15 +81,36 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.AUTOBUILD_PAT || secrets.GITHUB_TOKEN }}
         run: |
-          NEW_VER=$(cat gui-dev-build-auto/latest.version)
+          NEW_VER="${{ steps.build_step.outputs.version }}"
+          IS_PRERELEASE="${{ steps.build_step.outputs.is_prerelease }}"
+          TITLE="${{ steps.build_step.outputs.release_title }}"
+          CHANNEL="${{ steps.build_step.outputs.channel }}"
+
+          PRERELEASE_FLAG=""
+          if [ "$IS_PRERELEASE" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
           if gh release view "v${NEW_VER}" --repo NobodySan97/tch-nginx-gui >/dev/null 2>&1; then
             echo "Release v${NEW_VER} already exists."
           else
-            echo "Creating GitHub Release v${NEW_VER}..."
-            gh release create "v${NEW_VER}" \
-              "gui-dev-build-auto/GUI.tar.bz2#GUI.tar.bz2" \
-              "gui-dev-build-auto/GUI_dev.tar.bz2#GUI_dev.tar.bz2" \
-              --repo NobodySan97/tch-nginx-gui \
-              --title "Release v${NEW_VER}" \
-              --generate-notes
+            echo "Creating GitHub Release v${NEW_VER} (channel: ${CHANNEL})..."
+            if [ "$CHANNEL" = "preview" ]; then
+              gh release create "v${NEW_VER}" \
+                "gui-dev-build-auto/GUI_preview.tar.bz2#GUI_preview.tar.bz2" \
+                "gui-dev-build-auto/GUI_dev.tar.bz2#GUI_dev.tar.bz2" \
+                --repo NobodySan97/tch-nginx-gui \
+                --title "$TITLE" \
+                $PRERELEASE_FLAG \
+                --generate-notes
+            else
+              gh release create "v${NEW_VER}" \
+                "gui-dev-build-auto/GUI.tar.bz2#GUI.tar.bz2" \
+                "gui-dev-build-auto/GUI_preview.tar.bz2#GUI_preview.tar.bz2" \
+                "gui-dev-build-auto/GUI_dev.tar.bz2#GUI_dev.tar.bz2" \
+                --repo NobodySan97/tch-nginx-gui \
+                --title "$TITLE" \
+                $PRERELEASE_FLAG \
+                --generate-notes
+            fi
           fi

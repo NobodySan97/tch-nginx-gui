@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 """
 Cross-platform build & release manager for tch-nginx-gui.
-Handles:
-  1. Version determination (manual from commit msg / env, or auto-increment from latest.version)
-  2. Setting version in rootdevice
-  3. Generating checksum files for LED framework
-  4. Packaging modular tar.bz2 archives
-  5. Assembling total distribution and packaging GUI.tar.bz2 / GUI_dev.tar.bz2
-  6. Updating version metadata files in gui-dev-build-auto
+Supports:
+  - Stable releases (default)
+  - Preview releases (triggered by '[preview]' in commit message, --channel preview, or RELEASE_CHANNEL=preview)
 """
 
 import os
 import sys
 import re
+import time
 import shutil
 import tarfile
 import hashlib
@@ -47,22 +44,30 @@ def get_git_info(repo_dir):
         last_msg = ""
     return short_sha, last_msg
 
-def calculate_version(last_msg, latest_version_file, manual_ver=None):
-    # 1. Explicit override passed as argument or env
+def detect_channel(last_msg, cli_channel=None):
+    if cli_channel:
+        return cli_channel.lower()
+    env_chan = os.environ.get("RELEASE_CHANNEL", "").lower()
+    if env_chan in ["preview", "stable"]:
+        return env_chan
+    # Check for [preview] or preview in commit message
+    if re.search(r'\[preview\]', last_msg, re.IGNORECASE) or "preview" in last_msg.lower():
+        return "preview"
+    return "stable"
+
+def calculate_version(last_msg, base_version_file, manual_ver=None):
     if manual_ver:
         return manual_ver.strip()
     
-    # 2. Check for [x.y.z] in commit message
     match = re.search(r'\[([0-9]+\.[0-9]+\.[0-9]+)\]', last_msg)
     if match:
         print(f"Detected version tag in commit message: {match.group(1)}")
         return match.group(1)
 
-    # 3. Auto-increment from latest.version
-    cur_ver = "9.7.8"
-    if latest_version_file.exists():
+    cur_ver = "9.7.50"
+    if base_version_file.exists():
         try:
-            content = latest_version_file.read_text().strip()
+            content = base_version_file.read_text().strip()
             if re.match(r'^[0-9]+\.[0-9]+\.[0-9]+$', content):
                 cur_ver = content
         except Exception:
@@ -80,27 +85,45 @@ def calculate_version(last_msg, latest_version_file, manual_ver=None):
             major += 1
 
     new_ver = f"{major}.{minor}.{patch}"
-    print(f"Auto-incrementing version: {cur_ver} -> {new_ver}")
+    print(f"Auto-incrementing version ({base_version_file.name}): {cur_ver} -> {new_ver}")
     return new_ver
 
 def main():
     src_dir = Path(__file__).resolve().parent.parent
-    
-    # Check if build destination path passed as argument or default to adjacent folder
-    if len(sys.argv) > 1 and Path(sys.argv[1]).exists():
-        dest_dir = Path(sys.argv[1]).resolve()
-    else:
-        dest_dir = src_dir.parent / "gui-dev-build-auto"
-        if not dest_dir.exists():
-            dest_dir.mkdir(parents=True, exist_ok=True)
-
+    dest_dir = src_dir.parent / "gui-dev-build-auto"
+    cli_channel = None
     manual_ver = os.environ.get("CUSTOM_VERSION", None)
+
+    for arg in sys.argv[1:]:
+        if arg.startswith("--channel="):
+            cli_channel = arg.split("=", 1)[1]
+        elif arg in ["preview", "stable"]:
+            cli_channel = arg
+        elif Path(arg).is_dir() or Path(arg).parent.exists():
+            dest_dir = Path(arg).resolve()
+        elif re.match(r'^[0-9]+\.[0-9]+\.[0-9]+', arg):
+            manual_ver = arg
+
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    short_sha, last_msg = get_git_info(src_dir)
+    channel = detect_channel(last_msg, cli_channel)
 
     print(f"Source Directory:      {src_dir}")
     print(f"Destination Directory: {dest_dir}")
+    print(f"Target Channel:        {channel.upper()}")
 
-    short_sha, last_msg = get_git_info(src_dir)
-    version = calculate_version(last_msg, dest_dir / "latest.version", manual_ver)
+    # Determine reference version file based on channel
+    if channel == "preview":
+        ref_version_file = dest_dir / "preview.version"
+        if not ref_version_file.exists():
+            ref_version_file = dest_dir / "latest.version"
+    else:
+        ref_version_file = dest_dir / "stable.version"
+        if not ref_version_file.exists():
+            ref_version_file = dest_dir / "latest.version"
+
+    version = calculate_version(last_msg, ref_version_file, manual_ver)
 
     # 1. Update version in rootdevice
     rootdevice = src_dir / "decompressed" / "base" / "etc" / "init.d" / "rootdevice"
@@ -110,7 +133,7 @@ def main():
         rootdevice.write_text(updated, encoding="utf-8")
         print(f"Updated rootdevice: version_gui={version}-{short_sha}")
 
-    # 2. Checksum files
+    # 2. Checksums
     status_led = src_dir / "decompressed" / "gui_file" / "tmp" / "status-led-eventing.lua_new"
     if status_led.exists():
         md5_val = md5_file(status_led)
@@ -175,28 +198,61 @@ def main():
             if mod_tar.exists():
                 shutil.copy2(mod_tar, tmp_dir / f"{mod}.tar.bz2")
 
-    gui_tar = dest_dir / "GUI.tar.bz2"
+    # 5. Packaging tarballs according to channel
     gui_preview_tar = dest_dir / "GUI_preview.tar.bz2"
     gui_dev_tar = dest_dir / "GUI_dev.tar.bz2"
+    gui_stable_tar = dest_dir / "GUI.tar.bz2"
 
-    print("Packaging main GUI.tar.bz2, GUI_preview.tar.bz2, and GUI_dev.tar.bz2...")
-    make_tar_bz2(str(total_dir), str(gui_tar))
-    shutil.copy2(gui_tar, gui_preview_tar)
-    shutil.copy2(gui_tar, gui_dev_tar)
+    if channel == "preview":
+        print("Packaging Preview release (GUI_preview.tar.bz2)...")
+        make_tar_bz2(str(total_dir), str(gui_preview_tar))
+        shutil.copy2(gui_preview_tar, gui_dev_tar)
+        gui_md5 = md5_file(gui_preview_tar)
 
-    shutil.rmtree(total_dir)
+        # Update preview metadata only
+        (dest_dir / "preview.version").write_text(f"{version}\n")
+        (dest_dir / "latest.version").write_text(f"{version}\n")
+        is_prerelease = "true"
+        release_title = f"Release v{version} (Preview)"
+    else:
+        print("Packaging Stable release (GUI.tar.bz2, GUI_preview.tar.bz2)...")
+        make_tar_bz2(str(total_dir), str(gui_stable_tar))
+        shutil.copy2(gui_stable_tar, gui_preview_tar)
+        shutil.copy2(gui_stable_tar, gui_dev_tar)
+        gui_md5 = md5_file(gui_stable_tar)
 
-    # 5. Update version files in destination
-    gui_md5 = md5_file(gui_tar)
-    (dest_dir / "stable.version").write_text(f"{version}\n")
-    (dest_dir / "preview.version").write_text(f"{version}\n")
-    (dest_dir / "latest.version").write_text(f"{version}\n")
+        # Update stable and preview metadata
+        (dest_dir / "stable.version").write_text(f"{version}\n")
+        (dest_dir / "preview.version").write_text(f"{version}\n")
+        (dest_dir / "latest.version").write_text(f"{version}\n")
+        is_prerelease = "false"
+        release_title = f"Release v{version}"
+
+    if total_dir.exists():
+        for _ in range(5):
+            try:
+                shutil.rmtree(total_dir)
+                break
+            except Exception:
+                time.sleep(0.5)
 
     v_file = dest_dir / "version"
     existing = v_file.read_text() if v_file.exists() else ""
-    v_file.write_text(f"{gui_md5} {version}\n" + existing)
+    v_file.write_text(f"{gui_md5} {version} [{channel.upper()}]\n" + existing)
 
-    print(f"\nSuccessfully built release v{version} (MD5: {gui_md5})!")
+    print(f"\nSuccessfully built {channel.upper()} release v{version} (MD5: {gui_md5})!")
+
+    # Set GitHub Actions output parameters if running in CI
+    gh_output = os.environ.get("GITHUB_OUTPUT")
+    if gh_output:
+        try:
+            with open(gh_output, "a") as f:
+                f.write(f"channel={channel}\n")
+                f.write(f"version={version}\n")
+                f.write(f"is_prerelease={is_prerelease}\n")
+                f.write(f"release_title={release_title}\n")
+        except Exception:
+            pass
 
 if __name__ == "__main__":
     main()
