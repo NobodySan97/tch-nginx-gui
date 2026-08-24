@@ -19,7 +19,8 @@ with many fixes and new features like:
 <ul>
 <li><b>Quick glance statistics page</b></li>
 <li>DLNA Fully working</li>
-<li>Visualise CPU load</li>
+<li>Visualise CPU load with Zero-Fork native /proc calculation</li>
+<li>Automatic background AJAX polling pause (HTML5 Page Visibility API)</li>
 <li>Show VoIP Password directly on the GUI</li>
 <li>Upgrade/Downgrade firmware from the GUI</li>
 <li>Export and Save modem configuration from the GUI</li>
