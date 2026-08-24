@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
-9.7.62 (Stable)
+9.7.63 (Stable)
 ---------------------------------------------------------------------------
 - **Aggiornamento e Test di Verifica Pipeline**:
   - Test completo del nuovo meccanismo di download resiliente con timeout a 300s
