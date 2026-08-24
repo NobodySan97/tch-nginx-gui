@@ -11,6 +11,8 @@ on:
       - 'CHANGELOG.md'
       - 'LICENSE'
       - '.github/**'
+      - '*.bat'
+      - 'inizialize_gui.sh'
   workflow_dispatch:
     inputs:
       custom_version:
