@@ -7965,3 +7965,192 @@ a .icon-rotate-90:before, a .icon-rotate-180:before, a .icon-rotate-270:before, 
 	font-weight: 700;
 	text-align: center
 }
+
+
+/* ==========================================================================
+   Modern UI/UX Design System (NobodySan97 Edition)
+   ========================================================================== */
+
+:root {
+  --tch-radius-sm: 6px;
+  --tch-radius-md: 10px;
+  --tch-radius-lg: 14px;
+  --tch-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.06);
+  --tch-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --tch-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --tch-shadow-modal: 0 16px 40px rgba(0, 0, 0, 0.22);
+  --tch-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --tch-trans: all 0.22s var(--tch-ease);
+}
+
+/* Smooth Transitions across interactive elements */
+a, button, .btn, .smallcard, .modal, .nav-link, select, input[type="text"], input[type="password"] {
+  transition: var(--tch-trans);
+}
+
+/* Modern Card Layout & Elevation */
+.smallcard {
+  border-radius: var(--tch-radius-md) !important;
+  box-shadow: var(--tch-shadow-md) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  background-color: #ffffff;
+  overflow: hidden;
+  transition: transform 0.22s var(--tch-ease), box-shadow 0.22s var(--tch-ease) !important;
+}
+
+.smallcard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--tch-shadow-lg) !important;
+}
+
+.smallcard .header {
+  border-radius: var(--tch-radius-md) var(--tch-radius-md) 0 0 !important;
+  padding: 12px 16px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px;
+}
+
+.smallcard .content {
+  padding: 16px !important;
+}
+
+/* Modern Modal Styling */
+.modal {
+  border-radius: var(--tch-radius-lg) !important;
+  box-shadow: var(--tch-shadow-modal) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden;
+}
+
+.modal-header {
+  border-radius: var(--tch-radius-lg) var(--tch-radius-lg) 0 0 !important;
+  padding: 14px 20px !important;
+}
+
+.modal-footer {
+  border-radius: 0 0 var(--tch-radius-lg) var(--tch-radius-lg) !important;
+  padding: 14px 20px !important;
+  background-color: #f8fafc !important;
+}
+
+/* Modern Status Badges & Pills */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-status::before {
+  content: '';
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.badge-status-connected {
+  background-color: #e6f4ea !important;
+  color: #137333 !important;
+}
+.badge-status-connected::before { background-color: #1e8e3e; }
+
+.badge-status-disconnected {
+  background-color: #fce8e6 !important;
+  color: #c5221f !important;
+}
+.badge-status-disconnected::before { background-color: #d93025; }
+
+.badge-status-syncing {
+  background-color: #e8f0fe !important;
+  color: #1967d2 !important;
+}
+.badge-status-syncing::before { background-color: #1a73e8; }
+
+.badge-status-warning {
+  background-color: #fef7e0 !important;
+  color: #b06000 !important;
+}
+.badge-status-warning::before { background-color: #f9ab00; }
+
+/* Modern Button Polish */
+.btn {
+  border-radius: var(--tch-radius-sm) !important;
+  font-weight: 500 !important;
+  padding: 6px 14px !important;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--tch-shadow-sm) !important;
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: #1a73e8 !important;
+  border-color: #1a73e8 !important;
+  color: #ffffff !important;
+}
+.btn-primary:hover {
+  background: #1557b0 !important;
+}
+
+.btn-danger {
+  background: #ea4335 !important;
+  border-color: #ea4335 !important;
+  color: #ffffff !important;
+}
+.btn-danger:hover {
+  background: #c5221f !important;
+}
+
+/* Modern Form & Table Enhancements */
+.table {
+  border-radius: var(--tch-radius-sm);
+  overflow: hidden;
+}
+
+.table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.table-striped tbody tr:nth-child(odd) td {
+  background-color: #fcfcfd;
+}
+
+.table-hover tbody tr:hover td {
+  background-color: #f1f5f9;
+}
+
+/* Fieldset Section Dividers */
+fieldset.form-section {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--tch-radius-md);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+fieldset.form-section legend {
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+  border-bottom: none;
+  margin-bottom: 12px;
+  padding: 0 8px;
+}

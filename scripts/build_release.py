@@ -94,15 +94,24 @@ def main():
     cli_channel = None
     manual_ver = os.environ.get("CUSTOM_VERSION", None)
 
-    for arg in sys.argv[1:]:
-        if arg.startswith("--channel="):
+    i = 1
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        if arg == "--channel" and i + 1 < len(sys.argv):
+            cli_channel = sys.argv[i + 1]
+            i += 2
+            continue
+        elif arg.startswith("--channel="):
             cli_channel = arg.split("=", 1)[1]
-        elif arg in ["preview", "stable"]:
-            cli_channel = arg
-        elif Path(arg).is_dir() or Path(arg).parent.exists():
-            dest_dir = Path(arg).resolve()
         elif re.match(r'^[0-9]+\.[0-9]+\.[0-9]+', arg):
             manual_ver = arg
+        elif arg.lower() in ["preview", "stable"]:
+            cli_channel = arg.lower()
+        elif not arg.startswith("-"):
+            p = Path(arg)
+            if p.is_dir() or "build" in arg or "gui" in arg:
+                dest_dir = p.resolve()
+        i += 1
 
     dest_dir.mkdir(parents=True, exist_ok=True)
 
