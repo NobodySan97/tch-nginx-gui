@@ -150,8 +150,13 @@ def main():
     # 4. Assembling total GUI
     total_dir = src_dir / "total"
     if total_dir.exists():
-        shutil.rmtree(total_dir)
-    total_dir.mkdir()
+        for _ in range(5):
+            try:
+                shutil.rmtree(total_dir)
+                break
+            except Exception:
+                time.sleep(0.5)
+    total_dir.mkdir(exist_ok=True)
 
     for mod in ["base", "gui_file", "traffic_mon"]:
         mod_src = src_dir / "decompressed" / mod
