@@ -5,14 +5,10 @@ on:
     branches:
       - master
     paths-ignore:
-      - 'README.md'
       - '.gitignore'
       - '.gitattributes'
-      - 'CHANGELOG.md'
       - 'LICENSE'
-      - '.github/**'
       - '*.bat'
-      - 'inizialize_gui.sh'
   workflow_dispatch:
     inputs:
       channel:

@@ -209,31 +209,24 @@ def main():
 
     # 5. Packaging tarballs according to channel
     gui_preview_tar = dest_dir / "GUI_preview.tar.bz2"
-    gui_dev_tar = dest_dir / "GUI_dev.tar.bz2"
     gui_stable_tar = dest_dir / "GUI.tar.bz2"
 
     if channel == "preview":
         print("Packaging Preview release (GUI_preview.tar.bz2)...")
         make_tar_bz2(str(total_dir), str(gui_preview_tar))
-        shutil.copy2(gui_preview_tar, gui_dev_tar)
         gui_md5 = md5_file(gui_preview_tar)
 
         # Update preview metadata only
         (dest_dir / "preview.version").write_text(f"{version}\n")
-        (dest_dir / "latest.version").write_text(f"{version}\n")
         is_prerelease = "true"
         release_title = f"Release v{version} (Preview)"
     else:
-        print("Packaging Stable release (GUI.tar.bz2, GUI_preview.tar.bz2)...")
+        print("Packaging Stable release (GUI.tar.bz2)...")
         make_tar_bz2(str(total_dir), str(gui_stable_tar))
-        shutil.copy2(gui_stable_tar, gui_preview_tar)
-        shutil.copy2(gui_stable_tar, gui_dev_tar)
         gui_md5 = md5_file(gui_stable_tar)
 
-        # Update stable and preview metadata
+        # Update stable metadata
         (dest_dir / "stable.version").write_text(f"{version}\n")
-        (dest_dir / "preview.version").write_text(f"{version}\n")
-        (dest_dir / "latest.version").write_text(f"{version}\n")
         is_prerelease = "false"
         release_title = f"Release v{version}"
 
