@@ -188,7 +188,6 @@ def main():
     gui_md5 = md5_file(gui_tar)
     (dest_dir / "latest.version").write_text(f"{version}\n")
     (dest_dir / "stable.version").write_text(f"{version}\n")
-    (dest_dir / "preview.version").write_text(f"{version}\n")
 
     v_file = dest_dir / "version"
     existing = v_file.read_text() if v_file.exists() else ""
