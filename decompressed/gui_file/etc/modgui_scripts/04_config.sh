@@ -487,14 +487,10 @@ cumulative_check_gui() {
     fi
   fi
 
-  #This generates new hash
+  # This generates new hash
   if [ -f /root/GUI.tar.bz2 ]; then
     old_gui_hash=$(uci get -q modgui.gui.gui_hash)
-    if [ -f /root/gui_dev.md5sum ]; then
-      gui_hash=$(cat /root/gui_dev.md5sum)
-    else
-      gui_hash=$(md5sum /root/GUI.tar.bz2 | awk '{ print $1}')
-    fi
+    gui_hash=$(md5sum /root/GUI.tar.bz2 | awk '{ print $1}')
     if [ "$old_gui_hash" != "$gui_hash" ]; then
       logecho "Detected upgrade!"
       logecho "Old GUI hash: $old_gui_hash"
@@ -506,6 +502,8 @@ cumulative_check_gui() {
     logecho "Can't generate GUI hash, file not found!"
     gui_hash="0"
   fi
+
+  rm -f /root/gui_dev.md5sum
 
   clean_version_gui=$(echo "$version_gui" | cut -d'-' -f1)
 

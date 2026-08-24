@@ -314,10 +314,7 @@ if [ -z "$update_branch" ] || [ "$FORCE_SAVE_GUI" = "1" ]; then
   cp "$WORKING_DIR/$FILE_NAME" "$PERMANENT_STORE_DIR/$STABLE_FILE_NAME"
 fi
 
-if [ "$update_branch" = "_dev" ] || [ "$update_branch" = "_preview" ]; then
-  logecho "Saving md5sum of dev gui to /root ..."
-  md5sum "$WORKING_DIR/$FILE_NAME" | cut -d' ' -f1 >/root/gui_dev.md5sum
-fi
+rm -f /root/gui_dev.md5sum
 
 sync
 
@@ -327,6 +324,11 @@ logecho "Running rootdevice script"
 set_transformer "rpc.system.modgui.executeCommand.state" "In Progress"
 /etc/init.d/rootdevice "$rootdevice_call"
 /etc/init.d/do_migrate_overlay preserve_files
+
+# Explicitly reset outdated state in UCI config
+uci set modgui.gui.outdated_ver=0
+uci set modgui.gui.new_ver="Unknown"
+uci commit modgui
 
 if [ -f "$WORKING_DIR/$FILE_NAME" ]; then
   rm "$WORKING_DIR/$FILE_NAME"
