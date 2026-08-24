@@ -1,6 +1,26 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.7.60 (Stable)
+---------------------------------------------------------------------------
+- **Nuovo Design System UI/UX Moderno**:
+  - Card elevation elegante con ombreggiatura neutra e transizioni fluide a 60fps
+  - Border radius moderno (10px - 14px) applicato a card, finestre modali e pulsanti
+  - Nuovi indicatori di stato a pillola (Pill Badges) per link connesso/disconnesso/sincronizzazione
+  - Ottimizzazione responsive mobile-first: aree di tocco touch >40px e zero overflow orizzontale
+  - Tabelle di configurazione con righe alternate (Zebra striping) e highlight al passaggio del mouse
+- **Download e Aggiornamento Firmware Resiliente**:
+  - Timeout di download aumentato a 300 secondi con gestione automatica errori e redirect (curl -m 300 -k -s -f -L)
+  - Prevenzione del troncamento archivio su connessioni lente
+- **Pipeline Release Stable vs Preview**:
+  - Canale Stable ufficiale e canale Preview dedicati
+  - Script nativo cross-platform Python per la compilazione automatica dei pacchetti release
+- **Stabilità e Prestazioni**:
+  - Bonifica completa di tutte le finestre modali (76) e card (29) per 100% crash-free nil-safety
+  - Risolti bug e leak di memoria su moduli Lua e streaming log ad alta efficienza
+  - Conformità POSIX /bin/sh su tutti gli script shell
+  - Integrazione supporto Ko-fi (https://ko-fi.com/nobodysan) e rimozione vecchi riferimenti PayPal
+
 9.7.50
 ---------------------------------------------------------------------------
 - Revisione e bonifica totale di tutti i 76 file modal LP e 29 file card LP per garantire 100% crash-free nil-safety
