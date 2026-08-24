@@ -17,16 +17,18 @@ local cui = {
 
 content_helper.getExactContent(cui)
 
-local year = cui.timestamp
-local current_year = string.sub(year,1,4)
+local year = cui.timestamp or ""
+local current_year = string.sub(tostring(year), 1, 4)
+if current_year == "" then current_year = "2026" end
 
-if cui.friendly_product_name then
-	if cui.provisioning_code == "Telstra" then
-		cui.friendly_product_name = cui.friendly_product_name:gsub("Technicolor", cui.provisioning_code)  -- Change Telstra
-	elseif friendly_product_name == "AGHP" then
-		cui.friendly_product_name = "AGTHP" -- Wrong product name by telecom!
-	end
+local product_name = cui.friendly_product_name or "Technicolor"
+if cui.provisioning_code == "Telstra" then
+	product_name = product_name:gsub("Technicolor", tostring(cui.provisioning_code))
+elseif product_name == "AGHP" then
+	product_name = "AGTHP"
 end
+
+local gui_ver = cui.gui_version or "9.7.61"
 
 local lang_credit = ""
 
@@ -41,11 +43,11 @@ local html = {}
 html[#html+1] =		'<div id="footer" class="row">'
 html[#html+1] =			'<div class="copyright">'
 html[#html+1] =				format('<p>&copy; Technicolor %s</p>', current_year)
-html[#html+1] =				format(T'<p>%s GUI Version ', cui.friendly_product_name)
-if session:hasAccess("/modals/changelog.lp") then
-	html[#html+1] =					format('<a href data-toggle="modal" data-remote="modals/changelog.lp">%s</a>', cui.gui_version)
+html[#html+1] =				format(T'<p>%s GUI Version ', product_name)
+if session and session.hasAccess and session:hasAccess("/modals/changelog.lp") then
+	html[#html+1] =					format('<a href data-toggle="modal" data-remote="modals/changelog.lp">%s</a>', gui_ver)
 else
-	html[#html+1] =					format('%s', cui.gui_version)
+	html[#html+1] =					format('%s', gui_ver)
 end
 html[#html+1] =				'</p>'
 html[#html+1] =				T'<p>Fork & Maintained by <font style="color:#0088cc;">NobodySan97</font> (<a target="_blank" href="https://ko-fi.com/nobodysan" style="color:#ff5e5b;font-weight:bold;"><i class="fa fa-coffee"></i> Support on Ko-fi</a>) &mdash; Based on original <font style="color:#0088cc;">Ansuel GUI</font> by <font style="color:#0088cc;">Ansuel</font> and <a href="https://github.com/NobodySan97/tch-nginx-gui/graphs/contributors">these GitHub users.</a><br/>Unlock Utility by <font style="color:#0088cc;">ADeltaX</font>'
