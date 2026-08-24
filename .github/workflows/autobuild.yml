@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'README.md'
+      - '.gitignore'
+      - '.gitattributes'
+      - 'CHANGELOG.md'
+      - 'LICENSE'
+      - '.github/**'
   workflow_dispatch:
     inputs:
       custom_version:

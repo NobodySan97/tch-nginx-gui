@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
-9.7.54
+9.7.50
 ---------------------------------------------------------------------------
 - Revisione e bonifica totale di tutti i 76 file modal LP e 29 file card LP per garantire 100% crash-free nil-safety
 - Risolti bug e leak di memoria su moduli Lua, streaming log ad alta efficienza senza picchi RAM
