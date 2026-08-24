@@ -176,18 +176,21 @@ def main():
                 shutil.copy2(mod_tar, tmp_dir / f"{mod}.tar.bz2")
 
     gui_tar = dest_dir / "GUI.tar.bz2"
+    gui_preview_tar = dest_dir / "GUI_preview.tar.bz2"
     gui_dev_tar = dest_dir / "GUI_dev.tar.bz2"
 
-    print("Packaging main GUI.tar.bz2 and GUI_dev.tar.bz2...")
+    print("Packaging main GUI.tar.bz2, GUI_preview.tar.bz2, and GUI_dev.tar.bz2...")
     make_tar_bz2(str(total_dir), str(gui_tar))
+    shutil.copy2(gui_tar, gui_preview_tar)
     shutil.copy2(gui_tar, gui_dev_tar)
 
     shutil.rmtree(total_dir)
 
     # 5. Update version files in destination
     gui_md5 = md5_file(gui_tar)
-    (dest_dir / "latest.version").write_text(f"{version}\n")
     (dest_dir / "stable.version").write_text(f"{version}\n")
+    (dest_dir / "preview.version").write_text(f"{version}\n")
+    (dest_dir / "latest.version").write_text(f"{version}\n")
 
     v_file = dest_dir / "version"
     existing = v_file.read_text() if v_file.exists() else ""
