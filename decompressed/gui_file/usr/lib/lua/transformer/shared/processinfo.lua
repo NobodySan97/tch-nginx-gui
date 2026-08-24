@@ -26,22 +26,42 @@ function M.getCPUUsage()
   return tostring(cpuUsage)
 end
 
--- Calculates Current cpu usage using top command. The value is addition of usr, sys and nice vlaues.
--- @funciton M.getCurrentCPUUsage
+local prev_idle, prev_total = 0, 0
+-- Calculates Current cpu usage using /proc/stat deltas. Zero-fork, zero subshell overhead.
+-- @function M.getCurrentCPUUsage
 -- @return #string, returns the current CPU usage value.
 function M.getCurrentCPUUsage()
-  local cpuUsage
-  local getData = popen("top -b -n1")
-  local usr,sys,nic
-  for line in getData:lines() do
-    usr, sys, nic = line:match("^CPU:%s*(%d+)%%%s*u.*%s*(%d+)%%%s*s.*%s*(%d+)%%%s*n.*")
-    if usr then
-      cpuUsage = tonumber(usr) + tonumber(sys) + tonumber(nic)
-      break
-    end
+  local data = open("/proc/stat", "r")
+  if not data then return "0" end
+  local firstLine = data:read("*l")
+  data:close()
+  if not firstLine then return "0" end
+  local user, nice, sys, idle, ioWait, irq, softIrq, steal, guest, guestNice = firstLine:match("^cpu%s*(%d+)%s*(%d+)%s*(%d+)%s*(%d+)%s*(%d+)%s*(%d+)%s*(%d+)%s*(%d+)%s*(%d+)%s*(%d+)")
+  if not user then return "0" end
+  user = tonumber(user) or 0
+  nice = tonumber(nice) or 0
+  sys = tonumber(sys) or 0
+  idle = tonumber(idle) or 0
+  ioWait = tonumber(ioWait) or 0
+  irq = tonumber(irq) or 0
+  softIrq = tonumber(softIrq) or 0
+  steal = tonumber(steal) or 0
+  guest = tonumber(guest) or 0
+  guestNice = tonumber(guestNice) or 0
+  local cpuIdle = ioWait + idle
+  local cpuNonIdle = user + nice + sys + irq + softIrq + steal + guest + guestNice
+  local total = cpuIdle + cpuNonIdle
+  if prev_total == 0 then
+    prev_idle, prev_total = cpuIdle, total
+    local usage = floor(((total - cpuIdle)/total)*100)
+    return tostring(math.max(0, math.min(100, usage)))
   end
-  getData:close()
-  return (cpuUsage and tostring(cpuUsage)) or "0"
+  local diff_idle = cpuIdle - prev_idle
+  local diff_total = total - prev_total
+  prev_idle, prev_total = cpuIdle, total
+  if diff_total <= 0 then return "0" end
+  local usage = floor(((diff_total - diff_idle)/diff_total)*100)
+  return tostring(math.max(0, math.min(100, usage)))
 end
 
 return M

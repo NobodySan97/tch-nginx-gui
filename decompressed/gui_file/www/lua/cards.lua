@@ -134,21 +134,33 @@ function M.get_modal_from_card(CardSearch)
 	return result
 end
 
+local card_files_cache = {}
+
 function M.cards()
   local session = ngx.ctx.session
   local limit_info = get_limit_info()
   local result = {}
-  if includepath and lfs.attributes(includepath, 'mode') == 'directory' then
-    for file in lfs.dir(includepath) do
-      if find(file, "%.lp$") then
-        local cardname = file:gsub("^%d+_", "")
-        if card_visible(session, config, cardname) and not card_limited(limit_info, cardname, includepath) then
-          result[#result+1] = file
+  if not includepath then return result end
+
+  if not card_files_cache[includepath] then
+    local files = {}
+    if lfs.attributes(includepath, 'mode') == 'directory' then
+      for file in lfs.dir(includepath) do
+        if find(file, "%.lp$") then
+          files[#files+1] = file
         end
       end
+      sort(files)
+    end
+    card_files_cache[includepath] = files
+  end
+
+  for _, file in ipairs(card_files_cache[includepath]) do
+    local cardname = file:gsub("^%d+_", "")
+    if card_visible(session, config, cardname) and not card_limited(limit_info, cardname, includepath) then
+      result[#result+1] = file
     end
   end
-  sort(result)
   return result
 end
 

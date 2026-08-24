@@ -61,7 +61,7 @@ end
 local leds_data, leds_index = content_helper.loadTableData(leds_options.basepath, leds_columns,leds_filter)
 
   ngx.print('\
-');  ngx.print(ui_helper.createHeader(T"Diagnostics", false, false, 1) ); ngx.print('\
+');  ngx.print(ui_helper.createHeader(T"Diagnostics", false, false, 5) ); ngx.print('\
 <div class="modal-body update">\
 ');  
   local lp = require("web.lp")

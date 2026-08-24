@@ -355,4 +355,12 @@ $(document).ready(function () {
 			}
 		}
 	};
+
+	document.addEventListener("visibilitychange", function () {
+		if (document.hidden) {
+			clearKoInterval();
+		} else {
+			restartKoInterval();
+		}
+	});
 });

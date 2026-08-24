@@ -57,6 +57,9 @@ local  port_options = {
     basepath = "sys.eth.port.@.",
 }
 
+local wan_port_val = proxy.get("uci.ethernet.port.@"..ethname..".wan")
+local is_wan = (wan_port_val and wan_port_val[1] and wan_port_val[1].value == "1")
+
 local port_filter = function(data)
 
 	data.status_light = "1"
@@ -80,8 +83,6 @@ local port_filter = function(data)
 	if quantenna_wifi and data.paramindex:match("eth5") then
 		return false
 	else
-		local wan_port_val = proxy.get("uci.ethernet.port.@"..ethname..".wan")
-		local is_wan = (wan_port_val and wan_port_val[1] and wan_port_val[1].value == "1")
 		if data.paramindex:match(ethname) and is_wan then
 			data.paramindex = "WAN"
 		else

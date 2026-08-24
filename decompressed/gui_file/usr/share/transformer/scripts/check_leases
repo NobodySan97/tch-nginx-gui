@@ -141,10 +141,11 @@ if result and #deleted > 0 then
   end
 end
 
--- restart dnsmasq, reload firewall
--- static leases have been deleted if we get here
-os.execute("/etc/init.d/dnsmasq restart")
-if reload_firewall then
-  -- port forwarding rules have been deleted
-  os.execute("/etc/init.d/firewall reload")
+-- restart dnsmasq, reload firewall only if static leases have been deleted
+if #deleted > 0 then
+  os.execute("/etc/init.d/dnsmasq restart")
+  if reload_firewall then
+    -- port forwarding rules have been deleted
+    os.execute("/etc/init.d/firewall reload")
+  end
 end

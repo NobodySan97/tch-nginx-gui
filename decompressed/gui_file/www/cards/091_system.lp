@@ -37,15 +37,19 @@ local syslog_light_map = {
 }
 
 local ssh_enable = "disabled"
-local SSH_legacy = proxy.get("uci.dropbear.dropbear.@dropbear[0].enable")
-local SSH_lan = proxy.get("uci.dropbear.dropbear.@lan.enable")
-local SSH_wan = proxy.get("uci.dropbear.dropbear.@wan.enable")
-local SSH_afg = proxy.get("uci.dropbear.dropbear.@afg.enable")
-if (SSH_legacy and SSH_legacy[1] and SSH_legacy[1].value == "1") or
-   (SSH_lan and SSH_lan[1] and SSH_lan[1].value == "1") or
-   (SSH_wan and SSH_wan[1] and SSH_wan[1].value == "1") or
-   (SSH_afg and SSH_afg[1] and SSH_afg[1].value == "1") then
-    ssh_enable = "enabled"
+local dropbear_res = proxy.get(
+  "uci.dropbear.dropbear.@dropbear[0].enable",
+  "uci.dropbear.dropbear.@lan.enable",
+  "uci.dropbear.dropbear.@wan.enable",
+  "uci.dropbear.dropbear.@afg.enable"
+)
+if dropbear_res then
+  for _, item in ipairs(dropbear_res) do
+    if item.value == "1" then
+      ssh_enable = "enabled"
+      break
+    end
+  end
 end
 
 local SSH_state_map = {

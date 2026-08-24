@@ -12,49 +12,70 @@ local table, string = table, string
 local tonumber = tonumber
 local format = string.format
 
---Funtion that gets information of a particular wireless station, the parameter received is the MAC address
+local ap0_raw = proxy.get("rpc.wireless.ap.@ap0.station.")
+local ap1_raw = proxy.get("rpc.wireless.ap.@ap1.station.")
+
+local ap0_stations = content_helper.convertResultToObject("rpc.wireless.ap.@ap0.station.@.", ap0_raw) or {}
+local ap1_stations = content_helper.convertResultToObject("rpc.wireless.ap.@ap1.station.@.", ap1_raw) or {}
+
+local stations_2g = {}
+for _, s in ipairs(ap0_stations) do
+	if s.paramindex then
+		stations_2g[s.paramindex:upper()] = s
+	end
+end
+
+local stations_5g = {}
+for _, s in ipairs(ap1_stations) do
+	if s.paramindex then
+		stations_5g[s.paramindex:upper()] = s
+	end
+end
+
+-- Function that gets information of a particular wireless station from the pre-fetched maps
 local stationConf = {}
 local getStationData = function(stationMAC)
-		stationConf = {}
-		local stationPath = format("rpc.wireless.ap.@ap0.station.@%s.", stationMAC)
+	local mac = stationMAC and stationMAC:upper()
+	local s = mac and stations_2g[mac]
+	if s then
 		stationConf = {
-				state = stationPath .. "state",
-				flags = stationPath .. "flags",
-				capabilities = stationPath .. "capabilities",
-				last_rssi = stationPath .. "last_rssi",
-				rssi = stationPath .. "rssi",
-				av_rssi = stationPath .. "av_rssi",
-				rx_bytes = stationPath .. "rx_bytes",
-				tx_bytes = stationPath .. "tx_bytes",
-				tx_phy_rate = stationPath .. "tx_phy_rate",
-				rx_phy_rate = stationPath .. "rx_phy_rate",
+			state = s.state,
+			flags = s.flags,
+			capabilities = s.capabilities,
+			last_rssi = s.last_rssi,
+			rssi = s.rssi,
+			av_rssi = s.av_rssi,
+			rx_bytes = s.rx_bytes,
+			tx_bytes = s.tx_bytes,
+			tx_phy_rate = s.tx_phy_rate,
+			rx_phy_rate = s.rx_phy_rate,
+			radio = "2.4Ghz"
 		}
-
-		local m_status, m_error = content_helper.getExactContent(stationConf)
-
-		stationConf["radio"] = "2.4Ghz"
-		return m_status
+		return true
+	end
+	return false
 end
 
 local getStationData5G = function(stationMAC)
-		stationConf = {}
-		local stationPath = format("rpc.wireless.ap.@ap1.station.@%s.", stationMAC)
+	local mac = stationMAC and stationMAC:upper()
+	local s = mac and stations_5g[mac]
+	if s then
 		stationConf = {
-			state = stationPath .. "state",
-			flags = stationPath .. "flags",
-			capabilities = stationPath .. "capabilities",
-			last_rssi = stationPath .. "last_rssi",
-			rssi = stationPath .. "rssi",
-			av_rssi = stationPath .. "av_rssi",
-			rx_bytes = stationPath .. "rx_bytes",
-			tx_bytes = stationPath .. "tx_bytes",
-			tx_phy_rate = stationPath .. "tx_phy_rate",
-			rx_phy_rate = stationPath .. "rx_phy_rate",
+			state = s.state,
+			flags = s.flags,
+			capabilities = s.capabilities,
+			last_rssi = s.last_rssi,
+			rssi = s.rssi,
+			av_rssi = s.av_rssi,
+			rx_bytes = s.rx_bytes,
+			tx_bytes = s.tx_bytes,
+			tx_phy_rate = s.tx_phy_rate,
+			rx_phy_rate = s.rx_phy_rate,
+			radio = "5Ghz"
 		}
-
-		local m_status, m_error = content_helper.getExactContent(stationConf)
-		stationConf["radio"] = "5Ghz"
-		return m_status
+		return true
+	end
+	return false
 end
 
 local hosts = proxy.get("sys.hosts.host.")

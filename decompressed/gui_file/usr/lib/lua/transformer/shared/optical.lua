@@ -508,11 +508,11 @@ function M.getAllStats()
 end
 
 function M.getCrossbarStatus()
-  local ctl = popen("cat /proc/ethernet/crossbar_status")
+  local f = io.open("/proc/ethernet/crossbar_status", "r")
   local output = ""
-  if ctl then
-    output = ctl:read("*a") or ""
-    ctl:close()
+  if f then
+    output = f:read("*a") or ""
+    f:close()
   end
   return output
 end

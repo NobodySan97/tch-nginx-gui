@@ -24,17 +24,9 @@ start_service() {
 
     if [ -n "$dest_ip" ] && [ -n "$dest_intf" ]; then
         # Add route entry
-        ip route add ${dest_ip}/32 dev $dest_intf
+        ip route replace ${dest_ip}/32 dev $dest_intf 2>/dev/null
         # Add a static ARP spoofing entry
-        local count="0"
-        while [ $count -lt 20 ]; do
-            if [ -z "$(ip neigh show to $dest_ip dev $dest_intf | grep 'FAILED')" ] ; then
-              break
-            fi
-            sleep 1
-            count=$(( $count + 1 ))
-        done
-        ip neigh replace $dest_ip lladdr ff:ff:ff:ff:ff:ff nud permanent dev $dest_intf
+        ip neigh replace $dest_ip lladdr ff:ff:ff:ff:ff:ff nud permanent dev $dest_intf 2>/dev/null
 		# Add port forwarding
 		uci set firewall.WakeOnWan=redirect
 		uci set firewall.WakeOnWan.family=ipv4
@@ -49,7 +41,7 @@ start_service() {
 		uci commit firewall
     fi
 
-    /etc/init.d/firewall restart 2>/dev/null
+    /etc/init.d/firewall reload 2>/dev/null
 }
 
 stop_service() {

@@ -66,7 +66,7 @@ local portAttr = {
   }
 }
   ngx.print('\
-');  ngx.print(ui_helper.createHeader(T"Diagnostics", false, false, 2) ); ngx.print('\
+');  ngx.print(ui_helper.createHeader(T"Diagnostics", false, false, 5) ); ngx.print('\
 <div class="modal-body update">\
 ');  
   local lp = require("web.lp")

@@ -1,17 +1,18 @@
 #!/bin/sh
 
+[ "$ACTION" = "ifup" ] || exit 0
+
 config_load mmpbx
 
 config_get_bool enabled global enabled 0
-[ "$enabled" -eq 0 ] && exit 0
+[ "$enabled" -eq 1 ] || exit 0
 
 iface0="$(uci -q get mmpbxrvsipnet.@network[0].interface)"
 iface1="$(uci -q get mmpbxrvsipnet.@network[1].interface)"
 
-if [ "$ACTION" = "ifup" ]; then
-	if [ -n "$iface0" ] && [ "$INTERFACE" = "$iface0" ]; then
-		/etc/init.d/mmpbxd reload &
-	elif [ -n "$iface1" ] && [ "$INTERFACE" = "$iface1" ]; then
-		/etc/init.d/mmpbxd reload &
-	fi
+if [ "$INTERFACE" = "$iface0" ] || [ "$INTERFACE" = "$iface1" ]; then
+	(
+		flock -n 200 || exit 0
+		/etc/init.d/mmpbxd reload
+	) 200>/var/run/mmpbxd_hotplug.lock &
 fi

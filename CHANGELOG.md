@@ -1,6 +1,23 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.7.64 (Stable)
+---------------------------------------------------------------------------
+- **Ottimizzazione CPU, Riduzione I/O e Zero-Fork Performance**:
+  - `processinfo.lua`: Sostituito `top -b -n1` con calcolo differenziale diretto da `/proc/stat` in Lua nativo (zero-fork, zero subshell overhead).
+  - `sfp.lua` & `optical.lua`: Sostituiti i comandi shell `cat /proc/sfp_status` e `cat /proc/crossbar_status` con `io.open()` nativo ultra-veloce.
+  - `wifi-nurse-modal.lp`: Raggruppate tutte le query di stazione Wi-Fi 2.4G e 5G in due soli batch iniziali con mappatura O(1), eliminando oltre 400 interrogazioni IPC sincrone in loop.
+  - `shared-script.js`: Integrata l'API HTML5 `document.visibilitychange` per mettere in pausa automaticamente tutti i timer di polling AJAX quando la scheda del browser è in background o minimizzata.
+  - `banktable.lua`: Memorizzato in cache il controllo di validità del banco passivo (`isOtherBankValid`) per eliminare la scansione a blocchi 4KB su memoria NAND Flash.
+  - `cards.lua`: Memorizzata in cache la scansione dei template card sul filesystem, azzerando le letture disco a ogni richiesta HTTP.
+  - `091_system.lp`: Raggruppate in un unico batch `proxy.get()` le 4 verifiche di stato del servizio Dropbear/SSH.
+  - `port_status.lua`: Spostata l'interrogazione della porta WAN all'esterno del ciclo `port_filter`.
+  - `wol` & `99-wol`: Eliminato il loop bloccante da 20s con `sleep 1`, usati comandi atomici `ip route replace` / `ip neigh replace` e ricaricamento non distruttivo del firewall (`firewall reload`).
+  - `99-mmpbxd`: Aggiunta uscita immediata su eventi non-ifup e serializzazione reload con `flock`.
+  - `check_leases`: Riavvio di `dnsmasq` eseguito solo ed esclusivamente quando sono stati effettivamente rimossi lease DHCP statici (`#deleted > 0`).
+  - `command-log-read-modal.lp`: Regolato l'intervallo di polling da 100ms a 1000ms.
+  - `diagnostics-leds-modal.lp` & `diagnostics-network-modal.lp`: Ottimizzato l'autorefresh da 1s/2s a 5s per abbattere il carico CPU continuo.
+
 9.7.63 (Stable)
 ---------------------------------------------------------------------------
 - **Aggiornamento e Test di Verifica Pipeline**:

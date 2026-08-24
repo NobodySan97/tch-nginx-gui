@@ -162,7 +162,11 @@ end
 -- the FVP is set to 0.
 -- @return true if booting from the other bank seems possible
 -- @return false if not
+local cached_other_valid = nil
 function M.isOtherBankValid()
+  if cached_other_valid ~= nil then
+    return cached_other_valid
+  end
   local valid = false
   local devname = getDeviceName(getOtherBank())
   if devname then
@@ -201,6 +205,7 @@ function M.isOtherBankValid()
       end
     end
    end
+  cached_other_valid = valid
   return valid
 end
 

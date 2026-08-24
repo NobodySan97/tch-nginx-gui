@@ -45,12 +45,12 @@ function M.getSfpctlFormat(option)
 end
 
 function M.getSfpStatus()
-  local ctl = popen("cat /proc/sfp_status 2>/dev/null")
-  if not ctl then
+  local f = io.open("/proc/sfp_status", "r")
+  if not f then
     return ""
   end
-  local output = ctl:read("*a")
-  ctl:close()
+  local output = f:read("*a")
+  f:close()
   return output or ""
 end
 
@@ -63,12 +63,12 @@ function M.getTxDis()
 end
 
 function M.getCrossbarStatus()
-  local ctl = popen("cat /proc/crossbar_status 2>/dev/null")
-  if not ctl then
+  local f = io.open("/proc/crossbar_status", "r")
+  if not f then
     return ""
   end
-  local output = ctl:read("*a")
-  ctl:close()
+  local output = f:read("*a")
+  f:close()
   return output or ""
 end
 
