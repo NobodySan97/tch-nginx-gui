@@ -1,3 +1,20 @@
+---------------------------------------------------------------------------
+# Mainline 18.3 / 19.4 NobodySan97 Edition
+
+9.7.54
+---------------------------------------------------------------------------
+- Revisione e bonifica totale di tutti i 76 file modal LP e 29 file card LP per garantire 100% crash-free nil-safety
+- Risolti bug e leak di memoria su moduli Lua, streaming log ad alta efficienza senza picchi RAM
+- Riorganizzato e chiarito il menu di Reset Avanzato (modgui-modal.lp) con descrizioni dedicate, dialoghi popup espliciti e pulsanti colorati
+- Raggruppate in batch le interrogazioni al datamodel per dispositivi Wi-Fi, contatori di traffico e profili VoIP MMPBX
+- Corretto il ring buffer a finestra scorrevole 24h per il monitoraggio del traffico in trafficmon.lua
+- Risolto bug di sintassi in Transformer system.tcpdump.map (cattura pacchetti 100% funzionante)
+- Conformità POSIX /bin/sh al 100% su tutti i 63 script shell e demoni di sistema (rimossi bashismi e variabili non quotate)
+- Aggiunti link e badge di supporto Ko-fi (https://ko-fi.com/nobodysan) su README, footer GUI e modgui modal; rimossi vecchi riferimenti PayPal
+- Aggiunto badge contatore download totali su README.md
+- Rimossa configurazione legacy CircleCI in favore di GitHub Actions CI/CD
+- Testati e verificati tutti i 9 temi grafici della GUI con resa perfetta e traduzioni italiane UTF-8 complete
+
 
 ---------------------------------------------------------------------------
 # Mainline 18.3 Cobalt

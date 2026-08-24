@@ -1,6 +1,24 @@
-transfer.bat
-transfer_dev.bat
-total/*
+# Temporary & Build Directories
+total/
+gui-dev-build-auto/
+*.tar.bz2
+*.tar.gz
+*.zip
+
+# OS & Editor files
 .DS_Store
 *.DS_Store
-.idea
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Scripts & temporary logs
+transfer.bat
+transfer_dev.bat
+*.log
+*.tmp
+__pycache__/
+*.py[cod]
