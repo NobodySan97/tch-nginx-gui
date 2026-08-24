@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
-9.7.64 (Stable)
+9.7.66 (Stable)
 ---------------------------------------------------------------------------
 - **Ottimizzazione CPU, Riduzione I/O e Zero-Fork Performance**:
   - `processinfo.lua`: Sostituito `top -b -n1` con calcolo differenziale diretto da `/proc/stat` in Lua nativo (zero-fork, zero subshell overhead).
@@ -17,13 +17,7 @@
   - `check_leases`: Riavvio di `dnsmasq` eseguito solo ed esclusivamente quando sono stati effettivamente rimossi lease DHCP statici (`#deleted > 0`).
   - `command-log-read-modal.lp`: Regolato l'intervallo di polling da 100ms a 1000ms.
   - `diagnostics-leds-modal.lp` & `diagnostics-network-modal.lp`: Ottimizzato l'autorefresh da 1s/2s a 5s per abbattere il carico CPU continuo.
-
-9.7.63 (Stable)
----------------------------------------------------------------------------
-- **Aggiornamento e Test di Verifica Pipeline**:
-  - Test completo del nuovo meccanismo di download resiliente con timeout a 300s
-  - Verifica automatica del checksum e scompattamento su tutti i modelli Technicolor
-  - Ottimizzazioni per il rendering fluido del nuovo Design System NobodySan97 Edition
+  - Rimossa la generazione dei file legacy dev (`GUI_dev.tar.bz2`), mantenendo solo i canali ufficiali Stable e Preview.
 
 9.7.60 (Stable)
 ---------------------------------------------------------------------------
