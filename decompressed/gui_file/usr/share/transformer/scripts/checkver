@@ -83,7 +83,7 @@ if [ "$connectivity" = "yes" ]; then
 	newer_stable=0
 
     logger -s -t "CheckVer Script" "Installed version: $CURRENT_VERSION checking update on $update_branch branch..."
-	new_version="$(curl -m 15 -k -s "$version_link")"
+	new_version="$(curl -m 30 -k -s -f -L "$version_link")"
 	new_version_norm="$(normalize "$new_version")"
 
     logger -s -t "CheckVer Script" "Online version: $new_version"
