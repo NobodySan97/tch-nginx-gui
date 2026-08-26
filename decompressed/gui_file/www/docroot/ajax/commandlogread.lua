@@ -29,7 +29,6 @@ else
 	if file then
 		local content = file:read('*a')
 		file:close()
-		data["log"] = content
 		local last_pct = nil
 		for p in content:gmatch("(%d+%.?%d*)%%") do
 			last_pct = p
@@ -37,6 +36,15 @@ else
 		if last_pct then
 			data["progress"] = tonumber(last_pct)
 		end
+		-- Strip curl progress bar lines from console display
+		local clean_lines = {}
+		for line in content:gmatch("[^\r\n]+") do
+			local is_prog = line:match("^[%s#=%-O]*%d+%.?%d*%%[%s#=%-O]*$") or line:match("^[%s#=%-O]+$")
+			if not is_prog then
+				clean_lines[#clean_lines + 1] = line
+			end
+		end
+		data["log"] = table.concat(clean_lines, "\n")
 	end
 end
 

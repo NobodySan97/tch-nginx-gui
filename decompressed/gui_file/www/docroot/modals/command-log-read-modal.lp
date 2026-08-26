@@ -45,7 +45,11 @@ ngx.print('\
             complete: function(data) { requestInProgress=false },\
             dataType: "json"})\
 			.done(function(data) {\
-				ElementBinding.log(data.log);\
+				var clean_log = (data.log || "")\
+					.replace(/^[#=\\-O\\s]*\\d+\\.?\\d*%\\s*$/gm, "")\
+					.replace(/^[#=\\-O\\s]+$/gm, "")\
+					.replace(/\\n\\s*\\n/g, "\\n");\
+				ElementBinding.log(clean_log);\
 				var header_text = $("#header_title").text();\
 				if (header_text != data.state) $("#header_title").text(data.state);\
 				if (data.state == "Downloading" || data.progress !== undefined || data.state == "Extracting" || data.state == "In Progress" || data.state == "Clearing") {\
