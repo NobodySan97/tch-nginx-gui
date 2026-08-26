@@ -17,6 +17,8 @@
   - `check_leases`: Riavvio di `dnsmasq` eseguito solo ed esclusivamente quando sono stati effettivamente rimossi lease DHCP statici (`#deleted > 0`).
   - `command-log-read-modal.lp`: Regolato l'intervallo di polling da 100ms a 1000ms.
   - `diagnostics-leds-modal.lp` & `diagnostics-network-modal.lp`: Ottimizzato l'autorefresh da 1s/2s a 5s per abbattere il carico CPU continuo.
+  - `06_network.sh`: Disattivazione automatica di DHCPv6 e Router Advertisements (RA) in modalità Bridge, eliminando i conflitti DNS IPv6 con router in cascata.
+  - Aggiornati i server DNS upstream predefiniti a Cloudflare ad altissima velocità (`1.1.1.1` e `1.0.0.1`).
   - Rimossa la generazione dei file legacy dev (`GUI_dev.tar.bz2`), mantenendo solo i canali ufficiali Stable e Preview.
 
 9.7.60 (Stable)

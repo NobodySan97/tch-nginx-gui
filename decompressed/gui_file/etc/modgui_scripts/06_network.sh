@@ -155,12 +155,21 @@ update_dhcp_config() {
     #by removing the entities we solve the problem
     uci del dhcp.lan.dhcpv4
   fi
-  if [ "$(uci get -q network.config.wan_mode)" = "bridge" ] || [ "$(uci get -q network.interface.wan.proto)" = "bridge" ]; then
+  if [ "$(uci get -q network.config.wan_mode)" = "bridge" ] || [ "$(uci get -q network.wan.proto)" = "bridge" ] || [ "$(uci get -q network.interface.wan.proto)" = "bridge" ]; then
+    logecho "Bridge mode detected: disabling DHCP, DHCPv6 and Router Advertisements on LAN"
     uci set dhcp.lan.ignore='1'
+    uci set dhcp.lan.dhcpv6='disabled'
+    uci set dhcp.lan.ra='disabled'
   elif [ ! "$(uci get -q dhcp.lan.ignore)" ]; then
     uci set dhcp.lan.ignore='0'
   fi
   uci commit dhcp
+
+  # Ensure default DNS is set to fast Cloudflare resolvers
+  if [ ! "$(uci get -q network.lan.dns)" ] || [ "$(uci get -q network.lan.dns)" = "8.8.8.8 1.1.1.1" ]; then
+    uci set network.lan.dns='1.1.1.1 1.0.0.1'
+    uci commit network
+  fi
 
   # Ensure lan_alias is in the firewall zone for LAN
   if [ "$(uci get -q network.lan_alias)" ] && ! uci get firewall.lan.network | grep -q "lan_alias"; then
