@@ -27,8 +27,16 @@ if action[string.untaint(data.state)] then
 else
 	local file = io.open("/tmp/command_log","r")
 	if file then
-		data["log"] = file:read('*a')
+		local content = file:read('*a')
 		file:close()
+		data["log"] = content
+		local last_pct = nil
+		for p in content:gmatch("(%d+%.?%d*)%%") do
+			last_pct = p
+		end
+		if last_pct then
+			data["progress"] = tonumber(last_pct)
+		end
 	end
 end
 

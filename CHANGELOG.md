@@ -20,6 +20,7 @@
   - `06_network.sh`: Disattivazione automatica di DHCPv6 e Router Advertisements (RA) in modalità Bridge, eliminando i conflitti DNS IPv6 con router in cascata.
   - Aggiornati i server DNS upstream predefiniti a Cloudflare ad altissima velocità (`1.1.1.1` e `1.0.0.1`).
   - `network.interface.map`: Corretto errore Lua di tipo `concat` (string vs table) su `getDnsServers`, eliminando l'errore di transformer `bad argument #1 to 'concat'`.
+  - `command-log-read-modal.lp` & `commandlogread.lua` & `upgradegui`: Aggiunta barra di avanzamento dinamica e percentuale di download in tempo reale (0% - 100%) durante l'aggiornamento della GUI.
   - Rimossa la generazione dei file legacy dev (`GUI_dev.tar.bz2`), mantenendo solo i canali ufficiali Stable e Preview.
 
 9.7.60 (Stable)

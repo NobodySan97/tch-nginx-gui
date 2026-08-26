@@ -41,7 +41,7 @@ ${NC}
 "
 }
 
-curl="/usr/bin/curl -m 300 -k -s -f -L"
+curl="/usr/bin/curl -m 300 -k -f -L"
 bzcat=/usr/bin/bzcat
 tar=/bin/tar
 rootdevice_call="debug"
@@ -153,7 +153,7 @@ if [ ! -f $WORKING_DIR/$FILE_NAME ]; then #Check if file exist as offline upload
   rm -f "$WORKING_DIR/$FILE_NAME"* "$WORKING_DIR/GUI"*
 
   # Download new GUI to /tmp
-  if ! $curl $URL_BASE/$FILE_NAME --output $WORKING_DIR/$FILE_NAME; then
+  if ! $curl -# "$URL_BASE/$FILE_NAME" --output "$WORKING_DIR/$FILE_NAME"; then
     logecho "ERROR: Can't find new GUI file" >&2
     ubus send fwupgrade '{"state":"done"}'
     exit 1
@@ -163,7 +163,7 @@ if [ ! -f $WORKING_DIR/$FILE_NAME ]; then #Check if file exist as offline upload
   if [ -f /tmp/$CHECKSUM_FILE ]; then
     rm "$WORKING_DIR/$CHECKSUM_FILE"
   fi
-  $curl "$URL_BASE/$CHECKSUM_FILE" --output "$WORKING_DIR/$CHECKSUM_FILE"
+  $curl -s "$URL_BASE/$CHECKSUM_FILE" --output "$WORKING_DIR/$CHECKSUM_FILE"
 
   downloaded_md5="$(md5sum "$WORKING_DIR/$FILE_NAME" | cut -d' ' -f1)"
 
