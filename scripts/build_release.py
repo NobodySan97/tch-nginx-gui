@@ -55,7 +55,57 @@ def detect_channel(last_msg, cli_channel=None):
         return "preview"
     return "stable"
 
-def calculate_version(last_msg, base_version_file, manual_ver=None):
+def parse_ver_tuple(ver_str):
+    m = re.search(r'(\d+)\.(\d+)\.(\d+)', str(ver_str))
+    if m:
+        return (int(m.group(1)), int(m.group(2)), int(m.group(3)))
+    return (0, 0, 0)
+
+def ver_tuple_to_str(v_tuple):
+    return f"{v_tuple[0]}.{v_tuple[1]}.{v_tuple[2]}"
+
+def find_highest_version(src_dir, dest_dir):
+    candidates = []
+    
+    # 1. From git tags in tch-nginx-gui
+    try:
+        tags_out = subprocess.check_output(
+            ["git", "-C", str(src_dir), "tag", "-l", "v*"],
+            text=True
+        ).strip().splitlines()
+        for t in tags_out:
+            candidates.append(parse_ver_tuple(t))
+    except Exception:
+        pass
+
+    # 2. From stable.version, preview.version, latest.version in dest_dir
+    for f in ["stable.version", "preview.version", "latest.version"]:
+        p = dest_dir / f
+        if p.exists():
+            try:
+                candidates.append(parse_ver_tuple(p.read_text().strip()))
+            except Exception:
+                pass
+
+    # 3. From version file in dest_dir
+    v_file = dest_dir / "version"
+    if v_file.exists():
+        try:
+            for line in v_file.read_text().splitlines():
+                if line.strip():
+                    candidates.append(parse_ver_tuple(line))
+        except Exception:
+            pass
+
+    if not candidates:
+        return (9, 7, 50)
+    
+    highest = max(candidates)
+    if highest == (0, 0, 0):
+        return (9, 7, 50)
+    return highest
+
+def calculate_version(last_msg, src_dir, dest_dir, manual_ver=None):
     if manual_ver:
         return manual_ver.strip()
     
@@ -64,17 +114,8 @@ def calculate_version(last_msg, base_version_file, manual_ver=None):
         print(f"Detected version tag in commit message: {match.group(1)}")
         return match.group(1)
 
-    cur_ver = "9.7.50"
-    if base_version_file.exists():
-        try:
-            content = base_version_file.read_text().strip()
-            if re.match(r'^[0-9]+\.[0-9]+\.[0-9]+$', content):
-                cur_ver = content
-        except Exception:
-            pass
-
-    parts = cur_ver.split(".")
-    major, minor, patch = int(parts[0]), int(parts[1]), int(parts[2])
+    highest_tuple = find_highest_version(src_dir, dest_dir)
+    major, minor, patch = highest_tuple
     
     patch += 1
     if patch > 99:
@@ -85,7 +126,7 @@ def calculate_version(last_msg, base_version_file, manual_ver=None):
             major += 1
 
     new_ver = f"{major}.{minor}.{patch}"
-    print(f"Auto-incrementing version ({base_version_file.name}): {cur_ver} -> {new_ver}")
+    print(f"Detected highest existing version across repositories: {ver_tuple_to_str(highest_tuple)} -> Auto-incrementing to: {new_ver}")
     return new_ver
 
 def main():
@@ -122,17 +163,7 @@ def main():
     print(f"Destination Directory: {dest_dir}")
     print(f"Target Channel:        {channel.upper()}")
 
-    # Determine reference version file based on channel
-    if channel == "preview":
-        ref_version_file = dest_dir / "preview.version"
-        if not ref_version_file.exists():
-            ref_version_file = dest_dir / "latest.version"
-    else:
-        ref_version_file = dest_dir / "stable.version"
-        if not ref_version_file.exists():
-            ref_version_file = dest_dir / "latest.version"
-
-    version = calculate_version(last_msg, ref_version_file, manual_ver)
+    version = calculate_version(last_msg, src_dir, dest_dir, manual_ver)
 
     # 1. Update version in rootdevice
     rootdevice = src_dir / "decompressed" / "base" / "etc" / "init.d" / "rootdevice"
@@ -216,8 +247,9 @@ def main():
         make_tar_bz2(str(total_dir), str(gui_preview_tar))
         gui_md5 = md5_file(gui_preview_tar)
 
-        # Update preview metadata only
+        # Update preview & latest metadata
         (dest_dir / "preview.version").write_text(f"{version}\n")
+        (dest_dir / "latest.version").write_text(f"{version}\n")
         is_prerelease = "true"
         release_title = f"Release v{version} (Preview)"
     else:
@@ -225,8 +257,10 @@ def main():
         make_tar_bz2(str(total_dir), str(gui_stable_tar))
         gui_md5 = md5_file(gui_stable_tar)
 
-        # Update stable metadata
+        # Update stable, preview baseline & latest metadata
         (dest_dir / "stable.version").write_text(f"{version}\n")
+        (dest_dir / "latest.version").write_text(f"{version}\n")
+        (dest_dir / "preview.version").write_text(f"{version}\n")
         is_prerelease = "false"
         release_title = f"Release v{version}"
 
@@ -239,10 +273,12 @@ def main():
                 time.sleep(0.5)
 
     v_file = dest_dir / "version"
-    existing = v_file.read_text() if v_file.exists() else ""
-    v_file.write_text(f"{gui_md5} {version} [{channel.upper()}]\n" + existing)
+    existing_lines = v_file.read_text().splitlines() if v_file.exists() else []
+    filtered_lines = [l for l in existing_lines if not re.search(r'\b' + re.escape(version) + r'\b', l)]
+    new_version_content = f"{gui_md5} {version} [{channel.upper()}]\n" + "\n".join(filtered_lines) + "\n"
+    v_file.write_text(new_version_content)
 
-    print(f"\nSuccessfully built {channel.upper()} release v{version} (MD5: {gui_md5})!")
+    print(f"\nSuccessfully built and synchronized {channel.upper()} release v{version} (MD5: {gui_md5})!")
 
     # Set GitHub Actions output parameters if running in CI
     gh_output = os.environ.get("GITHUB_OUTPUT")

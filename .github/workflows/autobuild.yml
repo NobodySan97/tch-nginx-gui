@@ -69,7 +69,6 @@ jobs:
             NEW_VER="${{ steps.build_step.outputs.version }}"
             CHANNEL="${{ steps.build_step.outputs.channel }}"
             git commit -m "Autobuild ${CHANNEL} release v${NEW_VER} from commit ${{ github.sha }}"
-            git pull --rebase origin master || true
             git push origin master
           fi
 
