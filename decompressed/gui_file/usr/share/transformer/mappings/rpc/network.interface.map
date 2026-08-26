@@ -669,7 +669,14 @@ local function getDnsServers(key)
   elseif type(inactive) == "table" and #inactive ~= 0 then
     v = inactive
   end
-  servers = staticDns ~= "" and table.concat(staticDns, ",") or ""
+
+  if type(staticDns) == "table" then
+    servers = table.concat(staticDns, ",")
+  elseif type(staticDns) == "string" and staticDns ~= "" then
+    servers = staticDns:gsub("%s+", ",")
+  else
+    servers = ""
+  end
   for i, server in ipairs(v) do
     if (i > 1) then
       dnsServer2 = server
