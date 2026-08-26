@@ -11,6 +11,10 @@
 *.md text eol=lf
 *.css text eol=lf
 *.js text eol=lf
+decompressed/gui_file/usr/share/transformer/scripts/* text eol=lf
+decompressed/gui_file/etc/init.d/* text eol=lf
+decompressed/gui_file/etc/modgui_scripts/* text eol=lf
+decompressed/gui_file/etc/hotplug.d/**/* text eol=lf
 
 # Windows batch files must use CRLF
 *.bat text eol=crlf
