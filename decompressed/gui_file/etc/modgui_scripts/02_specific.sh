@@ -5,11 +5,12 @@
 extract_with_check() {
 
   export RESTART_SERVICE=0
+  [ ! -s "$1" ] && { rm -f "$1"; return 0; }
   MD5_CHECK_DIR=/tmp/md5check
 
-  [ ! -d $MD5_CHECK_DIR ] && mkdir $MD5_CHECK_DIR
+  [ ! -d $MD5_CHECK_DIR ] && mkdir -p $MD5_CHECK_DIR
 
-  for file in $(bzcat "$1" | tar -C $MD5_CHECK_DIR -xvf -); do
+  for file in $(bzcat "$1" 2>/dev/null | tar -C $MD5_CHECK_DIR -xvf - 2>/dev/null); do
 
     if [ ! -f "$MD5_CHECK_DIR/$file" ]; then
       if [ ! -d "/$file" ]; then

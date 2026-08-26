@@ -11,34 +11,38 @@ install_from_github() {
   mkdir -p "/tmp/$2"
 
   if [ "$3" = "specificapp" ]; then
-    if [ ! -f "/tmp/$2.tar.bz2" ]; then
-      if ! ping -q -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; then
+    if [ ! -s "/tmp/$2.tar.bz2" ]; then
+      rm -f "/tmp/$2.tar.bz2"
+      if ! ping -q -c 1 -W 1 1.1.1.1 >/dev/null 2>&1 && ! ping -q -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; then
         echo "No internet connection detected, download manually!"
         return 1
       fi
-      curl -m 30 -sLk "https://raw.githubusercontent.com/$1/$2.tar.bz2" --output "/tmp/$2.tar.bz2"
+      curl -m 30 -sLkf "https://raw.githubusercontent.com/$1/$2.tar.bz2" --output "/tmp/$2.tar.bz2"
     fi
-    if [ ! -f "/tmp/$2.tar.bz2" ]; then
+    if [ ! -s "/tmp/$2.tar.bz2" ]; then
+      rm -f "/tmp/$2.tar.bz2"
       echo "Error installing App: Cannot find/download  $2.tar.bz2"
       return 1
     fi
-    bzcat "/tmp/$2.tar.bz2" | tar -C "/tmp/$2" -xf -
-    rm "/tmp/$2.tar.bz2"
+    bzcat "/tmp/$2.tar.bz2" 2>/dev/null | tar -C "/tmp/$2" -xf - 2>/dev/null
+    rm -f "/tmp/$2.tar.bz2"
     cd "/tmp/$2" || return 1
   else
-    if [ ! -f "/tmp/$2.tar.gz" ]; then
-      if ! ping -q -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; then
+    if [ ! -s "/tmp/$2.tar.gz" ]; then
+      rm -f "/tmp/$2.tar.gz"
+      if ! ping -q -c 1 -W 1 1.1.1.1 >/dev/null 2>&1 && ! ping -q -c 1 -W 1 8.8.8.8 >/dev/null 2>&1; then
         echo "No internet connection detected, download manually!"
         return 1
       fi
-      curl -m 30 -sLk "https://github.com/$1/tarball/$2" --output "/tmp/$2.tar.gz"
+      curl -m 30 -sLkf "https://github.com/$1/tarball/$2" --output "/tmp/$2.tar.gz"
     fi
-    if [ ! -f "/tmp/$2.tar.gz" ]; then
+    if [ ! -s "/tmp/$2.tar.gz" ]; then
+      rm -f "/tmp/$2.tar.gz"
       echo "Error installing App: Cannot find/download  $2.tar.gz"
       return 1
     fi
-    tar -xzf "/tmp/$2.tar.gz" -C "/tmp/$2"
-    rm "/tmp/$2.tar.gz"
+    tar -xzf "/tmp/$2.tar.gz" -C "/tmp/$2" 2>/dev/null
+    rm -f "/tmp/$2.tar.gz"
     cd /tmp/"$2"/* || return 1
   fi
 
