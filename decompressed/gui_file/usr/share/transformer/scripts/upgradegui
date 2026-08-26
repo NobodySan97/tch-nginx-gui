@@ -154,10 +154,12 @@ if [ ! -f $WORKING_DIR/$FILE_NAME ]; then #Check if file exist as offline upload
 
   # Download new GUI to /tmp
   if ! $curl -# "$URL_BASE/$FILE_NAME" --output "$WORKING_DIR/$FILE_NAME"; then
+    echo ""
     logecho "ERROR: Can't find new GUI file" >&2
     ubus send fwupgrade '{"state":"done"}'
     exit 1
   fi
+  echo ""
 
   # Check GUI hash
   if [ -f /tmp/$CHECKSUM_FILE ]; then

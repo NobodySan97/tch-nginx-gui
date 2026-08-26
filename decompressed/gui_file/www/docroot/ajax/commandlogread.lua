@@ -36,12 +36,12 @@ else
 		if last_pct then
 			data["progress"] = tonumber(last_pct)
 		end
-		-- Strip curl progress bar lines from console display
+		-- Strip curl progress bar artifacts from console display
 		local clean_lines = {}
 		for line in content:gmatch("[^\r\n]+") do
-			local is_prog = line:match("^[%s#=%-O]*%d+%.?%d*%%[%s#=%-O]*$") or line:match("^[%s#=%-O]+$")
-			if not is_prog then
-				clean_lines[#clean_lines + 1] = line
+			local sanitized = line:gsub("^[%s#=%-O]*%d+%.?%d*%%[%s#=%-O]*", ""):gsub("^[%s#=%-O]+", ""):gsub("^%s+", "")
+			if sanitized ~= "" then
+				clean_lines[#clean_lines + 1] = sanitized
 			end
 		end
 		data["log"] = table.concat(clean_lines, "\n")
