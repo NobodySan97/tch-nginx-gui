@@ -18,8 +18,11 @@ local value
 for _ , v in pairs(KnownEncryptedPasswordLocaltion) do
 	value = uci:get(v[1],v[2],v[3])
 	if isEncrypted(value) then
-		uci:set(v[1],v[2],v[3],decryptPassword(value))
-		uci:commit(v[1])
+		local decrypted = decryptPassword(value)
+		if decrypted and decrypted ~= "" then
+			uci:set(v[1],v[2],v[3],decrypted)
+			uci:commit(v[1])
+		end
 	end
 end
 

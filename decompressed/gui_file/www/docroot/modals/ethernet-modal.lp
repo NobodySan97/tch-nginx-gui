@@ -145,84 +145,77 @@ end
 
 ----------------------------------reset function-------------------------------------
 local function restdhcp()
-local file = io.open("/rom/etc/uci-defaults/tch_0035-network-lan","r")
-io.input(file)
-local lanip = ""
-local lanmask = ""
-local checkup = 0
-	while checkup == 0 do
-	local line = io.read()
-		if line ~= nil and (lanip == "" or lanip == nil) then
-			lanip=match(line,"uci set network%."..curintf.."%.ipaddr%=([%d]+%.[%d]+%.[%d]+%.[%d]+)")
+	local lanip = ""
+	local lanmask = ""
+	
+	local file = io.open("/rom/etc/uci-defaults/tch_0035-network-lan", "r")
+	if file then
+		for line in file:lines() do
+			if lanip == "" then
+				lanip = match(line, "uci set network%." .. curintf .. "%.ipaddr%=([%d]+%.[%d]+%.[%d]+%.[%d]+)") or ""
+			end
+			if lanmask == "" then
+				lanmask = match(line, "uci set network%." .. curintf .. "%.netmask%=([%d]+%.[%d]+%.[%d]+%.[%d]+)") or ""
+			end
+			if lanip ~= "" and lanmask ~= "" then
+				break
+			end
 		end
-		if line ~= nil and (lanmask == "" or lanmask == nil) then
-			lanmask=match(line,"uci set network%."..curintf.."%.netmask%=([%d]+%.[%d]+%.[%d]+%.[%d]+)")
-		end
-		if lanip ~= "" and lanip ~= nil and lanmask ~= "" and lanmask ~= nil  then
-			checkup=1
-			io.close(file)
-		elseif line == nil then
-			checkup=2
-			io.close(file)
-		end
+		file:close()
 	end
-	if checkup == 2 then
-	local file2 = io.open("/lib/functions/uci-defaults.sh","r")
-	io.input(file2)
-		while checkup == 2 do
-			local line = io.read()
-			if line ~= nil and (lanip == "" or lanip == nil) then
-				lanip=match(line,"set network%."..curintf.."%.ipaddr%=%'([%d]+%.[%d]+%.[%d]+%.[%d]+)%'")
+
+	if lanip == "" or lanmask == "" then
+		local file2 = io.open("/lib/functions/uci-defaults.sh", "r")
+		if file2 then
+			for line in file2:lines() do
+				if lanip == "" then
+					lanip = match(line, "set network%." .. curintf .. "%.ipaddr%=%'([%d]+%.[%d]+%.[%d]+%.[%d]+)%'") or ""
+				end
+				if lanmask == "" then
+					lanmask = match(line, "set network%." .. curintf .. "%.netmask%=%'([%d]+%.[%d]+%.[%d]+%.[%d]+)%'") or ""
+				end
+				if lanip ~= "" and lanmask ~= "" then
+					break
+				end
 			end
-			if line ~= nil and (lanmask == "" or lanmask == nil) then
-				lanmask=match(line,"set network%."..curintf.."%.netmask%=%'([%d]+%.[%d]+%.[%d]+%.[%d]+)%'")
-			end
-			if lanip and lanip ~= "" and lanmask and lanmask ~= "" or line == nil then
-				checkup=5
-				io.close(file2)
-			end
+			file2:close()
 		end
 	end
 
-	local founddev = 0
 	local ipstart = ""
 	local ipend = ""
 	local ltime = ""
 	local dhcpign = ""
 	local fp = io.open("/rom/etc/config/dhcp", "r")
-	local pattern = format("config dhcp %s",curintf)
-	io.input(fp)
-		while founddev == 0 do
-			local line =io.read()
-			if match(line,pattern) then
-				while founddev == 0 do
-				line =io.read()
-					if line ~= nil and (ipstart == "" or ipstart == nil) then
-						ipstart= match(line,"option start[%s]+'([%d]+)'")
-					end
-					if line ~= nil and (ipend == "" or ipend == nil) then
-						ipend= match(line,"option limit[%s]+'([%d]+)'")
-					end
-					if line ~= nil and (ltime == "" or ltime == nil) then
-						ltime= match(line,"option leasetime[%s]+'([%w]+)'")
-					end
-					if line ~= nil and (dhcpign == "" or dhcpign == nil) then
-						dhcpign= match(line,"option ignore[%s]+'([%d]+)'")
-					end
-					if line == nil or match(line, "config dhcp") or ipstart~= nil and ipstart~="" and ipend ~= nil and ipend ~="" and ltime ~= nil and ltime ~="" and dhcpign ~= nil and dhcpign ~="" then
-						founddev = 1
-					end
+	if fp then
+		local in_target_section = false
+		local pattern = format("config dhcp %s", curintf)
+		for line in fp:lines() do
+			if match(line, pattern) then
+				in_target_section = true
+			elseif in_target_section and match(line, "^%s*config%s+dhcp") then
+				break
+			elseif in_target_section then
+				if ipstart == "" then
+					ipstart = match(line, "option start[%s]+'([%d]+)'") or ""
+				end
+				if ipend == "" then
+					ipend = match(line, "option limit[%s]+'([%d]+)'") or ""
+				end
+				if ltime == "" then
+					ltime = match(line, "option leasetime[%s]+'([%w]+)'") or ""
+				end
+				if dhcpign == "" then
+					dhcpign = match(line, "option ignore[%s]+'([%d]+)'") or ""
 				end
 			end
-			if line == nil then
-				founddev = 1
+		end
+		fp:close()
+	end
 
-			end
-		end
-		io.close(fp)
-		if dhcpign == nil or dhcpign == "" then
-			dhcpign = "0"
-		end
+	if dhcpign == nil or dhcpign == "" then
+		dhcpign = "0"
+	end
 	return lanip, lanmask, ipstart, ipend, ltime, dhcpign
 end
 ------------------------------------reset end-----------------------------------------------------------------

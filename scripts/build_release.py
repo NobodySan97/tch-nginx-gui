@@ -23,11 +23,38 @@ def md5_file(filepath):
             h.update(chunk)
     return h.hexdigest()
 
+def sanitize_text_files_lf(target_dir):
+    text_extensions = {
+        ".sh", ".lua", ".lp", ".map", ".po", ".js", ".css",
+        ".json", ".md", ".conf", ".rules", ".txt", ".version", ".include"
+    }
+    special_dirs = {"init.d", "hotplug.d", "modgui_scripts", "scripts", "transfers"}
+    for root, _, files in os.walk(target_dir):
+        r_path = Path(root)
+        is_special_dir = any(s in r_path.parts for s in special_dirs)
+        for f in files:
+            p = r_path / f
+            if p.suffix.lower() in text_extensions or is_special_dir:
+                try:
+                    raw = p.read_bytes()
+                    if b"\r\n" in raw:
+                        p.write_bytes(raw.replace(b"\r\n", b"\n"))
+                except Exception:
+                    pass
+
+def _tar_filter(tarinfo):
+    tarinfo.uid = 0
+    tarinfo.gid = 0
+    tarinfo.uname = "root"
+    tarinfo.gname = "root"
+    tarinfo.mtime = 1514764800
+    return tarinfo
+
 def make_tar_bz2(source_dir, output_filename):
     with tarfile.open(output_filename, "w:bz2") as tar:
         for item in sorted(os.listdir(source_dir)):
             item_path = os.path.join(source_dir, item)
-            tar.add(item_path, arcname=item)
+            tar.add(item_path, arcname=item, filter=_tar_filter)
 
 def get_git_info(repo_dir):
     try:
@@ -165,7 +192,10 @@ def main():
 
     version = calculate_version(last_msg, src_dir, dest_dir, manual_ver)
 
-    # 1. Update version in rootdevice
+    # 1. Sanitize line endings to LF across all source text files
+    sanitize_text_files_lf(src_dir / "decompressed")
+
+    # 2. Update version in rootdevice
     rootdevice = src_dir / "decompressed" / "base" / "etc" / "init.d" / "rootdevice"
     if rootdevice.exists():
         content = rootdevice.read_text(encoding="utf-8")
@@ -173,7 +203,7 @@ def main():
         rootdevice.write_text(updated, encoding="utf-8")
         print(f"Updated rootdevice: version_gui={version}-{short_sha}")
 
-    # 2. Checksums
+    # 3. Checksums
     status_led = src_dir / "decompressed" / "gui_file" / "tmp" / "status-led-eventing.lua_new"
     if status_led.exists():
         md5_val = md5_file(status_led)

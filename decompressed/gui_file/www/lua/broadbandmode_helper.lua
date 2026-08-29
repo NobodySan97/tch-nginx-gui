@@ -242,15 +242,11 @@ if sfp == 1 then
         end,
         operations = function()
 			local interface = findwan(ethname) or "@waneth4"
-            local difname = proxy.get("uci.network.device." .. interface .. ".ifname")
-            if difname then
+            local difname_res = proxy.get("uci.network.device." .. interface .. ".ifname")
+            local difname = (difname_res and difname_res[1] and difname_res[1].value) or ""
+            if difname ~= "" then
                 local _dn = proxy.get("uci.network.device." .. interface .. ".name"); local dname = (_dn and _dn[1] and _dn[1].value) or interface
-                difname = proxy.get("uci.network.device." .. interface .. ".ifname")[1].value
-                if difname ~= "" and difname ~= nil then
-                    proxy.set("uci.network.interface.@wan.ifname", dname)
-                else
-                    proxy.set("uci.network.interface.@wan.ifname", ethname)
-                end
+                proxy.set("uci.network.interface.@wan.ifname", dname)
             else
                 proxy.set("uci.network.interface.@wan.ifname", ethname)
             end

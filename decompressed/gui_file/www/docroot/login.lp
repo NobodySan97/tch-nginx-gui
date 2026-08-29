@@ -36,7 +36,7 @@ local legacySalts = ""
 
 local httpi = proxy.get("rpc.network.interface.@wan.up")
 
-if httpi and httpi[1].value then
+if httpi and httpi[1] and httpi[1].value then
 	httpi = httpi[1].value
 else
 	httpi = ""
@@ -44,7 +44,7 @@ end
 
 local httpi_wwan = proxy.get("rpc.network.interface.@wwan.up")
 
-if httpi_wwan and httpi_wwan[1].value then
+if httpi_wwan and httpi_wwan[1] and httpi_wwan[1].value then
 	httpi_wwan = httpi_wwan[1].value
 else
 	httpi_wwan = ""
@@ -52,7 +52,7 @@ end
 
 local wan_mode = proxy.get("uci.network.config.wan_mode")
 
-if wan_mode and wan_mode[1].value then
+if wan_mode and wan_mode[1] and wan_mode[1].value then
 	wan_mode = wan_mode[1].value
 else
 	wan_mode = ""
@@ -60,7 +60,7 @@ end
 
 local assistance_port = proxy.get("uci.web.assist_state.@state_remote.port")
 
-if assistance_port and not  ( assistance_port[1].value == "" ) then
+if assistance_port and assistance_port[1] and assistance_port[1].value and assistance_port[1].value ~= "" then
 	assistance_port = assistance_port[1].value
 else
 	assistance_port = "0"
@@ -208,8 +208,8 @@ ngx.print('\
 <!--[if lt IE 9]> <script src="/js/media-min.js?version='); ngx.print(cui.gui_version); ngx.print('"></script> <![endif]-->\
 <script  language="JavaScript" type="text/javascript"   src="/js/srp-min.js?version='); ngx.print(cui.gui_version); ngx.print('" ></script>\
 <script src="/js/aos.js?version='); ngx.print(cui.gui_version); ngx.print('"></script>');
-local script_file_presence = io.open(string.format("/www/docroot/theme/%s/script.js",cui.gui_skin),"r")
-if script_file_presence then
+local lfs = require("lfs")
+if lfs.attributes(string.format("/www/docroot/theme/%s/script.js", cui.gui_skin), "mode") == "file" then
 	ngx.print('<script src="/theme/');  ngx.print( cui.gui_skin ); ngx.print('/script.js?version='); ngx.print(cui.gui_version); ngx.print('"></script>');
 end
 ngx.print('\

@@ -12,7 +12,7 @@ local action = {
 		local data = {}
 		local new_ver = proxy.get("uci.modgui.gui.new_ver")
 		
-		if new_ver and not ( new_ver[1].value == "" ) then
+		if new_ver and new_ver[1] and new_ver[1].value and new_ver[1].value ~= "" then
 			data["new_version_text"] = new_ver[1].value
 		end
 		

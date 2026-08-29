@@ -15,7 +15,8 @@ local dest_port_select = {
     { "9", '9'},
 }
 
-local wol = io.open("/etc/init.d/wol", "r") and proxy.get("uci.wol.config.")
+local lfs = require("lfs")
+local wol = (lfs.attributes("/etc/init.d/wol", "mode") == "file") and proxy.get("uci.wol.config.")
 
 if wol then
   mapParams = {

@@ -136,9 +136,9 @@ xdsl_config() {
 	local multimode profile status
 	local maxdsdatarate maxusdatarate maxaggrdatarate
 	local advanced
-	local tpstc
-	local sra
-	local bitswap
+	local tpstc sra bitswap snr
+	local modstring="" profilestring="" tpstcstring=""
+	local srastring="" bitswapstring="" snrstring="" maxdataratestring=""
 
 	config_get CONNSTATUS "$cfg" enabled 1
 	

@@ -113,13 +113,18 @@ for _,app in ipairs(wan_app) do
 
 local reserved_ports = {}
 for _,wanPort in ipairs(wan_ports) do
+  if wanPort and wanPort[1] and wanPort[1].value then
     for port in wanPort[1].value:gmatch("%w+") do
        reserved_ports [#reserved_ports +1] = port
     end
+  end
 end
 
 --Remove the ports configured in system.wan-service in allowed_portlist
-local allowed_portlist = portslist
+local allowed_portlist = {}
+for k, v in pairs(portslist or {}) do
+  allowed_portlist[k] = v
+end
 for _,wanPort in ipairs(reserved_ports) do
   for i,j in pairs(allowed_portlist) do
     if wanPort and (tonumber(wanPort) == tonumber(j)) then

@@ -22,18 +22,20 @@ local function getFile(file_name)
 end
 
 local function calculation(oldtable,file_content)
-  local lastnumber = oldtable.lastnumber
-  local period = oldtable.period
-  if file_content and lastnumber then
-    if(tonumber(file_content) < tonumber(lastnumber)) then
-      period = period +1
+  local lastnumber = oldtable and oldtable.lastnumber
+  local period = (oldtable and oldtable.period) or 0
+  local num_fc = tonumber(file_content)
+  local num_ln = tonumber(lastnumber)
+  if num_fc and num_ln then
+    if num_fc < num_ln then
+      period = (tonumber(period) or 0) + 1
     end
-    if tonumber(period) > 256 then
+    if (tonumber(period) or 0) > 256 then
       period = 0
     end
     oldtable = {period,file_content}
   else
-    oldtable = {0,file_content}
+    oldtable = {0,file_content or "0"}
   end
   return oldtable
 end

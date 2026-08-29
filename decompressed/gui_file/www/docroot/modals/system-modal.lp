@@ -42,7 +42,7 @@ local function file_check(file_name)
   end
 end
 
-local serial_num = format("%s%s",env.factory,env.serial)
+local serial_num = format("%s%s", env.factory or "", env.serial or "")
 local syslog_present, syslog_filter_sw = "0", "0"
 
 -- SSH Access
@@ -56,12 +56,14 @@ local ssh_wan_new, ssh_lan_new, ssh_wan_port_new
 local function set_firewall(target, port)
    -- go through rules to find SSH-wan anonymous section name
    local rules = proxy.get("uci.firewall.rule.")
-   for _,v in ipairs(rules) do
-      if v.param == "name" and (untaint(v.value) == "SSH_wan" or untaint(v.value) == "SSH-wan") then
-          proxy.set(v.path .. "target", target)
-          proxy.set(v.path .. "dest_port", port)
-         return
-      end
+   if type(rules) == "table" then
+     for _,v in ipairs(rules) do
+        if v.param == "name" and (untaint(v.value) == "SSH_wan" or untaint(v.value) == "SSH-wan") then
+            proxy.set(v.path .. "target", target)
+            proxy.set(v.path .. "dest_port", port)
+           return
+        end
+     end
    end
 end
 
@@ -70,20 +72,24 @@ local dbpath = "uci.dropbear.dropbear."
 local dbvalues = proxy.get(dbpath)
 local data = content_helper.convertResultToObject(dbpath, dbvalues)
 
-for _,v in pairs(data) do
-  if v.Interface == "lan" then
-    ssh_lan = v.enable
-    ssh_lan_index = v.paramindex
-  elseif v.Interface == "wan" then
-    ssh_wan = v.enable
-    ssh_wan_index = v.paramindex
+if type(data) == "table" then
+  for _,v in pairs(data) do
+    if v.Interface == "lan" then
+      ssh_lan = v.enable or "0"
+      ssh_lan_index = v.paramindex or "-1"
+    elseif v.Interface == "wan" then
+      ssh_wan = v.enable or "0"
+      ssh_wan_index = v.paramindex or "-1"
+    end
   end
 end
 
 local Syslog = proxy.get("uci.system.system.@system[0].log_ip","uci.system.system.@system[0].log_filter_ip")
-if Syslog[1].value ~= "" or Syslog[2].value ~= "" then
+local log_ip = Syslog and Syslog[1] and Syslog[1].value or ""
+local log_filter_ip = Syslog and Syslog[2] and Syslog[2].value or ""
+if log_ip ~= "" or log_filter_ip ~= "" then
   syslog_present = "1"
-  if Syslog[2].value ~= "" then
+  if log_filter_ip ~= "" then
     syslog_filter_sw = "1"
   end
 end

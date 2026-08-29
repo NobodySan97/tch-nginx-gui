@@ -150,6 +150,7 @@ local  mmpbxd_options = {
     basepath = "rpc.mmpbx.profile.",
 }
 
+cached_calllog_data = nil
 local  mmpbxd_data = content_helper.loadTableData(mmpbxd_options.basepath, mmpbxd_columns ,  mmpbxd_filter , nil)
 
 local mmpbx_table = ui_helper.createTable(mmpbxd_columns, mmpbxd_data, mmpbxd_options, nil, nil)

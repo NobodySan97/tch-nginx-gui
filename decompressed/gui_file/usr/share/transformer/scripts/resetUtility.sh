@@ -42,7 +42,7 @@ restoreOriginalGui() {
 	mkdir -p /tmp/config_tmp
 	mkdir -p /tmp/shadow_file
 	[ -d "/overlay/$running_bank/etc/config" ] && cp -r /overlay/$running_bank/etc/config/* $config_tmp/ 2>/dev/null
-	[ -f "/overlay/$running_bank/etc/shadow" ] && cp /overlay/$running_bank/etc/shadow /tmp/shadow_file/ 2>/dev/null
+	[ -f "/overlay/$running_bank/etc/shadow" ] && cp -p /overlay/$running_bank/etc/shadow /tmp/shadow_file/ 2>/dev/null
 	
 	#Saving root files
 	emergencydir=/tmp/rootfile/emergency
@@ -52,12 +52,12 @@ restoreOriginalGui() {
 	mkdir -p $emergencydir/usr/bin 
 	mkdir -p $emergencydir/lib/upgrade 
 	mkdir -p $emergencydir/sbin
-	[ -f "/overlay/$running_bank/lib/upgrade/platform.sh" ] && cp /overlay/$running_bank/lib/upgrade/platform.sh $emergencydir/lib/upgrade/ 2>/dev/null
-	[ -f "/overlay/$running_bank/sbin/sysupgrade" ] && cp /overlay/$running_bank/sbin/sysupgrade $emergencydir/sbin/ 2>/dev/null
-	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && cp /overlay/$running_bank/etc/init.d/rootdevice $emergencydir/etc/init.d/ 2>/dev/null
-	[ -f "/overlay/$running_bank/usr/bin/rtfd" ] && cp /overlay/$running_bank/usr/bin/rtfd $emergencydir/usr/bin/ 2>/dev/null
-	[ -f "/overlay/$running_bank/usr/bin/sysupgrade-safe" ] && cp /overlay/$running_bank/usr/bin/sysupgrade-safe $emergencydir/usr/bin/ 2>/dev/null
-	[ -e "/overlay/$running_bank/etc/rc.d/S94rootdevice" ] && cp -d /overlay/$running_bank/etc/rc.d/S94rootdevice $emergencydir/etc/rc.d/ 2>/dev/null
+	[ -f "/overlay/$running_bank/lib/upgrade/platform.sh" ] && cp -p /overlay/$running_bank/lib/upgrade/platform.sh $emergencydir/lib/upgrade/ 2>/dev/null
+	[ -f "/overlay/$running_bank/sbin/sysupgrade" ] && cp -p /overlay/$running_bank/sbin/sysupgrade $emergencydir/sbin/ 2>/dev/null
+	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && cp -p /overlay/$running_bank/etc/init.d/rootdevice $emergencydir/etc/init.d/ 2>/dev/null
+	[ -f "/overlay/$running_bank/usr/bin/rtfd" ] && cp -p /overlay/$running_bank/usr/bin/rtfd $emergencydir/usr/bin/ 2>/dev/null
+	[ -f "/overlay/$running_bank/usr/bin/sysupgrade-safe" ] && cp -p /overlay/$running_bank/usr/bin/sysupgrade-safe $emergencydir/usr/bin/ 2>/dev/null
+	[ -e "/overlay/$running_bank/etc/rc.d/S94rootdevice" ] && cp -dp /overlay/$running_bank/etc/rc.d/S94rootdevice $emergencydir/etc/rc.d/ 2>/dev/null
 	
 	#Delete any change from running bank
 	rm -rf /overlay/$running_bank
@@ -70,14 +70,17 @@ restoreOriginalGui() {
 		cp -r $config_tmp/* /overlay/homeware_conversion/etc/config/ 2>/dev/null
 		cp -r $config_tmp/* /overlay/$running_bank/etc/config/ 2>/dev/null
 		[ -f "$config_tmp/modgui" ] && cp $config_tmp/modgui /overlay/homeware_conversion/etc/modgui_old 2>/dev/null
-		[ -f "/tmp/shadow_file/shadow" ] && cp /tmp/shadow_file/shadow /overlay/homeware_conversion/etc/ 2>/dev/null
-		[ -f "/tmp/shadow_file/shadow" ] && cp /tmp/shadow_file/shadow /overlay/$running_bank/etc/shadow 2>/dev/null
-		[ -f "/tmp/shadow_file/shadow" ] && cp /tmp/shadow_file/shadow /overlay/$running_bank/shadow_old 2>/dev/null
+		if [ -f "/tmp/shadow_file/shadow" ]; then
+			cp -p /tmp/shadow_file/shadow /overlay/homeware_conversion/etc/ 2>/dev/null
+			cp -p /tmp/shadow_file/shadow /overlay/$running_bank/etc/shadow 2>/dev/null
+			cp -p /tmp/shadow_file/shadow /overlay/$running_bank/shadow_old 2>/dev/null
+			chmod 600 /overlay/$running_bank/etc/shadow 2>/dev/null
+		fi
 	fi
 	
 	#Root only
 	emergencydir=/tmp/rootfile/emergency
-	[ -d "$emergencydir" ] && cp -dr $emergencydir/* /overlay/$running_bank/ 2>/dev/null
+	[ -d "$emergencydir" ] && cp -drp $emergencydir/* /overlay/$running_bank/ 2>/dev/null
 	sync
 	reboot
 }

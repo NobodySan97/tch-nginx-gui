@@ -86,7 +86,7 @@ end
 
 local function split(str, ang)
 	local tab = {}
-	for vari in string.gfind(format("%s",str), ang) do
+	for vari in string.gmatch(format("%s",str), ang) do
 		table.insert(tab, vari)
 	end
 	return tab

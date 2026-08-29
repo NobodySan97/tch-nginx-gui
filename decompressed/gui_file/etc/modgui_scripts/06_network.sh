@@ -156,10 +156,11 @@ update_dhcp_config() {
     uci del dhcp.lan.dhcpv4
   fi
   if [ "$(uci get -q network.config.wan_mode)" = "bridge" ] || [ "$(uci get -q network.wan.proto)" = "bridge" ] || [ "$(uci get -q network.interface.wan.proto)" = "bridge" ]; then
-    logecho "Bridge mode detected: disabling DHCP, DHCPv6 and Router Advertisements on LAN"
+    logecho "Bridge mode detected: disabling DHCP, DHCPv6, NDP and Router Advertisements on LAN"
     uci set dhcp.lan.ignore='1'
     uci set dhcp.lan.dhcpv6='disabled'
     uci set dhcp.lan.ra='disabled'
+    uci set dhcp.lan.ndp='disabled'
   elif [ ! "$(uci get -q dhcp.lan.ignore)" ]; then
     uci set dhcp.lan.ignore='0'
   fi

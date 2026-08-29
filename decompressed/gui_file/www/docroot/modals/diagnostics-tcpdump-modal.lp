@@ -70,11 +70,12 @@ local function tcpdump_download()
   content_helper.getExactContent(tcpdump_info)
 
   if tcpdump_info.state == "Complete" then
-    ngx.header.content_disposition = "attachment; filename=" .. (string.match(untaint(tcpdump_info.file), ".+/([^/]*%.%w+)$"))
+    local fname = (tcpdump_info.file and string.match(untaint(tcpdump_info.file), ".+/([^/]*%.%w+)$")) or "capture.pcap"
+    ngx.header.content_disposition = "attachment; filename=" .. fname
     ngx.header.content_type = "application/octet-stream"
     ngx.header.set_cookie = "fileDownload=true; Path=/"  -- the JS download code requires this cookie
 
-    local file = open(untaint(tcpdump_info.file), "r")
+    local file = tcpdump_info.file and open(untaint(tcpdump_info.file), "r")
     -- buffer read for large file
     if file then
       local data
@@ -86,8 +87,8 @@ local function tcpdump_download()
         ngx.print(data)
         ngx.flush(true)
       end
+      file:close()
     end
-    file:close()
 
     ngx.exit(ngx.HTTP_OK)
   end
@@ -99,7 +100,7 @@ local function restartTest(data)
   if type(data) == "table"  then
     success, msg = content_helper.validateObject(data, tcpdumpValid)
     local usbstatus =  proxy.get("rpc.system.tcpdump.usbstatus")
-    usbstatus = usbstatus[1] and usbstatus[1].value
+    usbstatus = usbstatus and usbstatus[1] and usbstatus[1].value or "Disconnected"
     if usbstatus == "Connected" then
       if not data.saveonusb then
         data.saveonusb = "0"

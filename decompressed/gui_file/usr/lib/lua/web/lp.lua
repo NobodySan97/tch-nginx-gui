@@ -20,7 +20,7 @@ end
 ----------------------------------------------------------------------------
 -- Internal compilation cache.
 local cache = {}
-local max_cache_size = 20
+local max_cache_size = 80
 
 ----------------------------------------------------------------------------
 -- Set the size of the template cache.

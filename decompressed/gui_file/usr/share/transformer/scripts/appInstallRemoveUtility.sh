@@ -53,8 +53,12 @@ install_from_github() {
 
 ############TRANSFORMER UTILITY##################
 set_transformer() {
-  cmd="require('datamodel').set('"$1"','"$2"')"
-  lua -e "$cmd"
+  lua - "$1" "$2" << 'EOF'
+local p, v = arg[1], arg[2]
+if p and v then
+  require('datamodel').set(p, v)
+end
+EOF
 }
 #################################################
 
