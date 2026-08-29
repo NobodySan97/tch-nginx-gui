@@ -7,6 +7,7 @@ local ngx = ngx
 local session = ngx.ctx.session
 local format = string.format
 local ui_helper = require("web.ui_helper")
+local content_helper = require("web.content_helper")
 local proxy = require("datamodel")
 local modalPath = "/modals/system-modal.lp"
 local syslog_present = "disabled"

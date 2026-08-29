@@ -74,10 +74,12 @@ local data = content_helper.convertResultToObject(dbpath, dbvalues)
 
 if type(data) == "table" then
   for _,v in pairs(data) do
-    if v.Interface == "lan" or (not v.Interface and (v.paramindex == "@dropbear[0]" or v.paramindex == "lan")) then
-      ssh_lan = (v.enable == "0") and "0" or "1"
-      ssh_lan_index = v.paramindex or "@dropbear[0]"
-    elseif v.Interface == "wan" then
+    if v.Interface == "lan" or v.paramindex == "lan" or v.paramindex == "afg" or (not v.Interface and v.paramindex == "@dropbear[0]") then
+      if v.enable == "1" or ssh_lan ~= "1" then
+        ssh_lan = (v.enable == "0") and "0" or "1"
+        ssh_lan_index = v.paramindex or "@dropbear[0]"
+      end
+    elseif v.Interface == "wan" or v.paramindex == "wan" then
       ssh_wan = (v.enable == "1") and "1" or "0"
       ssh_wan_index = v.paramindex or "-1"
     end
@@ -110,6 +112,12 @@ if ngx.var.request_method == "POST" then
           ssh_lan_index = "@dropbear[0]"
        end
        proxy.set(dbpath..ssh_lan_index.. ".enable", ssh_lan)
+       if ssh_lan_index ~= "lan" and data["lan"] then
+          proxy.set(dbpath.."lan.enable", ssh_lan)
+       end
+       if ssh_lan_index ~= "afg" and data["afg"] then
+          proxy.set(dbpath.."afg.enable", ssh_lan)
+       end
        -- Log  that someone has changed SSH access
        ngx.log(ngx.ALERT, "Local Setting of SSH on lan to "..ssh_lan)
     end
