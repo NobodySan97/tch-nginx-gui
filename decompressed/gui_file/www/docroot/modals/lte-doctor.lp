@@ -1004,7 +1004,7 @@ end
 				}\
 			});\
 \
-			placeholder.bind("plothover", function (event, pos, item) {\
+			placeholder.on("plothover", function (event, pos, item) {\
 				if (item) {\
 					var y = item.datapoint[1].toFixed(2);\
 					$("#plot-tooltip").html(y).css({top: item.pageY+5, left: item.pageX+5}).show();\

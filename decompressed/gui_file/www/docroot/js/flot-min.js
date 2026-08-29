@@ -329,9 +329,9 @@
 
 		function H() {
 			da && clearTimeout(da);
-			W.unbind("mousemove", T);
-			W.unbind("mouseleave", ka);
-			W.unbind("click", Z);
+			W.off("mousemove", T);
+			W.off("mouseleave", ka);
+			W.off("click", Z);
 			f(Q.shutdown, [W])
 		}
 
@@ -1475,7 +1475,7 @@
 			ca = new k("flot-overlay", a);
 			p = K.context;
 			P = ca.context;
-			W = g(ca.element).unbind();
+			W = g(ca.element).off();
 			var b = a.data("plot");
 			b && (b.shutdown(), ca.clear());
 			a.data("plot", F)
@@ -1483,7 +1483,7 @@
 		A(h);
 		U();
 		C();
-		m.grid.hoverable && (W.mousemove(T), W.bind("mouseleave", ka));
+		m.grid.hoverable && (W.mousemove(T), W.on("mouseleave", ka));
 		m.grid.clickable && W.click(Z);
 		f(Q.bindEvents, [W]);
 		var Y = [],
@@ -1683,7 +1683,7 @@
 		}, a.style && (a.style.MozUserSelect = d ? "" : "none"))
 	}
 	g.fn.drag = function(a, d, g) {
-		return d && this.bind("dragstart", a), g && this.bind("dragend", g), a ? this.bind("drag", d ? d : a) :
+		return d && this.on("dragstart", a), g && this.on("dragend", g), a ? this.on("drag", d ? d : a) :
 			this.trigger("drag")
 	};
 	var h = g.event,
@@ -1752,10 +1752,10 @@
 	};
 	g.fn.extend({
 		mousewheel: function(a) {
-			return a ? this.bind("mousewheel", a) : this.trigger("mousewheel")
+			return a ? this.on("mousewheel", a) : this.trigger("mousewheel")
 		},
 		unmousewheel: function(a) {
-			return this.unbind("mousewheel", a)
+			return this.off("mousewheel", a)
 		}
 	})
 })(jQuery);
@@ -1889,16 +1889,16 @@
 			k.hooks.bindEvents.push(function(g, f) {
 				var k = g.getOptions();
 				k.zoom.interactive && (f[k.zoom.trigger](z), f.mousewheel(n));
-				k.pan.interactive && (f.bind("dragstart", {
+				k.pan.interactive && (f.on("dragstart", {
 					distance: 10
-				}, a), f.bind("drag", h), f.bind("dragend", d))
+				}, a), f.on("drag", h), f.on("dragend", d))
 			});
 			k.hooks.shutdown.push(function(g, f) {
-				f.unbind(g.getOptions().zoom.trigger, z);
-				f.unbind("mousewheel", n);
-				f.unbind("dragstart", a);
-				f.unbind("drag", h);
-				f.unbind("dragend", d);
+				f.off(g.getOptions().zoom.trigger, z);
+				f.off("mousewheel", n);
+				f.off("dragstart", a);
+				f.off("drag", h);
+				f.off("dragend", d);
 				w && clearTimeout(w)
 			})
 		},
@@ -2223,8 +2223,8 @@
 			});
 			n.hooks.bindEvents.push(function(a, d) {
 				var g = a.getOptions();
-				g.series.pie.show && (g.grid.hoverable && d.unbind("mousemove").mousemove(x), g
-					.grid.clickable && d.unbind("click").click(f))
+				g.series.pie.show && (g.grid.hoverable && d.off("mousemove").mousemove(x), g
+					.grid.clickable && d.off("click").click(f))
 			});
 			n.hooks.processDatapoints.push(function(d, f, h, k) {
 				d.getOptions().series.pie.show && !$ && ($ = !0, q = d.getCanvas(),
@@ -2389,7 +2389,7 @@
 				g.getPlaceholder().resize(z)
 			});
 			g.hooks.shutdown.push(function(g, a) {
-				g.getPlaceholder().unbind("resize", z)
+				g.getPlaceholder().off("resize", z)
 			})
 		},
 		options: {},

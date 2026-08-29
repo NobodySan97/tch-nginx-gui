@@ -415,22 +415,33 @@ $(".traffic_data").each(function() {\
 });\
 var TrafficChartOption = {\
 		maintainAspectRatio: false,\
-        legend: {display: false},\
-        scales: {\
-		yAxes: [{ticks: {\
-				callback: function(value) { \
-					return formatBytes(value,2)},\
-				beginAtZero: true}}]},\
-		tooltips: {\
-                enabled: true,\
-                mode: "single",\
-                callbacks: {\
-                    label: function(tooltipItems, data) { \
-                        return formatBytes(tooltipItems.yLabel , 2);},\
-					title: function(tooltipItems, data) {\
-						return;}}},\
-		spanGaps:true,\
-		legend: {display: false},};\
+		spanGaps: true,\
+		plugins: {\
+			legend: { display: false },\
+			tooltip: {\
+				enabled: true,\
+				callbacks: {\
+					label: function(context) { \
+						var val = context.parsed.y !== undefined ? context.parsed.y : context.raw;\
+						return formatBytes(val, 2);\
+					},\
+					title: function() {\
+						return "";\
+					}\
+				}\
+			}\
+		},\
+		scales: {\
+			y: {\
+				beginAtZero: true,\
+				ticks: {\
+					callback: function(value) { \
+						return formatBytes(value, 2);\
+					}\
+				}\
+			}\
+		}\
+};\
 var wan_ctx = document.getElementById("WANChart").getContext("2d");\
 var WANChart = new Chart(wan_ctx, {\
     type: "line",\

@@ -218,24 +218,20 @@ var hlog_ctx = document.getElementById("HlogChart").getContext("2d");\
     }]},\
     options: {\
 		maintainAspectRatio: false,\
+		spanGaps: true,\
+		showLine: false,\
+		elements: {\
+			point: { pointStyle: "cross" }\
+		},\
+		plugins: {\
+			legend: { display: false }\
+		},\
         scales: {\
-            yAxes: [{\
-                ticks: {\
-                    beginAtZero:true,\
-                }\
-            }]\
+            y: {\
+                beginAtZero: true\
+            }\
         },\
-		spanGaps:true,\
-		showLines:false,\
-		pointStyle:"cross",\
-		legend: {display: false},\
-		animation: {\
-            duration: 0,\
-        },\
-        hover: {\
-            animationDuration: 0,\
-        },\
-        responsiveAnimationDuration: 0,\
+		animation: false\
     }\
 });\
 var qln_ctx = document.getElementById("QLNChart").getContext("2d");\
@@ -244,35 +240,31 @@ var qln_ctx = document.getElementById("QLNChart").getContext("2d");\
     data: {labels: labelLegend,\
 	"datasets":[{"data":['); ngx.print(QLNUs); ngx.print('],\
 	"pointBackgroundColor": "#90cd8a",\
-	"lineTension":0.1,\
-	"pointBorderWidth":"0.6",\
-	"pointRadius":"0.6",\
+	"tension": 0.1,\
+	"pointBorderWidth": 0.6,\
+	"pointRadius": 0.6,\
     },{"data":['); ngx.print(QLNDs); ngx.print('],\
 	"pointBackgroundColor": "#f58368",\
-	"lineTension":0.1,\
-	"pointBorderWidth":"0.6",\
-	"pointRadius":"0.6",\
+	"tension": 0.1,\
+	"pointBorderWidth": 0.6,\
+	"pointRadius": 0.6,\
     }]},\
     options: {\
 		maintainAspectRatio: false,\
+		spanGaps: true,\
+		showLine: false,\
+		elements: {\
+			point: { pointStyle: "cross" }\
+		},\
+		plugins: {\
+			legend: { display: false }\
+		},\
         scales: {\
-            yAxes: [{\
-                ticks: {\
-                    beginAtZero:false,\
-                }\
-            }]\
+            y: {\
+                beginAtZero: false\
+            }\
         },\
-		spanGaps:true,\
-		showLines:false,\
-		pointStyle:"cross",\
-		legend: {display: false},\
-		animation: {\
-            duration: 0,\
-        },\
-        hover: {\
-            animationDuration: 0,\
-        },\
-        responsiveAnimationDuration: 0,\
+		animation: false\
     }\
 });\
 var snr_ctx = document.getElementById("SNRChart").getContext("2d");\
@@ -281,36 +273,32 @@ var snr_ctx = document.getElementById("SNRChart").getContext("2d");\
     data: {labels: labelLegend,\
 	"datasets":[{"data":['); ngx.print(SNRUs); ngx.print('],\
 	"pointBackgroundColor": "#90cd8a",\
-	"lineTension":0.1,\
-	"pointBorderWidth":"0.6",\
-	"pointRadius":"0.6",\
+	"tension": 0.1,\
+	"pointBorderWidth": 0.6,\
+	"pointRadius": 0.6,\
     },\
 	{"data":['); ngx.print(SNRDs); ngx.print('],\
 	"pointBackgroundColor": "#f58368",\
-	"lineTension":0.1,\
-	"pointBorderWidth":"0.6",\
-	"pointRadius":"0.6",\
+	"tension": 0.1,\
+	"pointBorderWidth": 0.6,\
+	"pointRadius": 0.6,\
     }]},\
     options: {\
 		maintainAspectRatio: false,\
+		spanGaps: true,\
+		showLine: false,\
+		elements: {\
+			point: { pointStyle: "cross" }\
+		},\
+		plugins: {\
+			legend: { display: false }\
+		},\
         scales: {\
-            yAxes: [{\
-                ticks: {\
-                    beginAtZero:true,\
-                }\
-            }]\
+            y: {\
+                beginAtZero: true\
+            }\
         },\
-		spanGaps:true,\
-		showLines:false,\
-		pointStyle:"cross",\
-		legend: {display: false},\
-		animation: {\
-            duration: 0,\
-        },\
-        hover: {\
-            animationDuration: 0,\
-        },\
-        responsiveAnimationDuration: 0,\
+		animation: false\
     }\
 });\
 var bits_ctx = document.getElementById("BitsChart").getContext("2d");\
@@ -320,39 +308,35 @@ var bits_ctx = document.getElementById("BitsChart").getContext("2d");\
         "datasets":[{"data":['); ngx.print(BitsUs); ngx.print('],\
         "pointBackgroundColor": "#90cd8a",\
         "backgroundColor": "#90cd8a",\
-        "lineTension":0.1,\
-        "pointBorderWidth":"0.6",\
-        "pointRadius":"0.6",\
-        "fill":"start",\
+        "tension": 0.1,\
+        "pointBorderWidth": 0.6,\
+        "pointRadius": 0.6,\
+        "fill": "start",\
     },\
 	{"data":['); ngx.print(BitsDs); ngx.print('],\
         "pointBackgroundColor": "#f58368",\
         "backgroundColor": "#f58368",\
-        "lineTension":0.1,\
-        "pointBorderWidth":"0.1",\
-        "pointRadius":"0.1",\
-        "fill":"start",\
+        "tension": 0.1,\
+        "pointBorderWidth": 0.1,\
+        "pointRadius": 0.1,\
+        "fill": "start",\
     }]},\
     options: {\
-                maintainAspectRatio: false,\
+        maintainAspectRatio: false,\
+        spanGaps: false,\
+        showLine: true,\
+        elements: {\
+            point: { pointStyle: "cross" }\
+        },\
+        plugins: {\
+            legend: { display: false }\
+        },\
         scales: {\
-            yAxes: [{\
-                ticks: {\
-                    beginAtZero:true,\
-                }\
-            }]\
+            y: {\
+                beginAtZero: true\
+            }\
         },\
-                spanGaps:false,\
-                showLines:true,\
-                pointStyle:"cross",\
-                legend: {display: false},\
-                animation: {\
-            duration: 0,\
-        },\
-        hover: {\
-            animationDuration: 0,\
-        },\
-        responsiveAnimationDuration: 0,\
+        animation: false\
     }\
 });\
 var scanband = '); ngx.print(scanband); ngx.print(';\

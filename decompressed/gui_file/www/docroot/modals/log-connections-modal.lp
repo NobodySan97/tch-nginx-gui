@@ -293,7 +293,7 @@ $("#searchInput").on("keyup", function () {\
     .show();\
 }).trigger("focus", function () {\
     this.value = "";\
-    $(this).unbind(\'focus\');\
+    $(this).off(\'focus\');\
 }).css({\
     "color": "#C0C0C0"\
 });\

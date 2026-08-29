@@ -109,25 +109,36 @@ var CPUGraph = new Chart(cpu_ctx, {\
 		}]},\
     options: {\
 		maintainAspectRatio: false,\
-        legend: {display: false},\
+		spanGaps: true,\
+		plugins: {\
+			legend: { display: false },\
+			tooltip: {\
+				enabled: true,\
+				callbacks: {\
+					label: function(context) { \
+						var val = context.parsed.y !== undefined ? context.parsed.y : context.raw;\
+						return val + "%";\
+					},\
+					title: function() {\
+						return "";\
+					}\
+				}\
+			}\
+		},\
         scales: {\
-		yAxes: [{ticks: {\
-				callback: function(value) { \
-					if (value %1 == 0 ) \
-						return value+"%"}, \
-				min: 0, \
-				max:'); ngx.print(tonumber(stats.cpu.total) or 100); ngx.print(',\
-				stepSize: 20,}}]},\
-		tooltips: {\
-                enabled: true,\
-                mode: "single",\
-                callbacks: {\
-                    label: function(tooltipItems, data) { \
-                        return tooltipItems.yLabel+"%";},\
-					title: function(tooltipItems, data) {\
-						return;}}},\
-		spanGaps:true,\
-		legend: {display: false},} \
+			y: {\
+				min: 0,\
+				max: '); ngx.print(tonumber(stats.cpu.total) or 100); ngx.print(',\
+				ticks: {\
+					stepSize: 20,\
+					callback: function(value) { \
+						if (value % 1 == 0) \
+							return value + "%";\
+					}\
+				}\
+			}\
+		}\
+	}\
 });\
 var ram_ctx = document.getElementById("RAMGraph").getContext("2d");\
 var RAMGraph = new Chart(ram_ctx, {\
@@ -139,24 +150,34 @@ var RAMGraph = new Chart(ram_ctx, {\
 		}]},\
     options: {\
 		maintainAspectRatio: false,\
-        legend: {display: false},\
+		spanGaps: true,\
+		plugins: {\
+			legend: { display: false },\
+			tooltip: {\
+				enabled: true,\
+				callbacks: {\
+					label: function(context) { \
+						var val = context.parsed.y !== undefined ? context.parsed.y : context.raw;\
+						return formatBytes(val, 2);\
+					},\
+					title: function() {\
+						return "";\
+					}\
+				}\
+			}\
+		},\
         scales: {\
-		yAxes: [{ticks: {\
-				callback: function(value) { \
-					return formatBytes(value,2) \
-				},\
+			y: {\
 				min: 0,\
-				max:'); ngx.print(tonumber(stats.ram.total) or 0); ngx.print('}}]},\
-		tooltips: {\
-                enabled: true,\
-                mode: "single",\
-                callbacks: {\
-                    label: function(tooltipItems, data) { \
-                        return formatBytes(tooltipItems.yLabel , 2);},\
-					title: function(tooltipItems, data) {\
-						return;}}},\
-		spanGaps:true,\
-		legend: {display: false},} \
+				max: '); ngx.print(tonumber(stats.ram.total) or 0); ngx.print(',\
+				ticks: {\
+					callback: function(value) { \
+						return formatBytes(value, 2);\
+					}\
+				}\
+			}\
+		}\
+	}\
 });\
 	</script>\
 ');  ngx.print( ui_helper.createFooter() ); ngx.print('\

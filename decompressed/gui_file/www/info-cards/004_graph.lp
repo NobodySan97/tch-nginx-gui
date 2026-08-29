@@ -64,7 +64,7 @@ function checkGraphWidth() {\
 	$("#canvas_container").width($(document).width()-80);}\
 }\
 checkGraphWidth();\
-$(window).bind("resize", checkGraphWidth );\
+$(window).on("resize", checkGraphWidth );\
 function formatBit(bit,decimals) {\
    if(bit == 0) return "0 bit";\
 	var k = 1000,\
@@ -74,28 +74,35 @@ function formatBit(bit,decimals) {\
    return (bit / Math.pow(k, i)) > 0 ? parseFloat((bit / Math.pow(k, i)).toFixed(dm)) + " " + ( i > -1 ? sizes[i] : "bits") : null;\
 }\
 var TrafficChartOption = {\
-		responsive:true,\
+		responsive: true,\
 		maintainAspectRatio: false,\
-        legend: {display: false},\
-        scales: {\
-		xAxes: [{\
-                display: false\
-            }],\
-		yAxes: [{ticks: {\
+		spanGaps: true,\
+		plugins: {\
+			legend: { display: false },\
+			tooltip: {\
+				enabled: true,\
+				callbacks: {\
+					label: function(context) { \
+						return formatBit(context.parsed.y !== undefined ? context.parsed.y : context.raw, 2);\
+					},\
+					title: function() {\
+						return "";\
+					}\
+				}\
+			}\
+		},\
+		scales: {\
+			x: { display: false },\
+			y: {\
 				min: 0,\
-				callback: function(value) { \
-					return formatBit(value,2) \
-				},}}],},\
-		tooltips: {\
-                enabled: true,\
-                mode: "single",\
-                callbacks: {\
-                    label: function(tooltipItems, data) { \
-                        return formatBit(tooltipItems.yLabel, 2);},\
-					title: function(tooltipItems, data) {\
-						return;}}},\
-		spanGaps:true,\
-		legend: {display: false},};\
+				ticks: {\
+					callback: function(value) { \
+						return formatBit(value, 2); \
+					}\
+				}\
+			}\
+		}\
+};\
 var wan_ctx = document.getElementById("InfoWANChart").getContext("2d");\
 var wanRxdatasets = [];\
 var wanTxdatasets = [];\

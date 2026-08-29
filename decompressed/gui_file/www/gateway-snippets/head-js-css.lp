@@ -36,7 +36,7 @@ ngx.print('\
 	ngx.print('\
 	<script src="/js/jquery.min.js?version='); ngx.print(cui.gui_version); ngx.print('" ></script>\
 	<script src="/js/main-min-nojquery.js?version='); ngx.print(cui.gui_version); ngx.print('" ></script>\
-	<script src="js/knockout-min.js?version='); ngx.print(cui.gui_version); ngx.print('"></script>')
+	<script src="/js/knockout-min.js?version='); ngx.print(cui.gui_version); ngx.print('"></script>')
 	if cui.gui_animation == "1" then
 		ngx.print('<script src="/js/aos.js?version='); ngx.print(cui.gui_version); ngx.print('"></script>')
 	end
@@ -44,10 +44,9 @@ ngx.print('\
 	<script src="/js/Chart.min.js?version='); ngx.print(cui.gui_version); ngx.print('"></script>\
 	<script async src="/js/srp-min.js?version='); ngx.print(cui.gui_version); ngx.print('" ></script>');
 	--ngx.print('<script src="/js/jquery-migrate.js?version='); ngx.print(cui.gui_version); ngx.print('" ></script>')  -- Usefull to debug deprecated function from jquery update
-	local script_file_presence = io.open(string.format("/www/docroot/theme/%s/script.js",cui.gui_skin),"r")
-	if script_file_presence then
+	local lfs = require("lfs")
+	if lfs.attributes(string.format("/www/docroot/theme/%s/script.js", cui.gui_skin), "mode") == "file" then
 		ngx.print('<script src="/theme/');  ngx.print( cui.gui_skin ); ngx.print('/script.js?version='); ngx.print(cui.gui_version); ngx.print('"></script>');
-		script_file_presence:close()
 	end
 ngx.print('\
   </head>\

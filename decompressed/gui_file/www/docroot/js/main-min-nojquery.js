@@ -176,12 +176,12 @@ function Apprise(t, e) {
 		}, r.animation, function () {
 			$overlay.fadeOut(300),
 			$Apprise.hide(),
-			$window.unbind("beforeunload"),
-			$window.unbind("keydown"),
+			$window.off("beforeunload"),
+			$window.off("keydown"),
 			AppriseQueue[0] && (Apprise(AppriseQueue[0].text, AppriseQueue[0].options), AppriseQueue.splice(0, 1))
 		})
 	}, this.keyPress = function () {
-		$window.bind("keydown", function (t) {
+		$window.on("keydown", function (t) {
 			27 === t.keyCode ? r.buttons.cancel ? $("#apprise-btn-" + r.buttons.cancel.id).trigger("click") : n.dissapear() : 13 === t.keyCode && (r.buttons.confirm ? $("#apprise-btn-" + r.buttons.confirm.id).trigger("click") : n.dissapear())
 		})
 	}, $.each(r.buttons, function (t, e) {
@@ -197,7 +197,7 @@ function Apprise(t, e) {
 					e.action(t)
 				})
 			}
-		}), r.override && $window.bind("beforeunload", function (t) {
+		}), r.override && $window.on("beforeunload", function (t) {
 			return "An alert requires attention"
 		}), n.adjustWidth(), $window.resize(function () {
 			n.adjustWidth()
