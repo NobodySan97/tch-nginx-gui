@@ -104,6 +104,16 @@ orig_config_gen() {
 }
 
 dropbear_config_check() {
+  if [ ! "$(uci get -q dropbear.lan)" ] && [ ! "$(uci get -q dropbear.@dropbear[0])" ]; then
+    logecho "Adding Dropbear lan config"
+    uci add dropbear dropbear >/dev/null
+    uci rename dropbear.@dropbear[-1]=lan
+    uci set dropbear.lan=dropbear
+    uci set dropbear.lan.Interface='lan'
+    uci set dropbear.lan.Port='22'
+    uci set dropbear.lan.enable='1'
+  fi
+
   if [ ! "$(uci get -q dropbear.wan)" ]; then
     logecho "Adding Dropbear wan config"
     uci add dropbear dropbear >/dev/null
@@ -114,11 +124,24 @@ dropbear_config_check() {
     uci set dropbear.wan.enable='0'
   fi
 
+  [ "$(uci get -q dropbear.lan)" ] && {
+    uci -q set dropbear.lan.RootLogin='1'
+    uci -q set dropbear.lan.RootPasswordAuth='on'
+    uci -q set dropbear.lan.PasswordAuth='on'
+    [ -z "$(uci get -q dropbear.lan.enable)" ] && uci -q set dropbear.lan.enable='1'
+  }
+  [ "$(uci get -q dropbear.@dropbear[0])" ] && {
+    uci -q set dropbear.@dropbear[0].RootLogin='1'
+    uci -q set dropbear.@dropbear[0].RootPasswordAuth='on'
+    uci -q set dropbear.@dropbear[0].PasswordAuth='on'
+    [ -z "$(uci get -q dropbear.@dropbear[0].enable)" ] && uci -q set dropbear.@dropbear[0].enable='1'
+  }
+
   uci set dropbear.wan.RootLogin='1'
   uci set dropbear.wan.RootPasswordAuth='on' #dropbear root related
   uci set dropbear.wan.PasswordAuth='on'
 
-  if [ "$(uci changes)" ]; then
+  if [ "$(uci changes dropbear)" ]; then
     logecho "Restarting Dropbear SSH Server..."
     uci commit dropbear
     /etc/init.d/dropbear enable

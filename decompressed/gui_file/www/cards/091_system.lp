@@ -37,17 +37,30 @@ local syslog_light_map = {
 }
 
 local ssh_enable = "disabled"
-local dropbear_res = proxy.get(
-  "uci.dropbear.dropbear.@dropbear[0].enable",
-  "uci.dropbear.dropbear.@lan.enable",
-  "uci.dropbear.dropbear.@wan.enable",
-  "uci.dropbear.dropbear.@afg.enable"
-)
-if dropbear_res then
-  for _, item in ipairs(dropbear_res) do
-    if item.value == "1" then
+local dbpath = "uci.dropbear.dropbear."
+local dbvalues = proxy.get(dbpath)
+local data = content_helper.convertResultToObject(dbpath, dbvalues)
+
+if type(data) == "table" and next(data) ~= nil then
+  for _, v in pairs(data) do
+    if v.enable == "1" or (v.enable ~= "0" and (v.Port or v.Interface or v.PasswordAuth or v.RootPasswordAuth)) then
       ssh_enable = "enabled"
       break
+    end
+  end
+else
+  local dropbear_res = proxy.get(
+    "uci.dropbear.dropbear.@dropbear[0].enable",
+    "uci.dropbear.dropbear.@lan.enable",
+    "uci.dropbear.dropbear.@wan.enable",
+    "uci.dropbear.dropbear.@afg.enable"
+  )
+  if dropbear_res then
+    for _, item in ipairs(dropbear_res) do
+      if item.value == "1" then
+        ssh_enable = "enabled"
+        break
+      end
     end
   end
 end
