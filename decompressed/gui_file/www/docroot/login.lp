@@ -1,13 +1,13 @@
 --pretranslated: do not change this file
--- Enable localization
+ 
 gettext.textdomain('webui-core')
 local ui_helper = require("web.ui_helper")
 local proxy = require("datamodel")
 local triesbeforemsg = 3
 local content_helper = require("web.content_helper")
 local format = string.format
-local passwd_count_msg = format(T"Tentativi di accesso errati (%s).", '<span id="pwdCount" class="badge-count"></span>')
-local timer_msg = format(T"Blocco di sicurezza attivo. Attendi %s secondi prima di riprovare.", '<span id="timerSec" class="cooldown-timer"></span>')
+local passwd_count_msg = format(T"Tentativi errati (%s).", '<span id="pwdCount" class="badge-count"></span>')
+local timer_msg = format(T"Blocco temporaneo. Attendi %s secondi.", '<span id="timerSec" class="cooldown-timer"></span>')
 
 if ngx.var.request_method == "GET" and ngx.req.get_uri_args().action == "getcsrf" then
   ngx.print(ngx.ctx.session:getCSRFtoken())
@@ -62,20 +62,19 @@ elseif skin_lower == "violet" then
 end
 
 ngx.print('<!DOCTYPE HTML>\n')
-ngx.print(string.format('<html lang="%s" class="%s">\n', gettext.language(), theme_class))
+ngx.print(format('<html lang="%s" class="%s">\n', gettext.language(), theme_class))
+ngx.print('<head>\n')
+ngx.print('    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">\n')
+ngx.print('    <meta charset="UTF-8">\n')
+ngx.print('    <meta name="CSRFtoken" content="'); ngx.print(ngx.ctx.session:getCSRFtoken()); ngx.print('">\n')
+ngx.print('    <link href="/css/font-awesome-all-5.7.2.css?version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\n')
+ngx.print('    <link href="/css/gw.css?version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\n')
+ngx.print('    <link href="/css/responsive.css?version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\n')
+ngx.print('    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico"/>\n')
+ngx.print('    <link rel="stylesheet" href="/theme/'); ngx.print(cui.gui_skin); ngx.print('/style.css?version='); ngx.print(cui.gui_version); ngx.print('">\n')
+ngx.print('    <link rel="stylesheet" href="/css/aos.css?version='); ngx.print(cui.gui_version); ngx.print('">\n')
+ngx.print('    <title>'); ngx.print(T"Gateway Login"); ngx.print('</title>\n')
 ngx.print([[
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta charset="UTF-8">
-    <meta name="CSRFtoken" content="]]) ngx.print(ngx.ctx.session:getCSRFtoken()) ngx.print([[">
-    <link href="/css/font-awesome-all-5.7.2.css?version=]]) ngx.print(cui.gui_version) ngx.print([[" rel="stylesheet">
-    <link href="/css/gw.css?version=]]) ngx.print(cui.gui_version) ngx.print([[" rel="stylesheet">
-    <link href="/css/responsive.css?version=]]) ngx.print(cui.gui_version) ngx.print([[" rel="stylesheet">
-    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico"/>
-    <link rel="stylesheet" href="/theme/]]) ngx.print(cui.gui_skin) ngx.print([[/style.css?version=]]) ngx.print(cui.gui_version) ngx.print([[">
-    <link rel="stylesheet" href="/css/aos.css?version=]]) ngx.print(cui.gui_version) ngx.print([[">
-    <title>]]) ngx.print(T"Gateway Login") ngx.print([[</title>
-
     <style>
       :root {
         --primary: #004691;
@@ -472,76 +471,58 @@ ngx.print([[
   <div class="auth-card" data-aos="fade-up" data-aos-duration="600">
 
     <div class="auth-header">
-      <a href="]]) ngx.print(cui.nsplink) ngx.print([[" target="_blank" class="brand-logo-wrap" title="Gateway Portal">
-        <picture>
 ]])
+ngx.print('      <a href="'); ngx.print(cui.nsplink); ngx.print('" target="_blank" class="brand-logo-wrap" title="Gateway Portal">\n')
+ngx.print('        <picture>\n')
 if cui.gui_skin == "TIM" then
-  ngx.print('          <img src="/img/TIM.png" alt="TIM Gateway">
-')
+  ngx.print('          <img src="/img/TIM.png" alt="TIM Gateway">\n')
 elseif cui.gui_skin == "Fritz" or string.match(cui.gui_skin, "[dD][aA][rR][kK]") then
-  ngx.print([[          <source srcset="/img/logo_white.webp" type="image/webp">
-          <source srcset="/img/logo_white.png" type="image/png">
-          <img src="/img/logo_white.png" alt="Gateway Admin">
-]])
+  ngx.print('          <source srcset="/img/logo_white.webp" type="image/webp">\n')
+  ngx.print('          <source srcset="/img/logo_white.png" type="image/png">\n')
+  ngx.print('          <img src="/img/logo_white.png" alt="Gateway Admin">\n')
 else
-  ngx.print([[          <source srcset="/img/logo.webp" type="image/webp">
-          <source srcset="/img/logo.png" type="image/png">
-          <img src="/img/logo.png" alt="Gateway Admin">
-]])
+  ngx.print('          <source srcset="/img/logo.webp" type="image/webp">\n')
+  ngx.print('          <source srcset="/img/logo.png" type="image/png">\n')
+  ngx.print('          <img src="/img/logo.png" alt="Gateway Admin">\n')
 end
-ngx.print([[        </picture>
-      </a>
-      <h1 class="auth-title">]]) ngx.print(T"Gateway Sign In") ngx.print([[</h1>
-      <p class="auth-subtitle">]]) ngx.print(T"Technicolor Gateway Web Interface") ngx.print([[</p>
-    </div>
+ngx.print('        </picture>\n')
+ngx.print('      </a>\n')
+ngx.print('      <h1 class="auth-title">'); ngx.print(T"Gateway Sign In"); ngx.print('</h1>\n')
+ngx.print('      <p class="auth-subtitle">'); ngx.print(T"Technicolor Gateway Web Interface"); ngx.print('</p>\n')
+ngx.print('    </div>\n')
 
-    <div class="status-pill-list">
-]])
+ngx.print('    <div class="status-pill-list">\n')
 if httpi == "0" and httpi_wwan == "0" and wan_mode ~= "bridge" then
-  ngx.print(string.format([[      <div class="status-pill warning">
-        <i class="fas fa-wifi"></i>
-        <span>%s</span>
-      </div>
-]], T"Nessuna connessione Internet attiva"))
+  ngx.print(format('      <div class="status-pill warning"><i class="fas fa-wifi"></i><span>%s</span></div>\n', T"Nessuna connessione Internet attiva"))
 end
-
 if wan_mode == "bridge" then
-  ngx.print(string.format([[      <div class="status-pill info">
-        <i class="fas fa-network-wired"></i>
-        <span>%s</span>
-      </div>
-]], T"Modalità Bridge Attiva"))
+  ngx.print(format('      <div class="status-pill info"><i class="fas fa-network-wired"></i><span>%s</span></div>\n', T"Modalità Bridge Attiva"))
 end
-
 if assistance_port ~= "0" then
-  ngx.print(string.format([[      <div class="status-pill info">
-        <i class="fas fa-headset"></i>
-        <span>%s</span>
-      </div>
-]], T"Sessione Assistenza Remota Attiva"))
+  ngx.print(format('      <div class="status-pill info"><i class="fas fa-headset"></i><span>%s</span></div>\n', T"Sessione Assistenza Remota Attiva"))
 end
+ngx.print('    </div>\n')
 
-ngx.print([[    </div>
+ngx.print('    <div id="erroruserpass" class="auth-alert-toast"><i class="fas fa-exclamation-circle"></i><span>'); ngx.print(T"Username o Password non validi."); ngx.print('</span></div>\n')
 
-    <div id="erroruserpass" class="auth-alert-toast">
-      <i class="fas fa-exclamation-circle"></i>
-      <span>]]) ngx.print(T"Username o Password non validi.") ngx.print([[</span>
-    </div>
-
+ngx.print([[
     <div id="login-section">
       <form id="auth-form" onsubmit="return false;">
-        
         <div class="form-group-modern">
           <div class="input-wrapper-modern">
             <i class="fas fa-user input-icon-leading"></i>
-            <input class="input-field-modern" type="text" id="srp_username" placeholder="]]) ngx.print(T"Username") ngx.print([[" value="]]) ngx.print(cui.defaultuser) ngx.print([[" autocomplete="username" autofocus required>
+]])
+ngx.print('            <input class="input-field-modern" type="text" id="srp_username" placeholder="'); ngx.print(T"Username"); ngx.print('" value="'); ngx.print(cui.defaultuser); ngx.print('" autocomplete="username" autofocus required>\n')
+ngx.print([[
           </div>
         </div>
 
         <div class="form-group-modern">
           <div class="input-wrapper-modern">
             <i class="fas fa-lock input-icon-leading"></i>
-            <input class="input-field-modern" type="password" id="srp_password" placeholder="]]) ngx.print(T"Password") ngx.print([[" autocomplete="current-password" required>
+]])
+ngx.print('            <input class="input-field-modern" type="password" id="srp_password" placeholder="'); ngx.print(T"Password"); ngx.print('" autocomplete="current-password" required>\n')
+ngx.print([[
             <button type="button" class="btn-password-toggle" id="btn-toggle-pw" aria-label="Mostra/Nascondi password" title="Mostra/Nascondi password">
               <i class="fas fa-eye" id="toggle-pw-icon"></i>
             </button>
@@ -550,7 +531,9 @@ ngx.print([[    </div>
 
         <div id="defaultpassword" class="auth-info-card" style="display: none;">
           <i class="fas fa-info-circle" style="color: var(--primary); margin-right: 4px;"></i>
-          ]]) ngx.print(T"Se non modificata, la password predefinita corrisponde all'<strong>Access Code</strong> presente sull'etichetta sotto il modem.") ngx.print([[
+]])
+ngx.print('          '); ngx.print(T"Se non modificata, la password predefinita corrisponde all'<strong>Access Code</strong> presente sull'etichetta sotto il modem."); ngx.print('\n')
+ngx.print([[
         </div>
 
         <div style="margin-top: 24px;">
