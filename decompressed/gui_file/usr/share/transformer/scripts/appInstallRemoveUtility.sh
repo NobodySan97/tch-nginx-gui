@@ -605,8 +605,82 @@ install_specific_files() {
   esac
 }
 
+app_adblock() {
+  install() {
+    opkg update
+    opkg install adblock ca-bundle ca-certificates
+    mkdir -p /tmp/dnsmasq.d
+
+    uci set adblock.global.adb_enabled='1'
+    uci set adblock.global.adb_dns='dnsmasq'
+    uci set adblock.global.adb_dnscanary='1'
+    uci set adblock.global.adb_tld='0'
+
+    uci set adblock.stevenblack=source
+    uci set adblock.stevenblack.adb_src='https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts'
+    uci set adblock.stevenblack.adb_src_desc='stevenblack unified hosts (ads, malware, social trackers, analytics, telemetry)'
+    uci set adblock.stevenblack.adb_src_rset='/^0\.0\.0\.0[[:space:]]+([[:alnum:]_-]+\.)+[[:alpha:]]+([[:space:]]|$)/{print tolower($2)}'
+    uci set adblock.stevenblack.enabled='1'
+
+    uci set adblock.oisd=source
+    uci set adblock.oisd.adb_src='https://small.oisd.nl/'
+    uci set adblock.oisd.adb_src_desc='OISD Small - Zero false positive ad and tracking domain list'
+    uci set adblock.oisd.adb_src_rset='BEGIN{FS="[[:space:]]+"} !/^#/ && NF {print tolower($1)}'
+    uci set adblock.oisd.enabled='0'
+
+    uci set adblock.hagezi=source
+    uci set adblock.hagezi.adb_src='https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/pro.txt'
+    uci set adblock.hagezi.adb_src_desc='Hagezi Multi Pro (Ads, Trackers, Social, OEMs, Telemetry)'
+    uci set adblock.hagezi.adb_src_rset='BEGIN{FS="[[:space:]]+"} !/^#/ && NF {print tolower($1)}'
+    uci set adblock.hagezi.enabled='0'
+
+    for dead in hphosts shalla zeus ransomware malwarelist sysctl ut_capitole reg_cn reg_cz reg_de reg_id reg_nl reg_pl reg_ro reg_ru dshield feodo winhelp hagezi_pro; do
+      uci -q delete adblock.$dead
+    done
+
+    if [ -f /usr/bin/adblock.sh ]; then
+      sed -i 's|adb_dnsdir="${adb_dnsdir:-"/tmp"}"|adb_dnsdir="${adb_dnsdir:-"/tmp/dnsmasq.d"}"|g' /usr/bin/adblock.sh
+      sed -i 's|adb_dnsdeny="awk.*|adb_dnsdeny="awk '"'"'{print \\\\"address=/\\\\"\\\\$0\\\\"/0.0.0.0\\\\"}'"'"'"|g' /usr/bin/adblock.sh
+      sed -i 's|killall -q -HUP "${adb_dns}"|/etc/init.d/dnsmasq restart|g' /usr/bin/adblock.sh
+    fi
+
+    uci commit adblock
+    /etc/init.d/adblock enable
+    /etc/init.d/adblock restart
+    /etc/init.d/transformer restart
+    uci set modgui.app.adblock_app="1"
+    uci commit modgui
+  }
+
+  remove() {
+    /etc/init.d/adblock stop 2>/dev/null
+    /etc/init.d/adblock disable 2>/dev/null
+    rm -f /tmp/dnsmasq.d/adb_list.overall
+    /etc/init.d/dnsmasq restart
+    opkg remove adblock
+    uci set modgui.app.adblock_app="0"
+    uci commit modgui
+  }
+
+  case $1 in
+  install)
+    install
+    ;;
+  remove)
+    remove
+    ;;
+  *)
+    echo "Unsupported action"
+    return 1
+    ;;
+  esac
+}
+
 call_app_type() {
   case "$2" in
+  adblock)
+    app_adblock "$1"
+    ;;
   transmission)
     app_transmission "$1"
     ;;

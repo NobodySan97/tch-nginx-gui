@@ -70,6 +70,10 @@ local check_rule = {
 	{ name = 'diagnosticsledsmodal', target = '/modals/diagnostics-leds-modal.lp' },
 	{ name = 'systeminitmodal', target = '/modals/system-init-modal.lp' },
 	{ name = 'systemcronmodal', target = '/modals/system-cron-modal.lp' },
+	{ name = 'adblockmodal', target = '/modals/adblck-config-modal.lp' },
+	{ name = 'adblocksourcesmodal', target = '/modals/adblck-sources-modal.lp' },
+	{ name = 'adblocklistsmodal', target = '/modals/adblck-lists-modal.lp' },
+	{ name = 'ajaxadblockstatus', target = '/ajax/adblck-status.lua' },
 }
 
 --We add telstra rules anyway as nginx will respond 404 if not found
@@ -137,6 +141,7 @@ local card_check_rule = {
 	{ name = 'devices_card', card = '006_Devices.lp', modal = 'devicemodal' },
 	{ name = 'wanservices_card', card = '007_wanservices.lp', modal = 'wanservices' },
 	{ name = 'firewall_card', card = '008_firewall.lp', modal = 'firewallmodal' },
+	{ name = 'adblock_card', card = '008_adblock.lp', modal = 'adblockmodal' },
 	{ name = 'qos_card', card = '008_qos.lp', modal = 'qosqueuemodal' },
 	{ name = 'telephony_card', card = '008_telephony.lp', modal = 'mmpbxglobalmodal' },
 	{ name = 'diagnostics_card', card = '009_diagnostics.lp', modal = 'diagnosticspingmodal' },
