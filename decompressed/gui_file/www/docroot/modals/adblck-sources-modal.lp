@@ -10,14 +10,15 @@ local format, untaint = string.format, string.untaint
 
 if ngx.req.get_method() == "POST" then
   local args = ngx.req.get_post_args()
-  local selected_sources = args.adb_sources or {}
-  if type(selected_sources) == "string" then
-    selected_sources = { selected_sources }
-  end
-  
+  local selected_sources = args.adb_sources
   local active_map = {}
-  for _, s in ipairs(selected_sources) do
-    active_map[untaint(s)] = true
+  
+  if type(selected_sources) == "table" then
+    for _, s in ipairs(selected_sources) do
+      active_map[untaint(s)] = true
+    end
+  elseif selected_sources then
+    active_map[untaint(selected_sources)] = true
   end
 
   local all_sources = proxy.getPN("uci.adblock.source.", true) or {}
