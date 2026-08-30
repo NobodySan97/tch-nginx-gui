@@ -191,8 +191,7 @@ app_luci() {
       [ ! -f /rom/usr/lib/libjson-c.so.2 ] && [ -f /usr/lib/libjson-c.so.4 ] && ln -sf /usr/lib/libjson-c.so.4 /usr/lib/libjson-c.so.2 #workaround for 18.x feeds used on 19.x firmware
       rm -rf /etc/config/uhttpd
       rm -f /usr/lib/lua/uci.so #remove to avoid lua-uci conflict during install
-      opkg install --force-reinstall libuci-lua luci rpcd px5g-standalone
-      [ ! -f /etc/init.d/uhttpd ] && opkg install uhttpd # only on 19.x is not getting installed as dependency?
+      opkg install --force-reinstall uhttpd libuci-lua luci rpcd px5g-standalone
       mkdir -p /www_luci
       [ -d /www/cgi-bin ] && mv /www/cgi-bin /www_luci/
       [ -d /www/luci-static ] && mv /www/luci-static /www_luci/
@@ -200,7 +199,27 @@ app_luci() {
       [ -f /rom/usr/lib/lua/uci.so ] && cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ #restore lib as it gets removed by libuci-lua
       [ -f /usr/lib/lua/luci/model/uci.lua ] && sed -i 's/require "uci"/require "uci_luci"/g' /usr/lib/lua/luci/model/uci.lua #modify luci to load his original lib with different name
 
-      if [ ! "$(uci get uhttpd.main.listen_http 2>/dev/null | grep 9080)" ]; then
+      if [ ! -f /etc/config/uhttpd ]; then
+        touch /etc/config/uhttpd
+        uci set uhttpd.main=uhttpd
+        uci set uhttpd.main.home='/www_luci'
+        uci set uhttpd.main.cgi_prefix='/cgi-bin'
+        uci add_list uhttpd.main.lua_prefix='/cgi-bin/luci=/usr/lib/lua/luci/sgi/uhttpd.lua'
+        uci set uhttpd.main.script_timeout='60'
+        uci set uhttpd.main.network_timeout='30'
+        uci set uhttpd.main.http_keepalive='20'
+        uci set uhttpd.main.tcp_keepalive='1'
+        uci set uhttpd.main.rfc1918_filter='1'
+        uci set uhttpd.main.max_requests='3'
+        uci set uhttpd.main.max_connections='100'
+        uci set uhttpd.main.cert='/etc/uhttpd.crt'
+        uci set uhttpd.main.key='/etc/uhttpd.key'
+        uci add_list uhttpd.main.listen_http='0.0.0.0:9080'
+        uci add_list uhttpd.main.listen_http='[::]:9080'
+        uci add_list uhttpd.main.listen_https='0.0.0.0:9443'
+        uci add_list uhttpd.main.listen_https='[::]:9443'
+        uci set uhttpd.main.redirect_https='0'
+      else
         uci del_list uhttpd.main.listen_http='0.0.0.0:80' 2>/dev/null
         uci add_list uhttpd.main.listen_http='0.0.0.0:9080'
         uci del_list uhttpd.main.listen_http='[::]:80' 2>/dev/null
