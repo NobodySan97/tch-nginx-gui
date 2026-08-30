@@ -83,22 +83,13 @@ function M.getAdblockCardHTML()
   local ui_helper = require("web.ui_helper")
   local content = M.getAdblockStatus()
   local blocked = tonumber(content.blocked_domains) or 0
-  local white = content.custom_whitelist
-  local black = content.custom_blacklist
+  local modal_link_sources = 'class="modal-link" data-toggle="modal" data-remote="/modals/adblck-sources-modal.lp" data-id="adblck-sources-modal"'
 
   local html = {}
-  html[#html+1] = ui_helper.createSimpleLight(content.status, content.status_text)
-  html[#html+1] = '<p class="subinfos">'
-  html[#html+1] = format("<strong class='modal-link' data-toggle='modal' data-remote='/modals/adblck-sources-modal.lp' data-id='adblck-sources-modal'>%d Liste DNS</strong> attive", content.enabled_lists)
-  html[#html+1] = '<br>'
-  html[#html+1] = format('<strong>Aggiornato:</strong> %s', content.last_rundate)
-  html[#html+1] = '<br>'
-  html[#html+1] = format("<strong class='modal-link' data-toggle='modal' data-remote='/modals/adblck-lists-modal.lp' data-id='adblck-lists-modal'>%d Domini Whitelist</strong>", white)
-  html[#html+1] = '<br>'
-  html[#html+1] = format("<strong class='modal-link' data-toggle='modal' data-remote='/modals/adblck-lists-modal.lp' data-id='adblck-lists-modal'>%d Domini Blacklist</strong>", black)
-  html[#html+1] = '<br>'
-  html[#html+1] = format("<strong>%d Domini</strong> bloccati", blocked)
-  html[#html+1] = '</p>'
+  html[#html+1] = ui_helper.createSimpleLight(content.status, content.status_text, nil, "fa fa-shield")
+  html[#html+1] = '<span class="simple-desc"><i class="fa fa-list-ul" aria-hidden="true">&nbsp;</i>' .. format('<strong %s>%d Liste DNS</strong> attive', modal_link_sources, content.enabled_lists) .. '</span><br/>'
+  html[#html+1] = '<span class="simple-desc"><i class="fa fa-ban" aria-hidden="true">&nbsp;</i><strong>' .. blocked .. ' Domini</strong> bloccati</span><br/>'
+  html[#html+1] = '<span class="simple-desc"><i class="fa fa-clock" aria-hidden="true">&nbsp;</i><strong>Aggiornato:</strong> ' .. content.last_rundate .. '</span><br/>'
   return html
 end
 

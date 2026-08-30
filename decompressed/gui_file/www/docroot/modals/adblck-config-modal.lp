@@ -35,6 +35,15 @@ if not helpmsg then
   helpmsg = {}
 end
 
+local reload_button = {
+  button = {
+    id = "btn-reload-adb",
+    name = "action",
+    value = "reload",
+    type = "submit",
+  }
+}
+
 ngx.print('\
 ');  ngx.print(ui_helper.createHeader("Adblock", false, true) ); ngx.print('\
 <div class="modal-body update">')
@@ -47,16 +56,9 @@ ngx.print('\
     <fieldset><legend>',T"Stato e Configurazione Adblock",'</legend>',
       ui_helper.createSwitch(T"Abilita Adblock", "adb_enabled", config["adb_enabled"], nil, helpmsg["adb_enabled"]),
       ui_helper.createSwitch(T"Backup Cache Liste", "adb_backup", config["adb_backup"], nil, helpmsg["adb_backup"]),
-      ui_helper.createSwitch(T"Modalità Debug", "adb_debug", config["adb_debug"], nil, helpmsg["adb_debug"]),'\
+      ui_helper.createSwitch(T"Modalità Debug", "adb_debug", config["adb_debug"], nil, helpmsg["adb_debug"]),
+      ui_helper.createButton(T"Aggiorna Database", T"Ricarica e Aggiorna Liste Ora", "fa fa-refresh", reload_button),'\
     </fieldset>\
-  </form>\
-  <form class="form-horizontal" method="post" action="modals/adblck-config-modal.lp" style="margin-top:15px;">\
-    <input type="hidden" name="action" value="reload">\
-    <div class="control-group">\
-      <div class="controls">\
-        <button type="submit" class="btn btn-primary"><i class="fa fa-refresh"></i> Ricarica e Aggiorna Liste Ora</button>\
-      </div>\
-    </div>\
   </form>\
 </div>\
 ',ui_helper.createFooter())
