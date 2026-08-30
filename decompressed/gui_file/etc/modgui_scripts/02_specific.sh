@@ -64,6 +64,7 @@ apply_right_opkg_repo() {
       sed -i '/homeware\/18\/brcm63xx-tch/d' /etc/opkg.conf #remove old setted feeds
       sed -i '/Ansuel\/GUI_ipk\/kernel-4.1/d' /etc/opkg.conf #remove old setted feeds
       sed -i '/repository\.macoers\.com\/homeware\/19\/brcm6xxx-tch/d' /etc/opkg.conf #remove broken 19 macoers feeds
+      sed -i '/^arch /d' /etc/opkg.conf #remove duplicate arch lines
       if ! grep -q "Ansuel/GUI_ipk/kernel-4.1" $opkg_file; then
         cat <<EOF >>$opkg_file
 arch all 100
