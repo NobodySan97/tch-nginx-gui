@@ -1,6 +1,20 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.7.70 (Stable)
+---------------------------------------------------------------------------
+- **Nuovo Modulo & Card Adblock DNS Sinkhole a Risposta Istantanea**:
+  - `008_adblock.lp` & `adblock_helper.lua`: Nuova card nativa con badge di stato dinamico, conteggio liste attive e totale domini bloccati in tempo reale.
+  - `adblck-config-modal.lp`: Gestione stato globale, download utility (curl), avvio automatico al boot e pulsante rapido di aggiornamento immediato delle liste con protezione token CSRF.
+  - `adblck-sources-modal.lp`: Selezione sorgenti DNS con supporto alle migliori liste mondiali (StevenBlack Unified Hosts, OISD Zero False Positives, HaGeZi Multi Pro, AdGuard DNS, Disconnect Malvertising, ecc.).
+  - `adblck-lists-modal.lp`: Gestione rapida Whitelist e Blacklist personalizzate da interfaccia web con auto-reload.
+  - **Correzioni di Stabilità & UI**:
+    - Risolto bug sul salvataggio delle modifiche (attivazione immediata del pulsante Salva sui checkbox e textarea).
+    - Risolto crash HTTP 500 su Technicolor OpenResty tramite deserializzazione sicura di oggetti tainted/userdata su richieste POST.
+    - Purga automatica di 19 liste obsolete, morte o non rilevanti.
+    - Risoluzione istantanea con direttiva nativa Dnsmasq `address=/dominio/0.0.0.0` e bypass del loop awk per una compilazione ultra-veloce senza carico CPU (`adb_tld='0'`).
+  - `unlock_and_refresh_web_config.lua` & `05_app.sh`: Auto-registrazione automatica della scheda e configurazione iniziale al momento dell'installazione o upgrade della GUI.
+
 9.7.66 (Stable)
 ---------------------------------------------------------------------------
 - **Ottimizzazione CPU, Riduzione I/O e Zero-Fork Performance**:
