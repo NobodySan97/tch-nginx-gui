@@ -252,7 +252,7 @@ app_luci() {
   remove() {
     luci_remove_arm() {
       [ -f /etc/init.d/uhttpd ] && { /etc/init.d/uhttpd stop 2>/dev/null; /etc/init.d/uhttpd disable 2>/dev/null; }
-      opkg remove --force-removal-of-dependent-packages uhttpd rpcd libuci-lua luci luci-* px5g-standalone
+      opkg remove --force-removal-of-dependent-packages uhttpd rpcd rpcd-mod-* libuci-lua luci luci-* liblucihttp* px5g-standalone
       [ ! -f /rom/usr/lib/libjson-c.so.2 ] && rm -f /usr/lib/libjson-c.so.2 #workaround for 18.x feeds used on 19.x firmware
       [ -f /rom/usr/lib/lua/uci.so ] && cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ #restore lib as it gets removed by libuci-lua
 
