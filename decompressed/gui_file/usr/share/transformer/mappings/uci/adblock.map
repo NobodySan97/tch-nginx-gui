@@ -1,0 +1,17 @@
+local config_adblock = "adblock"
+
+-- uci.adblock
+mapper("uci_1to1").registerConfigMap(config_adblock)
+
+-- uci.adblock.global
+local adblock_global = {
+  config = config_adblock,
+  section = "global",
+  type = "adblock",
+  options = {
+    "adb_enabled", "adb_srcarc", "adb_srcfile", "adb_dns", "adb_fetchutil", "adb_fetchparm",
+    "adb_trigger", "adb_debug", "adb_backup", "adb_backupdir",
+  }
+}
+
+mapper("uci_1to1").registerSimpleMap(adblock_global)
