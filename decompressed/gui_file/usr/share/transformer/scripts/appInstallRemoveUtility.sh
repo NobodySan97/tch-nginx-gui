@@ -198,6 +198,7 @@ app_luci() {
       [ -f /www/index.html ] && mv /www/index.html /www_luci/
       [ -f /rom/usr/lib/lua/uci.so ] && cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ #restore lib as it gets removed by libuci-lua
       [ -f /usr/lib/lua/luci/model/uci.lua ] && sed -i 's/require "uci"/require "uci_luci"/g' /usr/lib/lua/luci/model/uci.lua #modify luci to load his original lib with different name
+      [ -f /usr/lib/lua/luci/view/sysauth.htm ] && sed -i '/if (document.location.protocol != .https:.) {/,/}/d' /usr/lib/lua/luci/view/sysauth.htm
 
       if [ ! -f /etc/config/uhttpd ]; then
         touch /etc/config/uhttpd
