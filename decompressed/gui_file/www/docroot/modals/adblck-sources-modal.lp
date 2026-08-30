@@ -3,7 +3,6 @@
 -- Enable localization
 gettext.textdomain('webui-code')
 
-local content_helper = require("web.content_helper")
 local ui_helper = require("web.ui_helper")
 local message_helper = require("web.uimessage_helper")
 local proxy = require("datamodel")
@@ -70,7 +69,7 @@ ngx.print(ui_helper.createHeader("Adblock", false, true), '\
   <form class="form-horizontal" method="post" action="modals/adblck-sources-modal.lp">',
     ui_helper.createMessages(message_helper.popMessages()),'\
     <fieldset><legend>',T"Sorgenti Blacklist DNS",'</legend>')
-    ngx.print(ui_helper.createAlertBlock(T"Seleziona le liste desiderate. Consigliate: <strong>adaway, yoyo, disconnect</strong>.", warn_box))
+    ngx.print(ui_helper.createAlertBlock(T"Seleziona le liste desiderate. Consigliate: <strong>stevenblack, adguard, disconnect, adaway, yoyo</strong>.", warn_box))
     ngx.print('\
       <div class="control-group">\
         <table id="adb_sources" class="table table-striped table-bordered">\
@@ -95,4 +94,12 @@ ngx.print(ui_helper.createHeader("Adblock", false, true), '\
     </fieldset>\
   </form>\
 </div>\
+<script>\
+$().ready(function(){\
+  $("#adb_sources input[type=checkbox]").on("change", function(){\
+    $("#modal-no-change").hide();\
+    $("#modal-changes").removeClass("hide").show();\
+  });\
+});\
+</script>\
 ', ui_helper.createFooter())

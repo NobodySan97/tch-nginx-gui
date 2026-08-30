@@ -25,14 +25,12 @@ end
 
 if ngx.req.get_method() == "POST" then
   local args = ngx.req.get_post_args()
-  if args.action == "save_lists" then
-    local wl = untaint(args.whitelist or "")
-    local bl = untaint(args.blacklist or "")
-    write_file("/etc/adblock/adblock.whitelist", wl)
-    write_file("/etc/adblock/adblock.blacklist", bl)
-    os.execute("/etc/init.d/adblock reload &")
-    message_helper.pushMessage(T"Liste personalizzate salvate con successo!", "success")
-  end
+  local wl = untaint(args.whitelist or "")
+  local bl = untaint(args.blacklist or "")
+  write_file("/etc/adblock/adblock.whitelist", wl)
+  write_file("/etc/adblock/adblock.blacklist", bl)
+  os.execute("/etc/init.d/adblock reload &")
+  message_helper.pushMessage(T"Liste personalizzate salvate con successo!", "success")
 end
 
 local wl_content = read_file("/etc/adblock/adblock.whitelist")
@@ -46,7 +44,6 @@ ngx.print(ui_helper.createHeader("Adblock", false, true), '\
   ngx.print('\
   <form class="form-horizontal" method="post" action="modals/adblck-lists-modal.lp">',
     ui_helper.createMessages(message_helper.popMessages()),'\
-    <input type="hidden" name="action" value="save_lists">\
     <fieldset><legend>',T"Liste Personalizzate (Un dominio per riga)",'</legend>\
       <div class="control-group">\
         <label class="control-label"><strong>Whitelist</strong><br><small>Domini sempre permessi</small></label>\
@@ -63,4 +60,12 @@ ngx.print(ui_helper.createHeader("Adblock", false, true), '\
     </fieldset>\
   </form>\
 </div>\
+<script>\
+$().ready(function(){\
+  $("textarea[name=whitelist], textarea[name=blacklist]").on("input keyup change", function(){\
+    $("#modal-no-change").hide();\
+    $("#modal-changes").removeClass("hide").show();\
+  });\
+});\
+</script>\
 ', ui_helper.createFooter())
