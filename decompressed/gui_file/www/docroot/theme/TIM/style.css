@@ -1,293 +1,146 @@
-/*NG-78956 The "show advanced´" and "hide advanced" Button shall be more visible */
- .smallcard .header {
-    background-image: linear-gradient(to bottom, #004691, #004691) !important;
-    margin-bottom: 0px !important;
-    background-color: #004691 !important;
-}
- .smallcard{
-    font-family:Helvetica,Arial,sans-serif;
-    background-color:#ffffff;
-    border:1px solid #999999;
-    margin-bottom:20px;
-    -webkit-box-shadow:0 2px 3px rgba(0, 0, 0, 0.1);
-    -moz-box-shadow:0 2px 3px rgba(0, 0, 0, 0.1);
-    box-shadow:0 2px 3px rgba(0, 0, 0, 0.1);
-    overflow:hidden;
-}
- .smallcard .content {
-    background-color: #82b9e6 !important;
-}
- .header {
-    background-color: #004691 !important;
-}
- .switchOn {
-    background-color: #82b9e6;
-}
- .modal-header {
-    color: #004691;
-    border-radius: 10px 10px 0 0;
-    background-color: #ebe6e1;
-    border-bottom: 1px solid #ddd
-}
- .modal-footer {
-    background-color: #ebe6e1;
-}
- .smallcard .header .settings {
-    background-image: linear-gradient(to bottom, #82b9e6, #004691) !important;
-    background-color: #004691 !important;
-    border: 1px solid #004691 !important;
-}
- .btn {
-    color: #004691;
-}
- .btn-primary {
-    background-image: linear-gradient(to bottom, #82b9e6, #004691);
-    border: 1px solid #004691;
-    color: #ffffff;
-}
- .login {
-     background-color:#fff;
-     border-top:4px solid #004691;
-     margin-bottom:20px;
-    -webkit-box-shadow:0 2px 3px rgba(0, 0, 0, 0.1);
-    -moz-box-shadow:0 2px 3px rgba(0, 0, 0, 0.1);
-     box-shadow:0 2px 3px rgba(0, 0, 0, 0.1);
-     overflow:hidden;
-     margin-top:50%;
-     padding:20px 20px 5px 
+/* 2026-Grade Modern TIM Theme */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0, 70, 145, 0.4); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 70, 145, 0.7); }
+
+body, input, button, select, textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
 }
 
- .login_bg:after {
-     color:#dbccdc;
-     content:"";
-     display:block;
-     position:absolute;
-     bottom:-150px;
-     right:-40px;
-     font:"";
-}
- .span3 {
-    width: 300px;
-}
- .modal-action-advanced{
-    background-color: #0088cc;
-     color: #ffffff;
-     border-radius: 5px;
-     padding: 2px
-}
- .modal-action-refresh{
-    background-color: #0088cc;
-     color: #ffffff;
-     border-radius: 5px;
-     padding: 2px
-}
- .modal-action i{
-    color: #ffffff;
-     vertical-align: 0%;
-}
-/*.row .offset4.span4 {
-    background-color: #004691;
-}
-*/
- #webui_language, #wizard-btn{
-    background-color: #004691;
-    color: white;
-}
- #signin{
-    background-color: #004691;
-    color: white;
-}
- #logged .btn{
-    background-color: #004691;
-    color: white;
-}
- .logo-technicolor{
-    left: 0%;
-    box-sizing: border-box;
-    margin: 0px 0px 0px 0px;
-    background-color: #004691;
-    width:100%;
-    height: auto;
-    padding:15px
-}
- .timlogo {
-    padding: 0px 0px 0px 10px
-}
- @media screen and (min-width:768px) and (max-width:979px) {
-     .span12{
-        width:760px;
-         margin-left:10px
-    }
-}
- @media screen and (min-width:768px) and (max-width:979px) {
-     .row{
-        margin-left:-20px;
-         width:768px;
-        *zoom:1;
-    }
-     .span3{
-        width:246px;
-         margin-left:10px
-    }
-}
- @media screen and (max-width: 767px) {
-     .header{
-        padding: 30px 0px 50px 0px;
-        margin-bottom: 20px;
-    }
-}
- @media screen and (max-width: 767px) {
-     [class*="span"], .uneditable-input[class*="span"], .row-fluid [class*="span"] {
-         width: 100%;
-    }
-}
- @media screen and (min-width: 1200px) {
-     .span3 {
-         width: 270px;
-    }
+body {
+  background: radial-gradient(circle at 50% 10%, rgba(0, 70, 145, 0.08), transparent 40%),
+              radial-gradient(circle at 85% 85%, rgba(0, 153, 255, 0.06), transparent 35%),
+              #f1f5f9 !important;
+  color: #334155 !important;
 }
 
- .card_bg:after {
-     color:#dbccdc;
-     content:"" !important;
-     display:block;
-     position:absolute;
-     bottom:-40px;
-     right:10px;
-     font:"" !important;
+.navbar-inner {
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(0, 70, 145, 0.15) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04) !important;
 }
 
- .gateway_bg:after {
-     color:#ffffff;
-     content:"" !important; 
-     display:block;
-     position:absolute;
-     left:-400px;
-     top:-500px;
-     font:"" !important; 
+.smallcard {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid rgba(0, 70, 145, 0.12) !important;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background: #ffffff !important;
 }
 
-#headertab {
-	height: auto;
-	margin-bottom: 20px;
+.smallcard:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 36px -4px rgba(0, 70, 145, 0.18), 0 4px 12px -2px rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(0, 70, 145, 0.25) !important;
 }
 
-.header > .row{
- margin-left: 2rem;
- margin-right: 2rem;
+.smallcard > .header, .btn-primary, .smallcard .header .settings {
+  background: linear-gradient(135deg, #004691 0%, #00336b 100%) !important;
+  border: none !important;
+  border-radius: 16px 16px 0 0 !important;
+  padding: 12px 18px !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
 }
 
-@media screen and (max-width: 51rem) {
-	#webui_language {
-		width: 100%;
-	}
-	.header-sub-button {
-		width: 100%;
-	}
-	    
-	.header-button {
-		width: 9rem;
-	}
-	.btn-group>.btn+.dropdown-toggle {
-		padding-right: 0.4rem;
-		padding-left: 0.4rem;
-	}
-	
-	.btn-group>.btn:first-child {
-		padding-right: 0.5rem;
-		padding-left: 0.5rem;
-	}
+.smallcard > .header > .header-title p {
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  text-shadow: none !important;
+  margin: 0 !important;
 }
 
-.scroll-down {
-  opacity: 1;
-  -webkit-transition: all .5s ease-in 3s;
-  transition: all .5s ease-in 3s;
+.smallcard > .content {
+  border-radius: 0 0 16px 16px !important;
+  padding: 16px 18px !important;
+  background: #ffffff !important;
 }
 
-.scroll-down {
-  position: fixed;
-  bottom: 30px;
-  left: 100%;
-  margin-left: -50px;
-  width: 32px;
-  height: 32px;
-  background-size: 14px auto;
-  border-radius: 50%;
-  z-index: 5;
-  -webkit-animation: bounce 2s infinite 2s;
-  animation: bounce 2s infinite 2s;
-  -webkit-transition: all .2s ease-in;
-  transition: all .2s ease-in;
+.smallcard .modal-link:hover {
+  color: #004691 !important;
 }
 
-.scroll-down:before {
-	position: absolute;
-    top: calc(50% - 8px);
-    left: calc(50% - 7px);
-    color:#004691;
-	content: "\f063";
-	display:block;
-	position:absolute;
-	font-size:38px;
-	font-family:"Font Awesome 5 Free";
-	font-weight:900;
+.btn {
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
 }
 
-.scroll-up {
-  opacity: 1;
-  -webkit-transition: all .5s ease-in 3s;
-  transition: all .5s ease-in 3s;
+.btn-primary {
+  background: linear-gradient(135deg, #004691 0%, #00336b 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(0, 70, 145, 0.3) !important;
 }
 
-.scroll-up {
-  position: fixed;
-  bottom: 30px;
-  left: 100%;
-  margin-left: -50px;
-  width: 32px;
-  height: 32px;
-  background-size: 14px auto;
-  border-radius: 50%;
-  z-index: 5;
-  -webkit-animation: bounce 2s infinite 2s;
-  animation: bounce 2s infinite 2s;
-  -webkit-transition: all .2s ease-in;
-  transition: all .2s ease-in;
+.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(0, 70, 145, 0.4) !important;
+  filter: brightness(1.05) !important;
 }
 
-.scroll-up:before {
-	position: absolute;
-    top: calc(50% - 8px);
-    left: calc(50% - 7px);
-    color:#004691;
-	content: "\f062";
-	display:block;
-	position:absolute;
-	font-size:38px;
-	font-family:"Font Awesome 5 Free";
-	font-weight:900;
+.btn-primary:active {
+  transform: translateY(0) scale(0.98) !important;
 }
 
-@keyframes bounce {
-  0%,
-  100%,
-  20%,
-  50%,
-  80% {
-    -webkit-transform: translateY(0);
-    -ms-transform: translateY(0);
-    transform: translateY(0);
-  }
-  40% {
-    -webkit-transform: translateY(-10px);
-    -ms-transform: translateY(-10px);
-    transform: translateY(-10px);
-  }
-  60% {
-    -webkit-transform: translateY(-5px);
-    -ms-transform: translateY(-5px);
-    transform: translateY(-5px);
-  }
+.switchOn {
+  background-color: #004691 !important;
 }
-.copyright>p>font {color: #08c;}
+
+.switch {
+  border-radius: 9999px !important;
+}
+
+.switch .switcher {
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+.modal {
+  border-radius: 18px !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.28) !important;
+  overflow: hidden !important;
+}
+
+.modal-header {
+  border-radius: 18px 18px 0 0 !important;
+  padding: 16px 22px !important;
+  color: #004691 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.modal-footer {
+  border-radius: 0 0 18px 18px !important;
+  padding: 16px 22px !important;
+  background-color: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
+}
+
+.nav-tabs {
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+
+.nav-tabs > li > a {
+  border-radius: 8px 8px 0 0 !important;
+  color: #64748b !important;
+}
+
+.nav-tabs > .active > a, 
+.nav-tabs > .active > a:hover, 
+.nav-tabs > .active > a:focus {
+  color: #004691 !important;
+  border-color: #004691 !important;
+  border-bottom-color: transparent !important;
+  font-weight: 600 !important;
+}

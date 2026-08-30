@@ -77,13 +77,13 @@ ngx.print('    <title>'); ngx.print(T"Gateway Login"); ngx.print('</title>\n')
 ngx.print([[
     <style>
       :root {
-        --primary: #004691;
-        --primary-hover: #00336b;
-        --primary-glow: rgba(0, 70, 145, 0.28);
-        --accent: #0099ff;
-        --card-bg: rgba(255, 255, 255, 0.92);
-        --card-border: rgba(255, 255, 255, 0.7);
-        --card-shadow: 0 25px 50px -12px rgba(0, 70, 145, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+        --primary: #059669;
+        --primary-hover: #047857;
+        --primary-glow: rgba(5, 150, 105, 0.28);
+        --accent: #10b981;
+        --card-bg: rgba(255, 255, 255, 0.95);
+        --card-border: rgba(255, 255, 255, 0.8);
+        --card-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
         --input-bg: #f8fafc;
         --input-border: #cbd5e1;
         --text-heading: #0f172a;
@@ -111,10 +111,10 @@ ngx.print([[
         --accent: #0288d1;
       }
       .theme-dark, .theme-dark body {
-        --card-bg: rgba(30, 41, 59, 0.82);
+        --card-bg: rgba(30, 41, 59, 0.88);
         --card-border: rgba(255, 255, 255, 0.12);
         --card-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6), 0 0 30px rgba(59, 130, 246, 0.15);
-        --input-bg: rgba(15, 23, 42, 0.8);
+        --input-bg: rgba(15, 23, 42, 0.85);
         --input-border: rgba(255, 255, 255, 0.15);
         --text-heading: #f8fafc;
         --text-body: #cbd5e1;
@@ -140,18 +140,23 @@ ngx.print([[
         min-height: 100%;
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        background: radial-gradient(circle at 50% 15%, rgba(0, 70, 145, 0.08), transparent 45%),
-                    radial-gradient(circle at 85% 85%, rgba(0, 153, 255, 0.06), transparent 40%),
-                    #f8fafc;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        background: radial-gradient(circle at 50% 15%, rgba(5, 150, 105, 0.10), transparent 45%),
+                    radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.08), transparent 40%),
+                    #f1f5f9 !important;
         color: var(--text-body);
         -webkit-font-smoothing: antialiased;
         overflow-x: hidden;
       }
+      .theme-tim html, .theme-tim body {
+        background: radial-gradient(circle at 50% 15%, rgba(0, 70, 145, 0.10), transparent 45%),
+                    radial-gradient(circle at 85% 85%, rgba(0, 153, 255, 0.08), transparent 40%),
+                    #f1f5f9 !important;
+      }
       .theme-dark html, .theme-dark body {
         background: radial-gradient(circle at 50% 15%, rgba(59, 130, 246, 0.15), transparent 50%),
                     radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.08), transparent 45%),
-                    #0b0f19;
+                    #0b0f19 !important;
       }
 
       .auth-viewport {
@@ -177,7 +182,6 @@ ngx.print([[
         box-sizing: border-box;
         position: relative;
         overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
       }
 
       .auth-card::before {
@@ -248,131 +252,136 @@ ngx.print([[
         color: #2563eb;
       }
 
-      .form-group-modern {
-        margin-bottom: 18px;
-        position: relative;
-      }
-      .input-wrapper-modern {
-        position: relative;
-        display: flex;
-        align-items: center;
-      }
-      .input-icon-leading {
-        position: absolute;
-        left: 15px;
-        color: var(--text-muted);
-        font-size: 16px;
-        pointer-events: none;
-        transition: color 0.2s ease;
-        z-index: 2;
-      }
-      .input-field-modern {
-        width: 100% !important;
-        height: 48px !important;
+      /* === PURE FLEXBOX INPUT CONTAINER - IMMUNE TO OVERLAYS === */
+      .modern-input-group {
+        display: flex !important;
+        align-items: center !important;
         background: var(--input-bg) !important;
         border: 1.5px solid var(--input-border) !important;
         border-radius: var(--radius-control) !important;
-        padding: 0 44px 0 44px !important;
-        font-size: 14.5px !important;
-        color: var(--text-heading) !important;
+        padding: 0 12px !important;
+        height: 50px !important;
+        margin-bottom: 18px !important;
         box-sizing: border-box !important;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: none !important;
       }
-      .input-field-modern::placeholder {
+      .modern-input-group:focus-within {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 4px var(--primary-glow) !important;
+        background: #ffffff !important;
+      }
+      .theme-dark .modern-input-group:focus-within {
+        background: rgba(15, 23, 42, 0.95) !important;
+      }
+      .input-prefix-icon {
+        width: 32px !important;
+        flex: 0 0 32px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: var(--text-muted) !important;
+        font-size: 16px !important;
+      }
+      .modern-input-group:focus-within .input-prefix-icon {
+        color: var(--primary) !important;
+      }
+      .modern-input-group input {
+        flex: 1 1 auto !important;
+        width: 100% !important;
+        border: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
+        padding: 0 10px !important;
+        margin: 0 !important;
+        height: 100% !important;
+        font-size: 15px !important;
+        color: var(--text-heading) !important;
+        box-sizing: border-box !important;
+      }
+      .modern-input-group input::placeholder {
         color: var(--text-muted);
         opacity: 0.75;
       }
-      .input-field-modern:focus {
-        outline: none !important;
-        border-color: var(--primary) !important;
-        background: #ffffff !important;
-        box-shadow: 0 0 0 4px var(--primary-glow) !important;
-      }
-      .theme-dark .input-field-modern:focus {
-        background: rgba(15, 23, 42, 0.95) !important;
-      }
-      .input-wrapper-modern:focus-within .input-icon-leading {
-        color: var(--primary);
-      }
 
       .btn-password-toggle {
-        position: absolute;
-        right: 12px;
-        background: transparent;
-        border: none;
-        color: var(--text-muted);
-        cursor: pointer;
-        padding: 8px;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        transition: all 0.2s ease;
-        z-index: 3;
+        width: 36px !important;
+        height: 36px !important;
+        flex: 0 0 36px !important;
+        background: transparent !important;
+        border: none !important;
+        color: var(--text-muted) !important;
+        cursor: pointer !important;
+        padding: 0 !important;
+        font-size: 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
       }
       .btn-password-toggle:hover {
-        color: var(--text-heading);
-        background: rgba(0, 0, 0, 0.05);
+        color: var(--text-heading) !important;
+        background: rgba(0, 0, 0, 0.06) !important;
       }
       .theme-dark .btn-password-toggle:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.1) !important;
       }
 
       .btn-modern-primary {
-        width: 100%;
-        height: 48px;
-        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+        width: 100% !important;
+        height: 48px !important;
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover)) !important;
         color: #ffffff !important;
-        border: none;
-        border-radius: var(--radius-control);
-        font-size: 15.5px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 14px var(--primary-glow);
-        text-decoration: none;
-        box-sizing: border-box;
+        border: none !important;
+        border-radius: var(--radius-control) !important;
+        font-size: 15.5px !important;
+        font-weight: 600 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        cursor: pointer !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 0 4px 14px var(--primary-glow) !important;
+        text-decoration: none !important;
+        box-sizing: border-box !important;
+        text-shadow: none !important;
       }
       .btn-modern-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 22px var(--primary-glow);
-        filter: brightness(1.05);
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 22px var(--primary-glow) !important;
+        filter: brightness(1.05) !important;
       }
       .btn-modern-primary:active {
-        transform: translateY(0) scale(0.98);
+        transform: translateY(0) scale(0.98) !important;
       }
       .btn-modern-primary:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
+        opacity: 0.7 !important;
+        cursor: not-allowed !important;
         transform: none !important;
         box-shadow: none !important;
       }
 
       .btn-modern-secondary {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        height: 42px;
-        padding: 0 18px;
-        border-radius: var(--radius-control);
-        border: 1.5px solid var(--input-border);
-        background: transparent;
-        color: var(--text-body);
-        font-size: 14px;
-        font-weight: 500;
-        cursor: pointer;
-        text-decoration: none;
-        transition: all 0.2s ease;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 42px !important;
+        padding: 0 18px !important;
+        border-radius: var(--radius-control) !important;
+        border: 1.5px solid var(--input-border) !important;
+        background: transparent !important;
+        color: var(--text-body) !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
       }
       .btn-modern-secondary:hover {
-        background: rgba(0, 0, 0, 0.04);
-        border-color: var(--text-muted);
+        background: rgba(0, 0, 0, 0.04) !important;
+        border-color: var(--text-muted) !important;
       }
 
       .auth-alert-toast {
@@ -508,25 +517,22 @@ ngx.print('    <div id="erroruserpass" class="auth-alert-toast"><i class="fas fa
 ngx.print([[
     <div id="login-section">
       <form id="auth-form" onsubmit="return false;">
-        <div class="form-group-modern">
-          <div class="input-wrapper-modern">
-            <i class="fas fa-user input-icon-leading"></i>
+        
+        <div class="modern-input-group">
+          <div class="input-prefix-icon"><i class="fas fa-user"></i></div>
 ]])
-ngx.print('            <input class="input-field-modern" type="text" id="srp_username" placeholder="'); ngx.print(T"Username"); ngx.print('" value="'); ngx.print(cui.defaultuser); ngx.print('" autocomplete="username" autofocus required>\n')
+ngx.print('          <input type="text" id="srp_username" placeholder="'); ngx.print(T"Username"); ngx.print('" value="'); ngx.print(cui.defaultuser); ngx.print('" autocomplete="username" autofocus required>\n')
 ngx.print([[
-          </div>
         </div>
 
-        <div class="form-group-modern">
-          <div class="input-wrapper-modern">
-            <i class="fas fa-lock input-icon-leading"></i>
+        <div class="modern-input-group">
+          <div class="input-prefix-icon"><i class="fas fa-lock"></i></div>
 ]])
-ngx.print('            <input class="input-field-modern" type="password" id="srp_password" placeholder="'); ngx.print(T"Password"); ngx.print('" autocomplete="current-password" required>\n')
+ngx.print('          <input type="password" id="srp_password" placeholder="'); ngx.print(T"Password"); ngx.print('" autocomplete="current-password" required>\n')
 ngx.print([[
-            <button type="button" class="btn-password-toggle" id="btn-toggle-pw" aria-label="Mostra/Nascondi password" title="Mostra/Nascondi password">
-              <i class="fas fa-eye" id="toggle-pw-icon"></i>
-            </button>
-          </div>
+          <button type="button" class="btn-password-toggle" id="btn-toggle-pw" aria-label="Mostra/Nascondi password" title="Mostra/Nascondi password">
+            <i class="fas fa-eye" id="toggle-pw-icon"></i>
+          </button>
         </div>
 
         <div id="defaultpassword" class="auth-info-card" style="display: none;">
@@ -559,11 +565,9 @@ ngx.print([[
         <i class="fas fa-key"></i> ]]) ngx.print(T'Inserisci il codice <strong>"Access Code"</strong> presente sotto il modem.') ngx.print([[
       </div>
 
-      <div class="form-group-modern">
-        <div class="input-wrapper-modern">
-          <i class="fas fa-key input-icon-leading"></i>
-          <input class="input-field-modern" type="password" id="srp_password1" placeholder="]]) ngx.print(T"Access Code") ngx.print([[">
-        </div>
+      <div class="modern-input-group">
+        <div class="input-prefix-icon"><i class="fas fa-key"></i></div>
+        <input type="password" id="srp_password1" placeholder="]]) ngx.print(T"Access Code") ngx.print([[">
       </div>
 
       <div style="display: flex; gap: 10px; margin-top: 20px;">

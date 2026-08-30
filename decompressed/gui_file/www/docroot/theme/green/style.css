@@ -1,368 +1,159 @@
+/* ==========================================================================
+   2026-GRADE MODERN EMERALD THEME FOR TECHNICOLOR OPENRESTY GUI
+   ========================================================================== */
 
-body::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-body::-webkit-scrollbar-button {
-  width: 0px;
-  height: 0px;
-}
-body::-webkit-scrollbar-thumb {
-  background: rgba(30, 116, 30, 0.50);
-}
-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(30, 116, 30, 0.80);
-}
-body::-webkit-scrollbar-thumb:active {
-  background: rgba(30, 116, 30, 1);
-}
-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-body::-webkit-scrollbar-track:hover {
-  background: transparent;
-}
-body::-webkit-scrollbar-track:active {
-  background: transparent;
-}
-body::-webkit-scrollbar-corner {
-  background: transparent;
+/* Universal Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(5, 150, 105, 0.4); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(5, 150, 105, 0.7); }
+
+/* Global Typography & Font Stack */
+body, input, button, select, textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
 }
 
-.modal-body::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-.modal-body::-webkit-scrollbar-button {
-  width: 0px;
-  height: 0px;
-}
-.modal-body::-webkit-scrollbar-thumb {
-  background: rgba(30, 116, 30, 0.50);
-}
-.modal-body::-webkit-scrollbar-thumb:hover {
-  background: rgba(30, 116, 30, 0.80);
-}
-.modal-body::-webkit-scrollbar-thumb:active {
-  background: rgba(30, 116, 30, 1);
-}
-.modal-body::-webkit-scrollbar-track {
-  background: transparent;
-}
-.modal-body::-webkit-scrollbar-track:hover {
-  background: transparent;
-}
-.modal-body::-webkit-scrollbar-track:active {
-  background: transparent;
-}
-.modal-body::-webkit-scrollbar-corner {
-  background: transparent;
+/* Background Atmosphere */
+body {
+  background: radial-gradient(circle at 50% 10%, rgba(5, 150, 105, 0.08), transparent 40%),
+              radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.06), transparent 35%),
+              #f1f5f9 !important;
+  color: #334155 !important;
 }
 
-.modal-body {
-  padding: 0px 15px;
+/* Top Navigation Bar */
+.navbar-inner {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(5, 150, 105, 0.15) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.04) !important;
 }
 
-legend {
-  background-color: rgb(255, 255, 255);
-  position: sticky;
-  top: 0px;
+/* Modern Card Bento-Grid Elevation */
+.smallcard {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid rgba(5, 150, 105, 0.12) !important;
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background: #ffffff !important;
 }
 
-.scroll-down {
-  opacity: 1;
-  -webkit-transition: all .5s ease-in 3s;
-  transition: all .5s ease-in 3s;
+.smallcard:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 36px -4px rgba(5, 150, 105, 0.18), 0 4px 12px -2px rgba(0, 0, 0, 0.06) !important;
+  border-color: rgba(5, 150, 105, 0.25) !important;
 }
 
-.scroll-down {
-  position: fixed;
-  bottom: 30px;
-  left: 100%;
-  margin-left: -50px;
-  width: 32px;
-  height: 32px;
-  background-size: 14px auto;
-  border-radius: 50%;
-  z-index: 5;
-  -webkit-animation: bounce 2s infinite 2s;
-  animation: bounce 2s infinite 2s;
-  -webkit-transition: all .2s ease-in;
-  transition: all .2s ease-in;
+/* Card Header Modern Gradient */
+.smallcard > .header, .btn-primary, .smallcard .header .settings {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  border: none !important;
+  border-radius: 16px 16px 0 0 !important;
+  padding: 12px 18px !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
 }
 
-.scroll-down:before {
-	position: absolute;
-    top: calc(50% - 8px);
-    left: calc(50% - 7px);
-    color:rgb(30, 116, 30);
-	content: "\f063";
-	display:block;
-	position:absolute;
-	font-size:38px;
-	font-family:"Font Awesome 5 Free";
-	font-weight:900;
+.smallcard > .header > .header-title p {
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  text-shadow: none !important;
+  margin: 0 !important;
 }
 
-.scroll-up {
-  opacity: 1;
-  -webkit-transition: all .5s ease-in 3s;
-  transition: all .5s ease-in 3s;
-}
-
-.scroll-up {
-  position: fixed;
-  bottom: 30px;
-  left: 100%;
-  margin-left: -50px;
-  width: 32px;
-  height: 32px;
-  background-size: 14px auto;
-  border-radius: 50%;
-  z-index: 5;
-  -webkit-animation: bounce 2s infinite 2s;
-  animation: bounce 2s infinite 2s;
-  -webkit-transition: all .2s ease-in;
-  transition: all .2s ease-in;
-}
-
-.scroll-up:before {
-	position: absolute;
-    top: calc(50% - 8px);
-    left: calc(50% - 7px);
-    color:rgb(30, 116, 30);
-	content: "\f062";
-	display:block;
-	position:absolute;
-	font-size:38px;
-	font-family:"Font Awesome 5 Free";
-	font-weight:900;
-}
-
-@keyframes bounce {
-  0%,
-  100%,
-  20%,
-  50%,
-  80% {
-    -webkit-transform: translateY(0);
-    -ms-transform: translateY(0);
-    transform: translateY(0);
-  }
-  40% {
-    -webkit-transform: translateY(-10px);
-    -ms-transform: translateY(-10px);
-    transform: translateY(-10px);
-  }
-  60% {
-    -webkit-transform: translateY(-5px);
-    -ms-transform: translateY(-5px);
-    transform: translateY(-5px);
-  }
-}
-
-.logo{
-  margin-top: -30px; 
+.smallcard > .content {
+  border-radius: 0 0 16px 16px !important;
+  padding: 16px 18px !important;
+  background: #ffffff !important;
 }
 
 .smallcard .modal-link:hover {
-  color: rgb(30, 116, 30);
+  color: #059669 !important;
 }
 
-.smallcard .someInfos{
-	color:#333333;
-}
-
-.btn-primary, .smallcard .header, .smallcard .header .settings {
-  background-color: rgb(30, 116, 30);
-  background-image: -moz-linear-gradient(top, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-image: -webkit-gradient(linear, 0 0, 20% 100%, from(rgb(30, 116, 30)), to(rgb(29, 36, 29)));
-  background-image: -webkit-linear-gradient(top, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-image: -o-linear-gradient(top, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-image: linear-gradient(to bottom, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff440359', endColorstr='#ff7c1a74', GradientType=0);
-  border-color: rgb(30, 116, 30) rgb(30, 116, 30) rgb(30, 116, 30);
-  border: 1px solid rgb(30, 116, 30);
-  text-shadow: 0 1px 0px #000000;
-}
-
-.switchOn {
-  background-color: rgb(30, 116, 30);
-}
-
-.modal-header {
-  color: rgb(30, 116, 30);
-  border-bottom: 1px solid rgb(30, 116, 30);
-}
-
-.modal-footer {
-  border-top:1px solid rgb(30, 116, 30);
-  -webkit-border-radius:0 0 6px 6px;
-  -moz-border-radius:0 0 6px 6px;
-  border-radius:0 0 6px 6px;
-  -webkit-box-shadow:inset 0 1px 0 rgb(98, 196, 98);
-  -moz-box-shadow:inset 0 1px 0 rgb(98, 196, 98);
-  box-shadow:inset 0 1px 0 rgb(98, 196, 98);
-}
-
+/* Buttons */
 .btn {
-  color: rgb(30, 116, 30);
+  border-radius: 10px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
 }
 
 .btn-primary {
-  color: #ededed;
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3) !important;
 }
 
-.btn[disabled] {
-  color: #6e0a8f;
+.btn-primary:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4) !important;
+  filter: brightness(1.05) !important;
 }
 
-.btn:hover, .btn:focus, .btn:active, .btn.active, .btn.disabled, .btn[disabled] {
-color: #48848F;
-background-color: #e6e6e6;
+.btn-primary:active {
+  transform: translateY(0) scale(0.98) !important;
 }
 
-.btn:hover:hover, .btn:hover:focus, .btn:hover:active, .btn:hover.active, .btn:hover.disabled, .btn:hover[disabled] {
-color: #ffffff;
-background-color: rgb(30, 116, 30);
+/* Switch */
+.switchOn {
+  background-color: #059669 !important;
 }
 
-.btn:hover,.btn:focus{background-position:0 0px;}
-
-.button:hover:hover, .button:hover:focus, .button:hover:active, .button:hover.active, .button:hover.disabled, .button:hover[disabled] {
-color: #ffffff;
-background-color: rgb(30, 116, 30);
+.switch {
+  border-radius: 9999px !important;
 }
 
-.button:hover {
-text-shadow: 0 -1px 0px rgba(0, 0, 0, 0.2);
-color: #ffffff;
-text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-background-color: rgb(30, 116, 30);
-  background-image: -moz-linear-gradient(top, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-image: -webkit-gradient(linear, 0 0, 20% 100%, from(rgb(30, 116, 30)), to(rgb(29, 36, 29)));
-  background-image: -webkit-linear-gradient(top, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-image: -o-linear-gradient(top, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-image: linear-gradient(to bottom, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-background-repeat: repeat-x;
-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffcb2bbe', endColorstr='#ff440359', GradientType=0);
-border-color: rgb(30, 116, 30) rgb(30, 116, 30) rgb(30, 116, 30);
-border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
--webkit-box-shadow: inset 0px 1px 0px rgba(255,255,255,.5), 0px 0px 5px rgb(92, 247, 65);
--moz-box-shadow: inset 0px 1px 0px rgba(255,255,255,.5), 0px 0px 5px rgb(92, 247, 65);
-box-shadow: inset 0px 1px 0px rgba(255,255,255,.5), 0px 0px 5px rgb(92, 247, 65);
-border: 1px solid rgb(30, 116, 30);
-outline: none;
-}
-.smallcard .header .settings:hover:hover, .smallcard .header .settings:hover:focus, .smallcard .header .settings:hover:active, .smallcard .header .settings:hover.active, .smallcard .header .settings:hover.disabled, .smallcard .header .settings:hover[disabled] {
-color: #ffffff;
-background-color: rgb(30, 116, 30);
-}
-.smallcard .header .settings:hover {
-text-shadow: 0 -1px 0px rgba(0, 0, 0, 0.2);
-color: #ffffff;
-text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-background-color: rgb(30, 116, 30);
-  background-image: -moz-linear-gradient(top, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-image: -webkit-gradient(linear, 0 0, 20% 100%, from(rgb(30, 116, 30)), to(rgb(29, 36, 29)));
-  background-image: -webkit-linear-gradient(top, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-image: -o-linear-gradient(top, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-  background-image: linear-gradient(to bottom, rgb(30, 116, 30) 20%, rgb(29, 36, 29) 100%);
-background-repeat: repeat-x;
-filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffcb2bbe', endColorstr='#ff440359', GradientType=0);
-border-color: rgb(30, 116, 30) rgb(30, 116, 30) rgb(30, 116, 30);
-border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
--webkit-box-shadow: inset 0px 1px 0px rgba(255,255,255,.5), 0px 0px 5px rgb(92, 247, 65);
--moz-box-shadow: inset 0px 1px 0px rgba(255,255,255,.5), 0px 0px 5px rgb(92, 247, 65);
-box-shadow: inset 0px 1px 0px rgba(255,255,255,.5), 0px 0px 5px rgb(92, 247, 65);
-border: 1px solid rgb(30, 116, 30);
-outline: none;
+.switch .switcher {
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
 }
 
-
-.nav-list>.active>a, .nav-list>.active>a:hover, .nav-list>.active>a:focus {
-  color: #ffffff;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
-  background-color: rgb(30, 116, 30);
+/* Modern Modals */
+.modal {
+  border-radius: 18px !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.28) !important;
+  overflow: hidden !important;
 }
 
-.nav>li>a:hover, .nav>li>a:focus {
-text-decoration: none;
-background-color: #cccccc;
+.modal-header {
+  border-radius: 18px 18px 0 0 !important;
+  padding: 16px 22px !important;
+  color: #047857 !important;
+  border-bottom: 1px solid #e2e8f0 !important;
 }
 
-a {
-color: rgb(30, 116, 30);
-text-decoration: none;
+.modal-footer {
+  border-radius: 0 0 18px 18px !important;
+  padding: 16px 22px !important;
+  background-color: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+  box-shadow: none !important;
 }
 
-.dropdown-menu>li>a:hover, .dropdown-menu>li>a:focus, .dropdown-submenu:hover>a, .dropdown-submenu:focus>a {
-  color: #2bb6cb;
+/* Tabs */
+.nav-tabs {
+  border-bottom: 2px solid #e2e8f0 !important;
 }
 
-.card_bg:after {
-    color: rgba(151, 187, 151, 0.40);
+.nav-tabs > li > a {
+  border-radius: 8px 8px 0 0 !important;
+  color: #64748b !important;
 }
 
-.smallcard {
-    -webkit-box-shadow: 0 2px 20px 0px rgba(56, 132, 56, 0.65);
-    -moz-box-shadow: 0 2px 20px 0px rgba(56, 132, 56, 0.65);
-    box-shadow: 0 2px 20px 0px rgba(56, 132, 56, 0.65);
+.nav-tabs > .active > a, 
+.nav-tabs > .active > a:hover, 
+.nav-tabs > .active > a:focus {
+  color: #059669 !important;
+  border-color: #059669 !important;
+  border-bottom-color: transparent !important;
+  font-weight: 600 !important;
 }
-
-.gateway_bg {
-    position: fixed;
-}
-
-.gateway_bg:after {
-    color: rgba(151, 187, 151, 0.40);
-}
-
-.login_bg:after {
-    color: rgba(151, 187, 151, 0.40);
-}
-
-.login {
-    background-color: rgb(255, 255, 255);
-    border-top: 4px solid rgb(30, 116, 30);
-    -webkit-box-shadow: 0 2px 20px 0px rgba(56, 132, 56, 0.65);
-    -moz-box-shadow: 0 2px 20px 0px rgba(56, 132, 56, 0.65);
-    box-shadow: 0 2px 20px 0px rgba(56, 132, 56, 0.65);
-}
-
-#headertab {
-	height: auto;
-	margin-bottom: 20px;
-}
-
-.header > .row{
- margin-left: 2rem;
- margin-right: 2rem;
-}
-
-@media screen and (max-width: 51rem) {
-	#webui_language {
-		width: 100%;
-	}
-	.header-sub-button {
-		width: 100%;
-	}
-	    
-	.header-button {
-		width: 9rem;
-	}
-	.btn-group>.btn+.dropdown-toggle {
-		padding-right: 0.4rem;
-		padding-left: 0.4rem;
-	}
-	
-	.btn-group>.btn:first-child {
-		padding-right: 0.5rem;
-		padding-left: 0.5rem;
-	}
-}
-
-.copyright>p>font {color: rgb(30, 116, 30);}
