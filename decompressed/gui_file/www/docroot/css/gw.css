@@ -8154,3 +8154,163 @@ fieldset.form-section legend {
   margin-bottom: 12px;
   padding: 0 8px;
 }
+
+
+/* ==========================================================================
+   2026-GRADE VISUAL DESIGN SYSTEM & COMPONENT OVERHAUL
+   ========================================================================== */
+
+/* Universal Smooth Typography & Rendering */
+body, input, button, select, textarea {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Card Elevation & Bento-Grid Interactivity */
+.smallcard {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.07), 0 2px 6px -1px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease !important;
+  background: #ffffff !important;
+}
+
+.smallcard:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.05) !important;
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.smallcard > .header {
+  border-radius: 16px 16px 0 0 !important;
+  padding: 12px 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-weight: 600 !important;
+}
+
+.smallcard > .header > .header-title p {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+}
+
+.smallcard > .content {
+  border-radius: 0 0 16px 16px !important;
+  padding: 16px 18px !important;
+}
+
+/* Top Navigation Bar Glassmorphism */
+.navbar-inner {
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Modal Dialogs Modern Polish */
+.modal {
+  border-radius: 18px !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.28) !important;
+  overflow: hidden !important;
+}
+
+.modal-header {
+  border-radius: 18px 18px 0 0 !important;
+  padding: 16px 22px !important;
+}
+
+.modal-footer {
+  border-radius: 0 0 18px 18px !important;
+  padding: 16px 22px !important;
+  background-color: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+/* Modern Tab Navigation in Modals */
+.nav-tabs {
+  border-bottom: 2px solid #e2e8f0 !important;
+  margin-bottom: 18px !important;
+}
+
+.nav-tabs > li > a {
+  border-radius: 8px 8px 0 0 !important;
+  font-weight: 500 !important;
+  padding: 10px 18px !important;
+  color: #64748b !important;
+  transition: all 0.2s ease !important;
+}
+
+.nav-tabs > li > a:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.nav-tabs > .active > a, 
+.nav-tabs > .active > a:hover, 
+.nav-tabs > .active > a:focus {
+  font-weight: 600 !important;
+  color: #004691 !important;
+  border: 2px solid #004691 !important;
+  border-bottom-color: transparent !important;
+  background-color: #ffffff !important;
+}
+
+/* Polished Form Inputs & Selects */
+input[type="text"], 
+input[type="password"], 
+input[type="number"], 
+input[type="email"], 
+select, 
+textarea {
+  border-radius: 10px !important;
+  border: 1.5px solid #cbd5e1 !important;
+  padding: 8px 14px !important;
+  font-size: 13.5px !important;
+  color: #1e293b !important;
+  background-color: #f8fafc !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: none !important;
+}
+
+input[type="text"]:focus, 
+input[type="password"]:focus, 
+input[type="number"]:focus, 
+input[type="email"]:focus, 
+select:focus, 
+textarea:focus {
+  background-color: #ffffff !important;
+  border-color: #004691 !important;
+  box-shadow: 0 0 0 3px rgba(0, 70, 145, 0.2) !important;
+  outline: none !important;
+}
+
+/* Custom Switches with Smooth Sliding */
+.switch {
+  border-radius: 9999px !important;
+  transition: background-color 0.25s ease !important;
+}
+
+.switch .switcher {
+  border-radius: 50% !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Animated Pulsing Status Dots */
+@keyframes livePulseGreen {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 142, 62, 0.6); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(30, 142, 62, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(30, 142, 62, 0); }
+}
+
+.badge-status-connected::before {
+  background-color: #1e8e3e !important;
+  animation: livePulseGreen 2s infinite !important;
+}
