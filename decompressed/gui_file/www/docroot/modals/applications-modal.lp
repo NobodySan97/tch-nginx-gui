@@ -31,12 +31,10 @@ local specific_app_res = proxy.get("uci.modgui.app.specific_app")
 local specific_app = specific_app_res and specific_app_res[1] and specific_app_res[1].value or "0"
 
 local function appapply(action)
-	proxy.set("rpc.system.modgui.app.sendcmd",action)
+	proxy.set("rpc.system.modgui.app.sendcmd", action)
+	proxy.apply()
 	ngx.header.content_type = "application/json"
 	ngx.print('{ "success":"true" }')
-	ngx.timer.at(0, function()
-		proxy.apply()
-	end)
 	ngx.exit(ngx.HTTP_OK)
 end
 
@@ -86,7 +84,7 @@ ngx.print('\
 ');  ngx.print(ui_helper.createHeader(T"Application List", false, false))   ngx.print('\
 <div class="modal-body update">\
 <fieldset style="display:flex;">\
-    <form class="form-horizontal" method="post" action="modals/applications-modal.lp">\
+    <form class="form-horizontal" method="post" action="/modals/applications-modal.lp">\
     ');
 local info_box = {
 	alert = {

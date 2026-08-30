@@ -92,10 +92,8 @@ end
 
 local function sendcmd(cmd)
         proxy.set("rpc.system.modgui.utility.sendcmd", cmd)
+        proxy.apply()
         ngx.print('{"success":"true"}')
-        ngx.timer.at(0, function()
-                proxy.apply()
-        end)
         ngx.exit(ngx.HTTP_OK)
 end
 
@@ -259,11 +257,9 @@ if ngx.req.get_method() == "POST" then
         end
         if action == "system_install_specificapp" then
                 proxy.set("rpc.system.modgui.app.sendcmd", "install_specificapp_"..getSupportedModel())
+                proxy.apply()
                 ngx.header.content_type = "application/json"
                 ngx.print('{"success":"true"}')
-                ngx.timer.at(0, function()
-                        proxy.apply()
-                end)
                 ngx.exit(ngx.HTTP_OK)
         end
         if action == "system_remove_root" then

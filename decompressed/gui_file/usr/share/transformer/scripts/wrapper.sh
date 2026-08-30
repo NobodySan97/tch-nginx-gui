@@ -15,7 +15,7 @@ fi
 
 set_transformer "rpc.system.modgui.executeCommand.state" "Requested"
 
-$1 2>$LOG_LOCATION >$LOG_LOCATION
+eval "$1" 2>$LOG_LOCATION >$LOG_LOCATION
 sync
 
 set_transformer "rpc.system.modgui.executeCommand.state" "Complete"
@@ -23,4 +23,4 @@ set_transformer "rpc.system.modgui.executeCommand.state" "Complete"
 sleep 1
 
 set_transformer "rpc.system.modgui.executeCommand.state" "Idle"
-rm $LOG_LOCATION
+rm -f $LOG_LOCATION
