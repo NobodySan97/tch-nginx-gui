@@ -46,7 +46,7 @@ function M.getAdblockStatus()
   local info = get_runtime_info()
   
   local enabled_sources_count = 0
-  local sources = proxy.getPN("uci.adblock.@source.", true) or {}
+  local sources = proxy.getPN("uci.adblock.source.", true) or {}
   for _, src in ipairs(sources) do
     local state = proxy.get(src.path .. "enabled")
     if state and state[1] and state[1].value == "1" then

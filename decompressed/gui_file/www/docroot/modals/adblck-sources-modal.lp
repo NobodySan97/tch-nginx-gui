@@ -21,9 +21,9 @@ if ngx.req.get_method() == "POST" then
     active_map[untaint(s)] = true
   end
 
-  local all_sources = proxy.getPN("uci.adblock.@source.", true) or {}
+  local all_sources = proxy.getPN("uci.adblock.source.", true) or {}
   for _, src in ipairs(all_sources) do
-    local sname = src.path:match("uci%.adblock%.@([^%.]+)%.")
+    local sname = src.path:match("uci%.adblock%.source%.@([^%.]+)%.")
     if sname then
       local should_enable = active_map[sname] and "1" or "0"
       proxy.set(src.path .. "enabled", should_enable)
@@ -36,9 +36,9 @@ end
 
 -- Read all sources from UCI
 local sources_list = {}
-local all_sources = proxy.getPN("uci.adblock.@source.", true) or {}
+local all_sources = proxy.getPN("uci.adblock.source.", true) or {}
 for _, src in ipairs(all_sources) do
-  local sname = src.path:match("uci%.adblock%.@([^%.]+)%.")
+  local sname = src.path:match("uci%.adblock%.source%.@([^%.]+)%.")
   if sname then
     local url_obj = proxy.get(src.path .. "adb_src")
     local desc_obj = proxy.get(src.path .. "adb_src_desc")
