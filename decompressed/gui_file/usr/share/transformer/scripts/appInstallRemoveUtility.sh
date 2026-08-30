@@ -209,6 +209,7 @@ app_luci() {
         uci add_list uhttpd.main.listen_https='0.0.0.0:9443'
         uci del_list uhttpd.main.listen_https='[::]:443' 2>/dev/null
         uci add_list uhttpd.main.listen_https='[::]:9443'
+        uci set uhttpd.main.redirect_https='0'
         uci set uhttpd.main.home='/www_luci'
       fi
 
