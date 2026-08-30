@@ -71,14 +71,15 @@ app_transmission() {
 
     uci set transmission.@transmission[0].enabled=1
     uci set transmission.@transmission[0].rpc_whitelist='127.0.0.1,192.168.*.*'
-    uci commit
+    uci commit transmission
 
     # Create script to trigger transmission restart when an usb is plugged in/out
+    mkdir -p /etc/hotplug.d/usb
     {
         echo '#!/bin/sh'
-        echo 'last_usb=$(ls -t /dev/sd* | tail -n 1)'
+        echo 'last_usb=$(ls -t /dev/sd* 2>/dev/null | tail -n 1)'
         echo 'last_usb=${last_usb#"/dev/"}'
-        echo 'usb_count=$(find /tmp/run/mountd/ -mindepth 1 -maxdepth 1 -type d | wc -l)'
+        echo 'usb_count=$(find /tmp/run/mountd/ -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)'
         echo '[ "$usb_count" = "0" ] && /etc/init.d/transmission stop || [ -d "/tmp/run/mountd/$last_usb/sharing/config/transmission" ] && /etc/init.d/transmission restart'
     } >/etc/hotplug.d/usb/60-transmission
 
@@ -108,6 +109,7 @@ app_transmission() {
   }
 
   remove() {
+    [ -f /etc/init.d/transmission ] && { /etc/init.d/transmission stop 2>/dev/null; /etc/init.d/transmission disable 2>/dev/null; }
     opkg remove --force-removal-of-dependent-packages transmission-daemon-openssl transmission-web
     [ ! -f /rom/usr/lib/libmbedcrypto.so.1 ] && opkg install libmbedtls #workaround for 19.x firmware
     rm -rf /www/docroot/transmission
@@ -358,10 +360,11 @@ app_aria2() {
       opkg update
       opkg install aria2 libstdcpp
       curl -sLk https://github.com/mayswind/AriaNg-DailyBuild/tarball/master --output /tmp/ariang.tar.gz
-      rm -rf /www/docroot/aria
-      tar -xzf /tmp/ariang.tar.gz -C /www/docroot/
-      rm -f /tmp/ariang.tar.gz
-      mv /www/docroot/*AriaNg* /www/docroot/aria
+      rm -rf /tmp/ariang /www/docroot/aria
+      mkdir -p /tmp/ariang /www/docroot/aria
+      tar -xzf /tmp/ariang.tar.gz -C /tmp/ariang/ 2>/dev/null
+      cp -r /tmp/ariang/*/* /www/docroot/aria/ 2>/dev/null || cp -r /tmp/ariang/* /www/docroot/aria/ 2>/dev/null
+      rm -rf /tmp/ariang /tmp/ariang.tar.gz
 
       ARIA2_DIR="/etc/aria2"
 
@@ -380,10 +383,12 @@ app_aria2() {
       } >>"$ARIA2_DIR/aria2.conf"
 
       # add aria2 in /etc/rc.local to start the daemon after a reboot
+      sed -i '/aria2c/d' /etc/rc.local 2>/dev/null
       sed -i '/exit 0/i \
 			aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --daemon=true --conf-path=/etc/aria2/aria2.conf' /etc/rc.local
 
       # start the daemon
+      killall aria2c 2>/dev/null
       aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --daemon=true --conf-path="$ARIA2_DIR/aria2.conf"
     }
 
@@ -405,7 +410,7 @@ app_aria2() {
   }
   remove() {
     killall aria2c 2>/dev/null
-    opkg remove aria2
+    opkg remove --force-removal-of-dependent-packages aria2
     rm -rf /www/docroot/aria
     rm -rf /etc/aria2
     sed -i '/aria2c/d' /etc/rc.local 2>/dev/null
@@ -413,10 +418,19 @@ app_aria2() {
     uci commit modgui
   }
   start() {
-    /etc/init.d/aria2 start
+    if [ -f /etc/init.d/aria2 ]; then
+      /etc/init.d/aria2 start
+    else
+      killall aria2c 2>/dev/null
+      [ -f /etc/aria2/aria2.conf ] && aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --daemon=true --conf-path="/etc/aria2/aria2.conf"
+    fi
   }
   stop() {
-    /etc/init.d/aria2 stop
+    if [ -f /etc/init.d/aria2 ]; then
+      /etc/init.d/aria2 stop
+    else
+      killall aria2c 2>/dev/null
+    fi
   }
 
   case $1 in
@@ -540,11 +554,13 @@ app_xupnp() {
   install() {
     opkg update
     opkg install xupnpd
+    [ -f /etc/init.d/xupnpd ] && { /etc/init.d/xupnpd enable 2>/dev/null; /etc/init.d/xupnpd restart 2>/dev/null; }
     uci set modgui.app.xupnp_app="1"
     uci commit modgui
   }
   remove() {
-    opkg remove xupnpd
+    [ -f /etc/init.d/xupnpd ] && { /etc/init.d/xupnpd stop 2>/dev/null; /etc/init.d/xupnpd disable 2>/dev/null; }
+    opkg remove --force-removal-of-dependent-packages xupnpd
     uci set modgui.app.xupnp_app="0"
     uci commit modgui
   }
