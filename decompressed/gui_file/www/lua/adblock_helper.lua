@@ -1,6 +1,5 @@
 local proxy = require("datamodel")
 local content_helper = require("web.content_helper")
-local ui_helper = require("web.ui_helper")
 local dkjson = require("dkjson")
 local format = string.format
 
@@ -36,7 +35,7 @@ local function get_runtime_info()
       info.status = node.adblock_status or "disabled"
       info.version = node.adblock_version or "3.5.5"
       local domains = node.blocked_domains or node.overall_domains or "0"
-      info.blocked_domains = domains:match("(%d+)") or "0"
+      info.blocked_domains = tostring(domains):match("(%d+)") or "0"
       info.last_rundate = node.last_rundate or node.last_run or "-"
     end
   end
@@ -70,7 +69,7 @@ function M.getAdblockStatus()
   return {
     state = info.status,
     status = status_code,
-    status_text = T("Adblock " .. info.status),
+    status_text = "Adblock " .. info.status,
     version = info.version,
     blocked_domains = info.blocked_domains,
     last_rundate = info.last_rundate,
@@ -81,6 +80,7 @@ function M.getAdblockStatus()
 end
 
 function M.getAdblockCardHTML()
+  local ui_helper = require("web.ui_helper")
   local content = M.getAdblockStatus()
   local blocked = tonumber(content.blocked_domains) or 0
   local white = content.custom_whitelist
