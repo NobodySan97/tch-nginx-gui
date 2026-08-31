@@ -22,9 +22,9 @@ local cui = {
   gui_skin = "uci.modgui.gui.gui_skin",
 }
 content_helper.getExactContent(cui)
-local year = cui.timestamp or ""
-local current_year = (string.sub(tostring(year),1,4))
-if current_year == "" then current_year = "2026" end
+local untaint = string.untaint
+local year = untaint(cui.timestamp or "")
+local current_year = string.match(tostring(year), "%d%d%d%d") or "2026"
 local users = content_helper.getMatchedContent("uci.web.user.")
 local userNames = ""
 local legacySalts = ""
@@ -211,6 +211,15 @@ ngx.print([[
         align-items: center;
         padding: 24px 16px;
         box-sizing: border-box;
+      }
+
+      
+      .auth-card {
+        animation: cardEntrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes cardEntrance {
+        from { opacity: 0; transform: translateY(20px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
       }
 
       .auth-card {
@@ -534,7 +543,7 @@ ngx.print([[
 <body>
 
 <div class="auth-viewport">
-  <div class="auth-card" data-aos="fade-up" data-aos-duration="600">
+  <div class="auth-card">
 
     <div class="auth-header">
 ]])

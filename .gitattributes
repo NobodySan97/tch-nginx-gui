@@ -35,3 +35,10 @@ decompressed/gui_file/etc/hotplug.d/**/* text eol=lf
 *.so binary
 *.ko binary
 *.o binary
+
+# Fonts must be treated as pure binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
