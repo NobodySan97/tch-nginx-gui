@@ -23,20 +23,20 @@ ngx.print('\
     <meta charset="UTF-8">\
     <meta name="CSRFtoken" content="');  ngx.print( session:getCSRFtoken() ); ngx.print('">\
     <meta name="Advanced" content="');  ngx.print( cui.advanced ); ngx.print('">\
-	<link href="/css/font-awesome-all-5.7.2.css?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
-    <link href="/css/gw.css?v=1788174787&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
-    <link href="/css/responsive.css?v=1788174787&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
-	<link id="theme_skin" rel="stylesheet" href="/theme/');  ngx.print( cui.gui_skin ); ngx.print('/style.css?v=1788172949&version='); ngx.print(cui.gui_version); ngx.print('">\
+	<link href="/css/font-awesome-all-5.7.2.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
+    <link href="/css/gw.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
+    <link href="/css/responsive.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
+	<link id="theme_skin" rel="stylesheet" href="/theme/');  ngx.print( cui.gui_skin ); ngx.print('/style.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('">\
 	<link rel="shortcut icon"    type="image/x-icon"   href="/img/favicon.ico"    />\
-	<!--[if IE 7]><link rel="stylesheet" href="/css/font-awesome-ie7.css?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('"><![endif]-->\
-    <!--[if lt IE 9]> <script src="/js/media-min.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('"></script> <![endif]-->')
+	<!--[if IE 7]><link rel="stylesheet" href="/css/font-awesome-ie7.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('"><![endif]-->\
+    <!--[if lt IE 9]> <script src="/js/media-min.js?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('"></script> <![endif]-->')
 	if cui.gui_animation == "1" then
-		ngx.print('<link rel="stylesheet" href="/css/aos.css?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" >')
+		ngx.print('<link rel="stylesheet" href="/css/aos.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" >')
 	end
 	ngx.print('\
-	<script src="/js/jquery.min.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" ></script>\
-	<script src="/js/main-min-nojquery.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" ></script>\
-	<script src="/js/knockout-min.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('"></script>')
+	<script src="/js/jquery.min.js?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" ></script>\
+	<script src="/js/main-min-nojquery.js?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" ></script>\
+	<script src="/js/knockout-min.js?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('"></script>')
 	if cui.gui_animation == "1" then
 		ngx.print('<script src="/js/aos.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('"></script>')
 	end
