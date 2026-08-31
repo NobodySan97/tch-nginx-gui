@@ -29,16 +29,16 @@ modem_stats_link = 'class="modal-link" data-toggle="modal" data-remote="/modals/
         
         local html = {}
 
-        html[#html + 1] = '<i " class="fas fa-user-alt" aria-hidden="true" href="#">&nbsp</i>'
+        html[#html + 1] = '<i class="fas fa-user-alt" aria-hidden="true" href="#">&nbsp</i>'
         html[#html + 1] = '<strong>'..T"User Management and Log Viewer"..'</strong>'
         html[#html + 1] = '<br>'
         html[#html + 1] = '<i class="fas fa-chart-line" href="#">&nbsp</i>'
         html[#html + 1] = format( '<strong id = "Modem_Stats" %1$s>%s</strong>', modem_stats_link, T"Modem Stats")
         html[#html + 1] = '<br>'
-        html[#html + 1] = '<i " class="fas fa-list-ul" aria-hidden="true" href="#">&nbsp</i>'
+        html[#html + 1] = '<i class="fas fa-list-ul" aria-hidden="true" href="#">&nbsp</i>'
         html[#html + 1] = format(N("<strong>%s cron rule</strong> active","<strong>%s cron rules</strong> active"), content.cronEntires,content.cronEntires)
         html[#html + 1] = '<br>'
-        html[#html + 1] = '<i " class="fas fa-list-ul" aria-hidden="true" href="#">&nbsp</i>'
+        html[#html + 1] = '<i class="fas fa-list-ul" aria-hidden="true" href="#">&nbsp</i>'
         html[#html + 1] = format(N("<strong>%s init script</strong> active","<strong>%s init scripts</strong> active"), content.initEntries,content.initEntries)
         html[#html + 1] = '<br>'
         

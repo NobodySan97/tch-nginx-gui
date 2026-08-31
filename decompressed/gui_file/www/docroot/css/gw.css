@@ -8314,3 +8314,162 @@ textarea:focus {
   background-color: #1e8e3e !important;
   animation: livePulseGreen 2s infinite !important;
 }
+
+
+/* === ULTIMATE 2026 UI REFINEMENT FIXES === */
+
+/* Universal FontAwesome 5 Watermark Font */
+.card_bg:after {
+  font-family: "Font Awesome 5 Free", "FontAwesome" !important;
+  font-weight: 900 !important;
+  position: absolute !important;
+  right: 12px !important;
+  bottom: 8px !important;
+  font-size: 70px !important;
+  opacity: 0.08 !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}
+
+/* Card Uniform Bento Height & Grid Alignment */
+.smallcard {
+  min-height: 220px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  margin-bottom: 24px !important;
+  position: relative !important;
+  background: #ffffff !important;
+  box-sizing: border-box !important;
+}
+
+.smallcard > .header {
+  flex: 0 0 auto !important;
+}
+
+.smallcard > .content {
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.smallcard .divtable {
+  width: 100% !important;
+}
+
+/* Perfect Switch Button (No Oval Distortion, Clean Slider) */
+.switch {
+  width: 44px !important;
+  height: 24px !important;
+  border-radius: 9999px !important;
+  background: #cbd5e1 !important;
+  position: relative !important;
+  cursor: pointer !important;
+  transition: background-color 0.25s ease !important;
+  padding: 2px !important;
+  box-sizing: border-box !important;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.15) !important;
+  overflow: hidden !important;
+}
+
+.switch.switchOn {
+  background: #059669 !important;
+}
+
+.switch .switcher {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.25) !important;
+  position: absolute !important;
+  top: 2px !important;
+  left: 2px !important;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.switch.switchOn .switcher {
+  transform: translateX(20px) !important;
+}
+
+.switcher:before, .switcher:after {
+  display: none !important;
+}
+
+/* Modal Popup Centering & Scrolling Fixes */
+.modal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  width: 90% !important;
+  max-width: 680px !important;
+  max-height: 90vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  border-radius: 18px !important;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.35) !important;
+  z-index: 1050 !important;
+  background: #ffffff !important;
+  overflow: hidden !important;
+}
+
+.modal.hide {
+  display: none !important;
+}
+
+.modal-header {
+  flex: 0 0 auto !important;
+  padding: 16px 24px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.modal-body {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  max-height: calc(85vh - 130px) !important;
+  padding: 20px 24px !important;
+}
+
+.modal-footer {
+  flex: 0 0 auto !important;
+  padding: 14px 24px !important;
+  background: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+/* Modal Close Button */
+.modal-action-close .btn-close, .modal-header .close {
+  opacity: 0.6 !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+.modal-action-close .btn-close:hover, .modal-header .close:hover {
+  opacity: 1 !important;
+  transform: scale(1.1) !important;
+}
+
+/* Responsive Table & Form Styling inside Modals */
+.modal-body table {
+  width: 100% !important;
+  margin-bottom: 16px !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}
+
+.modal-body table th {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  padding: 10px 14px !important;
+  font-weight: 600 !important;
+}
+
+.modal-body table td {
+  padding: 10px 14px !important;
+  border-top: 1px solid #f1f5f9 !important;
+}

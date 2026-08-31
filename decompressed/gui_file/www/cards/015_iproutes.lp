@@ -97,7 +97,7 @@ end
                 else
                     dosprotect_status = T"DoS Protect disabled"
                 end
-                ngx.print( ui_helper.createSimpleLight(dosprotect, dosprotect_status, subinfo_light,"fa fas fa-menorah") )
+                ngx.print( ui_helper.createSimpleLight(dosprotect, dosprotect_status, subinfo_light,"fas fa-menorah") )
             end
 
             local flowcache = proxy.get("uci.fcctlsettings.state.enabled")
@@ -109,7 +109,7 @@ end
                 else
                     flowcache_status = T"Flow Cache disabled"
                 end
-                ngx.print( ui_helper.createSimpleLight(flowcache, flowcache_status, subinfo_light,"fa fas fa-map-signs") )
+                ngx.print( ui_helper.createSimpleLight(flowcache, flowcache_status, subinfo_light,"fas fa-map-signs") )
             end
 			ngx.print('\
          </div>\
