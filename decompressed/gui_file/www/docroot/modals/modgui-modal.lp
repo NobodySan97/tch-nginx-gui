@@ -350,6 +350,7 @@ local content = {
         fwversion_real = "uci.versioncusto.override.fwversion_override_real",
         activebank = "sys.banktable.activebank",
         passivebank = "sys.banktable.passivebank",
+        bootedbank = "sys.banktable.booted",
         activeversion = "sys.banktable.activeversion",
         passiveversion = "sys.banktable.passiveversion",
         rip_key_B = "rpc.system.modgui.utility.rip_key_B",
@@ -761,8 +762,15 @@ html[#html + 1] = ui_helper.createAlertBlock(T"Force the device to always use ba
 html[#html + 1] = ui_helper.createSwitch(T"OBP Check", "check_obp", modgui_settings["check_obp"])
 
 html[#html + 1] = '<legend>'.. T"Bank Info" ..'</legend>'
+if content["bootedbank"] and content["bootedbank"] ~= "" then
+        html[#html + 1] = ui_helper.createLabel(T"Booted Bank", content["bootedbank"] , basic)
+end
 html[#html + 1] = ui_helper.createLabel(T"Active Bank", content["activebank"] , basic)
-html[#html + 1] = ui_helper.createLabel(T"Active Version", content["activeversion"] , long_basic)
+if content["activeversion"] == "Unknown" then
+        html[#html + 1] = ui_helper.createLabel(T"Active Version", T"Firmware not present in this bank (OBP Recovery Plan)" , long_basic)
+else
+        html[#html + 1] = ui_helper.createLabel(T"Active Version", content["activeversion"] , long_basic)
+end
 html[#html + 1] = ui_helper.createLabel(T"Passive Bank", content["passivebank"] , basic)
 if content["passiveversion"] == "Unknown" then
         html[#html + 1] = ui_helper.createLabel(T"Passive Version", T"Firmware not present in this bank" , long_basic)

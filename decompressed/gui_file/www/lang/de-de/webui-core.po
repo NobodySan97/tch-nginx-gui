@@ -4615,3 +4615,10 @@ msgstr "Datenbank aktualisieren"
 
 msgid "Update in progress... Do not turn off your modem."
 msgstr "Aktualisierung läuft... Schalten Sie das Modem nicht aus."
+
+msgid "Booted Bank"
+msgstr "Gebootete Bank"
+
+msgid "Firmware not present in this bank (OBP Recovery Plan)"
+msgstr "Firmware in dieser Bank nicht vorhanden (OBP-Wiederherstellungsplan)"
+

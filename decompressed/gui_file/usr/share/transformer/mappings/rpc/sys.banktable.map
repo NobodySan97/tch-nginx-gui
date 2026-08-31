@@ -16,11 +16,15 @@ local sys_banktable_ = {
                 access = "readOnly",
                 type = "string",
             },
-			passivebank = {
+            passivebank = {
                 access = "readOnly",
                 type = "string",
             },
             activebank = {
+                access = "readOnly",
+                type = "string",
+            },
+            booted = {
                 access = "readOnly",
                 type = "string",
             },
@@ -52,6 +56,8 @@ local function get(mapping, paramName)
         cmd = "cat /proc/banktable/inactive"
     elseif paramName == "activebank" then
         cmd = "cat /proc/banktable/active"
+    elseif paramName == "booted" then
+        cmd = "cat /proc/banktable/booted"
     else
         return ""
     end

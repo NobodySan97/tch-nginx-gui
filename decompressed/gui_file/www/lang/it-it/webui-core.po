@@ -4618,3 +4618,9 @@ msgstr "Aggiorna Database"
 
 msgid "Update in progress... Do not turn off your modem."
 msgstr "Aggiornamento in corso... Non spegnere il modem."
+
+msgid "Booted Bank"
+msgstr "Banco avviato"
+
+msgid "Firmware not present in this bank (OBP Recovery Plan)"
+msgstr "Firmware non presente in questo banco (Piano di ripristino OBP)"
