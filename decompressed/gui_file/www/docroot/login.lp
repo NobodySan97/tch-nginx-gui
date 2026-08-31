@@ -76,6 +76,50 @@ ngx.print('    <link rel="stylesheet" href="/css/aos.css?version='); ngx.print(c
 ngx.print('    <title>'); ngx.print(T"Gateway Login"); ngx.print('</title>\n')
 ngx.print([[
     <style>
+
+      /* === ABSOLUTE FONTAWESOME 5 ICON PRESERVATION === */
+      .fa, .fas, [class^="fa-"], [class*=" fa-"], [class^="icon-"], [class*=" icon-"] {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+        font-style: normal !important;
+        display: inline-block !important;
+        line-height: 1 !important;
+        -webkit-font-smoothing: antialiased !important;
+        -moz-osx-font-smoothing: grayscale !important;
+      }
+      .far {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 400 !important;
+        font-style: normal !important;
+      }
+      .fab {
+        font-family: "Font Awesome 5 Brands" !important;
+        font-weight: 400 !important;
+        font-style: normal !important;
+      }
+      .input-prefix-icon i {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+        font-size: 18px !important;
+        color: var(--primary) !important;
+      }
+      .btn-password-toggle i {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+        font-size: 16px !important;
+        color: var(--text-muted) !important;
+      }
+      #sign-me-in i {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+        font-size: 16px !important;
+        margin-right: 8px !important;
+      }
+      .status-pill i, .auth-alert-toast i, .auth-info-card i {
+        font-family: "Font Awesome 5 Free" !important;
+        font-weight: 900 !important;
+      }
+
       :root {
         --primary: #059669;
         --primary-hover: #047857;
