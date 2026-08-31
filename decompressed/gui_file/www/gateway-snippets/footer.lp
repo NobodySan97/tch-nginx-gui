@@ -17,9 +17,9 @@ local cui = {
 
 content_helper.getExactContent(cui)
 
-local year = cui.timestamp or ""
-local current_year = string.sub(tostring(year), 1, 4)
-if current_year == "" then current_year = "2026" end
+local untaint = string.untaint
+local year = untaint(cui.timestamp or "")
+local current_year = string.match(tostring(year), "%d%d%d%d") or "2026"
 
 local product_name = cui.friendly_product_name or "Technicolor"
 if cui.provisioning_code == "Telstra" then

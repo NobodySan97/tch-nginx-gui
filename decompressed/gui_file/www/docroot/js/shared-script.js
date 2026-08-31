@@ -1,3 +1,15 @@
+
+window.registeredIntervals = window.registeredIntervals || [];
+window.addRegisteredInterval = window.addRegisteredInterval || function(id) {
+    if (id) window.registeredIntervals.push(id);
+};
+window.clearKoInterval = window.clearKoInterval || function() {
+    if (window.registeredIntervals && window.registeredIntervals.length > 0) {
+        window.registeredIntervals.forEach(function(id) { clearInterval(id); });
+        window.registeredIntervals = [];
+    }
+};
+
 var KoRequest = {};
 var connectionissue = 0;
 
