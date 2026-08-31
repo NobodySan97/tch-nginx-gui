@@ -22,8 +22,9 @@ local cui = {
   gui_skin = "uci.modgui.gui.gui_skin",
 }
 content_helper.getExactContent(cui)
-local year = cui.timestamp
-local current_year = (string.sub(year,1,4))
+local year = cui.timestamp or ""
+local current_year = (string.sub(tostring(year),1,4))
+if current_year == "" then current_year = "2026" end
 local users = content_helper.getMatchedContent("uci.web.user.")
 local userNames = ""
 local legacySalts = ""
@@ -76,7 +77,6 @@ ngx.print('    <link rel="stylesheet" href="/css/aos.css?version='); ngx.print(c
 ngx.print('    <title>'); ngx.print(T"Gateway Login"); ngx.print('</title>\n')
 ngx.print([[
     <style>
-
       /* === ABSOLUTE FONTAWESOME 5 ICON PRESERVATION === */
       .fa, .fas, [class^="fa-"], [class*=" fa-"], [class^="icon-"], [class*=" icon-"] {
         font-family: "Font Awesome 5 Free" !important;
@@ -345,18 +345,15 @@ ngx.print([[
       }
       .modern-input-group input::placeholder {
         color: var(--text-muted);
-        opacity: 0.75;
+        opacity: 0.8;
       }
 
       .btn-password-toggle {
-        width: 36px !important;
-        height: 36px !important;
-        flex: 0 0 36px !important;
         background: transparent !important;
         border: none !important;
-        color: var(--text-muted) !important;
+        padding: 8px !important;
         cursor: pointer !important;
-        padding: 0 !important;
+        color: var(--text-muted) !important;
         font-size: 16px !important;
         display: flex !important;
         align-items: center !important;
@@ -366,66 +363,10 @@ ngx.print([[
       }
       .btn-password-toggle:hover {
         color: var(--text-heading) !important;
-        background: rgba(0, 0, 0, 0.06) !important;
+        background: rgba(0, 0, 0, 0.05) !important;
       }
       .theme-dark .btn-password-toggle:hover {
-        background: rgba(255, 255, 255, 0.1) !important;
-      }
-
-      .btn-modern-primary {
-        width: 100% !important;
-        height: 48px !important;
-        background: linear-gradient(135deg, var(--primary), var(--primary-hover)) !important;
-        color: #ffffff !important;
-        border: none !important;
-        border-radius: var(--radius-control) !important;
-        font-size: 15.5px !important;
-        font-weight: 600 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 10px !important;
-        cursor: pointer !important;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 0 4px 14px var(--primary-glow) !important;
-        text-decoration: none !important;
-        box-sizing: border-box !important;
-        text-shadow: none !important;
-      }
-      .btn-modern-primary:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 22px var(--primary-glow) !important;
-        filter: brightness(1.05) !important;
-      }
-      .btn-modern-primary:active {
-        transform: translateY(0) scale(0.98) !important;
-      }
-      .btn-modern-primary:disabled {
-        opacity: 0.7 !important;
-        cursor: not-allowed !important;
-        transform: none !important;
-        box-shadow: none !important;
-      }
-
-      .btn-modern-secondary {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        height: 42px !important;
-        padding: 0 18px !important;
-        border-radius: var(--radius-control) !important;
-        border: 1.5px solid var(--input-border) !important;
-        background: transparent !important;
-        color: var(--text-body) !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        cursor: pointer !important;
-        text-decoration: none !important;
-        transition: all 0.2s ease !important;
-      }
-      .btn-modern-secondary:hover {
-        background: rgba(0, 0, 0, 0.04) !important;
-        border-color: var(--text-muted) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
       }
 
       .auth-alert-toast {
@@ -442,41 +383,112 @@ ngx.print([[
         margin-bottom: 20px;
         animation: shake 0.4s ease-in-out;
       }
-      .auth-alert-toast.show {
-        display: flex;
-      }
-
-      .auth-info-card {
-        padding: 12px 14px;
-        background: rgba(59, 130, 246, 0.08);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: var(--radius-control);
-        font-size: 12.5px;
-        color: var(--text-muted);
-        margin-bottom: 18px;
-        line-height: 1.4;
-      }
-
       @keyframes shake {
         0%, 100% { transform: translateX(0); }
         20%, 60% { transform: translateX(-6px); }
         40%, 80% { transform: translateX(6px); }
       }
 
+      .auth-info-card {
+        padding: 12px 14px;
+        background: rgba(5, 150, 105, 0.08);
+        border-radius: var(--radius-control);
+        font-size: 12.5px;
+        color: var(--text-body);
+        line-height: 1.45;
+        margin-bottom: 18px;
+        border: 1px solid rgba(5, 150, 105, 0.18);
+      }
+      .theme-tim .auth-info-card {
+        background: rgba(0, 70, 145, 0.08);
+        border-color: rgba(0, 70, 145, 0.18);
+      }
+
+      .btn-modern-primary {
+        width: 100%;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+        border: none;
+        border-radius: var(--radius-control);
+        color: #ffffff;
+        font-size: 15.5px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 14px var(--primary-glow);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .btn-modern-primary:hover {
+        transform: translateY(-1.5px);
+        box-shadow: 0 8px 20px var(--primary-glow);
+        filter: brightness(1.05);
+      }
+      .btn-modern-primary:active {
+        transform: translateY(0) scale(0.99);
+      }
+      .btn-modern-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+
+      .btn-modern-secondary {
+        height: 42px;
+        background: var(--input-bg);
+        border: 1.5px solid var(--input-border);
+        border-radius: var(--radius-control);
+        color: var(--text-body);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 16px;
+        transition: all 0.2s ease;
+      }
+      .btn-modern-secondary:hover {
+        background: rgba(0, 0, 0, 0.04);
+        border-color: var(--text-muted);
+      }
+
+      .auth-card-links {
+        margin-top: 22px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+      }
+      .auth-link {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.15s ease;
+      }
+      .auth-link:hover {
+        text-decoration: underline;
+        color: var(--primary-hover);
+      }
+
       .modern-modal-overlay {
         display: none;
         position: fixed;
-        top: 0; right: 0; bottom: 0; left: 0; inset: 0;
-        background: rgba(15, 23, 42, 0.65);
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(15, 23, 42, 0.7);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
-        z-index: 9999;
         align-items: center;
         justify-content: center;
         padding: 16px;
-      }
-      .modern-modal-overlay.active {
-        display: flex;
+        box-sizing: border-box;
       }
       .modern-modal-card {
         width: 100%;
@@ -515,6 +527,7 @@ ngx.print([[
         text-align: center;
         font-size: 12.5px;
         color: var(--text-muted);
+        line-height: 1.6;
       }
     </style>
 </head>
@@ -589,7 +602,11 @@ ngx.print([[
         <div style="margin-top: 24px;">
           <button id="sign-me-in" type="button" class="btn-modern-primary">
             <i id="sign-me-in-icon" class="fas fa-sign-in-alt"></i>
-            <span id="sign-me-in-text">]]) ngx.print(T"Accedi") ngx.print([[</span>
+            <span id="sign-me-in-text">
+]])
+ngx.print(T"Accedi")
+ngx.print([[
+            </span>
           </button>
         </div>
       </form>
@@ -597,26 +614,49 @@ ngx.print([[
 
     <div id="forgot-login" style="display: none;">
       <div class="auth-header" style="margin-bottom: 20px;">
-        <h2 class="auth-title" style="font-size: 18px;">]]) ngx.print(T"Reset Password") ngx.print([[</h2>
+        <h2 class="auth-title" style="font-size: 18px;">
+]])
+ngx.print(T"Reset Password")
+ngx.print([[
+        </h2>
       </div>
 
       <div id="erroruserpass1" class="auth-alert-toast">
         <i class="fas fa-exclamation-circle"></i>
-        <span>]]) ngx.print(T"Access Code non valido.") ngx.print([[</span>
+        <span>
+]])
+ngx.print(T"Access Code non valido.")
+ngx.print([[
+        </span>
       </div>
 
       <div class="auth-info-card">
-        <i class="fas fa-key"></i> ]]) ngx.print(T'Inserisci il codice <strong>"Access Code"</strong> presente sotto il modem.') ngx.print([[
+        <i class="fas fa-key"></i> 
+]])
+ngx.print(T'Inserisci il codice <strong>"Access Code"</strong> presente sotto il modem.')
+ngx.print([[
       </div>
 
       <div class="modern-input-group">
         <div class="input-prefix-icon"><i class="fas fa-key"></i></div>
-        <input type="password" id="srp_password1" placeholder="]]) ngx.print(T"Access Code") ngx.print([[">
+        <input type="password" id="srp_password1" placeholder="
+]])
+ngx.print(T"Access Code")
+ngx.print([[
+">
       </div>
 
       <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <button type="button" id="cancel-reset" class="btn-modern-secondary" style="flex: 1;">]]) ngx.print(T"Annulla") ngx.print([[</button>
-        <button type="button" id="verify-password" class="btn-modern-primary" style="flex: 1;">]]) ngx.print(T"Verifica") ngx.print([[</button>
+        <button type="button" id="cancel-reset" class="btn-modern-secondary" style="flex: 1;">
+]])
+ngx.print(T"Annulla")
+ngx.print([[
+        </button>
+        <button type="button" id="verify-password" class="btn-modern-primary" style="flex: 1;">
+]])
+ngx.print(T"Verifica")
+ngx.print([[
+        </button>
       </div>
     </div>
 
@@ -624,7 +664,15 @@ ngx.print([[
 
   <div class="auth-footer">
     <p style="margin: 0 0 6px 0; font-weight: 600; color: var(--text-heading);">
-      &copy; Technicolor ]] ngx.print(current_year) ngx.print([[ &bull; GUI Version <span style="color: var(--primary); font-weight: 700;">]] ngx.print(cui.gui_version) ngx.print([[</span>
+      &copy; Technicolor 
+]])
+ngx.print(current_year)
+ngx.print([[
+      &bull; GUI Version <span style="color: var(--primary); font-weight: 700;">
+]])
+ngx.print(cui.gui_version)
+ngx.print([[
+      </span>
     </p>
     <p style="margin: 0 0 5px 0; font-size: 12px;">
       Fork &amp; Maintained by <a href="https://github.com/NobodySan97/tch-nginx-gui" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none;">NobodySan97</a> (<a target="_blank" href="https://ko-fi.com/nobodysan" style="color:#ff5e5b; font-weight: 700; text-decoration: none;"><i class="fas fa-coffee"></i> Support on Ko-fi</a>)
@@ -643,22 +691,49 @@ ngx.print([[
     <div class="modal-icon-shield">
       <i class="fas fa-shield-alt"></i>
     </div>
-    <h3 style="font-size: 20px; font-weight: 700; color: var(--text-heading); margin: 0 0 10px 0;">]]) ngx.print(T"Accesso Bloccato") ngx.print([[</h3>
+    <h3 style="font-size: 20px; font-weight: 700; color: var(--text-heading); margin: 0 0 10px 0;">
+]])
+ngx.print(T"Accesso Bloccato")
+ngx.print([[
+    </h3>
     <p style="font-size: 14px; color: var(--text-body); line-height: 1.5; margin-bottom: 20px;">
-      ]]) ngx.print(passwd_count_msg) ngx.print([[<br/>
-      ]]) ngx.print(timer_msg) ngx.print([[
+]])
+ngx.print(passwd_count_msg)
+ngx.print('<br/>')
+ngx.print(timer_msg)
+ngx.print([[
     </p>
     <div style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted);">
       <i class="fas fa-spinner fa-spin"></i>
-      <span>]]) ngx.print(T"Sblocco automatico in corso...") ngx.print([[</span>
+      <span>
+]])
+ngx.print(T"Sblocco automatico in corso...")
+ngx.print([[
+      </span>
     </div>
   </div>
 </div>
 
-<script src="/js/jquery.min.js?version=]]) ngx.print(cui.gui_version) ngx.print([["></script>
-<script src="/js/main-min-nojquery.js?version=]]) ngx.print(cui.gui_version) ngx.print([["></script>
-<script src="/js/srp-min.js?version=]]) ngx.print(cui.gui_version) ngx.print([["></script>
-<script src="/js/aos.js?version=]]) ngx.print(cui.gui_version) ngx.print([["></script>
+<script src="/js/jquery.min.js?version=
+]])
+ngx.print(cui.gui_version)
+ngx.print([[
+"></script>
+<script src="/js/main-min-nojquery.js?version=
+]])
+ngx.print(cui.gui_version)
+ngx.print([[
+"></script>
+<script src="/js/srp-min.js?version=
+]])
+ngx.print(cui.gui_version)
+ngx.print([[
+"></script>
+<script src="/js/aos.js?version=
+]])
+ngx.print(cui.gui_version)
+ngx.print([[
+"></script>
 ]])
 
 local lfs = require("lfs")
@@ -667,77 +742,63 @@ if lfs.attributes(string.format("/www/docroot/theme/%s/script.js", cui.gui_skin)
 end
 
 ngx.print([[
-<script type="text/javascript">
-  if (typeof AOS !== 'undefined') {
-    AOS.init({ once: true, duration: 600 });
-  }
-
+<script>
   $(document).ready(function() {
-    var triesbeforemsg = ]]) ngx.print(triesbeforemsg) ngx.print([[;
-    var tries = 0;
-    var password = "";
-    var port = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
-    
-    if (port == "]]) ngx.print(assistance_port) ngx.print([[") {
-      $("#srp_username").val("assist");
+    if (typeof AOS !== "undefined") {
+      AOS.init({ once: true });
     }
 
-    $('#srp_username').focus();
-
-    $('#btn-toggle-pw').on('click', function(e) {
-      e.preventDefault();
-      var pwInput = $('#srp_password');
-      var icon = $('#toggle-pw-icon');
-      if (pwInput.attr('type') === 'password') {
-        pwInput.attr('type', 'text');
-        icon.removeClass('fa-eye').addClass('fa-eye-slash');
+    $("#btn-toggle-pw").on("click", function() {
+      var pwInput = $("#srp_password");
+      var icon = $("#toggle-pw-icon");
+      if (pwInput.attr("type") === "password") {
+        pwInput.attr("type", "text");
+        icon.removeClass("fa-eye").addClass("fa-eye-slash");
       } else {
-        pwInput.attr('type', 'password');
-        icon.removeClass('fa-eye-slash').addClass('fa-eye');
+        pwInput.attr("type", "password");
+        icon.removeClass("fa-eye-slash").addClass("fa-eye");
       }
     });
 
-    $('form input').on('keydown', function(e) {
-      if (e.which === 13 || e.which === 10) {
-        e.preventDefault();
-        $('#sign-me-in').click();
-      }
-    });
+    var tries = 0;
+    var timeSecond;
+    var defaultUser = "]] .. (cui.defaultuser or "") .. [[";
+    var userNames = "]] .. userNames .. [[";
+    var legacySalts = "]] .. legacySalts .. [[";
+    var assistance_port = "]] .. assistance_port .. [[";
+
+    if (assistance_port != "0" && document.location.port == assistance_port) {
+      document.getElementById("srp_username").value = "assist";
+    }
 
     $("#sign-me-in").on("click", function() {
       var btn = $(this);
-      var btnIcon = $("#sign-me-in-icon");
-      var btnText = $("#sign-me-in-text");
+      btn.attr("disabled", "disabled");
+      btn.find("#sign-me-in-icon").removeClass("fa-sign-in-alt").addClass("fa-spinner fa-spin");
+      $("#erroruserpass").hide();
 
-      $("#erroruserpass").removeClass("show");
-      btn.prop("disabled", true);
-      btnIcon.attr("class", "fas fa-circle-notch fa-spin");
-      btnText.text(']]) ngx.print(T"Verifica in corso...") ngx.print([[');
-
-      password = $("#srp_password").val();
-
-      var legacySalts = "]]) ngx.print(legacySalts) ngx.print([[";
-      var userNames = "]]) ngx.print(userNames) ngx.print([[";
       var inputUsername = $("#srp_username").val();
+      var password = $("#srp_password").val();
       var index = -1;
+
       var userNameArray = userNames.split(",");
       var legacySaltArray = legacySalts.split(",");
-      var timeSecond;
 
       for (var i = 0; i < userNameArray.length - 1; i++) {
-        if (inputUsername === userNameArray[i]) {
+        if (inputUsername == userNameArray[i]) {
           index = i;
           break;
         }
       }
-      if (index >= 0 && typeof jsSHA !== 'undefined') {
+
+      if (index >= 0) {
         var hashObj = new jsSHA((legacySaltArray[index] + tch.stringToHex(password)), "HEX");
         password = hashObj.getHash("SHA-1", "HEX");
       }
 
       var srp = new SRP();
       srp.success = function() {
-        if (window.location.pathname.search(/\/login\.lp$/) === -1) {
+        if (window.location.pathname.search(/\/login\.lp$/) == -1) {
           var curl = window.location.href;
           window.location.href = curl.substring(0, curl.indexOf("#"));
         } else {
@@ -746,56 +807,77 @@ ngx.print([[
       };
 
       srp.error_message = function(err) {
-        if (err === 403) {
-          $.get("login.lp", { action: "getcsrf" }, function(data) {
+        btn.removeAttr("disabled");
+        btn.find("#sign-me-in-icon").removeClass("fa-spinner fa-spin").addClass("fa-sign-in-alt");
+
+        if (err == 403) {
+          $.get("login.lp", {action: "getcsrf"}, function(data) {
             $('meta[name=CSRFtoken]').attr('content', data);
-            if (!$('#loginfailure').hasClass('active')) {
+            if (!$("#loginfailure").is(":visible")) {
               srp.identify("/authenticate", $("#srp_username").val(), password);
             }
           });
         } else {
-          btn.prop("disabled", false);
-          btnIcon.attr("class", "fas fa-sign-in-alt");
-          btnText.text(']]) ngx.print(T"Accedi") ngx.print([[');
-          $("#erroruserpass").addClass("show");
-          $("#srp_password").focus();
+          $("#erroruserpass").slideDown(200);
         }
 
-        timeSecond = err && err.waitTime ? err.waitTime : 0;
+        timeSecond = err.waitTime || 0;
         tries++;
-
         if (timeSecond > 0) {
           $("#timerSec").text(timeSecond);
           $("#pwdCount").text(tries);
-          $('#loginfailure').addClass('active');
+          $("#loginfailure").css("display", "flex");
           updateWaitingTime();
         }
 
         if (triesbeforemsg > 0 && tries >= triesbeforemsg) {
-          $("#defaultpassword").fadeIn();
+          $("#defaultpassword").slideDown(200);
         }
       };
 
       function updateWaitingTime() {
         var timeInterval = setInterval(function() {
-          timeSecond--;
-          $("#timerSec").text(timeSecond);
+          $("#timerSec").text(--timeSecond);
           if (timeSecond <= 0) {
             clearInterval(timeInterval);
-            $('#loginfailure').removeClass('active');
-            $("#sign-me-in").prop("disabled", false);
+            $("#loginfailure").hide();
+            $("#sign-me-in").removeAttr("disabled");
           }
         }, 1000);
       }
 
-      if (!$('#loginfailure').hasClass('active')) {
+      if (!$("#loginfailure").is(":visible")) {
         srp.identify("/authenticate", $("#srp_username").val(), password);
       }
     });
 
+    $("#srp_username, #srp_password").on("keypress", function(e) {
+      if (e.which == 13 || e.keyCode == 13) {
+        $("#sign-me-in").click();
+      }
+    });
+
+    $("#forgot-login-password").on("click", function(e) {
+      e.preventDefault();
+      $("#login-section").hide();
+      $("#forgot-login").fadeIn(200);
+    });
+
     $("#cancel-reset").on("click", function() {
       $("#forgot-login").hide();
-      $("#login-section").fadeIn();
+      $("#login-section").fadeIn(200);
+    });
+
+    $("#verify-password").on("click", function() {
+      var srp = new SRP();
+      srp.success = function() {
+        window.location = "/password-reset.lp";
+      };
+      srp.error_message = function(err) {
+        $("#erroruserpass1").slideDown(200);
+      };
+      var password = $("#srp_password1").val();
+      srp.identify("/authenticate", "forgotpassword", password);
     });
   });
 </script>
