@@ -2270,8 +2270,12 @@ function confirmationDialogue(t, e) {
 	}
 	var lastCardClicked;
 	function u(t, e) {
-		if (!y) {
-			y = !0,
+
+		if (true) {
+
+			y = !0; setTimeout(function(){ y = !1; }, 4000);
+
+			
 			$(".modal").remove();
 			try {
 				p(openMsg)
@@ -2484,20 +2488,30 @@ function confirmationDialogue(t, e) {
 		}
 	});
 	var y = !1;
-	$(document).on("click touchend", '[data-toggle="modal"]', function (t) {
-		t.preventDefault(),
-		u(t = $(this).attr("data-remote"), $(this).attr("data-id"))
-	}),
-	$(document).on("click touchend", ".smallcard", function (t) {
-		if (767 < window.innerWidth) {
-			t.preventDefault();
-			lastCardClicked = $(this);
-			var e = $(t.currentTarget).find('[data-toggle="modal"]');
-			t = e.attr("data-remote"),
-			e = e.attr("data-id"),
-			t && u(t, e)
+	function openCardModal(remote, id) {
+		if (!remote) return;
+		if (y) {
+			console.log("Modal already loading, unlocking...");
+			y = !1;
 		}
-	}),
+		u(remote, id);
+	}
+	$(document).on("click", '[data-toggle="modal"]', function (t) {
+		t.preventDefault();
+		t.stopPropagation();
+		var remote = $(this).attr("data-remote") || $(this).data("remote");
+		var id = $(this).attr("data-id") || $(this).data("id");
+		openCardModal(remote, id);
+	});
+	$(document).on("click", ".smallcard", function (t) {
+		if ($(t.target).is("input, select, button, a:not([data-toggle='modal'])")) return;
+		t.preventDefault();
+		lastCardClicked = $(this);
+		var elem = $(this).find('[data-toggle="modal"]').first();
+		var remote = elem.attr("data-remote") || elem.data("remote") || $(this).attr("data-remote") || $(this).data("remote");
+		var id = elem.attr("data-id") || elem.data("id") || $(this).attr("data-id") || $(this).data("id");
+		openCardModal(remote, id);
+	});
 	$(document).on("click", "#save-config", function () {
 		count += 1;
 		var t = $(".modal form"),
@@ -4655,3 +4669,15 @@ var qrcode = function () {
 	t.mobiscroll.themes["android-ics light"] = e
 }
 (jQuery);
+
+// Force backdrop removal and modal cleanup on hidden
+$(document).on("hidden.modal hidden", ".modal", function() {
+    $(".modal-backdrop").remove();
+    $(this).remove();
+});
+$(document).on("click", '[data-dismiss="modal"]', function() {
+    setTimeout(function() {
+        $(".modal-backdrop").remove();
+        $(".modal:not(.in)").remove();
+    }, 250);
+});

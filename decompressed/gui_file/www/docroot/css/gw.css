@@ -8731,7 +8731,7 @@ textarea:focus {
   margin-left: auto !important;
 }
 
-.modal-backdrop, .modal-backdrop.fade.in {
+.modal-backdrop {
   position: fixed !important;
   top: 0 !important;
   right: 0 !important;
@@ -8739,7 +8739,14 @@ textarea:focus {
   left: 0 !important;
   z-index: 1040 !important;
   background-color: #0f172a !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.15s linear !important;
+}
+
+.modal-backdrop.in, .modal-backdrop.fade.in {
   opacity: 0.65 !important;
+  pointer-events: auto !important;
 }
 
 .modal {
@@ -8752,7 +8759,8 @@ textarea:focus {
   width: 680px !important;
   max-width: 92vw !important;
   max-height: 86vh !important;
-  display: flex !important;
+  display: none !important;
+  pointer-events: none !important;
   flex-direction: column !important;
   background-color: #ffffff !important;
   background: #ffffff !important;
@@ -8765,12 +8773,16 @@ textarea:focus {
 
 .modal.fade {
   opacity: 0 !important;
+  display: none !important;
+  pointer-events: none !important;
   transform: translate(-50%, -46%) !important;
   transition: opacity 0.2s ease-out, transform 0.2s ease-out !important;
 }
 
 .modal.fade.in, .modal.in {
   opacity: 1 !important;
+  display: flex !important;
+  pointer-events: auto !important;
   transform: translate(-50%, -50%) !important;
 }
 
@@ -8817,4 +8829,17 @@ textarea:focus {
   display: flex !important;
   justify-content: flex-end !important;
   align-items: center !important;
+}
+
+
+/* === LOADING POPUP OVERLAY FIX === */
+.popUpBG {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0, 0, 0, 0.3) !important;
+  z-index: 1060 !important;
+  pointer-events: none !important;
 }
