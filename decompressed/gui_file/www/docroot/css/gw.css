@@ -8473,3 +8473,61 @@ textarea:focus {
   padding: 10px 14px !important;
   border-top: 1px solid #f1f5f9 !important;
 }
+
+
+/* Modal Header Close Button Perfection */
+.modal-header {
+  position: relative !important;
+}
+
+.modal-header .modal-action-close {
+  position: absolute !important;
+  right: 16px !important;
+  top: 14px !important;
+  margin: 0 !important;
+}
+
+.modal-header .btn-close, .modal-action-close .btn-close {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  color: #64748b !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.modal-header .btn-close:hover, .modal-action-close .btn-close:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  transform: scale(1.08) rotate(90deg) !important;
+}
+
+.theme-dark .modal-header .btn-close, .theme-dark .modal-action-close .btn-close {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #cbd5e1 !important;
+}
+
+.theme-dark .modal-header .btn-close:hover, .theme-dark .modal-action-close .btn-close:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+/* Disabled Switch Visual Styling */
+.switch.disabled {
+  opacity: 0.55 !important;
+  cursor: not-allowed !important;
+  filter: grayscale(0.8) !important;
+}

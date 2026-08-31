@@ -723,9 +723,10 @@ function M.createSimpleSwitch(name, value, attributes, helpmsg)
     local valOn = defaults["values"]["on"]
     local valOff = defaults["values"]["off"]
 
-    if value == valOn then
+    if tostring(value) == tostring(valOn) or value == true or value == "true" or value == 1 or value == "1" then
         defaults["switch"]["class"] = defaults["switch"]["class"] .. " switchOn"
         defaults["switcher"]["class"] = defaults["switcher"]["class"] .. " switcherOn"
+        defaults["input"]["value"] = valOn
     else
         defaults["input"]["value"] = valOff
     end
@@ -1426,14 +1427,14 @@ local function createTableData(columns, data, canEdit, canDelete, editing, helpm
             -- Action column (will be empty if nothing allowed)
             -- Only display the action buttons if the user is not editing a line
 	    local actionBtns = ""
-            if canEdit == true and allowedindexes[i].canEdit then
+            if canEdit == true and allowedindexes and allowedindexes[i] and allowedindexes[i].canEdit then
                 if editing ~= 0 then
                     attrEdit.button.class = attrEdit.button.class .. " disabled"
                 end
                 actionBtns = M.createSimpleButton("", "icon-edit", attrEdit)
             end
             content[#content + 1] = " "
-            if canDelete == true and allowedindexes[i].canDelete then
+            if canDelete == true and allowedindexes and allowedindexes[i] and allowedindexes[i].canDelete then
                 if editing ~= 0 then
                     attrDelete.button.class = attrDelete.button.class .. " disabled"
                 end

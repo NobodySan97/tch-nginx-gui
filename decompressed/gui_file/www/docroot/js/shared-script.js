@@ -25,7 +25,7 @@ var modgui = modgui || {};
 		);
 		if(logModal){
 			clearKoInterval();
-			$(window).on('shown.bs.modal', function() {
+			$(document).on('shown shown.bs.modal', '.modal', function() {
 				$(".modal-backdrop").unbind();
 				$("#close-config,.modal-action-close").unbind( "click" );
 				$("#close-config,.modal-action-close").on("click", function() {
