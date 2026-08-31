@@ -340,7 +340,8 @@ ngx.print([[
       }
       .modern-input-group input {
         flex: 1 1 auto !important;
-        width: 100% !important;
+        width: auto !important;
+        min-width: 0 !important;
         border: none !important;
         background: transparent !important;
         box-shadow: none !important;
@@ -358,6 +359,8 @@ ngx.print([[
       }
 
       .btn-password-toggle {
+        flex: 0 0 auto !important;
+        z-index: 2 !important;
         background: transparent !important;
         border: none !important;
         padding: 8px !important;
@@ -596,7 +599,7 @@ ngx.print([[
 ]])
 ngx.print('          <input type="password" id="srp_password" placeholder="'); ngx.print(T"Password"); ngx.print('" autocomplete="current-password" required>\n')
 ngx.print([[
-          <button type="button" class="btn-password-toggle" id="btn-toggle-pw" aria-label="Mostra/Nascondi password" title="Mostra/Nascondi password">
+          <button type="button" class="btn-password-toggle" id="btn-toggle-pw" onclick="togglePasswordVisibility()" aria-label="Mostra/Nascondi password" title="Mostra/Nascondi password">
             <i class="fas fa-eye" id="toggle-pw-icon"></i>
           </button>
         </div>
@@ -752,29 +755,33 @@ end
 
 ngx.print([[
 <script>
+  function togglePasswordVisibility() {
+    var pwEl = document.getElementById("srp_password");
+    var icon = document.getElementById("toggle-pw-icon");
+    if (pwEl) {
+      if (pwEl.type === "password") {
+        pwEl.type = "text";
+        if (icon) icon.className = "fas fa-eye-slash";
+      } else {
+        pwEl.type = "password";
+        if (icon) icon.className = "fas fa-eye";
+      }
+    }
+  }
   $(document).ready(function() {
     if (typeof AOS !== "undefined") {
       AOS.init({ once: true });
     }
 
-    $("#btn-toggle-pw").on("click", function() {
-      var pwInput = $("#srp_password");
-      var icon = $("#toggle-pw-icon");
-      if (pwInput.attr("type") === "password") {
-        pwInput.attr("type", "text");
-        icon.removeClass("fa-eye").addClass("fa-eye-slash");
-      } else {
-        pwInput.attr("type", "password");
-        icon.removeClass("fa-eye-slash").addClass("fa-eye");
-      }
-    });
-
     var tries = 0;
     var timeSecond;
-    var defaultUser = "]] .. (cui.defaultuser or "") .. [[";
-    var userNames = "]] .. userNames .. [[";
-    var legacySalts = "]] .. legacySalts .. [[";
-    var assistance_port = "]] .. assistance_port .. [[";
+]])
+ngx.print(format('    var defaultUser = "%s";\n', cui.defaultuser or ""))
+ngx.print(format('    var userNames = "%s";\n', userNames))
+ngx.print(format('    var legacySalts = "%s";\n', legacySalts))
+ngx.print(format('    var assistance_port = "%s";\n', assistance_port))
+ngx.print([[
+
 
     if (assistance_port != "0" && document.location.port == assistance_port) {
       document.getElementById("srp_username").value = "assist";
@@ -827,7 +834,7 @@ ngx.print([[
             }
           });
         } else {
-          $("#erroruserpass").slideDown(200);
+          $("#erroruserpass").css("display", "flex");
         }
 
         timeSecond = err.waitTime || 0;
@@ -840,7 +847,7 @@ ngx.print([[
         }
 
         if (triesbeforemsg > 0 && tries >= triesbeforemsg) {
-          $("#defaultpassword").slideDown(200);
+          $("#defaultpassword").css("display", "block");
         }
       };
 
@@ -883,13 +890,16 @@ ngx.print([[
         window.location = "/password-reset.lp";
       };
       srp.error_message = function(err) {
-        $("#erroruserpass1").slideDown(200);
+        $("#erroruserpass1").css("display", "flex");
       };
       var password = $("#srp_password1").val();
       srp.identify("/authenticate", "forgotpassword", password);
     });
   });
 </script>
+
+
+
 </body>
 </html>
 ]])
