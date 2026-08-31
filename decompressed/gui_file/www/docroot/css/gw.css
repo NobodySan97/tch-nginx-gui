@@ -2308,7 +2308,7 @@ button.btn.btn-mini, input[type="submit"].btn.btn-mini {
 	height: 16px;
 	width: 16px;
 	content: " ";
-	background-image: url(../image/loading-btn.gif);
+	background-image: url(../img/loading-btn.gif);
 	opacity: .8;
 	filter: alpha(opacity=80);
 	margin-right: 10px

@@ -6,6 +6,7 @@ gettext.textdomain('webui-code')
 local ui_helper = require("web.ui_helper")
 local message_helper = require("web.uimessage_helper")
 local format, untaint = string.format, string.untaint
+local html_escape = require("web.web").html_escape
 
 local function read_file(path)
   local f = io.open(path, "r")
@@ -48,13 +49,13 @@ ngx.print(ui_helper.createHeader("Adblock", false, true), '\
       <div class="control-group">\
         <label class="control-label"><strong>Whitelist</strong><br><small>Domini sempre permessi</small></label>\
         <div class="controls">\
-          <textarea name="whitelist" rows="6" class="span5" placeholder="es. example.com&#10;google.com">',ngx.escape_html(wl_content),'</textarea>\
+          <textarea name="whitelist" rows="6" class="span5" placeholder="es. example.com&#10;google.com">',html_escape(wl_content or ""),'</textarea>\
         </div>\
       </div>\
       <div class="control-group">\
         <label class="control-label"><strong>Blacklist</strong><br><small>Domini sempre bloccati</small></label>\
         <div class="controls">\
-          <textarea name="blacklist" rows="6" class="span5" placeholder="es. ads.evil.com&#10;tracking.domain.net">',ngx.escape_html(bl_content),'</textarea>\
+          <textarea name="blacklist" rows="6" class="span5" placeholder="es. ads.evil.com&#10;tracking.domain.net">',html_escape(bl_content or ""),'</textarea>\
         </div>\
       </div>\
     </fieldset>\
