@@ -758,22 +758,27 @@ label {
 }
 select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
 	display: inline-block;
-	height: 20px;
-	padding: 4px 6px;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	height: 34px;
+	min-height: 34px;
+	padding: 4px 10px;
 	margin-bottom: 10px;
 	font-size: 14px;
 	line-height: 20px;
-	color: #666;
-	-webkit-border-radius: 4px;
-	-moz-border-radius: 4px;
-	border-radius: 4px;
+	color: #334155;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
 	vertical-align: middle
 }
 input, textarea, .uneditable-input {
 	width: 206px
 }
 textarea {
-	height: auto
+	height: auto;
+	min-height: 60px
 }
 textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"], .uneditable-input {
 	background-color: #fff;
@@ -804,17 +809,30 @@ input[type="file"], input[type="image"], input[type="submit"], input[type="reset
 	width: auto
 }
 select, input[type="file"] {
-	height: 30px;
-	*margin-top: 4px;
-	line-height: 30px
+	height: 34px;
+	line-height: normal
 }
 select {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+	height: 34px;
+	min-height: 34px;
+	padding: 4px 8px;
+	line-height: normal;
+	font-size: 14px;
 	width: 220px;
 	border: 1px solid #ccc;
-	background-color: #fff
+	background-color: #fff;
+	color: #334155;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
+	vertical-align: middle
 }
 select[multiple], select[size] {
-	height: auto
+	height: auto;
+	min-height: 60px
 }
 select:focus, input[type="file"]:focus, input[type="radio"]:focus, input[type="checkbox"]:focus {
 	outline: thin dotted #333;
