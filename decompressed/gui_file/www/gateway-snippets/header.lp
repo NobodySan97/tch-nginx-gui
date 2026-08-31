@@ -83,15 +83,15 @@ ngx.print('\
       <picture>');
 
     if cui.gui_skin == "TIM" then
-      ngx.print('<img width="168px" height="39px" src="/img/TIM.png">');
+      ngx.print('<img style="display: block !important; margin-left: 0 !important; max-height: 48px !important; width: auto !important; object-fit: contain !important;" width="168px" height="39px" src="/img/TIM.png">');
     elseif cui.gui_skin == "Fritz" or string.match(cui.gui_skin, "[dD][aA][rR][kK]") then
       ngx.print('<source srcset="/img/logo_white.webp" type="image/webp">\
         <source srcset="/img/logo_white.png" type="image/png">\
-        <img width="131px" height="50px" src="/img/logo_white.png">');
+        <img style="display: block !important; margin-left: 0 !important; max-height: 48px !important; width: auto !important; object-fit: contain !important;" width="131px" height="50px" src="/img/logo_white.png">');
     else
       ngx.print('<source srcset="/img/logo.webp" type="image/webp">\
         <source srcset="/img/logo.png" type="image/png">\
-        <img width="131px" height="50px" src="/img/logo.png">');
+        <img style="display: block !important; margin-left: 0 !important; max-height: 48px !important; width: auto !important; object-fit: contain !important;" width="131px" height="50px" src="/img/logo.png">');
     end
     ngx.print('  </picture>\
     </a>\
