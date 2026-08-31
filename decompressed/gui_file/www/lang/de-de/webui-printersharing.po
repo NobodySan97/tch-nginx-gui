@@ -53,3 +53,6 @@ msgstr "CUPS Webseite auf <a href=\"http://%s:631\">http://%s:631</a> oder <a hr
 
 msgid "To connect: \\%s\ or \\%s\ "
 msgstr "Zum Verbinden: \\%s\ oder \\%s\ "
+
+msgid "To connect: \\\\%s\\ or \\\\%s\\ "
+msgstr ""

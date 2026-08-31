@@ -4349,7 +4349,7 @@ msgstr "Modifica il seriale del modem. Considera che il seriale del modem è l'I
 msgid "Modem Serial"
 msgstr "Seriale modem"
 
-msgstr "Debug Report & Advanced settings"
+msgid "Debug Report & Advanced settings"
 msgstr "Rapporto debug e impostazioni avanzate"
 
 msgid "Change the default page in system-extra to set this GUI as default"
@@ -4396,3 +4396,144 @@ msgstr "Supporto e Donazioni"
 
 msgid "Support Project"
 msgstr "Supporta il Progetto"
+
+msgid "Voipblock for mmpbx"
+msgstr "Voipblock per mmpbx"
+
+msgid "Backup Cache Liste"
+msgstr "Backup Cache Liste"
+
+msgid "The Voipblock for mmpbx is "
+msgstr "Il Voipblock per mmpbx è "
+
+msgid "Stop Speed Diagnostics"
+msgstr "Interrompi Diagnostica Velocità"
+
+msgid "Technicolor Gateway Web Interface"
+msgstr "Interfaccia Web Technicolor Gateway"
+
+msgid "Blocco temporaneo. Attendi %s secondi."
+msgstr "Blocco temporaneo. Attendi %s secondi."
+
+msgid "Verifica"
+msgstr "Verifica"
+
+msgid "Annulla"
+msgstr "Annulla"
+
+msgid "Modalità Debug"
+msgstr "Modalità Debug"
+
+msgid "Sessione Assistenza Remota Attiva"
+msgstr "Sessione Assistenza Remota Attiva"
+
+msgid "Se non modificata, la password predefinita corrisponde all'<strong>Access Code</strong> presente sull'etichetta sotto il modem."
+msgstr "Se non modificata, la password predefinita corrisponde all'<strong>Access Code</strong> presente sull'etichetta sotto il modem."
+
+msgid "Access Code non valido."
+msgstr "Access Code non valido."
+
+msgid "Adblock"
+msgstr "Adblock"
+
+msgid "Liste Personalizzate"
+msgstr "Liste Personalizzate"
+
+msgid "The Voipblock for asterisk is "
+msgstr "Il Voipblock per asterisk è "
+
+msgid "GUI Version <a onclick=\"event.stopPropagation()\" target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a>"
+msgstr ""
+
+msgid "Sblocco automatico in corso..."
+msgstr "Sblocco automatico in corso..."
+
+msgid "Stato e Configurazione Adblock"
+msgstr "Stato e Configurazione Adblock"
+
+msgid "Access Code"
+msgstr "Access Code"
+
+msgid "Accesso Bloccato"
+msgstr "Accesso Bloccato"
+
+msgid "Accedi"
+msgstr "Accedi"
+
+msgid "Liste Personalizzate (Un dominio per riga)"
+msgstr "Liste Personalizzate (Un dominio per riga)"
+
+msgid "Tentativi errati (%s)."
+msgstr "Tentativi errati (%s)."
+
+msgid "Disable CWMP Update. Any firmware update from CWMP will be rejected and not flashed. "
+msgstr "Disabilita l'aggiornamento CWMP. Qualsiasi aggiornamento del firmware da CWMP verrà rifiutato e non installato. "
+
+msgid "Aggiorna Database"
+msgstr "Aggiorna Database"
+
+msgid "Ricaricamento Adblock avviato in background"
+msgstr "Ricaricamento Adblock avviato in background"
+
+msgid "Inserisci il codice <strong>\"Access Code\"</strong> presente sotto il modem."
+msgstr ""
+
+msgid "Gateway Sign In"
+msgstr "Accedi al Gateway"
+
+msgid "Configurazione"
+msgstr "Configurazione"
+
+msgid "This will install Voipblock for mmpbx"
+msgstr "Questo installerà Voipblock per mmpbx"
+
+msgid "If you don't have connection, specific app can be downloaded here ( https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master/modular/upgrade-pack-specific%s.tar.bz2 ) and installed manually here."
+msgstr "Se non disponi di connessione, il pacchetto specifico può essere scaricato qui ( https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master/modular/upgrade-pack-specific%s.tar.bz2 ) e installato manualmente."
+
+msgid "Ricarica e Aggiorna Liste Ora"
+msgstr "Ricarica e Aggiorna Liste Ora"
+
+msgid "Username o Password non validi."
+msgstr "Username o Password non validi."
+
+msgid "Gateway Login"
+msgstr "Login Gateway"
+
+msgid "Voipblock for asterisk"
+msgstr "Voipblock per asterisk"
+
+msgid "Abilita Adblock"
+msgstr "Abilita Adblock"
+
+msgid "Nessuna connessione Internet attiva"
+msgstr "Nessuna connessione Internet attiva"
+
+msgid "<p>Fork & Maintained by <font style=\"color:#0088cc;\">NobodySan97</font> (<a target=\"_blank\" href=\"https://ko-fi.com/nobodysan\" style=\"color:#ff5e5b;font-weight:bold;\"><i class=\"fa fa-coffee\"></i> Support on Ko-fi</a>) &mdash; Based on original <font style=\"color:#0088cc;\">Ansuel GUI</font> by <font style=\"color:#0088cc;\">Ansuel</font> and <a href=\"https://github.com/NobodySan97/tch-nginx-gui/graphs/contributors\">these GitHub users.</a><br/>Unlock Utility by <font style=\"color:#0088cc;\">ADeltaX</font>"
+msgstr ""
+
+msgid "Sorgenti Blacklist DNS"
+msgstr "Sorgenti Blacklist DNS"
+
+msgid "Liste personalizzate salvate con successo!"
+msgstr "Liste personalizzate salvate con successo!"
+
+msgid "Update available! Version: <strong id=\"new-version-text\"><a target=\\"_blank\\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a></strong>"
+msgstr ""
+
+msgid "Run Speed Diagnostics"
+msgstr "Esegui Diagnostica Velocità"
+
+msgid "Sorgenti Adblock aggiornate. Ricaricamento in corso..."
+msgstr "Sorgenti Adblock aggiornate. Ricaricamento in corso..."
+
+msgid "Seleziona le liste desiderate. Consigliate: <strong>stevenblack, adguard, disconnect, adaway, yoyo</strong>."
+msgstr "Seleziona le liste desiderate. Consigliate: <strong>stevenblack, adguard, disconnect, adaway, yoyo</strong>."
+
+msgid "This will install Voipblock for asterisk"
+msgstr "Questo installerà Voipblock per asterisk"
+
+msgid "Modalità Bridge Attiva"
+msgstr "Modalità Bridge Attiva"
+
+msgid "Sorgenti DNS"
+msgstr "Sorgenti DNS"

@@ -1,7 +1,7 @@
 --pretranslated: do not change this file
 
 -- Enable localization
-gettext.textdomain('webui-code')
+gettext.textdomain('webui-core')
 
 local ui_helper = require("web.ui_helper")
 local message_helper = require("web.uimessage_helper")

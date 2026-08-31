@@ -1,5 +1,5 @@
 --pretranslated: do not change this file
-gettext.textdomain('webui-code')
+gettext.textdomain('webui-core')
 
 local format = string.format
 local ipairs = ipairs

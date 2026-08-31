@@ -138,3 +138,13 @@ msgstr "Virtueller Port"
 
 msgid "QoS"
 msgstr "QoS"
+
+msgid "<strong>%d queue</strong> active"
+msgid_plural "<strong>%d queues</strong> active"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "<strong>%d classify rule</strong> active"
+msgid_plural "<strong>%d classify rules</strong> active"
+msgstr[0] ""
+msgstr[1] ""

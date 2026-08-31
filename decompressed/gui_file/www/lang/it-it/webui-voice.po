@@ -452,3 +452,13 @@ msgstr "OFF"
 
 msgid "Interface"
 msgstr "Interfaccia"
+
+msgid "<strong>%d </strong> Registered Account"
+msgid_plural "<strong %s>%d </strong> Registered Accounts"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "<strong>%d </strong> Unregistered Account"
+msgid_plural "<strong %s>%d </strong> Unregistered Accounts"
+msgstr[0] ""
+msgstr[1] ""

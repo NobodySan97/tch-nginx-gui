@@ -4349,8 +4349,188 @@ msgstr ""
 msgid "Modem Serial"
 msgstr ""
 
-msgstr "Debug Report & Advanced settings"
+msgid "Debug Report & Advanced settings"
 msgstr ""
 
 msgid "Change the default page in system-extra to set this GUI as default"
+msgstr ""
+
+msgid "Voipblock for mmpbx"
+msgstr ""
+
+msgid "Backup Cache Liste"
+msgstr ""
+
+msgid "The Voipblock for mmpbx is "
+msgstr ""
+
+msgid "Stop Speed Diagnostics"
+msgstr ""
+
+msgid "Reset CWMP database and force initial provisioning with ACS server."
+msgstr ""
+
+msgid "Are you sure you want to reset the configuration? Network settings will return to factory defaults, but the Custom GUI will remain installed."
+msgstr ""
+
+msgid "Technicolor Gateway Web Interface"
+msgstr ""
+
+msgid "Blocco temporaneo. Attendi %s secondi."
+msgstr ""
+
+msgid "Verifica"
+msgstr ""
+
+msgid "Annulla"
+msgstr ""
+
+msgid "Modalità Debug"
+msgstr ""
+
+msgid "Sessione Assistenza Remota Attiva"
+msgstr ""
+
+msgid "Restore Stock GUI"
+msgstr ""
+
+msgid "Se non modificata, la password predefinita corrisponde all'<strong>Access Code</strong> presente sull'etichetta sotto il modem."
+msgstr ""
+
+msgid "Access Code non valido."
+msgstr ""
+
+msgid "Adblock"
+msgstr ""
+
+msgid "Liste Personalizzate"
+msgstr ""
+
+msgid "Support Project"
+msgstr ""
+
+msgid "The Voipblock for asterisk is "
+msgstr ""
+
+msgid "Are you sure you want to perform a complete factory reset? <br/><strong>This will wipe all custom files and remove root SSH access permanently.</strong>"
+msgstr ""
+
+msgid "GUI Version <a onclick=\"event.stopPropagation()\" target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a>"
+msgstr ""
+
+msgid "Sblocco automatico in corso..."
+msgstr ""
+
+msgid "Factory Reset & Remove Root"
+msgstr ""
+
+msgid "Access Code"
+msgstr ""
+
+msgid "Stato e Configurazione Adblock"
+msgstr ""
+
+msgid "Accesso Bloccato"
+msgstr ""
+
+msgid "Support & Donations"
+msgstr ""
+
+msgid "Accedi"
+msgstr ""
+
+msgid "Liste Personalizzate (Un dominio per riga)"
+msgstr ""
+
+msgid "Are you sure you want to restore the official stock GUI? Network configuration and root SSH access will be preserved."
+msgstr ""
+
+msgid "Tentativi errati (%s)."
+msgstr ""
+
+msgid "Disable CWMP Update. Any firmware update from CWMP will be rejected and not flashed. "
+msgstr ""
+
+msgid "Aggiorna Database"
+msgstr ""
+
+msgid "Reset the modem to the firmware stock GUI. Network configuration and root SSH access will be preserved."
+msgstr ""
+
+msgid "Ricaricamento Adblock avviato in background"
+msgstr ""
+
+msgid "Complete factory reset: wipes the entire overlay partition, removing the modded GUI and permanent root access."
+msgstr ""
+
+msgid "Inserisci il codice <strong>\"Access Code\"</strong> presente sotto il modem."
+msgstr ""
+
+msgid "Gateway Sign In"
+msgstr ""
+
+msgid "Configurazione"
+msgstr ""
+
+msgid "This will install Voipblock for mmpbx"
+msgstr ""
+
+msgid "Ricarica e Aggiorna Liste Ora"
+msgstr ""
+
+msgid "Username o Password non validi."
+msgstr ""
+
+msgid "Gateway Login"
+msgstr ""
+
+msgid "Voipblock for asterisk"
+msgstr ""
+
+msgid "Abilita Adblock"
+msgstr ""
+
+msgid "Nessuna connessione Internet attiva"
+msgstr ""
+
+msgid "<p>Fork & Maintained by <font style=\"color:#0088cc;\">NobodySan97</font> (<a target=\"_blank\" href=\"https://ko-fi.com/nobodysan\" style=\"color:#ff5e5b;font-weight:bold;\"><i class=\"fa fa-coffee\"></i> Support on Ko-fi</a>) &mdash; Based on original <font style=\"color:#0088cc;\">Ansuel GUI</font> by <font style=\"color:#0088cc;\">Ansuel</font> and <a href=\"https://github.com/NobodySan97/tch-nginx-gui/graphs/contributors\">these GitHub users.</a><br/>Unlock Utility by <font style=\"color:#0088cc;\">ADeltaX</font>"
+msgstr ""
+
+msgid "Reset all network and service configurations to factory defaults, while keeping the modded Custom GUI installed."
+msgstr ""
+
+msgid "Liste personalizzate salvate con successo!"
+msgstr ""
+
+msgid "Wiping overlay and reverting to factory defaults, please wait..."
+msgstr ""
+
+msgid "Sorgenti Blacklist DNS"
+msgstr ""
+
+msgid "Restoring Stock GUI, please wait..."
+msgstr ""
+
+msgid "Update available! Version: <strong id=\"new-version-text\"><a target=\\"_blank\\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a></strong>"
+msgstr ""
+
+msgid "Run Speed Diagnostics"
+msgstr ""
+
+msgid "Resetting configuration to defaults, please wait..."
+msgstr ""
+
+msgid "Sorgenti Adblock aggiornate. Ricaricamento in corso..."
+msgstr ""
+
+msgid "Seleziona le liste desiderate. Consigliate: <strong>stevenblack, adguard, disconnect, adaway, yoyo</strong>."
+msgstr ""
+
+msgid "This will install Voipblock for asterisk"
+msgstr ""
+
+msgid "Modalità Bridge Attiva"
+msgstr ""
+
+msgid "Sorgenti DNS"
 msgstr ""

@@ -85,3 +85,6 @@ msgstr "Bloccato da controllo genitori"
 
 msgid "MAC address"
 msgstr "Indirizzo MAC"
+
+msgid "<p>Fork & Maintained by <font style=\"color:#0088cc;\">NobodySan97</font> &mdash; Based on original <font style=\"color:#0088cc;\">Ansuel GUI</font> by <font style=\"color:#0088cc;\">Ansuel</font> and <a href=\"https://github.com/NobodySan97/tch-nginx-gui/graphs/contributors\">these GitHub users.</a><br/>Unlock Utility by <font style=\"color:#0088cc;\">ADeltaX</font>"
+msgstr ""

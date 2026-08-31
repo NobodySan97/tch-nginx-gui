@@ -79,7 +79,6 @@ end
                                 modal_link, nHot))
              ngx.print('\
            </p>\
-      %>\
         ');  end  ngx.print('\
     </div>\
 	</div>\
