@@ -67,7 +67,7 @@ ngx.print('\
     ');  ngx.print( ui_helper.createCardHeader(T"Extensions", modalPath, switchName, nil) ); ngx.print('\
 \
     <div class="content card_bg" data-bg-text="&#xf015;">\
-	  <div class="divtable" style="width: 110%; margin-top: -10px;">\
+	  <div class="divtable">\
 \
       ');
 local html = {}

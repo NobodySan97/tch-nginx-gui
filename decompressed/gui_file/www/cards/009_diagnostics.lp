@@ -16,12 +16,12 @@ local function genIcon(id,text,icons,tooltip_pos)
 	
 	local html = {}
 
-	html[#html+1] = '<td>'
+	html[#html+1] = '<div class="diagnostic-icon-item">'
 	html[#html+1] = format('<div id="diagnosticIcons" data-toggle="modal" data-remote="/modals/%s.lp" data-id="%s">',id,id)
 	html[#html+1] = format('<i class="smallsomeInfos modal-link %s" href="#" \
 			rel="tooltip" data-placement="%s" data-original-title="%s" alt="%s"></i>',icons,tooltip_pos,T(text),T(text))
 	html[#html+1] = '</div>'
-	html[#html+1] = '</td>'
+	html[#html+1] = '</div>'
 	
 	return html
 end

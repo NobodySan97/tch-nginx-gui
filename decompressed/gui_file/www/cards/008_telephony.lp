@@ -95,7 +95,7 @@ ngx.print('\
 	  end
 	  tinsert (html, [[<br/>]])
 	  if reged ~= 0 then
-	  	tinsert(html, format( N("<strong %s>%d </strong> Registered Account",
+	  	tinsert(html, format( N("<strong>%d </strong> Registered Account",
 	  							"<strong %s>%d </strong> Registered Accounts", reged), 0,
 	  							reged))
 	  	tinsert (html, [[<br/>]])
@@ -107,7 +107,7 @@ ngx.print('\
 	  	tinsert (html, [[<br/>]])
 	  end
 	  if notreged ~= 0 then
-	  	tinsert(html, format( N("<strong %s>%d </strong> Unregistered Account",
+	  	tinsert(html, format( N("<strong>%d </strong> Unregistered Account",
 	  							"<strong %s>%d </strong> Unregistered Accounts", notreged), 0,
 	  							notreged))
 	  	tinsert (html, [[</p>]])

@@ -1989,7 +1989,7 @@ button.btn.btn-mini, input[type="submit"].btn.btn-mini {
 	padding: 0 20px;
 	font-size: 18px;
 	line-height: 30px;
-	font-weight: \f032;
+	font-weight: 600;
 	color: #5d215d;
 	text-shadow: 0 1px 0 #fff;
 	text-align: center;
@@ -2108,7 +2108,7 @@ button.btn.btn-mini, input[type="submit"].btn.btn-mini {
 	margin-bottom: 0;
 	font-size: 14px;
 	line-height: 20px;
-	font-weight: \f032;
+	font-weight: 600;
 	text-align: center;
 	text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
 	vertical-align: middle;
@@ -3514,7 +3514,7 @@ button.btn.btn-mini, input[type="submit"].btn.btn-mini {
 	display: table;
 	margin-top: 10px;
 	margin-bottom: 20px;
-	font: italic \f032 20px Georgia, "Times New Roman", serif
+	font: italic 700 20px Georgia, "Times New Roman", serif
 }
 .title:before {
 	display: table-cell;
@@ -3549,7 +3549,7 @@ button.btn.btn-mini, input[type="submit"].btn.btn-mini {
 	margin-bottom: 20px
 }
 .card .header {
-	font-weight: \f032;
+	font-weight: 600;
 	font-size: 24px;
 	color: #fff;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
@@ -3631,7 +3631,7 @@ button.btn.btn-mini, input[type="submit"].btn.btn-mini {
 }
 .card .information {
 	font-size: 16px;
-	font-weight: \f032;
+	font-weight: 600;
 	color: #999
 }
 .card .information .subinfos p {
@@ -3702,7 +3702,7 @@ button.btn.btn-mini, input[type="submit"].btn.btn-mini {
 	font-size: 18px;
 	margin-bottom: 10px;
 	padding: 10px;
-	font-weight: \f032;
+	font-weight: 600;
 	color: #fff;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 	background-color: #5c1660;
@@ -3938,7 +3938,7 @@ a {
 	margin-left: 12px;
 	height: 110px;
 	display: block;
-	font-weight: \f032;
+	font-weight: 600;
 	font-size: 16px;
 	color: #fff;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
@@ -3973,7 +3973,7 @@ a {
 	margin-left: 12px;
 	height: 110px;
 	display: block;
-	font-weight: \f032;
+	font-weight: 600;
 	font-size: 16px;
 	color: #fff;
 	text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
@@ -4207,7 +4207,7 @@ form .switch {
 	display: block;
 	margin-left: -18px;
 	font-size: 9px;
-	font-weight: \f032;
+	font-weight: 600;
 	color: #fff;
 	text-shadow: 0 1px 1px #000;
 	-webkit-transition: all .5s;
@@ -4217,7 +4217,7 @@ form .switch {
 }
 .switcher:after {
 	font-size: 9px;
-	font-weight: \f032;
+	font-weight: 600;
 	color: #000;
 	text-shadow: 0 1px 1px #fff;
 	content: attr(textOFF);
@@ -4283,7 +4283,7 @@ form .switch {
 	text-align: center;
 	color: #333;
 	font-size: 16px;
-	font-weight: \f032;
+	font-weight: 600;
 	margin-bottom: 20px
 }
 .applicationName.in-store {
@@ -4996,7 +4996,7 @@ form .switch {
 	text-align: center;
 	color: #999;
 	border: solid 1px #999;
-	font-weight: \f032;
+	font-weight: 600;
 	padding-top: 7px;
 	padding-bottom: 5px;
 	margin: auto;
@@ -5125,7 +5125,7 @@ form .switch {
 .profil-name {
 	color: #5d215d;
 	font-size: 18px;
-	font-weight: \f032;
+	font-weight: 600;
 	text-shadow: none;
 	text-align: center;
 	margin-top: 0;
@@ -5378,12 +5378,7 @@ form .switch {
 	padding: 30px 0;
 	margin-bottom: 30px
 }
-.header-logo {
-	display: inline-block;
-	margin-right: auto;
-	margin-left: 0;
-	flex-basis: 60rem;
-}
+.header-logo { display: flex; align-items: center; margin-right: auto; margin-left: 0; flex: 0 0 auto; max-width: 220px; }
 .header-button {
 	display: flex;
 	flex-wrap: wrap;
@@ -5449,8 +5444,7 @@ form .switch {
 	position: absolute;
 	bottom: -90px;
 	right: 5px;
-	font: 200px font-family:"Font Awesome 5 Free";
-	font-weight: 900;
+	font-size: 200px; font-family: "Font Awesome 5 Free", sans-serif; font-weight: 900;
 }
 .card_bg {
 	position: relative;
@@ -8530,4 +8524,49 @@ textarea:focus {
   opacity: 0.55 !important;
   cursor: not-allowed !important;
   filter: grayscale(0.8) !important;
+}
+
+
+/* === AUDIT P0 & P1 FIXES === */
+.row, .row-fluid, #cardrow, #infocardrow {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  margin-left: -20px !important;
+  box-sizing: border-box !important;
+}
+
+/* Light Icon Status Colors */
+.light_icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-right: 8px !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+.light_icon.green  { color: #16a34a !important; }
+.light_icon.orange { color: #ea580c !important; }
+.light_icon.yellow { color: #eab308 !important; }
+.light_icon.red    { color: #dc2626 !important; }
+.light_icon.off    { color: #94a3b8 !important; }
+
+/* Diagnostics Card Container */
+#diagnosticCard {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  align-items: center !important;
+}
+.diagnostic-icon-item {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.diagnostic-icon-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 6px !important;
+  cursor: pointer !important;
 }

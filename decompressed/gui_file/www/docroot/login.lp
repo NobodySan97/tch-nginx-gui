@@ -422,7 +422,7 @@ ngx.print([[
       .modern-modal-overlay {
         display: none;
         position: fixed;
-        inset: 0;
+        top: 0; right: 0; bottom: 0; left: 0; inset: 0;
         background: rgba(15, 23, 42, 0.65);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);

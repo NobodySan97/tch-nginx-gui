@@ -39,7 +39,7 @@ body {
   border-color: rgba(0, 70, 145, 0.25) !important;
 }
 
-.smallcard > .header, .btn-primary, .smallcard .header .settings {
+.smallcard > .header, .smallcard .header .settings {
   background: linear-gradient(135deg, #004691 0%, #00336b 100%) !important;
   border: none !important;
   border-radius: 16px 16px 0 0 !important;

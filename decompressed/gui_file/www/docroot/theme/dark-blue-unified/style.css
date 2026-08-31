@@ -47,7 +47,7 @@ body {
   border-color: rgba(59, 130, 246, 0.4) !important;
 }
 
-.smallcard > .header, .btn-primary, .smallcard .header .settings {
+.smallcard > .header, .smallcard .header .settings {
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
   border-radius: 16px 16px 0 0 !important;
@@ -189,4 +189,15 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:foc
   border-bottom-color: transparent !important;
   background: rgba(30, 41, 59, 0.8) !important;
   font-weight: 600 !important;
+}
+
+/* Dark Table Header Overrides */
+.modal-body table th {
+  background: rgba(30, 41, 59, 0.95) !important;
+  color: #38bdf8 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+.modal-body table td {
+  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
 }

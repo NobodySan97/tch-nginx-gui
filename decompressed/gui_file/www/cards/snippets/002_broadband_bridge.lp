@@ -98,8 +98,8 @@ end
       "",
       '</p>')
 	if wan_bridge and wan_bridge:match("tm") and xdsl_data["dsl_enable"] == "1" then
-		local iconUp = '<i class="icon-upload icon-small gray"></i> '
-		local iconDown = '<i class="icon-download icon-small gray"></i> '
+		local iconUp = '<i class="fas fa-arrow-up text-muted"></i> '
+		local iconDown = '<i class="fas fa-arrow-down text-muted"></i> '
 		
 		if (xdsl_data["dsl_status"] == "Up") or (other_line_xdsl_data["dsl_status"] == "Up") then
 		

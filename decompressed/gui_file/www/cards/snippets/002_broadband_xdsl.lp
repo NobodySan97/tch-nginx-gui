@@ -76,8 +76,8 @@ ngx.print( ui_helper.createCardHeader(T"Broadband", modalPath) ); ngx.print('\
 <div class="content card_bg" data-bg-text="&#xf0b2;">\
 <div class="divtable">\
 ');
-local iconUp = '<i class="icon-upload icon-small gray"></i> '
-local iconDown = '<i class="icon-download icon-small gray"></i> '
+local iconUp = '<i class="fas fa-arrow-up text-muted"></i> '
+local iconDown = '<i class="fas fa-arrow-down text-muted"></i> '
 if tabdata.current.name == "bridge" then
   ngx.print(format("<strong>%s</strong><br/>",T"Bridge Mode Active"))
 end

@@ -52,7 +52,7 @@ if session:hasAccess(modalPath) and lfs.attributes("/etc/config/xdsl", "mode") =
       <div class="smallcard" data-aos="zoom-in" data-aos-anchor-placement="center-bottom" data-aos-easing="ease-in-back">\
          ');  ngx.print( ui_helper.createCardHeader(T"xDSL Config", modalPath) ); ngx.print('\
           <div class="content card_bg" data-bg-text="&#xf2db;">\
-          <div class="divtable" style="width: 105%;">\
+          <div class="divtable">\
                 ');  
                 html={}
                 html[#html+1] = ui_helper.createSimpleLight(content["dsl0_enabled"], status_msg, { light = {}},"fas fa-microchip")

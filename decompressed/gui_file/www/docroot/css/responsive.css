@@ -1914,3 +1914,18 @@ h2.span4{
     -webkit-overflow-scrolling: touch;
   }
 }
+
+
+/* Mobile Modal Fix */
+@media (max-width: 767px) {
+  .modal {
+    position: fixed !important;
+    left: 10px !important;
+    right: 10px !important;
+    top: 20px !important;
+    margin: 0 !important;
+    width: calc(100% - 20px) !important;
+    max-width: none !important;
+    transform: none !important;
+  }
+}
