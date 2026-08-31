@@ -8533,7 +8533,8 @@ textarea:focus {
 .row, .row-fluid, #cardrow, #infocardrow {
   display: flex !important;
   flex-wrap: wrap !important;
-  margin-left: -20px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
   box-sizing: border-box !important;
 }
 
