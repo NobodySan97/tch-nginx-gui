@@ -4534,3 +4534,81 @@ msgstr ""
 
 msgid "Sorgenti DNS"
 msgstr ""
+
+msgid "Invalid attempts (%s)."
+msgstr "Fehlgeschlagene Versuche (%s)."
+
+msgid "Temporary lockout. Please wait %s seconds."
+msgstr "Vorübergehende Sperre. Bitte warten Sie %s Sekunden."
+
+msgid "No active Internet connection"
+msgstr "Keine aktive Internetverbindung"
+
+msgid "Remote Assistance Session Active"
+msgstr "Remote-Support-Sitzung Aktiv"
+
+msgid "Invalid Username or Password."
+msgstr "Ungültiger Benutzername oder Passwort."
+
+msgid "Unless changed, default password matches the <strong>Access Code</strong> on router label."
+msgstr "Falls nicht geändert, entspricht das Standardpasswort dem <strong>Access Code</strong> auf dem Etikett unter dem Router."
+
+msgid "Sign In"
+msgstr "Anmelden"
+
+msgid "Invalid Access Code."
+msgstr "Ungültiger Access Code."
+
+msgid "Access Blocked"
+msgstr "Zugriff Gesperrt"
+
+msgid "Auto-unlocking in progress..."
+msgstr "Automatische Entsperrung läuft..."
+
+msgid "Signing In..."
+msgstr "Anmeldung läuft..."
+
+msgid "Verifying Access Code..."
+msgstr "Access Code wird überprüft..."
+
+msgid "Enter the <strong>"Access Code"</strong> printed under the router."
+msgstr "Geben Sie den <strong>"Access Code"</strong> ein, der auf der Unterseite des Routers aufgedruckt ist."
+
+msgid "Custom Lists (One domain per line)"
+msgstr "Benutzerdefinierte Listen (Eine Domain pro Zeile)"
+
+msgid "DNS Blacklist Sources"
+msgstr "DNS-Blacklist-Quellen"
+
+msgid "Custom lists saved successfully!"
+msgstr "Benutzerdefinierte Listen erfolgreich gespeichert!"
+
+msgid "Adblock sources updated. Reloading in progress..."
+msgstr "Adblock-Quellen aktualisiert. Neuladen läuft..."
+
+msgid "Select desired lists. Recommended: <strong>stevenblack, adguard, disconnect, adaway, yoyo</strong>."
+msgstr "Wählen Sie die gewünschten Listen aus. Empfohlen: <strong>stevenblack, adguard, disconnect, adaway, yoyo</strong>."
+
+msgid "Reload and Update Lists Now"
+msgstr "Listen jetzt neu laden und aktualisieren"
+
+msgid "Backup List Cache"
+msgstr "Listen-Cache sichern"
+
+msgid "Adblock reload started in background"
+msgstr "Adblock-Neuladen im Hintergrund gestartet"
+
+msgid "Enable Adblock"
+msgstr "Adblock aktivieren"
+
+msgid "Custom Lists"
+msgstr "Benutzerdefinierte Listen"
+
+msgid "Adblock Status and Configuration"
+msgstr "Adblock Status und Konfiguration"
+
+msgid "DNS Sources"
+msgstr "DNS-Quellen"
+
+msgid "Update Database"
+msgstr "Datenbank aktualisieren"

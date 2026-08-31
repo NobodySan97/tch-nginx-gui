@@ -136,9 +136,9 @@ local cron_data, cron_helpmsg = post_helper.handleTableQuery(cron_columns, cron_
 	
 	ngx.print('\
 	</fieldset>\
-  </fiedlset>\
+  </fieldset>\
   </div>\
   <script>\
   </script>\
 ');  ngx.print(ui_helper.createFooter() ); ngx.print('\
-'); 
+');

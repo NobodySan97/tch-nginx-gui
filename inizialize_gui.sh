@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 declare -a modular_dir=(
 	"base"
@@ -17,81 +18,93 @@ declare -a modular_dir=(
 	"ledfw_support-specificDGA4131"
 )
 
+AUTOBUILD_DIR="${AUTOBUILD_DIR:-$HOME/gui-dev-build-auto}"
+type=""
+
 if [ "$1" = "dev" ]; then
 	echo "Dev build detected"
 	type="_dev"
+elif [ "$1" = "preview" ]; then
+	echo "Preview build detected"
+	type="_preview"
 fi
 
-if [ "$CI" = "true" ]; then
-	TYPE="$(cat $HOME/gui_build/data/type)"
+if [ "$CI" = "true" ] && [ -f "$HOME/gui_build/data/type" ]; then
+	TYPE="$(cat "$HOME/gui_build/data/type")"
 	if [ "$TYPE" = "PREVIEW" ]; then
 		type="_preview"
 	elif [ "$TYPE" = "DEV" ]; then
 		type="_dev"
-	elif [ $TYPE != "STABLE" ]; then
-		type="_"$TYPE
+	elif [ -n "$TYPE" ] && [ "$TYPE" != "STABLE" ]; then
+		type="_$TYPE"
 	fi
 fi
 
-mkdir tar_tmp
+mkdir -p tar_tmp
+mkdir -p "$AUTOBUILD_DIR/modular"
 
 for index in "${modular_dir[@]}"; do
 	old_md5=""
-	if [ "$CI" = "true" ] && [ -f $HOME/gui-dev-build-auto/modular/$index.tar.bz2 ]; then
-		old_md5=$(md5sum <(bzcat $HOME/gui-dev-build-auto/modular/$index.tar.bz2) | awk '{print $1}')
+	if [ -f "$AUTOBUILD_DIR/modular/$index.tar.bz2" ]; then
+		old_md5=$(bzcat "$AUTOBUILD_DIR/modular/$index.tar.bz2" | md5sum | awk '{print $1}')
 	fi
 
-	cd decompressed/$index
+	cd "decompressed/$index"
 
-	#Creating md5sum file for status led eventing
-	if [[ "$index" = "gui_file" ]]; then
+	# Creating md5sum file for status led eventing
+	if [ "$index" = "gui_file" ] && [ -f "tmp/status-led-eventing.lua_new" ]; then
 		md5sum tmp/status-led-eventing.lua_new > tmp/status-led-eventing.md5sum
 	fi
 
-	#Creating md5sum for every ledfw_support modular dir
+	# Creating md5sum for every ledfw_support modular dir
 	if case "$index" in *ledfw_support*) true ;; *) false ;; esac; then
-		md5sum etc/ledfw/stateMachines.lua > stateMachines.md5sum
+		if [ -f "etc/ledfw/stateMachines.lua" ]; then
+			md5sum etc/ledfw/stateMachines.lua > stateMachines.md5sum
+		fi
 	fi
 
-	BZIP2=-9 tar --mtime='2018-01-01' -cjf ../../tar_tmp/$index.tar.bz2 * --owner=0 --group=0
+	BZIP2=-9 tar --mtime='2018-01-01' -cjf "../../tar_tmp/$index.tar.bz2" * --owner=0 --group=0
 	cd ../../
-	new_md5=$(md5sum <(bzcat tar_tmp/$index.tar.bz2) | awk '{print $1}')
+	new_md5=$(bzcat "tar_tmp/$index.tar.bz2" | md5sum | awk '{print $1}')
 	if [ -z "$old_md5" ] || [ "$old_md5" != "$new_md5" ]; then
 		echo "Changes detected in modular package $index, updating..."
-		cp tar_tmp/$index.tar.bz2 $HOME/gui-dev-build-auto/modular/
+		cp "tar_tmp/$index.tar.bz2" "$AUTOBUILD_DIR/modular/"
 	fi
 done
 
-rm -r tar_tmp
+rm -rf tar_tmp
 
 echo "Creating GUI dir"
 
 if [ -d total ]; then
-	rm -r total
+	rm -rf total
 fi
 
 if [ ! -d compressed ]; then
-	mkdir compressed
+	mkdir -p compressed
 fi
 
-mkdir total
+mkdir -p total
 
 if [ ! -d total/tmp ]; then
-	mkdir total/tmp
-	#This is needed as on installation this will overwrite permission of /tmp dir
+	mkdir -p total/tmp
+	# This is needed as on installation this will overwrite permission of /tmp dir
 	chmod 777 total/tmp
 fi
 
 for index in "${modular_dir[@]}"; do
-
 	if [ "$index" = "base" ] || [ "$index" = "gui_file" ] || [ "$index" = "traffic_mon" ]; then
-		echo "Copying file from "$index" to GUI dir"
-		cp -dr decompressed/$index/* total
-	elif [ -z "$(echo $index | grep upgrade-pack-)" ]; then
-		cp $HOME/gui-dev-build-auto/modular/$index.tar.bz2 total/tmp
-		echo "Adding specific file from "$index" to tmp virtual dir"
+		echo "Copying file from $index to GUI dir"
+		cp -dr "decompressed/$index/"* total/
+	elif [ -z "$(echo "$index" | grep upgrade-pack-)" ]; then
+		if [ -f "$AUTOBUILD_DIR/modular/$index.tar.bz2" ]; then
+			cp "$AUTOBUILD_DIR/modular/$index.tar.bz2" total/tmp/
+			echo "Adding specific file from $index to tmp virtual dir"
+		fi
 	fi
 done
 
-cd total && BZIP2=-9 tar -cjf ../compressed/GUI$type.tar.bz2 * --owner=0 --group=0
+cd total && BZIP2=-9 tar --mtime='2018-01-01' -cjf "../compressed/GUI$type.tar.bz2" * --owner=0 --group=0
 cd ../
+
+echo "Built compressed/GUI$type.tar.bz2 successfully."

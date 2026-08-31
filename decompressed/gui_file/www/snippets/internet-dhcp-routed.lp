@@ -384,6 +384,7 @@ ngx.print(ui_helper.createMessages(message_helper.popMessages()))
     html[#html+1] = ui_helper.createSwitch(T"Auto Discover DNS", "uci_wan_peerdns", content["uci_wan_peerdns"])
     html[#html+1] = format('<label class="control-label">%s</label><div class="controls">', T"DNS servers")
     html[#html+1] = ui_helper.createTable(dns_columns, dns_data, dns_options, nil, dns_helpmsg)
+    html[#html+1] = '</div>'
 
     ngx.print(html)
   ngx.print('\

@@ -6,8 +6,8 @@ local proxy = require("datamodel")
 local triesbeforemsg = 3
 local content_helper = require("web.content_helper")
 local format = string.format
-local passwd_count_msg = format(T"Tentativi errati (%s).", '<span id="pwdCount" class="badge-count"></span>')
-local timer_msg = format(T"Blocco temporaneo. Attendi %s secondi.", '<span id="timerSec" class="cooldown-timer"></span>')
+local passwd_count_msg = format(T"Invalid attempts (%s).", '<span id="pwdCount" class="badge-count"></span>')
+local timer_msg = format(T"Temporary lockout. Please wait %s seconds.", '<span id="timerSec" class="cooldown-timer"></span>')
 
 if ngx.var.request_method == "GET" and ngx.req.get_uri_args().action == "getcsrf" then
   ngx.print(ngx.ctx.session:getCSRFtoken())
@@ -571,17 +571,17 @@ ngx.print('    </div>\n')
 
 ngx.print('    <div class="status-pill-list">\n')
 if httpi == "0" and httpi_wwan == "0" and wan_mode ~= "bridge" then
-  ngx.print(format('      <div class="status-pill warning"><i class="fas fa-wifi"></i><span>%s</span></div>\n', T"Nessuna connessione Internet attiva"))
+  ngx.print(format('      <div class="status-pill warning"><i class="fas fa-wifi"></i><span>%s</span></div>\n', T"No active Internet connection"))
 end
 if wan_mode == "bridge" then
-  ngx.print(format('      <div class="status-pill info"><i class="fas fa-network-wired"></i><span>%s</span></div>\n', T"Modalità Bridge Attiva"))
+  ngx.print(format('      <div class="status-pill info"><i class="fas fa-network-wired"></i><span>%s</span></div>\n', T"Bridge Mode Active"))
 end
 if assistance_port ~= "0" then
-  ngx.print(format('      <div class="status-pill info"><i class="fas fa-headset"></i><span>%s</span></div>\n', T"Sessione Assistenza Remota Attiva"))
+  ngx.print(format('      <div class="status-pill info"><i class="fas fa-headset"></i><span>%s</span></div>\n', T"Remote Assistance Session Active"))
 end
 ngx.print('    </div>\n')
 
-ngx.print('    <div id="erroruserpass" class="auth-alert-toast"><i class="fas fa-exclamation-circle"></i><span>'); ngx.print(T"Username o Password non validi."); ngx.print('</span></div>\n')
+ngx.print('    <div id="erroruserpass" class="auth-alert-toast"><i class="fas fa-exclamation-circle"></i><span>'); ngx.print(T"Invalid Username or Password."); ngx.print('</span></div>\n')
 
 ngx.print([[
     <div id="login-section">
@@ -607,7 +607,7 @@ ngx.print([[
         <div id="defaultpassword" class="auth-info-card" style="display: none;">
           <i class="fas fa-info-circle" style="color: var(--primary); margin-right: 4px;"></i>
 ]])
-ngx.print('          '); ngx.print(T"Se non modificata, la password predefinita corrisponde all'<strong>Access Code</strong> presente sull'etichetta sotto il modem."); ngx.print('\n')
+ngx.print('          '); ngx.print(T"Unless changed, default password matches the <strong>Access Code</strong> on router label."); ngx.print('\n')
 ngx.print([[
         </div>
 
@@ -616,7 +616,7 @@ ngx.print([[
             <i id="sign-me-in-icon" class="fas fa-sign-in-alt"></i>
             <span id="sign-me-in-text">
 ]])
-ngx.print(T"Accedi")
+ngx.print(T"Sign In")
 ngx.print([[
             </span>
           </button>
@@ -637,7 +637,7 @@ ngx.print([[
         <i class="fas fa-exclamation-circle"></i>
         <span>
 ]])
-ngx.print(T"Access Code non valido.")
+ngx.print(T"Invalid Access Code.")
 ngx.print([[
         </span>
       </div>
@@ -661,12 +661,12 @@ ngx.print([[
       <div style="display: flex; gap: 10px; margin-top: 20px;">
         <button type="button" id="cancel-reset" class="btn-modern-secondary" style="flex: 1;">
 ]])
-ngx.print(T"Annulla")
+ngx.print(T"Cancel")
 ngx.print([[
         </button>
         <button type="button" id="verify-password" class="btn-modern-primary" style="flex: 1;">
 ]])
-ngx.print(T"Verifica")
+ngx.print(T"Verify")
 ngx.print([[
         </button>
       </div>
@@ -705,7 +705,7 @@ ngx.print([[
     </div>
     <h3 style="font-size: 20px; font-weight: 700; color: var(--text-heading); margin: 0 0 10px 0;">
 ]])
-ngx.print(T"Accesso Bloccato")
+ngx.print(T"Access Blocked")
 ngx.print([[
     </h3>
     <p style="font-size: 14px; color: var(--text-body); line-height: 1.5; margin-bottom: 20px;">
@@ -719,7 +719,7 @@ ngx.print([[
       <i class="fas fa-spinner fa-spin"></i>
       <span>
 ]])
-ngx.print(T"Sblocco automatico in corso...")
+ngx.print(T"Auto-unlocking in progress...")
 ngx.print([[
       </span>
     </div>

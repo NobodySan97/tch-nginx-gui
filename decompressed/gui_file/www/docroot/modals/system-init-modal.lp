@@ -154,7 +154,7 @@ local init_data, sipnet_helpmsg = post_helper.handleTableQuery(init_columns, ini
 
 	ngx.print('\
 	</fieldset>\
-  </fiedlset>\
+  </fieldset>\
   </div>\
   <script>\
 	$(".btn-disable").on("click", function(){\

@@ -1502,7 +1502,7 @@ else
     html[#html + 1] = format([[
       <div id="rescan-changes_%s" class="hide">
       <div id="rescan-cancel_%s" class="btn">%s</div>
-      <div id="rescan-confirm_%s" class="btn btn-primary" data-dimiss="modal">%s</div></div>]],
+      <div id="rescan-confirm_%s" class="btn btn-primary" data-dismiss="modal">%s</div></div>]],
       freq,freq,T"Cancel",freq,T"Accept")
     ngx.print(html)
   ngx.print('\

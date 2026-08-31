@@ -39,7 +39,7 @@ ngx.print('\
       <strong id = "Version_Id">');  ngx.print(string.format(T"Version %s (%s)", content.name or "", content.version or "")); ngx.print('</strong><br/>');
 	  ngx.print('<span class="subinfos">' ..  T"CPU Load"..":" ); ngx.print('\
 					<strong data-bind="text: cpuload">\
-					</strong></span>\
+					</strong></span></p>\
       <div data-remote="/modals/gateway-modal.lp" data-id="gateway-modal" style="text-align: center;">\
 	    <picture>\
 		    <source srcset="/img/gateway_'); ngx.print(content.model); ngx.print('.webp" type="image/webp">\

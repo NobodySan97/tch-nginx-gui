@@ -31,7 +31,7 @@ if ngx.req.get_method() == "POST" then
   end
   proxy.apply()
   os.execute("/etc/init.d/adblock reload &")
-  message_helper.pushMessage(T"Sorgenti Adblock aggiornate. Ricaricamento in corso...", "success")
+  message_helper.pushMessage(T"Adblock sources updated. Reloading in progress...", "success")
 end
 
 -- Read all sources from UCI
@@ -69,8 +69,8 @@ ngx.print(ui_helper.createHeader("Adblock", false, true), '\
   ngx.print('\
   <form class="form-horizontal" method="post" action="modals/adblck-sources-modal.lp">',
     ui_helper.createMessages(message_helper.popMessages()),'\
-    <fieldset><legend>',T"Sorgenti Blacklist DNS",'</legend>')
-    ngx.print(ui_helper.createAlertBlock(T"Seleziona le liste desiderate. Consigliate: <strong>stevenblack, adguard, disconnect, adaway, yoyo</strong>.", warn_box))
+    <fieldset><legend>',T"DNS Blacklist Sources",'</legend>')
+    ngx.print(ui_helper.createAlertBlock(T"Select desired lists. Recommended: <strong>stevenblack, adguard, disconnect, adaway, yoyo</strong>.", warn_box))
     ngx.print('\
       <div class="control-group">\
         <table id="adb_sources" class="table table-striped table-bordered">\

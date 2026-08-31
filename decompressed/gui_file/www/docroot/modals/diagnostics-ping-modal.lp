@@ -23,8 +23,8 @@ local mapValidTrace = {
     MaxHopCount = getAndValidation(post_helper.getValidateNumberInRange(1,64), post_helper.getValidateWholeNumber),
     MaxSize = getAndValidation(post_helper.getValidateNumberInRange(38,32768), post_helper.getValidateWholeNumber),
     DataBlockSizeT = getAndValidation(post_helper.getValidateNumberInRange(1, 1000), post_helper.getValidateWholeNumber),
-    Timeout = post_helper.validateWholeNumber,
-    Tries = post_helper.validateWholeNumber,
+    Timeout = post_helper.validatePositiveNum,
+    Tries = post_helper.validatePositiveNum,
     ipAddressTrace = post_helper.getOrValidation(post_helper.validateStringIsIP,post_helper.validateStringIsDomainName)
 }
 

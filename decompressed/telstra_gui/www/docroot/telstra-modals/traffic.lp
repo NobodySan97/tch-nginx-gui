@@ -206,7 +206,7 @@ end
 _, wanTx, wanTxTime = pcall(getTrafficData, "tx_bytes", graph_interface)
 _, wanRx, wanRxTime = pcall(getTrafficData, "rx_bytes", graph_interface)
 _, lanTx, lanTxTime = pcall(getTrafficData, "tx_bytes", "br-lan")
-_, lanRx, lanTxTime = pcall(getTrafficData, "rx_bytes", "br-lan")
+_, lanRx, lanRxTime = pcall(getTrafficData, "rx_bytes", "br-lan")
 _, wifiTx, wifiTxTime = pcall(getTrafficData, "tx_bytes", curiface)
 _, wifiRx, wifiRxTime = pcall(getTrafficData, "rx_bytes", curiface)
 proxy.set("rpc.system.lock.free", "0")

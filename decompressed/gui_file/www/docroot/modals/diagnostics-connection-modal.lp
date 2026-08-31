@@ -327,7 +327,7 @@ local attributes = {
 }
 
 if string.match(content_uci["wan_devices"],"eth%d") ~= nil or not xdsl_exist then
-    if proxy.getPL("rpc.docsis.status") ~= nil then
+    if proxy.get("rpc.docsis.status.") ~= nil then
         if content_rpc_wan["wan_up"] == "1" then
             html[#html+1] = ui_helper.createLabel(T"DOCSIS WAN Enable", format("%s %s","<i class=\"icon-ok icon-large green\"></i> ",T"Interface Enabled"), attributes)
         else

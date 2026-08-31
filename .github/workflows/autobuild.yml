@@ -12,12 +12,13 @@ on:
   workflow_dispatch:
     inputs:
       channel:
-        description: 'Release channel (stable or preview)'
+        description: 'Release channel (stable, preview, or dev)'
         required: true
         type: choice
         options:
           - stable
           - preview
+          - dev
         default: 'stable'
       custom_version:
         description: 'Specific version override (e.g. 9.8.0), leave empty for auto-increment'
@@ -90,22 +91,19 @@ jobs:
             echo "Release v${NEW_VER} already exists."
           else
             echo "Creating GitHub Release v${NEW_VER} (channel: ${CHANNEL})..."
+            RELEASE_FILES=()
             if [ "$CHANNEL" = "preview" ]; then
-              gh release create "v${NEW_VER}" \
-                "gui-dev-build-auto/GUI_preview.tar.bz2#GUI_preview.tar.bz2" \
-                "gui-dev-build-auto/GUI_dev.tar.bz2#GUI_dev.tar.bz2" \
-                --repo NobodySan97/tch-nginx-gui \
-                --title "$TITLE" \
-                $PRERELEASE_FLAG \
-                --generate-notes
+              RELEASE_FILES+=("gui-dev-build-auto/GUI_preview.tar.bz2#GUI_preview.tar.bz2")
+            elif [ "$CHANNEL" = "dev" ]; then
+              RELEASE_FILES+=("gui-dev-build-auto/GUI_dev.tar.bz2#GUI_dev.tar.bz2")
             else
-              gh release create "v${NEW_VER}" \
-                "gui-dev-build-auto/GUI.tar.bz2#GUI.tar.bz2" \
-                "gui-dev-build-auto/GUI_preview.tar.bz2#GUI_preview.tar.bz2" \
-                "gui-dev-build-auto/GUI_dev.tar.bz2#GUI_dev.tar.bz2" \
-                --repo NobodySan97/tch-nginx-gui \
-                --title "$TITLE" \
-                $PRERELEASE_FLAG \
-                --generate-notes
+              RELEASE_FILES+=("gui-dev-build-auto/GUI.tar.bz2#GUI.tar.bz2")
             fi
+
+            gh release create "v${NEW_VER}" \
+              "${RELEASE_FILES[@]}" \
+              --repo NobodySan97/tch-nginx-gui \
+              --title "$TITLE" \
+              $PRERELEASE_FLAG \
+              --generate-notes
           fi

@@ -31,7 +31,7 @@ if ngx.req.get_method() == "POST" then
   write_file("/etc/adblock/adblock.whitelist", wl)
   write_file("/etc/adblock/adblock.blacklist", bl)
   os.execute("/etc/init.d/adblock reload &")
-  message_helper.pushMessage(T"Liste personalizzate salvate con successo!", "success")
+  message_helper.pushMessage(T"Custom lists saved successfully!", "success")
 end
 
 local wl_content = read_file("/etc/adblock/adblock.whitelist")
@@ -45,7 +45,7 @@ ngx.print(ui_helper.createHeader("Adblock", false, true), '\
   ngx.print('\
   <form class="form-horizontal" method="post" action="modals/adblck-lists-modal.lp">',
     ui_helper.createMessages(message_helper.popMessages()),'\
-    <fieldset><legend>',T"Liste Personalizzate (Un dominio per riga)",'</legend>\
+    <fieldset><legend>',T"Custom Lists (One domain per line)",'</legend>\
       <div class="control-group">\
         <label class="control-label"><strong>Whitelist</strong><br><small>Domini sempre permessi</small></label>\
         <div class="controls">\

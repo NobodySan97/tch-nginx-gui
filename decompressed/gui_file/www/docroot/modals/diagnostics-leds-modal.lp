@@ -81,7 +81,7 @@ local leds_data, leds_index = content_helper.loadTableData(leds_options.basepath
 	
 	ngx.print('\
 	</fieldset>\
-  </fiedlset>\
+  </fieldset>\
   </div>\
 ');  ngx.print(ui_helper.createFooter() ); ngx.print('\
-'); 
+');

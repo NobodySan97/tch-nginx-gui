@@ -224,3 +224,9 @@ msgstr "Wireless 2.4 GHz (WiFi): "
 
 msgid "Some parameters failed validation"
 msgstr "Validazione fallita per alcuni parametri"
+
+msgid "VoIP Setup"
+msgstr "Configurazione VoIP"
+
+msgid "VoIP is an optional phone service that runs over the internet. If you have purchased this service, enter your VoIP settings here. You'll find your settings in your VoIP activation email."
+msgstr "Il VoIP è un servizio telefonico opzionale che funziona tramite Internet. Se hai acquistato questo servizio, inserisci qui le tue impostazioni VoIP. Troverai i tuoi parametri nell'e-mail di attivazione del VoIP."

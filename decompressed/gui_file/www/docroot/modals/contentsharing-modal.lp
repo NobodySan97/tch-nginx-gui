@@ -498,7 +498,7 @@ convertReceivedData(content_info)
 
 			if samba_available then
 				tinsert(html, "<fieldset><legend>" .. T"Attached Drive Info" .. "</legend>")
-				tinsert(html, format("<div><div id=\"connecteddevices\" class=\" simple-desc span3 monitor-changes\" data-ajaxrefresh=\"5\">%s</div>", content_info["connecteddevices"]))
+				tinsert(html, format("<div><div id=\"connecteddevices\" class=\" simple-desc span3 monitor-changes\" data-ajaxrefresh=\"5\">%s</div></div>", content_info["connecteddevices"]))
 				tinsert(html, ui_helper.createTable(usbdev_columms, usbpart_data, usbdev_options, nil, usbdev_helpmsg))
 				tinsert(html, "</fieldset>")
 			end

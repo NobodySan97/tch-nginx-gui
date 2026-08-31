@@ -12,7 +12,6 @@ local items = {
     {"diagnostics-leds-modal.lp", T"Leds"},
     {"port-mirror-modal.lp", T"Port Mirror"},
     {"diagnostics-tcpdump-modal.lp", T"Tcpdump"},
-    {"diagnostics-igmpproxy-modal.lp", T"Igmpproxy"},
 }
 
 if require("lfs").attributes("/etc/config/xdsl", "mode") == "file" then

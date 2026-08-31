@@ -26,7 +26,7 @@ if ngx.req.get_method() == "POST" then
   local args = ngx.req.get_post_args()
   if args.action == "reload" then
     os.execute("/etc/init.d/adblock reload &")
-    message_helper.pushMessage(T"Ricaricamento Adblock avviato in background", "success")
+    message_helper.pushMessage(T"Adblock reload started in background", "success")
   end
 end
 
@@ -53,11 +53,11 @@ ngx.print('\
   ngx.print('\
   <form class="form-horizontal" method="post" action="modals/adblck-config-modal.lp">',
     ui_helper.createMessages(message_helper.popMessages()),'\
-    <fieldset><legend>',T"Stato e Configurazione Adblock",'</legend>',
-      ui_helper.createSwitch(T"Abilita Adblock", "adb_enabled", config["adb_enabled"], nil, helpmsg["adb_enabled"]),
-      ui_helper.createSwitch(T"Backup Cache Liste", "adb_backup", config["adb_backup"], nil, helpmsg["adb_backup"]),
+    <fieldset><legend>',T"Adblock Status and Configuration",'</legend>',
+      ui_helper.createSwitch(T"Enable Adblock", "adb_enabled", config["adb_enabled"], nil, helpmsg["adb_enabled"]),
+      ui_helper.createSwitch(T"Backup List Cache", "adb_backup", config["adb_backup"], nil, helpmsg["adb_backup"]),
       ui_helper.createSwitch(T"Modalità Debug", "adb_debug", config["adb_debug"], nil, helpmsg["adb_debug"]),
-      ui_helper.createButton(T"Aggiorna Database", T"Ricarica e Aggiorna Liste Ora", "fa fa-refresh", reload_button),'\
+      ui_helper.createButton(T"Update Database", T"Reload and Update Lists Now", "fa fa-refresh", reload_button),'\
     </fieldset>\
   </form>\
 </div>\
