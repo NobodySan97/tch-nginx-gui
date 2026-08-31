@@ -37,8 +37,8 @@ if [ "$CI" = "true" ]; then
 		echo $version > stable.version
 	elif  [ "$build_type_name" = "PREVIEW" ]; then
 		echo $version > preview.version
-	elif [ $build_type_name != "DEV" ]; then
-		echo $version > $build_type_name.version
+	elif [ -n "$build_type_name" ] && [ "$build_type_name" != "DEV" ]; then
+		echo $version > "$build_type_name.version"
 	fi
 
 	if [ "$build_type_name" = "STABLE" ] || [ "$build_type_name" = "DEV" ]; then
