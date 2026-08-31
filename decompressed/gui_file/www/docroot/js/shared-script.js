@@ -37,10 +37,12 @@ var modgui = modgui || {};
 		);
 		if(logModal){
 			clearKoInterval();
-			$(document).on('shown shown.bs.modal', '.modal', function() {
-				$(".modal-backdrop").unbind();
-				$("#close-config,.modal-action-close").unbind( "click" );
-				$("#close-config,.modal-action-close").on("click", function() {
+			$(document).one('shown shown.bs.modal', '.modal', function() {
+				var $m = $(this);
+				$m.data('backdrop', 'static').data('keyboard', false);
+				$(".modal-backdrop").off('click').css('cursor', 'default');
+				$(".modal-footer, .modal-action-close, #close-config").hide();
+				$("#close-config, .modal-action-close").off("click").on("click", function() {
 					onClose();
 				});
 			});

@@ -4612,3 +4612,6 @@ msgstr "DNS-Quellen"
 
 msgid "Update Database"
 msgstr "Datenbank aktualisieren"
+
+msgid "Update in progress... Do not turn off your modem."
+msgstr "Aktualisierung läuft... Schalten Sie das Modem nicht aus."
