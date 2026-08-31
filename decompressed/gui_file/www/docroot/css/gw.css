@@ -8570,3 +8570,108 @@ textarea:focus {
   padding: 6px !important;
   cursor: pointer !important;
 }
+
+
+/* === ULTIMATE ICON & THEME BACKGROUND ENGINE === */
+
+/* Force FontAwesome 5 Free font family on all icon classes to prevent font-family inheritance loss */
+.fa, .fas, [class^="fa-"], [class*=" fa-"], [class^="icon-"], [class*=" icon-"] {
+  font-family: "Font Awesome 5 Free" !important;
+  font-weight: 900 !important;
+  font-style: normal !important;
+  display: inline-block !important;
+  line-height: 1 !important;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+}
+
+.far {
+  font-family: "Font Awesome 5 Free" !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  display: inline-block !important;
+}
+
+.fab {
+  font-family: "Font Awesome 5 Brands" !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  display: inline-block !important;
+}
+
+/* Page Giant Watermark Globe Background */
+.gateway_bg {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  z-index: 0 !important;
+}
+
+.gateway_bg:after {
+  content: attr(data-bg-text) !important;
+  font-family: "Font Awesome 5 Free" !important;
+  font-weight: 900 !important;
+  display: block !important;
+  position: fixed !important;
+  right: -80px !important;
+  bottom: -120px !important;
+  font-size: 700px !important;
+  line-height: 1 !important;
+  color: rgba(5, 150, 105, 0.09) !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+/* Card Watermark Icon in bottom-right */
+.card_bg {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.card_bg:after {
+  content: attr(data-bg-text) !important;
+  font-family: "Font Awesome 5 Free" !important;
+  font-weight: 900 !important;
+  display: block !important;
+  position: absolute !important;
+  right: 12px !important;
+  bottom: 8px !important;
+  font-size: 110px !important;
+  line-height: 1 !important;
+  color: rgba(5, 150, 105, 0.14) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+  transition: transform 0.3s ease, opacity 0.3s ease !important;
+}
+
+.smallcard:hover .card_bg:after {
+  transform: scale(1.08) rotate(-4deg) !important;
+  opacity: 0.9 !important;
+}
+
+/* Login Watermark */
+.login_bg {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.login_bg:after {
+  content: attr(data-bg-text) !important;
+  font-family: "Font Awesome 5 Free" !important;
+  font-weight: 900 !important;
+  display: block !important;
+  position: absolute !important;
+  right: 15px !important;
+  bottom: 15px !important;
+  font-size: 190px !important;
+  line-height: 1 !important;
+  color: rgba(5, 150, 105, 0.12) !important;
+  pointer-events: none !important;
+  z-index: 1 !important;
+}

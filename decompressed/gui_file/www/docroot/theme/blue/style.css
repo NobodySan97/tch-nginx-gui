@@ -144,3 +144,20 @@ body {
   border-bottom-color: transparent !important;
   font-weight: 600 !important;
 }
+
+/* Theme-specific Watermark & Background Atmosphere */
+body {
+  background: radial-gradient(circle at 50% 10%, rgba(2, 132, 199, 0.10), transparent 45%), #f8fafc !important;
+}
+
+.gateway_bg:after {
+  color: rgba(2, 132, 199, 0.10) !important;
+}
+
+.card_bg:after {
+  color: rgba(2, 132, 199, 0.16) !important;
+}
+
+.login_bg:after {
+  color: rgba(2, 132, 199, 0.14) !important;
+}

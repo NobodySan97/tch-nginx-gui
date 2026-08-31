@@ -201,3 +201,20 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:foc
   border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
   color: #cbd5e1 !important;
 }
+
+/* Theme-specific Watermark & Background Atmosphere */
+body {
+  background: radial-gradient(circle at 50% 0%, rgba(249, 115, 22, 0.12), transparent 45%), #0c0a09 !important;
+}
+
+.gateway_bg:after {
+  color: rgba(251, 146, 60, 0.06) !important;
+}
+
+.card_bg:after {
+  color: rgba(251, 146, 60, 0.12) !important;
+}
+
+.login_bg:after {
+  color: rgba(251, 146, 60, 0.10) !important;
+}
