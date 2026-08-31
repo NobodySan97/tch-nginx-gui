@@ -8843,3 +8843,70 @@ textarea:focus {
   z-index: 1060 !important;
   pointer-events: none !important;
 }
+
+
+/* === DEFINITIVE 100% VIEWPORT CENTERING (ALL RESOLUTIONS) === */
+.modal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) !important;
+  -webkit-transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  margin-top: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  margin-bottom: 0 !important;
+  width: 700px !important;
+  max-width: 92vw !important;
+  max-height: 88vh !important;
+  display: none !important;
+  pointer-events: none !important;
+  flex-direction: column !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  z-index: 1050 !important;
+  overflow: hidden !important;
+}
+
+.modal.fade {
+  opacity: 0 !important;
+  display: none !important;
+  pointer-events: none !important;
+  transform: translate(-50%, -48%) !important;
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out !important;
+}
+
+.modal.fade.in, .modal.in {
+  opacity: 1 !important;
+  display: flex !important;
+  pointer-events: auto !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+@media screen and (min-width: 1200px) {
+  .modal {
+    width: 720px !important;
+    left: 50% !important;
+    top: 50% !important;
+    margin: 0 !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .modal {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    top: 50% !important;
+    left: 50% !important;
+    margin: 0 !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}

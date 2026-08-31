@@ -24,8 +24,8 @@ ngx.print('\
     <meta name="CSRFtoken" content="');  ngx.print( session:getCSRFtoken() ); ngx.print('">\
     <meta name="Advanced" content="');  ngx.print( cui.advanced ); ngx.print('">\
 	<link href="/css/font-awesome-all-5.7.2.css?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
-    <link href="/css/gw.css?v=1788172949&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
-    <link href="/css/responsive.css?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
+    <link href="/css/gw.css?v=1788174787&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
+    <link href="/css/responsive.css?v=1788174787&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
 	<link id="theme_skin" rel="stylesheet" href="/theme/');  ngx.print( cui.gui_skin ); ngx.print('/style.css?v=1788172949&version='); ngx.print(cui.gui_version); ngx.print('">\
 	<link rel="shortcut icon"    type="image/x-icon"   href="/img/favicon.ico"    />\
 	<!--[if IE 7]><link rel="stylesheet" href="/css/font-awesome-ie7.css?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('"><![endif]-->\
