@@ -623,7 +623,18 @@ ngx.print([[
   </div>
 
   <div class="auth-footer">
-    <span>Technicolor Gateway &bull; GUI v]]) ngx.print(cui.gui_version) ngx.print([[ &bull; &copy; ]]) ngx.print(current_year) ngx.print([[</span>
+    <p style="margin: 0 0 6px 0; font-weight: 600; color: var(--text-heading);">
+      &copy; Technicolor ]] ngx.print(current_year) ngx.print([[ &bull; GUI Version <span style="color: var(--primary); font-weight: 700;">]] ngx.print(cui.gui_version) ngx.print([[</span>
+    </p>
+    <p style="margin: 0 0 5px 0; font-size: 12px;">
+      Fork &amp; Maintained by <a href="https://github.com/NobodySan97/tch-nginx-gui" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none;">NobodySan97</a> (<a target="_blank" href="https://ko-fi.com/nobodysan" style="color:#ff5e5b; font-weight: 700; text-decoration: none;"><i class="fas fa-coffee"></i> Support on Ko-fi</a>)
+    </p>
+    <p style="margin: 0 0 4px 0; font-size: 11.5px; opacity: 0.85;">
+      Based on original <a href="https://github.com/Ansuel/tch-nginx-gui" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">Ansuel GUI</a> by <strong>Ansuel</strong> &amp; <a href="https://github.com/NobodySan97/tch-nginx-gui/graphs/contributors" target="_blank" style="color: var(--text-muted); text-decoration: none;">GitHub Contributors</a>
+    </p>
+    <p style="margin: 0; font-size: 11px; opacity: 0.8;">
+      Unlock Utility by <strong>ADeltaX</strong>
+    </p>
   </div>
 </div>
 
