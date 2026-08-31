@@ -349,7 +349,7 @@ $(function () {
 					this.$backdrop.on("click", "static" == this.options.backdrop ? t.proxy(this.$element[0].focus, this.$element[0]) : t.proxy(this.hide, this)),
 					i && this.$backdrop[0].offsetWidth,
 					this.$backdrop.addClass("in"),
-					e && (i ? this.$backdrop.one(t.support.transition.end, e) : e())
+					e && e()
 				} else { 
 					this.$backdrop = t('.modal-backdrop'),
 					this.$backdrop.on("click", "static" == this.options.backdrop ? t.proxy(this.$element[0].focus, this.$element[0]) : t.proxy(this.hide, this)),
@@ -2280,7 +2280,7 @@ function confirmationDialogue(t, e) {
 			}
 			$.get(t, function (t) {
 				var n = $(t);
-				0 < n.find("#sign-me-in").length ? (p(loginMsg), window.location = "/login.lp") : ("1" === $("meta[name=Advanced]").attr("content") && (n.find(".advanced.hide").removeClass("hide"), n.find(".modal-action-advanced").parent().remove()), $('<div class="modal fade" id="' + e + '">' + t + "</div>").modal(), m(), y = !1, i())
+				0 < n.find("#sign-me-in").length ? (p(loginMsg), window.location = "/login.lp") : ("1" === $("meta[name=Advanced]").attr("content") && (n.find(".advanced.hide").removeClass("hide"), n.find(".modal-action-advanced").parent().remove()), $('<div class="modal fade in" id="' + e + '">' + t + "</div>").appendTo("body").modal({show:true}), m(), y = !1, i())
 			}).fail(function (t) {
 				if (y = !1, 403 === t.status)
 					p(loginMsg), window.location = "/login.lp";

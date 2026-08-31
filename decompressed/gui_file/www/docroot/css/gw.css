@@ -2937,6 +2937,8 @@ button.btn.btn-mini, input[type="submit"].btn.btn-mini {
 	background-color: #000
 }
 .modal-backdrop.fade {
+  transition: opacity 0.15s linear !important;
+
 	opacity: 0
 }
 .modal-backdrop, .modal-backdrop.fade.in {
@@ -8679,86 +8681,9 @@ textarea:focus {
 
 
 
-/* === SOLID MODAL BACKGROUND & CLEAN STACKING === */
-.modal-backdrop, .modal-backdrop.fade.in {
-  position: fixed !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  z-index: 1040 !important;
-  background-color: #0f172a !important;
-  opacity: 0.65 !important;
-}
-
-.modal {
-  position: fixed !important;
-  top: 10% !important;
-  left: 50% !important;
-  z-index: 1050 !important;
-  background-color: #ffffff !important;
-  background: #ffffff !important;
-  border-radius: 14px !important;
-  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.5) !important;
-  border: 1px solid rgba(0, 0, 0, 0.15) !important;
-  outline: none !important;
-}
-
-.modal.fade {
-  top: -25% !important;
-  opacity: 0 !important;
-  transition: opacity 0.25s linear, top 0.25s ease-out !important;
-}
-
-.modal.fade.in, .modal.in {
-  top: 10% !important;
-  opacity: 1 !important;
-}
-
-.modal-header {
-  background-color: #f8fafc !important;
-  border-bottom: 1px solid #e2e8f0 !important;
-  padding: 16px 22px !important;
-  border-top-left-radius: 14px !important;
-  border-top-right-radius: 14px !important;
-}
-
-.modal-header h3 {
-  color: #0f172a !important;
-  font-weight: 700 !important;
-  font-size: 20px !important;
-  margin: 0 !important;
-}
-
-.modal-body {
-  background-color: #ffffff !important;
-  padding: 24px !important;
-  color: #334155 !important;
-  max-height: 520px !important;
-}
-
-.modal-footer {
-  background-color: #f8fafc !important;
-  border-top: 1px solid #e2e8f0 !important;
-  padding: 14px 22px !important;
-  border-bottom-left-radius: 14px !important;
-  border-bottom-right-radius: 14px !important;
-}
-
-/* Fix brand logo padding in header */
-.navbar .brand, .brand {
-  padding: 8px 20px 8px 16px !important;
-  margin-left: 0 !important;
-  overflow: visible !important;
-}
-.brand img, .brand picture img {
-  max-height: 42px !important;
-  width: auto !important;
-  object-fit: contain !important;
-}
 
 
-/* === HEADER NAVBAR & LOGO ALIGNMENT FIX === */
+/* === PERFECT NAVBAR & MODAL SYSTEM === */
 #headertab {
   padding: 18px 24px 20px 24px !important;
   margin-bottom: 24px !important;
@@ -8804,4 +8729,92 @@ textarea:focus {
   align-items: center !important;
   gap: 8px !important;
   margin-left: auto !important;
+}
+
+.modal-backdrop, .modal-backdrop.fade.in {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  z-index: 1040 !important;
+  background-color: #0f172a !important;
+  opacity: 0.65 !important;
+}
+
+.modal {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  -webkit-transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+  width: 680px !important;
+  max-width: 92vw !important;
+  max-height: 86vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  z-index: 1050 !important;
+  overflow: hidden !important;
+}
+
+.modal.fade {
+  opacity: 0 !important;
+  transform: translate(-50%, -46%) !important;
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out !important;
+}
+
+.modal.fade.in, .modal.in {
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.modal-header {
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  padding: 16px 24px !important;
+}
+
+.modal-header h2, .modal-header h3 {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+  font-size: 20px !important;
+  margin: 0 !important;
+}
+
+.modal-header-title {
+  flex: 1 1 auto !important;
+}
+
+.modal-header-items {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.modal-body {
+  flex: 1 1 auto !important;
+  overflow-y: auto !important;
+  padding: 24px 28px !important;
+  color: #334155 !important;
+  background-color: #ffffff !important;
+}
+
+.modal-footer {
+  flex: 0 0 auto !important;
+  background-color: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+  padding: 14px 24px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
 }
