@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.39 (Stable)
+---------------------------------------------------------------------------
+- **Ottimizzazione Risorse & File Descriptor Safety**:
+  - `012_contentsharing.lp` & `091_system.lp`: Risolta perdita di descrittori di file (File Descriptor Leak) nella funzione `file_check()`, garantendo la chiusura immediata con `:close()` del file handle dopo la verifica di esistenza.
+
 9.8.38 (Stable)
 ---------------------------------------------------------------------------
 - **Correzioni di Stabilità & Documentazione**:

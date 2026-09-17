@@ -20,12 +20,12 @@ local content = {}
 
 -- Check availability of file, return true if found, else false
 local function file_check(file_name)
-  local file_found=io.open(file_name, "r")
-  if file_found==nil then
-    return false
-  else
+  local file_found = io.open(file_name, "r")
+  if file_found then
+    file_found:close()
     return true
   end
+  return false
 end
 
 local samba_available = file_check("/etc/init.d/samba")
