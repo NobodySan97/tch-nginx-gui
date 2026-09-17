@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.50 (Stable)
+---------------------------------------------------------------------------
+- **Atomic Single-Instance PID Lock & Polling Guard**:
+  - `upgradegui`: Aggiunto lock atomico con PID in `/var/run/upgradegui.pid` per prevenire istanze duplicate o conflitti di estrazione in caso di click multipli.
+  - `command-log-read-modal.lp`: Aggiunto filtro di ciclo polling (`pollCount > 1`) per ignorare stati pregressi completati e garantire la visualizzazione corretta della progressione di avanzamento (download -> estrazione -> installazione).
+
 9.8.49 (Stable)
 ---------------------------------------------------------------------------
 - **Fix Esecuzione Upgrade e Reset Log Stale**:
