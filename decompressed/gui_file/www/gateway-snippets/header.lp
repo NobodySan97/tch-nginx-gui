@@ -206,7 +206,8 @@ ngx.print('\
     if cui.outdated_ver == "0" then
       alert_style_upper.alert.class = "alert hide"
     end
-    html[#html + 1] = ui_helper.createAlertBlock(format(T'Update available! Version: <strong id="new-version-text"><a target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a></strong>',cui.new_ver,cui.new_ver),alert_style_upper)
+    local update_btn = ' <button type="button" id="direct-upgrade-btn" class="btn btn-warning btn-mini" style="margin-left: 12px; margin-top: -2px; font-weight: bold; padding: 2px 10px;"><i class="fa fa-arrow-circle-up"></i> ' .. T'Upgrade Now' .. '</button>'
+    html[#html + 1] = ui_helper.createAlertBlock(format(T'Update available! Version: <strong id="new-version-text"><a target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a></strong>',cui.new_ver,cui.new_ver) .. update_btn, alert_style_upper)
 
     local autoupgrade_view = cui.autoupgrade_view
     if not ( autoupgrade_view == "none" ) and not ( autoupgrade_view == "" ) then

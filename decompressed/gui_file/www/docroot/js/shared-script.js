@@ -319,6 +319,11 @@ $(function () {
 		modgui.postAction("autoupgrade_view");
 	};
 
+	$(document).on("click", "#direct-upgrade-btn", function (e) {
+		e.preventDefault();
+		modgui.postAction("system_upgrade_gui", 1, null, "/modals/modgui-modal.lp");
+	});
+
 	if ( gui_var.gui_animation == "1" ) {
 		AOS.init();
 	};

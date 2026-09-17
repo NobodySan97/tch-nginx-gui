@@ -4622,3 +4622,7 @@ msgstr "Gebootete Bank"
 msgid "Firmware not present in this bank (OBP Recovery Plan)"
 msgstr "Firmware in dieser Bank nicht vorhanden (OBP-Wiederherstellungsplan)"
 
+msgid "Upgrade Now"
+msgstr "Jetzt aktualisieren"
+
+

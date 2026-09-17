@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.42 (Stable)
+---------------------------------------------------------------------------
+- **Pulsante Aggiornamento Diretto nel Banner Superiore**:
+  - `header.lp`: Aggiunto pulsante rapido "Aggiorna Ora" all'interno del banner di notifica di nuova versione disponibile, consentendo l'aggiornamento diretto con un solo click.
+  - `shared-script.js`: Registrato handler click su `#direct-upgrade-btn` che invoca l'azione `system_upgrade_gui` con apertura automatica della finestra di log in tempo reale.
+  - `webui-core.po` (it-IT & de-DE): Aggiunta stringa di localizzazione `Upgrade Now` -> `Aggiorna Ora` / `Jetzt aktualisieren`.
+
 9.8.41 (Stable)
 ---------------------------------------------------------------------------
 - **Localizzazione & Traduzioni**:
