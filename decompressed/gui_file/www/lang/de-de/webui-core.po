@@ -4512,7 +4512,7 @@ msgid "Restoring Stock GUI, please wait..."
 msgstr ""
 
 msgid "Update available! Version: <strong id=\"new-version-text\"><a target=\\"_blank\\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a></strong>"
-msgstr ""
+msgstr "Update verfügbar! Version: <strong id=\"new-version-text\"><a target=\\"_blank\\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a></strong>"
 
 msgid "Run Speed Diagnostics"
 msgstr ""

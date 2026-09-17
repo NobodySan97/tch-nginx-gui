@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.41 (Stable)
+---------------------------------------------------------------------------
+- **Localizzazione & Traduzioni**:
+  - `webui-core.po` (it-IT & de-DE): Aggiunta traduzione mancante per il banner di aggiornamento (`Aggiornamento disponibile! Versione: ...` / `Update verfügbar! Version: ...`), stringhe crediti e versione GUI.
+
 9.8.40 (Stable)
 ---------------------------------------------------------------------------
 - **Pulizia Dead Code & Rifiniture Stabilità**:

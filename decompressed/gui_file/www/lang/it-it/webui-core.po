@@ -4443,7 +4443,7 @@ msgid "The Voipblock for asterisk is "
 msgstr "Il Voipblock per asterisk è "
 
 msgid "GUI Version <a onclick=\"event.stopPropagation()\" target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a>"
-msgstr ""
+msgstr "Versione GUI <a onclick=\"event.stopPropagation()\" target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a>"
 
 msgid "Sblocco automatico in corso..."
 msgstr "Sblocco automatico in corso..."
@@ -4476,7 +4476,7 @@ msgid "Ricaricamento Adblock avviato in background"
 msgstr "Ricaricamento Adblock avviato in background"
 
 msgid "Inserisci il codice <strong>\"Access Code\"</strong> presente sotto il modem."
-msgstr ""
+msgstr "Inserisci il codice <strong>\"Access Code\"</strong> presente sotto il modem."
 
 msgid "Gateway Sign In"
 msgstr "Accedi al Gateway"
@@ -4509,7 +4509,7 @@ msgid "Nessuna connessione Internet attiva"
 msgstr "Nessuna connessione Internet attiva"
 
 msgid "<p>Fork & Maintained by <font style=\"color:#0088cc;\">NobodySan97</font> (<a target=\"_blank\" href=\"https://ko-fi.com/nobodysan\" style=\"color:#ff5e5b;font-weight:bold;\"><i class=\"fa fa-coffee\"></i> Support on Ko-fi</a>) &mdash; Based on original <font style=\"color:#0088cc;\">Ansuel GUI</font> by <font style=\"color:#0088cc;\">Ansuel</font> and <a href=\"https://github.com/NobodySan97/tch-nginx-gui/graphs/contributors\">these GitHub users.</a><br/>Unlock Utility by <font style=\"color:#0088cc;\">ADeltaX</font>"
-msgstr ""
+msgstr "<p>Fork & Mantenuto da <font style=\"color:#0088cc;\">NobodySan97</font> (<a target=\"_blank\" href=\"https://ko-fi.com/nobodysan\" style=\"color:#ff5e5b;font-weight:bold;\"><i class=\"fa fa-coffee\"></i> Supporta su Ko-fi</a>) &mdash; Basato sulla <font style=\"color:#0088cc;\">Ansuel GUI</font> originale di <font style=\"color:#0088cc;\">Ansuel</font> e <a href=\"https://github.com/NobodySan97/tch-nginx-gui/graphs/contributors\">questi utenti GitHub.</a><br/>Unlock Utility di <font style=\"color:#0088cc;\">ADeltaX</font>"
 
 msgid "Sorgenti Blacklist DNS"
 msgstr "Sorgenti Blacklist DNS"
@@ -4518,7 +4518,7 @@ msgid "Liste personalizzate salvate con successo!"
 msgstr "Liste personalizzate salvate con successo!"
 
 msgid "Update available! Version: <strong id=\"new-version-text\"><a target=\\"_blank\\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a></strong>"
-msgstr ""
+msgstr "Aggiornamento disponibile! Versione: <strong id=\"new-version-text\"><a target=\\"_blank\\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a></strong>"
 
 msgid "Run Speed Diagnostics"
 msgstr "Esegui Diagnostica Velocità"
