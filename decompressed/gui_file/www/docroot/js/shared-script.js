@@ -319,7 +319,7 @@ $(function () {
 		modgui.postAction("autoupgrade_view");
 	};
 
-	$(document).on("click", "#direct-upgrade-btn", function (e) {
+	$(document).on("click", "#direct-upgrade-btn, #upgradebtn", function (e) {
 		e.preventDefault();
 		modgui.postAction("system_upgrade_gui", 1, null, "/modals/modgui-modal.lp");
 	});

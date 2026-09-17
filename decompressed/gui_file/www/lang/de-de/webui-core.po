@@ -4625,4 +4625,8 @@ msgstr "Firmware in dieser Bank nicht vorhanden (OBP-Wiederherstellungsplan)"
 msgid "Upgrade Now"
 msgstr "Jetzt aktualisieren"
 
+msgid "Click to upgrade GUI to the latest version."
+msgstr "Klicken Sie hier, um die GUI auf die neueste Version zu aktualisieren."
+
+
 

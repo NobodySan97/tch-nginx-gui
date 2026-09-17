@@ -110,12 +110,12 @@ ngx.print('\
       html[#html + 1] = '<div id="upgradebtn" class="btn someInfos '.. hideUpdateButton  ..'"'
       if not ( cui.gui_skin == "Fritz" ) then
         html[#html + 1] = ' rel="tooltip" data-placement="bottom" data-original-title="'
-        html[#html + 1] = T"Go to the GUI tab and click on the Update button, to autoupgrade to the new GUI."
+        html[#html + 1] = T"Click to upgrade GUI to the latest version."
         html[#html + 1] = '" '
       end
-      html[#html + 1] = 'data-toggle="modal" data-remote="modals/modgui-modal.lp?action=manualguiupgrade">'
-      html[#html + 1] = '<span>'
-      html[#html + 1] = T"Update"
+      html[#html + 1] = 'style="cursor: pointer;">'
+      html[#html + 1] = '<i class="fa fa-arrow-circle-up"></i> <span>'
+      html[#html + 1] = T"Upgrade Now"
       html[#html + 1] = '</span>'
       html[#html + 1] = '</div>'
       html[#html + 1] = '</div>'

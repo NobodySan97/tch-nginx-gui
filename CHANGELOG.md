@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.43 (Stable)
+---------------------------------------------------------------------------
+- **Aggiornamento Diretto dal Pulsante Header**:
+  - `header.lp`: Trasformato il pulsante `#upgradebtn` nella barra superiore di navigazione in "Aggiorna Ora" con icona dedicata, rimuovendo il reindirizzamento alla modale impostazioni manuali per consentire l'avvio immediato dell'aggiornamento con un solo click.
+  - `shared-script.js`: Collegato l'evento click di `#upgradebtn` all'azione diretta di upgrade asincrono con visualizzazione del log live.
+  - `webui-core.po`: Aggiunte stringhe e tooltip localizzati per l'aggiornamento rapido.
+
 9.8.42 (Stable)
 ---------------------------------------------------------------------------
 - **Pulsante Aggiornamento Diretto nel Banner Superiore**:
