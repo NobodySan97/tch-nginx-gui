@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.46 (Stable)
+---------------------------------------------------------------------------
+- **AdBlock Card Status Endpoint**:
+  - `adblck-status.lua`: Ripristinato l'endpoint AJAX `/ajax/adblck-status.lua` richiamato dalla card AdBlock (`008_adblock.lp`) per l'aggiornamento dinamico dello stato dei filtri e delle statistiche.
+
 9.8.45 (Stable)
 ---------------------------------------------------------------------------
 - **Nginx Configuration Compatibility**:
