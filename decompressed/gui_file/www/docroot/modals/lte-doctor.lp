@@ -313,7 +313,7 @@ end
 \
 ');  ngx.print( ui_helper.createHeader(params.modal_title, true, true, nil)); ngx.print('\
 <div class="modal-body update no-save" id="lte-doctor-body" style="min-height: 50px; min-width: 300px;">\
-	<form class="form-horizontal" method="post" action="');  ngx.print( ngx.var.request_uri ); ngx.print('">\
+	<form class="form-horizontal" method="post" action="');  ngx.print( require("web.web").html_escape(ngx.var.request_uri) ); ngx.print('">\
 		');  
 			local lp = require("web.lp")
 			lp.setpath("/www/snippets/")

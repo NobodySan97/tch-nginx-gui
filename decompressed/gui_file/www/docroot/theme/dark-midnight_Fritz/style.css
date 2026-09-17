@@ -257,9 +257,9 @@ textarea {
   font-size: 14px !important;
   line-height: 20px !important;
   border-radius: 8px !important;
-  border: 1.5px solid #cbd5e1 !important;
-  color: #1e293b !important;
-  background-color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.16) !important;
+  color: #f8fafc !important;
+  background-color: rgba(15, 23, 42, 0.85) !important;
   vertical-align: middle !important;
 }
 
@@ -271,9 +271,9 @@ select {
   font-size: 14px !important;
   line-height: normal !important;
   border-radius: 8px !important;
-  border: 1.5px solid #cbd5e1 !important;
-  color: #1e293b !important;
-  background-color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.16) !important;
+  color: #f8fafc !important;
+  background-color: rgba(15, 23, 42, 0.85) !important;
   vertical-align: middle !important;
 }
 
@@ -289,6 +289,6 @@ input[type="email"]:focus,
 select:focus, 
 textarea:focus {
   border-color: #f97316 !important;
-  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.3) !important;
   outline: none !important;
 }

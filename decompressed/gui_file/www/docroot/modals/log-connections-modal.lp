@@ -200,7 +200,7 @@ ngx.print(ui_helper.createMessages(message_helper.popMessages()))
   ngx.print('\
 \
 <fieldset>\
-    <form class="form-horizontal" method="post" action="');  ngx.print( ngx.var.request_uri ); ngx.print('">\
+    <form class="form-horizontal" method="post" action="');  ngx.print( require("web.web").html_escape(ngx.var.request_uri) ); ngx.print('">\
     ');  
 
 ngx.print('<legend>');  ngx.print( T"System Log - Active Connections" ); ngx.print('</legend>\

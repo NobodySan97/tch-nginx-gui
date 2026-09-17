@@ -8,15 +8,17 @@ local ui_helper = require("web.ui_helper")
 
 local  format = string.format
 
-local interface = proxy.get("rpc.network.interface.@wan.ifname")
-local wan = proxy.get("rpc.network.interface.@wan.up") and proxy.get("rpc.network.interface.@wan.up")[1].value or nil
+local _if = proxy.get("rpc.network.interface.@wan.ifname")
+local _wan = proxy.get("rpc.network.interface.@wan.up")
+local interface = (_if and _if[1] and _if[1].value) or nil
+local wan = (_wan and _wan[1] and _wan[1].value) or nil
 
-local graph_interface = interface and interface[1].value or "br-lan"
+local graph_interface = interface or "br-lan"
 
 if graph_interface:match("wan") then
 	local real_interface = proxy.get(format("uci.network.device.@%s.ifname",graph_interface))
-	if real_interface then
-		graph_interface = real_interface[1].value or "br-lan"
+	if real_interface and real_interface[1] and real_interface[1].value then
+		graph_interface = real_interface[1].value
 	end
 end
 
@@ -24,12 +26,18 @@ if interface and ( wan == "1" ) then
 	local int_rx = format("/sys/class/net/%s/statistics/rx_bytes",graph_interface)
 	local int_tx = format("/sys/class/net/%s/statistics/tx_bytes",graph_interface)
 	
+	local rx_traffic = "0"
+	local tx_traffic = "0"
 	local file = io.open(int_rx,"r")
-	local rx_traffic = file:read()
-	file:close()
+	if file then
+		rx_traffic = file:read() or "0"
+		file:close()
+	end
 	file = io.open(int_tx,"r")
-	local tx_traffic = file:read()
-	file:close()
+	if file then
+		tx_traffic = file:read() or "0"
+		file:close()
+	end
 
   ngx.print('\
 \
@@ -135,12 +143,15 @@ var InfoGraphCardRefresh = function(ElementBinding) {\
 					ElementBinding.rx_traffic_complete(data.rx_traffic);\
 					ElementBinding.tx_traffic_complete(data.tx_traffic);\
 					var date = new Date();\
-					var old_time = Date.parse("01 Jan 1970 "+timelabel.slice(-1).pop()+" GMT");\
+					var lastLabel = timelabel.length > 0 ? timelabel[timelabel.length - 1] : null;\
+					var old_time = lastLabel ? Date.parse("01 Jan 1970 " + lastLabel + " GMT") : null;\
 					timelabel.push(date.getHours()+":"+date.getMinutes()+":"+date.getSeconds());\
-					var time = Date.parse("01 Jan 1970 "+timelabel.slice(-1).pop()+" GMT");\
-					var time_diff = (time-old_time > 0) ? ((time-old_time)/1000) : 1;\
-					wanRxdatasets.push(((rx_traffic*8)/time_diff).toFixed(0));\
-					wanTxdatasets.push(((tx_traffic*8)/time_diff).toFixed(0));\
+					var time = Date.parse("01 Jan 1970 "+timelabel[timelabel.length - 1]+" GMT");\
+					var time_diff = (old_time && time-old_time > 0) ? ((time-old_time)/1000) : 1;\
+					var rx_val = Number(rx_traffic) || 0;\
+					var tx_val = Number(tx_traffic) || 0;\
+					wanRxdatasets.push(Math.round((rx_val*8)/time_diff));\
+					wanTxdatasets.push(Math.round((tx_val*8)/time_diff));\
 					if (wanTxdatasets.length > 60) {\
 						wanTxdatasets.shift();\
 						wanRxdatasets.shift();\

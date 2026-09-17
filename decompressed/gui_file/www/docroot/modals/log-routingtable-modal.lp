@@ -106,7 +106,7 @@ end)
     lp.include("tabs-management.lp")
   ngx.print('\
 \
-<form class="form-horizontal" method="post" action="');  ngx.print( ngx.var.request_uri ); ngx.print('">\
+<form class="form-horizontal" method="post" action="');  ngx.print( require("web.web").html_escape(ngx.var.request_uri) ); ngx.print('">\
 <legend>');  ngx.print( T"System Log - Routing Table" ); ngx.print('</legend>\
 \
 <fieldset>\

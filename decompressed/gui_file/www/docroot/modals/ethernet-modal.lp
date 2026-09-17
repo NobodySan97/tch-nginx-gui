@@ -739,7 +739,7 @@ end
 local function GWIPChanged()
     local post_data = ngx.req.get_post_args()
     local localdevIP = proxy.get("uci.network.interface.@" .. curintf .. ".ipaddr")
-    if localdevIP and not ( localdevIP[1].value == post_data["localdevIP"] ) then
+    if localdevIP and localdevIP[1] and not ( localdevIP[1].value == post_data["localdevIP"] ) then
         return true
     end
     return false
@@ -751,7 +751,7 @@ end
 -- has to be done for the new limit.
 local function validateLimit(value, object)
     local dhcpIgnore = proxy.get(mapParams["dhcpIgnore"])
-    if GWIPChanged() or ( dhcpIgnore and dhcpIgnore[1].value == "1") then --we bypass validation as the gateway ip has changed
+    if GWIPChanged() or ( dhcpIgnore and dhcpIgnore[1] and dhcpIgnore[1].value == "1") then --we bypass validation as the gateway ip has changed
         return true
     end
     if match(value, "^[0-9]*$") then
@@ -873,11 +873,8 @@ local function validateGWIP(value, object, key)
                 local mask = (mask_res and mask_res[1] and mask_res[1].value) or ""
                 local baseip = post_helper.validateStringIsIP(ipaddr) and ipv42num(ipaddr)
                 local netmask = post_helper.validateStringIsIP(mask) and ipv42num(mask)
-                local sfplocalip = proxy.get("uci.network.interface.@"..sfpintf..".ipaddr")
-
-                if sfplocalip and sfplocalip[1].value then
-                    sfplocalip = sfplocalip[1].value
-                end
+                local sfplocalip_res = proxy.get("uci.network.interface.@"..sfpintf..".ipaddr")
+                local sfplocalip = (sfplocalip_res and sfplocalip_res[1] and sfplocalip_res[1].value) or ""
 
                 local network, ipmax
                 if baseip and netmask then
@@ -942,11 +939,8 @@ local function validateSFPIP(value, object, key)
                 local mask = (mask_res and mask_res[1] and mask_res[1].value) or ""
                 local baseip = post_helper.validateStringIsIP(ipaddr) and ipv42num(ipaddr)
                 local netmask = post_helper.validateStringIsIP(mask) and ipv42num(mask)
-                local lanip = proxy.get("uci.network.interface.@lan.ipaddr")
-
-                if lanip and lanip[1].value then
-                    lanip = lanip[1].value
-                end
+                local lanip_res = proxy.get("uci.network.interface.@lan.ipaddr")
+                local lanip = (lanip_res and lanip_res[1] and lanip_res[1].value) or ""
 
                 local network, ipmax
                 if baseip and netmask then
@@ -1195,7 +1189,7 @@ ngx.print('\
 ');  ngx.print(ui_helper.createHeader(T"Local Network", true, false))   ngx.print('\
 \
    <div class="modal-body update">\
-     <form class="form-horizontal" method="post" action="');  ngx.print( ngx.var.request_uri ); ngx.print('">\
+     <form class="form-horizontal" method="post" action="');  ngx.print( require("web.web").html_escape(ngx.var.request_uri) ); ngx.print('">\
      ');
 -- Do not display the navlist on the list if only 1 lan interface
 if #lan_intfs> 1 then
@@ -1241,6 +1235,9 @@ local advanced = {
 local advanced_network = {
     group = {
         class = "advanced hide"
+    },
+    span = {
+        id = "network_address_val"
     }
 }
 local info_box = {
@@ -1394,7 +1391,8 @@ $(function() {\
           $("[name=\'dnsServer\']").val(NewIp);\
           currentlanip = NewIp;\
       }\
-	  document.getElementById("'); ngx.print( T"Network address" ); ngx.print('").innerHTML = NewIpBase+"0";\
+	  var netElem = document.getElementById("network_address_val") || document.getElementById("'); ngx.print( T"Network address" ); ngx.print('");\
+	  if (netElem) { netElem.innerHTML = NewIpBase+"0"; }\
 	  $("[name=\'dhcpStartAddress\']").val(NewIpBase+StartDHCP);\
 	  $("[name=\'dhcpEndAddress\']").val(NewIpBase+EndDHCP);\
     });\

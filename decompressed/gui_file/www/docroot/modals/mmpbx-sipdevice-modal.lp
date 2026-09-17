@@ -67,7 +67,7 @@ local sipdevpro_data = {}
 
 for i=1, #sipdev_data do
     sipdevpro_data = proxy.get("rpc.mmpbx.device." .. sipdev_data[i][column_paramindex] .. ".profileUsable")
-    sipdev_data[i][column_paramindex - 1] = sipdevpro_data[1].value
+    sipdev_data[i][column_paramindex - 1] = (sipdevpro_data and sipdevpro_data[1] and sipdevpro_data[1].value) or ""
     -- set table's last column to nil
     sipdev_data[i][column_paramindex] = nil
 end

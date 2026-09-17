@@ -182,6 +182,7 @@ def make_tar_bz2(source_dir, output_filename, git_modes=None, git_symlinks=None,
             tarinfo.size = f_path.stat().st_size
 
             # Determine mode
+            mode = None
             is_executable = (
                 norm_arc.endswith(".sh")
                 or norm_arc.endswith(".postinst")

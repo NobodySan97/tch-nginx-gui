@@ -476,26 +476,26 @@ if content["showBondingStats"] == 1 then
   columns1[14][7] = "sys.class.xdsl.@line1.DownstreamLOFSinceSync"
   columns1[15][7] = "sys.class.xdsl.@line1.UpstreamLOMSinceSync"
   columns1[16][7] = "sys.class.xdsl.@line1.DownstreamLOMSinceSync"
-  local dsl_stats1={}
-  for i=1, 16 do
-    local column = columns[i]
-    for i=2, 7 do
-      dsl_stats1[#dsl_stats+1]= column[i]
+  local dsl_stats1 = {}
+  for i = 1, 16 do
+    local column = columns1[i]
+    for j = 2, 7 do
+      dsl_stats1[#dsl_stats1 + 1] = column[j]
     end
   end
-  local result = proxy.get(unpack(dsl_stats1)) or {}
-  if result ~= nil  and #result > 0 then
-    local temp1 = {}
-      for _,v in ipairs(result1) do
-      temp1[v.path..v.param] = v.value
+  local result1 = (#dsl_stats1 > 0 and proxy.get(unpack(dsl_stats1))) or {}
+  local temp1 = {}
+  if type(result1) == "table" and #result1 > 0 then
+    for _, v in ipairs(result1) do
+      temp1[v.path .. v.param] = v.value
     end
     for k = 2, #columns1[1] do
       for ke = 1, #columns1 do
-        columns1[ke][k] = temp1 [columns1[ke][k]] or ""
+        columns1[ke][k] = temp1[columns1[ke][k]] or ""
       end
     end
   end
-  xdsl_BitLoading1 = temp1[xdsl_BitLoading1]
+  xdsl_BitLoading1 = temp1[xdsl_BitLoading1] or ""
 else
   showBondingStats = false
 end

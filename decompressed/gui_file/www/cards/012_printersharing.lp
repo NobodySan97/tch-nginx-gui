@@ -51,8 +51,8 @@ local pathIndexList = {}
         ngx.print('\
         <p class="subinfos">\
 	<div class="light green" id="PrinterSharing_LED_Id"></div>\
-	  ');  ngx.print(printerDetails["product"]); ngx.print('\
-          ');  ngx.print(printerDetails["manufacturer"]); ngx.print('\
+	  ');  ngx.print(require("web.web").html_escape(printerDetails["product"] or "")); ngx.print('\
+          ');  ngx.print(require("web.web").html_escape(printerDetails["manufacturer"] or "")); ngx.print('\
         </p>\
       ');  end   ngx.print('\
 	  </div>\

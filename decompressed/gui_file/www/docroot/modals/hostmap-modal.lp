@@ -16,7 +16,8 @@ local moca_interface = proxy.get("uci.moca.global.enable")
 
 local function AJAX(ap,path,mac)
   if ap and path and mac then
-    local rssi = format("%s",proxy.get("rpc.wireless.ap.@" .. ap:untaint() .. ".station.@" .. mac:untaint() ..".rssi")[1].value)
+    local res = proxy.get("rpc.wireless.ap.@" .. ap:untaint() .. ".station.@" .. mac:untaint() ..".rssi")
+    local rssi = format("%s",(res and res[1] and res[1].value) or "-100")
     if rssi == "0" then rssi ="-100" end
     path = path:untaint()
     local content = {
@@ -213,7 +214,7 @@ function Popupdevice(Title,txt,height){\
     var header = \'<div class="header"><div  class="header-title pull-left"><p id="device_poptitle"></p></div></div>\';\
    $("body").append(\'<div class=\\"device_popUpBG\\"></div>\');\
    $("body").append(\'<div id="device_popUp" class="popUp smallcard span4">\'+header+\'<div id="device_Poptxt" class="content"></div>\');\
-   $("#device_poptitle").html(Title);\
+   $("#device_poptitle").text(Title);\
    $("#device_Poptxt").html(txt);\
    $d = $("#device_popUp");\
    var pagewidth = $("body").width();\

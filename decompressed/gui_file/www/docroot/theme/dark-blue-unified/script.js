@@ -1,4 +1,5 @@
 function checkArrowDirection() {
+	if (!$('#cardrow').length || !$('#cardrow')[0]) return;
 	if (($('#cardrow').scrollTop() + $("#cardrow").height() + 100) >= $('#cardrow')[0].scrollHeight) {
 		$("#scroll-down").toggle();
 		$("#scroll-up").toggle();
@@ -9,6 +10,7 @@ function checkArrowDirection() {
 }
 
 function ScrollCardRow(direction) {
+	if (!$('#cardrow').length) return;
 	if (direction == "down") {
 		$('#cardrow').stop().animate({
 			scrollTop: $('#cardrow').scrollTop() + 210
@@ -19,15 +21,16 @@ function ScrollCardRow(direction) {
 		}, 500, 'swing');
 	}
 	checkArrowDirection();
-	if ( gui_var.gui_animation == "1" ) {
+	if ( typeof gui_var !== "undefined" && gui_var.gui_animation == "1" && typeof AOS !== "undefined" ) {
 		AOS.refresh();
 	}
 }
 var ScrollInterval;
 
 function checkSCroll(div) {
-	pos = div.offset().top;
-	cardrow_scroll = $('#cardrow').scrollTop();
+	if (!div || !div.length || !$('#cardrow').length) return;
+	var pos = div.offset().top;
+	var cardrow_scroll = $('#cardrow').scrollTop();
 	checkArrowDirection();
 	if (cardrow_scroll > 0 && pos < 200) {
 		$('#cardrow').stop().animate({
@@ -98,10 +101,14 @@ $(document).ready(function() {
 	});
 	$(document).on('mouseover', '#cardrow .span3 .smallcard', function() {
 		var div = $(this);
-		ScrollInterval = setInterval(checkSCroll(div), 500);
-		if ( gui_var.gui_animation == "1" ) {
+		clearInterval(ScrollInterval);
+		ScrollInterval = setInterval(function() { checkSCroll(div); }, 500);
+		if ( typeof gui_var !== "undefined" && gui_var.gui_animation == "1" && typeof AOS !== "undefined" ) {
 			AOS.refresh();
 		}
+	});
+	$(document).on('mouseleave', '#cardrow .span3 .smallcard', function() {
+		clearInterval(ScrollInterval);
 	});
 	if (window.matchMedia("(max-width: 50rem)").matches) {
 		$("#cardrow").on("scroll", function() {

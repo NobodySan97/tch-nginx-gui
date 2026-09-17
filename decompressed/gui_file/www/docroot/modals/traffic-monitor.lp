@@ -81,12 +81,10 @@ table.sort(wls, function(a,b)
 end)
 
 local wan_intf ="wan"
-local ipaddr = proxy.get("rpc.network.interface.@wwan.ipaddr")
-if ipaddr then
-	ipaddr = ipaddr[1].value
-	if ipaddr:len() ~= 0 then
-		wan_intf = "wwan"
-	end
+local ipaddr_res = proxy.get("rpc.network.interface.@wwan.ipaddr")
+local ipaddr = (ipaddr_res and ipaddr_res[1] and ipaddr_res[1].value) or ""
+if ipaddr:len() ~= 0 then
+	wan_intf = "wwan"
 end
 
 local content_wan = {
@@ -224,14 +222,14 @@ proxy.apply()
 
 local interface = proxy.get("rpc.network.interface.@wan.ifname")
 local wan = proxy.get("rpc.network.interface.@wan.up") 
-wan = wan and wan[1].value or nil
+wan = (wan and wan[1] and wan[1].value) or nil
 
-local graph_interface = interface and interface[1].value or "br-lan"
+local graph_interface = (interface and interface[1] and interface[1].value) or "br-lan"
 
 if graph_interface:match("wan") then
 	local real_interface = proxy.get(format("uci.network.device.@%s.ifname",graph_interface))
-	if real_interface then
-		graph_interface = real_interface[1].value or "br-lan"
+	if real_interface and real_interface[1] and real_interface[1].value then
+		graph_interface = real_interface[1].value
 	end
 end
 
@@ -364,9 +362,9 @@ ngx.print(ui_helper.createHeader(T"Traffic Monitor", false, true) ); ngx.print('
 <script language ="javascript">\
 ')
 if section_selected == "wifi" then
-	ngx.print('$("#WifiSection")[0].scrollIntoView();');
+	ngx.print('var _w = $("#WifiSection"); if (_w.length && _w[0]) _w[0].scrollIntoView();');
 elseif section_selected == "lan" then
-	ngx.print('$("#LANSection")[0].scrollIntoView();');
+	ngx.print('var _l = $("#LANSection"); if (_l.length && _l[0]) _l[0].scrollIntoView();');
 end
 ngx.print('\
 \
@@ -378,14 +376,16 @@ $("#sent").on("click", function() {\
 	LANChart.update();\
 	WANChart.update();\
 	WiFiChart.update();\
-		} else {\
+    } else {\
     LANChart.data.datasets[0].hidden=true;\
 	WANChart.data.datasets[0].hidden=true;\
 	WiFiChart.data.datasets[0].hidden=true;\
 	LANChart.update();\
 	WANChart.update();\
 	WiFiChart.update();\
-}});\
+    }\
+});\
+\
 $("#received").on("click", function() {\
     if(this.checked) {\
     LANChart.data.datasets[1].hidden=false;\
@@ -394,14 +394,15 @@ $("#received").on("click", function() {\
 	LANChart.update();\
 	WANChart.update();\
 	WiFiChart.update();\
-		} else {\
+    } else {\
     LANChart.data.datasets[1].hidden=true;\
 	WANChart.data.datasets[1].hidden=true;\
 	WiFiChart.data.datasets[1].hidden=true;\
 	LANChart.update();\
 	WANChart.update();\
 	WiFiChart.update();\
-}});\
+    }\
+});\
 function formatBytes(bytes,decimals) {\
    if(bytes == 0) return "0 Bytes";\
 	var k = 1024,\
@@ -442,20 +443,6 @@ var TrafficChartOption = {\
 			}\
 		}\
 };\
-var wan_ctx = document.getElementById("WANChart").getContext("2d");\
-var WANChart = new Chart(wan_ctx, {\
-    type: "line",\
-    data: {labels: ['); ngx.print(traffic.wan.tx.time); ngx.print('],\
-	"datasets":[{"data":['); ngx.print(traffic.wan.tx.data); ngx.print('],\
-			"pointBackgroundColor": "#90cd8a",\
-			"backgroundColor": "#90cd8a50",\
-		},\
-		{"data":['); ngx.print(traffic.wan.rx.data); ngx.print('],\
-			"pointBackgroundColor": "#f58368",\
-			"backgroundColor": "#f5836850",\
-    }]},\
-    options: TrafficChartOption \
-});\
 var lan_ctx = document.getElementById("LANChart").getContext("2d");\
 var LANChart = new Chart(lan_ctx, {\
     type: "line",\
@@ -467,7 +454,21 @@ var LANChart = new Chart(lan_ctx, {\
 		{"data":['); ngx.print(traffic.lan.rx.data); ngx.print('],\
 			"pointBackgroundColor": "#f58368",\
 			"backgroundColor": "#f5836850",\
-    }]},\
+		}]},\
+    options: TrafficChartOption, \
+});\
+var wan_ctx = document.getElementById("WANChart").getContext("2d");\
+var WANChart = new Chart(wan_ctx, {\
+    type: "line",\
+    data: {labels: ['); ngx.print(traffic.wan.tx.time); ngx.print('],\
+		"datasets":[{"data":['); ngx.print(traffic.wan.tx.data); ngx.print('],\
+			"pointBackgroundColor": "#90cd8a",\
+			"backgroundColor": "#90cd8a50",\
+		},\
+		{"data":['); ngx.print(traffic.wan.rx.data); ngx.print('],\
+			"pointBackgroundColor": "#f58368",\
+			"backgroundColor": "#f5836850",\
+		}]},\
     options: TrafficChartOption, \
 });\
 var wifi_ctx = document.getElementById("WiFiChart").getContext("2d");\
@@ -479,11 +480,11 @@ var WiFiChart = new Chart(wifi_ctx, {\
 			"backgroundColor": "#90cd8a50",\
 		},\
 		{"data":['); ngx.print(traffic.wifi.rx.data); ngx.print('],\
-			"	pointBackgroundColor": "#f58368",\
-				"backgroundColor": "#f5836850",\
+			"pointBackgroundColor": "#f58368",\
+			"backgroundColor": "#f5836850",\
 		}]},\
     options: TrafficChartOption, \
 });\
 </script>\
 ');  ngx.print( ui_helper.createFooter() ); ngx.print('\
-'); 
+');

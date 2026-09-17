@@ -51,9 +51,14 @@ local function restartNetwork()
         return "Failed to connect to ubusd"
     end
 
-    conn:call("network", "restart", {})
+    local ok, err = pcall(function()
+        conn:call("network", "restart", {})
+    end)
 
     conn:close()
+    if not ok then
+        return err
+    end
 end
 
 local tablecontent = {}

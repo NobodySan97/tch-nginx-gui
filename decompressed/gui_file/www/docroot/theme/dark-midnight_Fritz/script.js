@@ -34,19 +34,25 @@ function genHeaderBox() {
 	  });
 	  num = 1;
 	  $("#headerbox").show('slow');
-	  document.querySelector('#headertab').addEventListener('click', function (e) {
-  	  if (e.pageX != 0 && e.pageY !=0){
-  		if (e.pageX  < 60 && window.innerWidth <= (50 * parseFloat(getComputedStyle(document.documentElement).fontSize))) {
-  			openNav();
-  		}
-  	  }
-      });
-	  document.querySelector('#headerbox').addEventListener('click', function (e) {
-  	  if (e.target.childNodes.length == 2 && e.target.childNodes[0].nodeName == "DIV" && e.target.childNodes[1].nodeName == "DIV")
-  		e.target.childNodes[0].click();
-  		
-  	    closeNav();
-      });
+	  var headertab = document.querySelector('#headertab');
+	  if (headertab) {
+		  headertab.addEventListener('click', function (e) {
+			  if (e.pageX != 0 && e.pageY !=0){
+				if (e.pageX < 60 && window.innerWidth <= (50 * parseFloat(getComputedStyle(document.documentElement).fontSize))) {
+					openNav();
+				}
+			  }
+		  });
+	  }
+	  var headerbox = document.querySelector('#headerbox');
+	  if (headerbox) {
+		  headerbox.addEventListener('click', function (e) {
+			  if (e.target.childNodes.length == 2 && e.target.childNodes[0].nodeName == "DIV" && e.target.childNodes[1].nodeName == "DIV")
+				e.target.childNodes[0].click();
+				
+				closeNav();
+		  });
+	  }
 }
 
 function waitHeaderLoad() {
@@ -88,7 +94,9 @@ function themescript() {
 	  
 		$(".content.card_bg").on("click", function() {
 			var id = $(this).attr('id').replace(/cardid/, '');
-			$("#headerid"+id)[0].click();
+			if ($("#headerid"+id).length) {
+				$("#headerid"+id)[0].click();
+			}
 		});
 	  }
     }
@@ -97,19 +105,22 @@ function themescript() {
 $(document).ready(
     function() {
 	
-    document.querySelector('.apprise-overlay').style.opacity = "";
+    var overlay = document.querySelector('.apprise-overlay');
+    if (overlay) {
+        overlay.style.opacity = "";
+        overlay.addEventListener('click', function (e) {
+            closeNav();
+        });
+    }
     $(document).off("touchend", '[data-toggle\x3d"modal"]');
     $(document).off("touchend", ".smallcard");
 
 	themescript();
 	closeNav();
-      
-      document.querySelector('.apprise-overlay').addEventListener('click', function (e) {
-        closeNav();
-      });
   
+	//
 	$("#switchViewButton").on("switchcard", function() {
-		themescript();
+		setTimeout(themescript, 3000);
 	});
 });
 

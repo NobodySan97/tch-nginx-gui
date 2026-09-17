@@ -104,7 +104,9 @@ end
 local function execUpdate(user, password, password_is_crypted)
   local cmd="/usr/share/transformer/scripts/update_passw.sh '%s' '%s' '%s'"
   local crypted = (password_is_crypted and "-e") or ""
-  cmd = cmd:format(user, password, crypted)
+  local safe_user = tostring(user):gsub("'", "'\\''")
+  local safe_pass = tostring(password):gsub("'", "'\\''")
+  cmd = cmd:format(safe_user, safe_pass, crypted)
   os.execute(cmd)
   -- Here, we can assume password update succeeded.
   return true

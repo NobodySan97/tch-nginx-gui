@@ -3,4 +3,4 @@
 ^rpc%.system%.switchover cat /proc/banktable/notbooted > /proc/banktable/active; reboot
 ^sys%.bootp%.enable /usr/bin/bootp
 
-^rpc%.system%.modgui%.debuglog%.start /usr/share/transformer/scripts/generate-debug-file.sh dev
+^rpc%.system%.modgui%.debuglog%.start /usr/share/transformer/scripts/generate-debug-file.sh dev &

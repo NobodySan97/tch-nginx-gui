@@ -37,7 +37,7 @@ local function convert_to_object(data, basepath, output)
 	return output
 end
 
-if not post_data.data_period then
+if not post_data.data_period or not tostring(post_data.data_period):match("^[%w_]+$") then
 	utils.sendResponse({'{ error : "Invalid data_period" }'})
 	return
 end
@@ -48,6 +48,10 @@ if not post_data.request_data then
 end
 
 local request_data = json.decode(string.untaint(post_data.request_data))
+if not request_data or type(request_data) ~= "table" then
+	utils.sendResponse({'{ error : "Invalid JSON in request_data" }'})
+	return
+end
 
 local path
 

@@ -15,7 +15,7 @@ local table, ipairs, istainted, format = table, ipairs, string.istainted, string
 local session = ngx.ctx.session
 
 local logdata = proxy.get("sys.log.devicelog")
-logdata = logdata[1].value
+logdata = (logdata and logdata[1] and logdata[1].value) or ""
 
 local log_columns = {
     {
@@ -118,7 +118,7 @@ end
     lp.include("tabs-management.lp")
   ngx.print('\
 \
-<form class="form-horizontal" method="post" action="');  ngx.print( ngx.var.request_uri ); ngx.print('">\
+<form class="form-horizontal" method="post" action="');  ngx.print( require("web.web").html_escape(ngx.var.request_uri) ); ngx.print('">\
 ');
 
 

@@ -286,17 +286,23 @@ end
 ajax_helper.handleAjaxQuery(cs, function(c)
     -- this will add the HTML for the light
     local ds = get_dhcp_state(content["uci_wan_auto"], c["ipaddr"])
-    local dnstab = split(proxy.get("rpc.network.interface.@loopback.dnsservers")[1].value, "[^%,]+")
+    local loop_dns_res = proxy.get("rpc.network.interface.@loopback.dnsservers")
+    local loop_dns = (loop_dns_res and loop_dns_res[1] and loop_dns_res[1].value) or ""
+    local dnstab = split(loop_dns, "[^%,]+")
     local dnsv4, dnsv6 = dns_filter(dnstab)
     ajax_attr_light.light.class = dhcp_light_map[ds]
     c.wan_status = ui_helper.createSimpleLight(nil, dhcp_state_map[ds], ajax_attr_light)
-	if proxy.get("uci.network.interface.@wan.auto")[1].value == "1" then
-          c.dns = content_helper.getMergedList(proxy.get("rpc.network.interface.@wan.dnsservers")[1].value, dnsv4)
-        else
+    local wan_auto_res = proxy.get("uci.network.interface.@wan.auto")
+    local wan_auto = (wan_auto_res and wan_auto_res[1] and wan_auto_res[1].value) or ""
+    if wan_auto == "1" then
+        local wan_dns_res = proxy.get("rpc.network.interface.@wan.dnsservers")
+        local wan_dns = (wan_dns_res and wan_dns_res[1] and wan_dns_res[1].value) or ""
+        c.dns = content_helper.getMergedList(wan_dns, dnsv4)
+    else
 		c.dns = dnsv4
 	end
     local ipv6_enabled = proxy.get("uci.network.interface.@wan.ipv6")
-    if ipv6_enabled and ipv6_enabled[1].value == "1" then
+    if ipv6_enabled and ipv6_enabled[1] and ipv6_enabled[1].value == "1" then
 		c.dnsv6 = dnsv6
 	end
 	if ds == "connected" then

@@ -499,7 +499,7 @@ local internal_valid = {
 
 local interna_filter = function(data)
 	local ports = proxy.get(string.format("rpc.mmpbx.internal_profile.@%s.port", data.paramindex )) -- port
-	if ports then
+	if ports and ports[1] and ports[1].value then
 		ports = string.gsub(ports[1].value, "([^%,]+)", devMap)
 		ports = string.gsub(ports, "(%,)", " , ")
 		data.port = ports

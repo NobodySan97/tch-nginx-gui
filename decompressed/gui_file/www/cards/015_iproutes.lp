@@ -38,7 +38,7 @@ for _, v in pairs(interface_pn or {}) do
     end
 end
 
-local dns_rpc_content = proxy.get(unpack(dnsservers_paths)) -- use unpack for get() compatibility
+local dns_rpc_content = (#dnsservers_paths > 0 and proxy.get(unpack(dnsservers_paths))) or {}
 local dns_count = 0
 for _, v in pairs (dns_rpc_content or {}) do
    if v and v.value ~= "" then

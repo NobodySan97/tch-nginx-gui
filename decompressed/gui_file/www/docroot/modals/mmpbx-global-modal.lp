@@ -30,20 +30,23 @@ local voip_password_profile_1 = "uci.mmpbxrvsipnet.profile.@sip_profile_0.passwo
 local voip_password_profile_2 = "uci.mmpbxrvsipnet.profile.@sip_profile_1.password"
 local voip_password_profile_3 = "uci.mmpbxrvsipnet.profile.@sip_profile_2.password"
 
-if proxy.get(voip_password_profile_1) and proxy.get(voip_password_profile_1)[1].value then
-    local _p1 = proxy.get(voip_password_profile_1); voip_password_profile_1 = (_p1 and _p1[1] and _p1[1].value) or ""
+local _p1 = proxy.get(voip_password_profile_1)
+if _p1 and _p1[1] and _p1[1].value then
+    voip_password_profile_1 = _p1[1].value
 else
     voip_password_profile_1 = nil
 end
 
-if proxy.get(voip_password_profile_2) and proxy.get(voip_password_profile_2)[1].value then
-    local _p2 = proxy.get(voip_password_profile_2); voip_password_profile_2 = (_p2 and _p2[1] and _p2[1].value) or ""
+local _p2 = proxy.get(voip_password_profile_2)
+if _p2 and _p2[1] and _p2[1].value then
+    voip_password_profile_2 = _p2[1].value
 else
     voip_password_profile_2 = nil
 end
 
-if proxy.get(voip_password_profile_3) and proxy.get(voip_password_profile_3)[1].value then
-    local _p3 = proxy.get(voip_password_profile_3); voip_password_profile_3 = (_p3 and _p3[1] and _p3[1].value) or ""
+local _p3 = proxy.get(voip_password_profile_3)
+if _p3 and _p3[1] and _p3[1].value then
+    voip_password_profile_3 = _p3[1].value
 else
     voip_password_profile_3 = nil
 end

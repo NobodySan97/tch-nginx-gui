@@ -135,25 +135,25 @@ ajax_helper.handleAjaxQuery({
         content["phy_rate"] = content["phy_rate"] / 1000 .. "Mbps"
     end)
 
-local ap_paths={true}
-for i,v in ipairs(proxy.getPN("rpc.wireless.ap.", true)) do
-  ap_paths[i] = v.path.."ssid"
+local ap_paths = {}
+for i,v in ipairs(proxy.getPN("rpc.wireless.ap.", true) or {}) do
+  ap_paths[#ap_paths+1] = v.path.."ssid"
 end
 
-local wl_list = proxy.get(unpack(ap_paths))
+local wl_list = (#ap_paths > 0 and proxy.get(unpack(ap_paths))) or {}
 local wls = {}
 local cur_ssid
 for i,v in ipairs(wl_list) do
   local path = "rpc.wireless.ssid.@" .. v.value
   local values = proxy.get(path .. ".radio" , path .. ".ssid",path .. ".stb", path .. ".ap_display_name")
-  if values ~= nil then
+  if type(values) == "table" and #values > 0 then
     wls[#wls+1] = {
-            radio = values[1].value,
-            ssid = values[2].value,
-            iface = v.value,
-            stb = values[3].value,
-            ap_display_name = values[4].value
-        }
+            radio = values[1] and values[1].value or "",
+            ssid = values[2] and values[2].value or "",
+            iface = v.value or "",
+            stb = values[3] and values[3].value or "0",
+            ap_display_name = values[4] and values[4].value or ""
+    }
     if (v.value == getiface) or (not getiface and v.value == curiface) then
         curiface = v.value
         curap = match(v.path, "rpc%.wireless%.ap%.@([^%.]+)%.")
@@ -309,14 +309,14 @@ for i,v in ipairs(radios) do
     channel = path .. ".channel"
   }
   content_helper.getExactContent(rdata)
-  if rdata.channel ~= "" then
-    radioData[v] = rdata
-  end
+  radioData[v] = rdata
 end
 
-if radioData[curradio].remotely_managed == "1" and radioData[curradio].integrated_ap ~= "1" then
+local curRadioData = (curradio and radioData[curradio]) or {}
+
+if curRadioData.remotely_managed == "1" and curRadioData.integrated_ap ~= "1" then
     isExtRemman = "1"
-elseif radioData[curradio].remotely_managed == "1" and radioData[curradio].integrated_ap == "1" then
+elseif curRadioData.remotely_managed == "1" and curRadioData.integrated_ap == "1" then
 	isIntRemman = "1"
 end
 
@@ -339,7 +339,7 @@ local wifiStandard = {
 }
 
 local wifi_standard={}
-if radioData[curradio].supported_frequency_bands == "5GHz" then
+if curRadioData.supported_frequency_bands == "5GHz" then
   content_helper.getExactContent(wifiStandard)
   if wifiStandard.standard and wifiStandard.standard ~= "" then
     wifi_standard[1] = {wifiStandard.standard,wifi_standard_5GHz[untaint(wifiStandard.standard)]}
@@ -393,7 +393,7 @@ local cddList = {
   {"off", T"Off"}
 }
 
-local channelwidth = cwmaps[cw[untaint(radioData[curradio].supported_standards)]]
+local channelwidth = (curRadioData.supported_standards and cwmaps[cw[untaint(curRadioData.supported_standards)]]) or {}
 
 local supported_modes_data  = proxy.get("rpc.wireless.ap.@" .. curap .. ".security.supported_modes")
 local supported_modes = format("%s", supported_modes_data and supported_modes_data[1] and supported_modes_data[1].value or "")
@@ -428,7 +428,7 @@ local acl_modes = {
       { "lock", T"Whitelist" },
  }
 
- if radioData[curradio].remotely_managed ~= "1" then
+ if curRadioData.remotely_managed ~= "1" then
     acl_modes[#acl_modes+1] = {"register", T"Register"}
 
  end
@@ -875,13 +875,13 @@ end
   local step = 2
   for i=0, 60, step do
      ngx.sleep(step)
-     local content_val = proxy.get(unpack(content_ssid))
-     if (content_val and #content_val > 0) then
-        content["macaddress"] = content_val[1].value
-        content["stb"] = content_val[2].value
-        content["ap_display_name"] = content_val[3].value
-        content["wps_ap_pin_code"] = content_val[4].value
-        content["wps_ap_setup_locked"] = content_val[5].value
+     local content_val = (#content_ssid > 0 and proxy.get(unpack(content_ssid))) or {}
+     if (type(content_val) == "table" and #content_val > 0) then
+        content["macaddress"] = (content_val[1] and content_val[1].value) or ""
+        content["stb"] = (content_val[2] and content_val[2].value) or ""
+        content["ap_display_name"] = (content_val[3] and content_val[3].value) or ""
+        content["wps_ap_pin_code"] = (content_val[4] and content_val[4].value) or ""
+        content["wps_ap_setup_locked"] = (content_val[5] and content_val[5].value) or ""
         break
      end
   end
@@ -947,7 +947,7 @@ ngx.print(ui_helper.createHeader(T"Wireless", true, false))   ngx.print('\
     lp.setpath("/www/snippets/")
     lp.include("tabs-wireless.lp")
   ngx.print('\
-<form class="form-horizontal" method="post" action="');  ngx.print( ngx.var.request_uri ); ngx.print('">\
+<form class="form-horizontal" method="post" action="');  ngx.print( require("web.web").html_escape(ngx.var.request_uri) ); ngx.print('">\
 ');  
 -- Do not display the navlist on the list if only 1 SSID
 if #wls > 0 then
@@ -1059,7 +1059,7 @@ if bandsteerhelpmsg then ngx.print(ui_helper.createMessages(bandsteerhelpmsg)) e
         html[#html + 1] = ui_helper.createLabel(T"Frequency band", content["supported_frequency_bands"])
         -- Label that shows the MAC address of the Wifi interface
         html[#html + 1] = ui_helper.createLabel(T"MAC address", content["macaddress"])
-    if radioData[curradio].supported_frequency_bands == "5GHz" then
+    if curRadioData.supported_frequency_bands == "5GHz" then
       html[#html + 1] = ui_helper.createLabel(T"Standard", listboxToText(wifi_standard, wifiStandard.standard), advanced)
     else
       html[#html + 1] = ui_helper.createLabel(T"Standard", listboxToText(wifi_standard, content["standard"]), advanced)
@@ -1100,7 +1100,7 @@ if bandsteerhelpmsg then ngx.print(ui_helper.createMessages(bandsteerhelpmsg)) e
                 class = "monitor-changes"
             }
         }
-   if radioData[curradio].supported_frequency_bands == "5GHz" then
+   if curRadioData.supported_frequency_bands == "5GHz" then
      html[#html + 1] = ui_helper.createLabel(T"Standard", listboxToText(wifi_standard, wifiStandard.standard), stdattributes)
      stdattributes.select={class = "monitor-changes",style="display:none"}
      html[#html + 1] = ui_helper.createSimpleInputSelect("standard", wifi_standard, wifiStandard.standard,stdattributes)
@@ -1361,7 +1361,7 @@ if isguest ~= "1"  then
         ["data-name"] = "action",
         ["data-value"] = "wps_pbc",
     }
-    if radioData[curradio].remotely_managed ~= "1" or radioData[curradio].integrated_ap == "1"  then
+    if curRadioData.remotely_managed ~= "1" or curRadioData.integrated_ap == "1"  then
      html[#html + 1] = ui_helper.createButton(T"WPS PBC", T"Trigger", "icon-refresh", wps_class)
 	 html[#html + 1] = ui_helper.createInputRadio(T"WPS Buttom Mode", "wps_button_handler" , wps_button_mode , content["wps_button_handler"] , nil)
     end

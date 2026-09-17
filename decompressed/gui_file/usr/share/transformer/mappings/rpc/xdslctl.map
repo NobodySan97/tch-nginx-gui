@@ -78,11 +78,13 @@ end
 
 local function call_popen(cmd, mode)
 	local output = popen(cmd, mode)
+	local attempts = 0
 
-	while (not output:read(0) == "") do
+	while (output and output:read(0) ~= "") and attempts < 5 do
 		output:close()
-		sleep(5)
+		sleep(1)
 		output = popen(cmd, mode)
+		attempts = attempts + 1
 	end
 
 	return output

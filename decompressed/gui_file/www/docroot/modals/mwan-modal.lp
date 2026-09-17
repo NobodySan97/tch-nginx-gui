@@ -32,7 +32,7 @@ for _, v in pairs(interface_pn or {}) do
     end
 end
 
-local ip4table_content = proxy.get(unpack(ip4table_paths)) -- use unpack for get() compatibility
+local ip4table_content = (#ip4table_paths > 0 and proxy.get(unpack(ip4table_paths))) or {}
 
 local select_wan_intfs = {}
 local select_src_intfs = {

@@ -81,7 +81,9 @@ local firewall_value = {["uci.firewall.forwarding.@"..forwdnum..".src"] = "wan",
                         ["uci.firewall.forwarding.@"..forwdnum..".name"] = "for_w2l"}
 local function validateNat(value, object, key)
   local valid, msg = post_helper.validateBoolean(value, object, key)
-  if valid and zonenum ~= "" and value ~= proxy.get("uci.firewall.zone."..zonenum..".masq")[1].value then
+  local masq_res = (zonenum ~= "" and proxy.get("uci.firewall.zone."..zonenum..".masq")) or nil
+  local masq_val = (masq_res and masq_res[1] and masq_res[1].value) or ""
+  if valid and zonenum ~= "" and value ~= masq_val then
     proxy.set("uci.firewall.zone."..zonenum..".conntrack", "1")
     local key = "forwarding"..post_helper.getRandomKey()
     if value == "1" then
@@ -159,7 +161,9 @@ ajax_helper.handleAjaxQuery(content_dns, function(c)
     -- this will add the HTML for the light
 	local dnstab = split(c.loopbackdns, "[^%,]+")
 	local dnsv4, dnsv6 = dns_filter(dnstab)
-	c.loopbackdns = content_helper.getMergedList(proxy.get("rpc.network.interface.@wan.dnsservers")[1].value, dnsv4)
+	local wandns_res = proxy.get("rpc.network.interface.@wan.dnsservers")
+	local wandns_val = (wandns_res and wandns_res[1] and wandns_res[1].value) or ""
+	c.loopbackdns = content_helper.getMergedList(wandns_val, dnsv4)
 end)
 
 content_helper.getExactContent(content_dns)

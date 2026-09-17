@@ -1,7 +1,7 @@
 --pretranslated: do not change this file
 
-local content_helper = require("web.content_helper")
-local session = ngx.ctx.session
+local web = require("web.web")
+local html_escape = web.html_escape
 
 local status, err
 if ngx.req.get_method() == "GET" then
@@ -27,6 +27,10 @@ if session and not err then
 	status = 500
 	err = session:retrieve("lasterr")
 end
+
+err = html_escape(err or "An unknown error occurred")
+status = status or 500
+local status_detail = html_escape(error_code[status] or "UNKNOWN")
 
 if not err then
 	err = ngx.header.error_msg or ""

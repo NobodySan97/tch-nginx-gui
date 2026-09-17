@@ -64,20 +64,24 @@ local function getWanInterfacePath()
   if interfaceList then
     for _,intf in ipairs(interfaceList) do
       local values = proxy.get(intf.path .. "type")
-      wanIntfPaths[#wanIntfPaths + 1] = values[1].path
+      if values and values[1] and values[1].path then
+        wanIntfPaths[#wanIntfPaths + 1] = values[1].path
+      end
     end
   end
   return wanIntfPaths
 end
 
 local wanIntfPaths = getWanInterfacePath()
-local wanData = content_helper.convertResultToObject("rpc.network.interface.", proxy.get(unpack(wanIntfPaths)))
+local wanData = (#wanIntfPaths > 0 and content_helper.convertResultToObject("rpc.network.interface.", proxy.get(unpack(wanIntfPaths)))) or {}
 
 local wanConInfo = {}
-for _, data in ipairs(wanData) do
-  if data.type == "wan" then
-    wanConInfo[#wanConInfo + 1] = {}
-    wanConInfo[#wanConInfo].interface = match(data.paramindex, "([%w%_]+)")
+if type(wanData) == "table" then
+  for _, data in ipairs(wanData) do
+    if data and data.type == "wan" then
+      wanConInfo[#wanConInfo + 1] = {}
+      wanConInfo[#wanConInfo].interface = match(data.paramindex or "", "([%w%_]+)")
+    end
   end
 end
 
