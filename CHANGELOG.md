@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.38 (Stable)
+---------------------------------------------------------------------------
+- **Correzioni di Stabilità & Documentazione**:
+  - `error.lp`: Aggiunto import mancante di `content_helper` per prevenire crash Lua 500 durante il rendering delle pagine di errore non autenticate (401/403/404).
+  - `03_various.sh`: Deduplicazione e pulizia atomica delle voci crontab per evitare voci duplicate.
+  - `README.md`: Rinnovamento completo del documento con Disclaimer bilingue (EN/IT) su limitazione di responsabilità e ripristino dei link diretti alle guide del forum IlPuntoTecnico.
+
 9.7.70 (Stable)
 ---------------------------------------------------------------------------
 - **Nuovo Modulo & Card Adblock DNS Sinkhole a Risposta Istantanea**:

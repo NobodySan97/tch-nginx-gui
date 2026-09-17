@@ -1,6 +1,7 @@
 --pretranslated: do not change this file
 
 local web = require("web.web")
+local content_helper = require("web.content_helper")
 local html_escape = web.html_escape
 
 local status, err

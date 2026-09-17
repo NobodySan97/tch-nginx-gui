@@ -127,9 +127,9 @@ checkver_cron() {
 }
 
 cron_christmas() {
-	if [ ! -f /etc/crontabs/root ] || ! grep -q "christmas_tree" /etc/crontabs/root; then
-		echo "*/30 * 24-26 12 * /etc/christmas_tree.sh &" >> /etc/crontabs/root
-	fi
+	touch /etc/crontabs/root
+	sed -i '/christmas_tree/d' /etc/crontabs/root
+	echo "*/30 * 24-26 12 * /etc/christmas_tree.sh &" >> /etc/crontabs/root
 }
 
 create_symlink() {
