@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.45 (Stable)
+---------------------------------------------------------------------------
+- **Nginx Configuration Compatibility**:
+  - `nginx.conf`: Rimossa la direttiva `gzip` e `open_file_cache` non supportate dalla compilazione OpenResty embedded di Technicolor Homeware (`--without-http_gzip_module`), ripristinando il corretto avvio e la stabilità del demone web server Nginx.
+
 9.8.44 (Stable)
 ---------------------------------------------------------------------------
 - **Ottimizzazione Prestazioni Globale (Pipeline Upgrade, Backend & Frontend)**:
