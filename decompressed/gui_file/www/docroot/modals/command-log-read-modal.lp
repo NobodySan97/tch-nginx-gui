@@ -61,6 +61,7 @@ ngx.print('\
   <script>\
 	var requestInProgress = false;\
 	var isUpgradeComplete = false;\
+	var hasStartedExecution = false;\
 	var pollCount = 0;\
 \
 	var $activeModal = $("#modal-container, .modal");\
@@ -92,6 +93,7 @@ ngx.print('\
 				var header_text = $("#header_title").text();\
 				if (data.state && header_text != data.state) $("#header_title").text(data.state);\
 				if (data.state == "Downloading" || data.progress !== undefined || data.state == "Extracting" || data.state == "In Progress" || data.state == "Clearing" || data.state == "Requested") {\
+					hasStartedExecution = true;\
 					$("#upgrade-gui-bar").removeClass("hide");\
 					if (data.progress !== undefined) {\
 						var pct = Math.round(data.progress);\
@@ -110,7 +112,7 @@ ngx.print('\
 				}\
 				$("#show_progress").text($("#show_progress").text().replace(/[\\.]{10}/g, ""));\
 				$("#show_progress").append(".");\
-				if(pollCount > 1 && (data.state == "Complete" || data.state == "Failed" || data.state == "Error")){\
+				if((hasStartedExecution || pollCount > 3) && (data.state == "Complete" || data.state == "Failed" || data.state == "Error")){\
 					isUpgradeComplete = true;\
 					if (KoRequest.CommandLogReadInterval) {\
 						KoRequest.CommandLogReadInterval.active = false;\

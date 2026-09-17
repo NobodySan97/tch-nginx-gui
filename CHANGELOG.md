@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.51 (Stable)
+---------------------------------------------------------------------------
+- **Fix Timing Apertura Modale Log ed Esecuzione Aggiornamento**:
+  - `shared-script.js`: Apertura della modale di log (`command-log-read-modal.lp`) spostata all'interno del callback di completamento della richiesta POST di avvio comando, assicurando che il processo `upgradegui` sia già inizializzato prima dell'apertura del popup.
+  - `command-log-read-modal.lp`: Aggiunto tracciamento di stato di avvio (`hasStartedExecution`) per impedire la chiusura prematura del log in caso di stati residui pregressi.
+
 9.8.50 (Stable)
 ---------------------------------------------------------------------------
 - **Atomic Single-Instance PID Lock & Polling Guard**:

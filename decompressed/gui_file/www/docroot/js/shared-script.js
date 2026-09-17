@@ -32,22 +32,23 @@ var modgui = modgui || {};
 				action: action,
 				CSRFtoken: $("meta[name=CSRFtoken]").attr("content")
 			},
-			null,
+			function() {
+				if(logModal){
+					clearKoInterval();
+					$(document).one('shown shown.bs.modal', '.modal', function() {
+						var $m = $(this);
+						$m.data('backdrop', 'static').data('keyboard', false);
+						$(".modal-backdrop").off('click').css('cursor', 'default');
+						$(".modal-footer, .modal-action-close, #close-config").hide();
+						$("#close-config, .modal-action-close").off("click").on("click", function() {
+							onClose();
+						});
+					});
+					tch.openModal("/modals/command-log-read-modal.lp");
+				}
+			},
 			"json"
 		);
-		if(logModal){
-			clearKoInterval();
-			$(document).one('shown shown.bs.modal', '.modal', function() {
-				var $m = $(this);
-				$m.data('backdrop', 'static').data('keyboard', false);
-				$(".modal-backdrop").off('click').css('cursor', 'default');
-				$(".modal-footer, .modal-action-close, #close-config").hide();
-				$("#close-config, .modal-action-close").off("click").on("click", function() {
-					onClose();
-				});
-			});
-			tch.openModal("/modals/command-log-read-modal.lp");
-		}
 		return false;
 	}
 
