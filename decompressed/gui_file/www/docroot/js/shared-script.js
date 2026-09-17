@@ -306,7 +306,7 @@ $(function () {
 			$("#switchViewButton").trigger("switchcard");
 		});
 	});
-	$("#upgradebtn").on("hover",
+	$("#upgradebtn").hover(
 		function () {
 			$("#upgradebtn").css("color", "white");
 		},

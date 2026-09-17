@@ -1,6 +1,19 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.40 (Stable)
+---------------------------------------------------------------------------
+- **Pulizia Dead Code & Rifiniture Stabilità**:
+  - `system.modgui.map`: Aggiunto nil guard sul file handle `/etc/init.d/rootdevice` per prevenire crash in caso di file temporaneamente mancante o non leggibile.
+  - `shared-script.js`: Corretto l'event binding `hover` del pulsante di upgrade nel formato nativo jQuery (`.hover()`).
+  - **Eliminazione File Orfani e Codice Morto**:
+    - Rimossa la modale orfana `ipv6devices-modal.lp` (sostituita da `device-modal.lp`).
+    - Rimossa la card non registrata `016_speedservice.lp` (integrata in `009_diagnostics.lp`).
+    - Rimossi gli snippet dismessi `002_broadband_bridge.lp`, `002_broadband_docsis.lp`, `broadband-bridge.lp` e `broadband-docsis.lp`.
+    - Rimossi asset non referenziati `numberpicker-min.js`, `numberpicker.css`, `lte-doctor.css` e `TIM.css`.
+    - Rimossi moduli orfani `password_charachters.lua`, `tim_helper.lua`, `log/viewer.lua`, `parental/redirect.lua`.
+    - Rimossi script shell non richiamati `uci_ledfw-status-led.sh` e `fhcd.sh`.
+
 9.8.39 (Stable)
 ---------------------------------------------------------------------------
 - **Ottimizzazione Risorse & File Descriptor Safety**:

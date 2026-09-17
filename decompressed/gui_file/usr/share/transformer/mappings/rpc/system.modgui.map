@@ -82,15 +82,15 @@ local SYSTEM_MODGUI_ = {
       gui_version = "Unknown"
 
       local f = io.open("/etc/init.d/rootdevice", "r")
-
-      for l in f:lines() do
-        if l:find("version_gui=") then
-          gui_version = l:gsub("version_gui=", "")
-          break
+      if f then
+        for l in f:lines() do
+          if l:find("version_gui=") then
+            gui_version = l:gsub("version_gui=", "")
+            break
+          end
         end
+        f:close()
       end
-
-      f:close()
 
       gui_info_cache.gui_version = gui_version
 
