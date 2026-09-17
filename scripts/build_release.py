@@ -306,6 +306,18 @@ def calculate_version(last_msg, src_dir, dest_dir, manual_ver=None):
         print(f"Detected version tag in commit message: {match.group(1)}")
         return match.group(1)
 
+    changelog = Path(src_dir) / "CHANGELOG.md"
+    if changelog.exists():
+        try:
+            for line in changelog.read_text(encoding="utf-8").splitlines():
+                cl_match = re.search(r'^([0-9]+\.[0-9]+\.[0-9]+)\s*\(', line.strip())
+                if cl_match:
+                    cl_ver = cl_match.group(1)
+                    print(f"Detected release version from CHANGELOG.md: {cl_ver}")
+                    return cl_ver
+        except Exception:
+            pass
+
     highest_tuple = find_highest_version(src_dir, dest_dir)
     major, minor, patch = highest_tuple
 

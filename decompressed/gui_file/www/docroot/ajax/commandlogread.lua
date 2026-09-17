@@ -11,11 +11,13 @@ local action = {
 	Checking = function()
 		local data = {}
 		local new_ver = proxy.get("uci.modgui.gui.new_ver")
-		
 		if new_ver and new_ver[1] and new_ver[1].value and new_ver[1].value ~= "" then
 			data["new_version_text"] = new_ver[1].value
 		end
-		
+		local outdated = proxy.get("uci.modgui.gui.outdated_ver")
+		if outdated and outdated[1] and outdated[1].value and outdated[1].value ~= "" then
+			data["outdated_ver"] = outdated[1].value
+		end
 		return data
 	end,
 }
@@ -25,6 +27,16 @@ if action[string.untaint(data.state)] then
 		data[key] = val
 	end
 else
+	if ngx.req.get_uri_args().auto_update == "true" then
+		local new_ver = proxy.get("uci.modgui.gui.new_ver")
+		if new_ver and new_ver[1] and new_ver[1].value and new_ver[1].value ~= "" then
+			data["new_version_text"] = new_ver[1].value
+		end
+		local outdated = proxy.get("uci.modgui.gui.outdated_ver")
+		if outdated and outdated[1] and outdated[1].value and outdated[1].value ~= "" then
+			data["outdated_ver"] = outdated[1].value
+		end
+	end
 	local file = io.open("/tmp/command_log","r")
 	if file then
 		local content = file:read('*a')

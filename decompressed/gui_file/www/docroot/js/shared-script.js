@@ -157,45 +157,75 @@ var modgui = modgui || {};
 	function linkCheckUpdate() {
 		$(".check_update").on("click", function (e) {
 			e.stopPropagation();
-			if(KoRequest.CheckVer) return;
+			if (KoRequest.CheckVer) return;
 			postAction("checkver", null, null, '/modals/modgui-modal.lp?auto_update=true');
 			$(".check_update_spinner").addClass("fa-spin");
-				KoRequest.CheckVer = {
-					interval : setInterval(function () {
-						$.ajax({
-							url:"/ajax/commandlogread.lua?auto_update=true",
-							data: [tch.elementCSRFtoken()],
-							type: "POST",
-							dataType: "json",
-							timeout: 500,
-							success: function (data) {
-								if (data.state == "Checking") {
-									if (data.new_version_text) {
-										if (data.new_version_text == "Unknown") {
-											$(".gui_version_status").removeClass("yellow");
-											$(".gui_version_status").addClass("green");
-											$(".gui_version_status_text").text(gui_var.gui_updated);
-											$("#upgrade-alert").addClass("hide");
-										} else {
-											$(".gui_version_status").removeClass("green");
-											$(".gui_version_status").addClass("yellow");
-											$("#upgradebtn").removeClass("hide");
-											$(".gui_version_status_text").text(gui_var.gui_outdated);
-											$("#upgrade-alert").removeClass("hide");
-											$("#new-version-text").text(data.new_version_text);
-										}
-									}
-								} else if (data.state == "Complete") {
-									$(".gui_version_status_text").parent().fadeOut().fadeIn();
-									$(".check_update_spinner").removeClass("fa-spin");
-									clearInterval(KoRequest.CheckVer.interval);
-									KoRequest.CheckVer = null;
-								}
-							}
-						})
-					}, "500")
+
+			var pollCount = 0;
+			var hasSeenChecking = false;
+
+			function stopCheckVer() {
+				if (KoRequest.CheckVer && KoRequest.CheckVer.interval) {
+					clearInterval(KoRequest.CheckVer.interval);
 				}
-		})
+				KoRequest.CheckVer = null;
+				$(".check_update_spinner").removeClass("fa-spin");
+			}
+
+			function applyVersionUpdate(versionText, isOutdated) {
+				if (versionText && versionText !== "" && versionText !== "Unknown") {
+					$(".gui_version_status").removeClass("green").addClass("yellow");
+					$("#upgradebtn").removeClass("hide");
+					$(".gui_version_status_text").text(gui_var.gui_outdated);
+					$("#upgrade-alert").removeClass("hide");
+					$("#new-version-text").text(versionText);
+				} else {
+					$(".gui_version_status").removeClass("yellow").addClass("green");
+					$(".gui_version_status_text").text(gui_var.gui_updated);
+					$("#upgrade-alert").addClass("hide");
+				}
+				$(".gui_version_status_text").parent().fadeOut(150).fadeIn(150);
+			}
+
+			KoRequest.CheckVer = {
+				interval: setInterval(function () {
+					pollCount++;
+					// Hard watchdog timeout after 20 seconds
+					if (pollCount > 20) {
+						stopCheckVer();
+						return;
+					}
+
+					$.ajax({
+						url: "/ajax/commandlogread.lua?auto_update=true",
+						data: [tch.elementCSRFtoken()],
+						type: "POST",
+						dataType: "json",
+						timeout: 4000,
+						success: function (data) {
+							if (!data) return;
+
+							if (data.state === "Checking" || data.state === "Requested") {
+								hasSeenChecking = true;
+							}
+
+							if (data.new_version_text !== undefined) {
+								applyVersionUpdate(data.new_version_text, data.outdated_ver);
+							}
+
+							if (data.state === "Complete" || (hasSeenChecking && data.state === "Idle")) {
+								stopCheckVer();
+							}
+						},
+						error: function () {
+							if (pollCount > 15) {
+								stopCheckVer();
+							}
+						}
+					});
+				}, 1000)
+			};
+		});
 	};
 
 	function freshStyle(stylesheet) {

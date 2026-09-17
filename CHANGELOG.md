@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.52 (Stable)
+---------------------------------------------------------------------------
+- **Fix Polling e Spinner "Controlla Aggiornamenti"**:
+  - `shared-script.js`: Risolto il blocco a rotazione infinita dello spinner in "Controlla aggiornamenti": aumentato il timeout della richiesta AJAX da 500ms a 4000ms per evitare l'interruzione su router embedded, esteso l'intervallo di polling a 1s e gestiti correttamente gli stati di transizione (`Checking`, `Complete`, `Idle`). Aggiunto un watchdog di sicurezza di 20s.
+  - `commandlogread.lua`: Restituzione garantita dei metadati di versione (`new_version_text`, `outdated_ver`) con parametro `auto_update=true` sia durante che al termine del check.
+
 9.8.51 (Stable)
 ---------------------------------------------------------------------------
 - **Fix Timing Apertura Modale Log ed Esecuzione Aggiornamento**:
