@@ -66,11 +66,15 @@ var modgui = modgui || {};
 		});
 
 		var arrayLength = ElementBindingList.length;
-		var updateLink = (ajaxLink.indexOf("?") !== -1 ? "&" : "?") + "auto_update=true";
-		var fullUrl = ajaxLink + updateLink;
+		var fullUrl = "";
+		if (ajaxLink && typeof ajaxLink === "string") {
+			var updateLink = (ajaxLink.indexOf("?") !== -1 ? "&" : "?") + "auto_update=true";
+			fullUrl = ajaxLink + updateLink;
+		}
 
 		if (KoRequest[IntervalVar]) {
 			if (KoRequest[IntervalVar].timer) clearTimeout(KoRequest[IntervalVar].timer);
+			if (KoRequest[IntervalVar].interval) clearInterval(KoRequest[IntervalVar].interval);
 			if (KoRequest[IntervalVar].xhr && KoRequest[IntervalVar].xhr.readyState !== 4) {
 				KoRequest[IntervalVar].xhr.abort();
 			}
@@ -79,6 +83,7 @@ var modgui = modgui || {};
 		var reqState = {
 			active: true,
 			timer: null,
+			interval: null,
 			xhr: null,
 			binding: ElementBinding,
 			refreshTime: RefreshTime || 3000,
@@ -90,15 +95,23 @@ var modgui = modgui || {};
 		function scheduleNext() {
 			if (!reqState.active || document.hidden) return;
 			reqState.timer = setTimeout(executePoll, reqState.refreshTime);
+			reqState.interval = reqState.timer;
 		}
 
 		function executePoll() {
 			if (!reqState.active || document.hidden) return;
 
 			if (typeof CustomRefreshFunction === "function") {
-				CustomRefreshFunction(ElementBinding, scheduleNext);
+				try {
+					CustomRefreshFunction(ElementBinding);
+				} catch (err) {
+					console.error("Error in custom refresh function:", err);
+				}
+				scheduleNext();
 				return;
 			}
+
+			if (!fullUrl) return;
 
 			reqState.xhr = $.ajax({
 				url: fullUrl,
@@ -211,6 +224,7 @@ var modgui = modgui || {};
 			if (req) {
 				req.active = false;
 				if (req.timer) clearTimeout(req.timer);
+				if (req.interval) clearInterval(req.interval);
 				if (req.xhr && req.xhr.readyState !== 4) req.xhr.abort();
 			}
 		});
@@ -220,7 +234,7 @@ var modgui = modgui || {};
 		Object.keys(KoRequest).forEach(function(key) {
 			var req = KoRequest[key];
 			if (req && !req.active) {
-				createAjaxUpdateCard(key, req.url || "", key, req.refreshTime, req.customFn);
+				createAjaxUpdateCard(key, req.url || null, key, req.refreshTime, req.customFn);
 			}
 		});
 	}

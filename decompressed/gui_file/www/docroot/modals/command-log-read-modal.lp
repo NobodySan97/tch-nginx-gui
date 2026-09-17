@@ -77,6 +77,7 @@ ngx.print('\
 		requestInProgress=true;\
 		$.ajax({\
             url:"/ajax/commandlogread.lua?auto_update=true",\
+            type: "POST",\
             data: [tch.elementCSRFtoken()],\
             complete: function(data) { requestInProgress=false },\
             dataType: "json"})\
@@ -109,8 +110,10 @@ ngx.print('\
 				$("#show_progress").append(".");\
 				if(data.state == "Complete" || data.state == "Failed" || data.state == "Error"){\
 					isUpgradeComplete = true;\
-					if (KoRequest.CommandLogReadInterval && KoRequest.CommandLogReadInterval.interval) {\
-						clearInterval(KoRequest.CommandLogReadInterval.interval);\
+					if (KoRequest.CommandLogReadInterval) {\
+						KoRequest.CommandLogReadInterval.active = false;\
+						if (KoRequest.CommandLogReadInterval.timer) clearTimeout(KoRequest.CommandLogReadInterval.timer);\
+						if (KoRequest.CommandLogReadInterval.interval) clearInterval(KoRequest.CommandLogReadInterval.interval);\
 					}\
 					$("#upgrade-gui-bar").removeClass("hide");\
 					$("#show_progress").text("");\
@@ -145,8 +148,10 @@ ngx.print('\
 					$("#show_progress").text("");\
 					$("body, .modal, #modal-container").addClass("upgrade-finished");\
 					$(".modal-footer, .modal-action-close, #close-config").show().css("display", "block");\
-					if (KoRequest.CommandLogReadInterval && KoRequest.CommandLogReadInterval.interval) {\
-						clearInterval(KoRequest.CommandLogReadInterval.interval);\
+					if (KoRequest.CommandLogReadInterval) {\
+						KoRequest.CommandLogReadInterval.active = false;\
+						if (KoRequest.CommandLogReadInterval.timer) clearTimeout(KoRequest.CommandLogReadInterval.timer);\
+						if (KoRequest.CommandLogReadInterval.interval) clearInterval(KoRequest.CommandLogReadInterval.interval);\
 					}\
 				}\
 				$("#show_progress").text($("#show_progress").text().replace(/[\\.]{10}/g, ""));\

@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.47 (Stable)
+---------------------------------------------------------------------------
+- **Fix Esecuzione Log Modal & Direct Upgrade**:
+  - `shared-script.js`: Corretta la gestione di `ajaxLink` nullo in `createAjaxUpdateCard` per evitare l'eccezione `TypeError: Cannot read properties of null (reading 'indexOf')` che bloccava il binding di KnockoutJS e impediva la visualizzazione del log live nella modale "Esecuzione" durante l'aggiornamento.
+  - `command-log-read-modal.lp`: Aggiunto metodo esplicito `POST` alla richiesta AJAX verso `/ajax/commandlogread.lua` e gestione robusta dello stop del timer alla conclusione dell'aggiornamento.
+
 9.8.46 (Stable)
 ---------------------------------------------------------------------------
 - **AdBlock Card Status Endpoint**:
