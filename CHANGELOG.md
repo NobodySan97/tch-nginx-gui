@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.49 (Stable)
+---------------------------------------------------------------------------
+- **Fix Esecuzione Upgrade e Reset Log Stale**:
+  - `system.modgui.map`: Rimosso il wrapping errato di `start-stop-daemon` senza `--` per `upgradegui`, che ignorava i parametri di esecuzione del comando.
+  - `wrapper.sh`: Pulizia automatica dei vecchi file di log residui (`/tmp/command_log`) all'avvio di un nuovo comando per prevenire la visualizzazione di log obsoleti di `checkver`.
+  - `modgui-modal.lp`: Reset preventivo dello stato di esecuzione e del file di log all'invio di `sendcmd`.
+
 9.8.48 (Stable)
 ---------------------------------------------------------------------------
 - **Fix Link Tag Release GitHub**:

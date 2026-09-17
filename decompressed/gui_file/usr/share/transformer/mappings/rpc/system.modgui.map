@@ -133,7 +133,7 @@ local commands_helper = {
   resetcwmp = "/usr/share/transformer/scripts/resetUtility.sh --resetCWMP",
   checkver = '/usr/share/transformer/scripts/wrapper.sh "/usr/share/transformer/scripts/checkver"',
   resetDslDriver = '/usr/share/transformer/scripts/wrapper.sh "/usr/share/transformer/scripts/xdsl_firmware_utils.sh clean"',
-  upgradegui = 'start-stop-daemon -S -b -x /usr/share/transformer/scripts/wrapper.sh "/usr/share/transformer/scripts/upgradegui GuiRequest"',
+  upgradegui = '/usr/share/transformer/scripts/wrapper.sh "/usr/share/transformer/scripts/upgradegui GuiRequest"',
   genSysupgradeBackup = function(filename)
     local clean_name = tostring(filename or "sysupgrade_backup.tar.gz"):gsub("[^%w%._%-]", "")
     if clean_name == "" then clean_name = "sysupgrade_backup.tar.gz" end

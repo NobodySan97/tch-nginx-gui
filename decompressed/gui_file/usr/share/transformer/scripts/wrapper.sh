@@ -9,17 +9,14 @@ set_transformer() {
 }
 #################################################
 
-if [ -f $LOG_LOCATION ]; then
-	echo "Wrapper: command_log file already exist, appending to the last execution (or concurrent) logging..."
-fi
-
+rm -f "$LOG_LOCATION"
 set_transformer "rpc.system.modgui.executeCommand.state" "Requested"
 
 (
-	eval "$1" 2>$LOG_LOCATION >$LOG_LOCATION
+	eval "$1" 2>"$LOG_LOCATION" >"$LOG_LOCATION"
 	sync
 	set_transformer "rpc.system.modgui.executeCommand.state" "Complete"
 	sleep 3
 	set_transformer "rpc.system.modgui.executeCommand.state" "Idle"
-	rm -f $LOG_LOCATION
+	rm -f "$LOG_LOCATION"
 ) &

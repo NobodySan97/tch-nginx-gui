@@ -91,6 +91,8 @@ local function receive_file(filename, match)
 end
 
 local function sendcmd(cmd)
+        os.remove("/tmp/command_log")
+        proxy.set("rpc.system.modgui.executeCommand.state", "Requested")
         proxy.set("rpc.system.modgui.utility.sendcmd", cmd)
         proxy.apply()
         ngx.print('{"success":"true"}')
