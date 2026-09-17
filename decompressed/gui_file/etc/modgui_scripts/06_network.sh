@@ -7,15 +7,17 @@ restart_dnsmasq=0
 add_ipoe() {
   if [ ! "$(uci -q get network.ipoe)" ]; then
     logecho "Adding ipoe in network config..."
-    uci set network.ipoe=interface
-    uci set network.ipoe.proto='dhcp'
-    uci set network.ipoe.metric='1'
-    uci set network.ipoe.reqopts='1 3 6 43 51 58 59'
-    uci set network.ipoe.release='1'
-    uci set network.ipoe.neighreachabletime='1200000'
-    uci set network.ipoe.neighgcstaletime='2400'
-    uci set network.ipoe.ipv6='1'
-    uci commit network
+    uci -q batch <<EOF
+set network.ipoe=interface
+set network.ipoe.proto='dhcp'
+set network.ipoe.metric='1'
+set network.ipoe.reqopts='1 3 6 43 51 58 59'
+set network.ipoe.release='1'
+set network.ipoe.neighreachabletime='1200000'
+set network.ipoe.neighgcstaletime='2400'
+set network.ipoe.ipv6='1'
+commit network
+EOF
   fi
 }
 

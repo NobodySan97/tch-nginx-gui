@@ -78,28 +78,77 @@ orig_config_gen() {
   fi
   if [ ! -f /etc/config/fcctlsettings ]; then
     touch /etc/config/fcctlsettings
-    uci set fcctlsettings.state=state
-    uci set fcctlsettings.state.enabled='1'
-    uci set fcctlsettings.option=option
-    uci set fcctlsettings.option.l2tp='1'
-    uci set fcctlsettings.option.gre='1'
-    uci set fcctlsettings.option.ipv6='1'
-    uci set fcctlsettings.option.mcast='1'
-    uci set fcctlsettings.option.mcast_learn='1'
-    uci commit fcctlsettings
+    uci -q batch <<EOF
+set fcctlsettings.state=state
+set fcctlsettings.state.enabled='1'
+set fcctlsettings.option=option
+set fcctlsettings.option.l2tp='1'
+set fcctlsettings.option.gre='1'
+set fcctlsettings.option.ipv6='1'
+set fcctlsettings.option.mcast='1'
+set fcctlsettings.option.mcast_learn='1'
+commit fcctlsettings
+EOF
   fi
   # Ensure default NAT ALG helpers exist in firewall config
-  if [ -f /etc/config/firewall ] && ! uci show firewall | grep -q "helper"; then
-    uci set firewall.ftp=helper; uci set firewall.ftp.name='ftp'; uci set firewall.ftp.helper='ftp'; uci set firewall.ftp.dest_port='21'; uci set firewall.ftp.proto='tcp'; uci set firewall.ftp.enable='1'
-    uci set firewall.tftp=helper; uci set firewall.tftp.name='tftp'; uci set firewall.tftp.helper='tftp'; uci set firewall.tftp.dest_port='69'; uci set firewall.tftp.proto='udp'; uci set firewall.tftp.enable='1'
-    uci set firewall.snmp=helper; uci set firewall.snmp.name='snmp'; uci set firewall.snmp.helper='snmp'; uci set firewall.snmp.dest_port='161'; uci set firewall.snmp.proto='udp'; uci set firewall.snmp.enable='1'
-    uci set firewall.pptp=helper; uci set firewall.pptp.name='pptp'; uci set firewall.pptp.helper='pptp'; uci set firewall.pptp.dest_port='1723'; uci set firewall.pptp.proto='tcp'; uci set firewall.pptp.enable='1'
-    uci set firewall.sip=helper; uci set firewall.sip.name='sip'; uci set firewall.sip.helper='sip'; uci set firewall.sip.dest_port='5060'; uci set firewall.sip.proto='udp'; uci set firewall.sip.enable='1'
-    uci set firewall.irc=helper; uci set firewall.irc.name='irc'; uci set firewall.irc.helper='irc'; uci set firewall.irc.dest_port='6667'; uci set firewall.irc.proto='tcp'; uci set firewall.irc.enable='1'
-    uci set firewall.amanda=helper; uci set firewall.amanda.name='amanda'; uci set firewall.amanda.helper='amanda'; uci set firewall.amanda.dest_port='10080'; uci set firewall.amanda.proto='udp'; uci set firewall.amanda.enable='1'
-    uci set firewall.rtsp=helper; uci set firewall.rtsp.name='rtsp'; uci set firewall.rtsp.helper='rtsp'; uci set firewall.rtsp.dest_port='554'; uci set firewall.rtsp.proto='tcp'; uci set firewall.rtsp.enable='1'
-    uci set firewall.ipsec=helper; uci set firewall.ipsec.name='ipsec'; uci set firewall.ipsec.helper='ipsec'; uci set firewall.ipsec.dest_port='500'; uci set firewall.ipsec.proto='udp'; uci set firewall.ipsec.enable='1'
-    uci commit firewall
+  if [ -f /etc/config/firewall ] && ! uci -q show firewall | grep -q "helper"; then
+    uci -q batch <<EOF
+set firewall.ftp=helper
+set firewall.ftp.name='ftp'
+set firewall.ftp.helper='ftp'
+set firewall.ftp.dest_port='21'
+set firewall.ftp.proto='tcp'
+set firewall.ftp.enable='1'
+set firewall.tftp=helper
+set firewall.tftp.name='tftp'
+set firewall.tftp.helper='tftp'
+set firewall.tftp.dest_port='69'
+set firewall.tftp.proto='udp'
+set firewall.tftp.enable='1'
+set firewall.snmp=helper
+set firewall.snmp.name='snmp'
+set firewall.snmp.helper='snmp'
+set firewall.snmp.dest_port='161'
+set firewall.snmp.proto='udp'
+set firewall.snmp.enable='1'
+set firewall.pptp=helper
+set firewall.pptp.name='pptp'
+set firewall.pptp.helper='pptp'
+set firewall.pptp.dest_port='1723'
+set firewall.pptp.proto='tcp'
+set firewall.pptp.enable='1'
+set firewall.sip=helper
+set firewall.sip.name='sip'
+set firewall.sip.helper='sip'
+set firewall.sip.dest_port='5060'
+set firewall.sip.proto='udp'
+set firewall.sip.enable='1'
+set firewall.irc=helper
+set firewall.irc.name='irc'
+set firewall.irc.helper='irc'
+set firewall.irc.dest_port='6667'
+set firewall.irc.proto='tcp'
+set firewall.irc.enable='1'
+set firewall.amanda=helper
+set firewall.amanda.name='amanda'
+set firewall.amanda.helper='amanda'
+set firewall.amanda.dest_port='10080'
+set firewall.amanda.proto='udp'
+set firewall.amanda.enable='1'
+set firewall.rtsp=helper
+set firewall.rtsp.name='rtsp'
+set firewall.rtsp.helper='rtsp'
+set firewall.rtsp.dest_port='554'
+set firewall.rtsp.proto='tcp'
+set firewall.rtsp.enable='1'
+set firewall.ipsec=helper
+set firewall.ipsec.name='ipsec'
+set firewall.ipsec.helper='ipsec'
+set firewall.ipsec.dest_port='500'
+set firewall.ipsec.proto='udp'
+set firewall.ipsec.enable='1'
+commit firewall
+EOF
   fi
 }
 

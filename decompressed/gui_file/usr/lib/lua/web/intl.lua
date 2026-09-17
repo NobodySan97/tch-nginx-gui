@@ -24,8 +24,8 @@ function M.setLangPath(path)
     return langPath
 end
 
--- the translations cache
-local trcache = setmetatable({}, {__mode='v'})
+-- the translations cache (strong reference table in RAM to prevent disk re-parsing)
+local trcache = {}
 
 --- get the filename for a translation
 -- @param domain string the text domain

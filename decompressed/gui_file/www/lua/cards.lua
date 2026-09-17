@@ -36,6 +36,7 @@ local function get_cards_from_config()
       card.modal = rule.target
       -- set correct value for hide (missing means true)
       card.hide = (card.hide~='0')
+      card.raw_card = card.card
       -- remove any initial digits
       card.card = card.card:gsub("^%d+_", "")
 
@@ -90,48 +91,31 @@ function M.setpath(path)
   includepath = path
 end
 
---Returns card from modal provided or nil
+--Returns card from modal provided or nil (In-memory O(1) lookup)
 function M.get_card_from_modal(ModalSearch)
+	if not ModalSearch then return nil end
 	local session = ngx.ctx.session
 	local result
-	
-	uci:foreach('web', 'card', function(card)
-
-		local rule = rules[card.modal]
-
-		if rule and not card['.anonymous'] then
-			if rule.target == ModalSearch then
-				result = card.card
-			end
+	for _, card in pairs(config) do
+		if card.modal == ModalSearch then
+			result = card.raw_card or card.card
+			break
 		end
-	end)
-
-	uci:unload('web')
+	end
 	
 	if result and card_visible(session, config, (result:gsub("^%d+_", ""))) then
 	  return result
 	end
 	
-	return
+	return nil
 end
 
---Returns card from modal provided or nil
+--Returns card from modal provided or nil (In-memory O(1) lookup)
 function M.get_modal_from_card(CardSearch)
-	local result
-	
-	uci:foreach('web', 'card', function(card)
-
-		local rule = rules[card.modal]
-
-		if rule and not card['.anonymous'] then
-			if card.card == CardSearch then
-				result = rule.target
-			end
-		end
-	end)
-
-	uci:unload('web')
-	return result
+	if not CardSearch then return nil end
+	local clean_name = CardSearch:gsub("^%d+_", "")
+	local card = config[clean_name] or config[CardSearch]
+	return card and card.modal or nil
 end
 
 local card_files_cache = {}

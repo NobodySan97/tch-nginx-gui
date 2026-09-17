@@ -26,13 +26,9 @@ extract_with_check() {
     orig_file=/$file
     file=$MD5_CHECK_DIR/$file
 
-    if [ -f "$orig_file" ]; then
-      md5_file=$(md5sum "$file" | awk '{ print $1 }')
-      md5_orig_file=$(md5sum "$orig_file" | awk '{ print $1 }')
-      if [ "$md5_file" = "$md5_orig_file" ]; then
-        rm "$file"
-        continue
-      fi
+    if [ -f "$orig_file" ] && cmp -s "$file" "$orig_file"; then
+      rm -f "$file"
+      continue
     fi
 
     cp "$file" "$orig_file"

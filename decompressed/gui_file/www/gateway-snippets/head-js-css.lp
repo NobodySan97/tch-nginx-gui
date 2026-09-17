@@ -23,6 +23,7 @@ ngx.print('\
     <meta charset="UTF-8">\
     <meta name="CSRFtoken" content="');  ngx.print( session:getCSRFtoken() ); ngx.print('">\
     <meta name="Advanced" content="');  ngx.print( cui.advanced ); ngx.print('">\
+	<link rel="preload" href="/css/gw.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" as="style">\
 	<link href="/css/font-awesome-all-5.7.2.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
     <link href="/css/gw.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
     <link href="/css/responsive.css?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" rel="stylesheet">\
@@ -35,18 +36,17 @@ ngx.print('\
 	end
 	ngx.print('\
 	<script src="/js/jquery.min.js?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" ></script>\
-	<script src="/js/main-min-nojquery.js?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" ></script>\
-	<script src="/js/knockout-min.js?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('"></script>')
+	<script src="/js/main-min-nojquery.js?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" defer></script>\
+	<script src="/js/knockout-min.js?v=1788177500&version='); ngx.print(cui.gui_version); ngx.print('" defer></script>')
 	if cui.gui_animation == "1" then
-		ngx.print('<script src="/js/aos.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('"></script>')
+		ngx.print('<script src="/js/aos.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" defer></script>')
 	end
 	ngx.print('\
-	<script src="/js/Chart.min.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('"></script>\
+	<script src="/js/Chart.min.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" defer></script>\
 	<script async src="/js/srp-min.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" ></script>');
-	--ngx.print('<script src="/js/jquery-migrate.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" ></script>')  -- Usefull to debug deprecated function from jquery update
 	local lfs = require("lfs")
 	if lfs.attributes(string.format("/www/docroot/theme/%s/script.js", cui.gui_skin), "mode") == "file" then
-		ngx.print('<script src="/theme/');  ngx.print( cui.gui_skin ); ngx.print('/script.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('"></script>');
+		ngx.print('<script src="/theme/');  ngx.print( cui.gui_skin ); ngx.print('/script.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" defer></script>');
 	end
 ngx.print('\
   </head>\

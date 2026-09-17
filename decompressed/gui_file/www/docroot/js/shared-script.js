@@ -66,58 +66,78 @@ var modgui = modgui || {};
 		});
 
 		var arrayLength = ElementBindingList.length;
+		var updateLink = (ajaxLink.indexOf("?") !== -1 ? "&" : "?") + "auto_update=true";
+		var fullUrl = ajaxLink + updateLink;
 
-		var AjaxRefresh = ( typeof CustomRefreshFunction === "function" ) && CustomRefreshFunction || function() {
-			var updateLink = "auto_update=true";
-			if ( /[a-z]+=[a-z]+/.test(ajaxLink) ) {
-				updateLink = "&" + updateLink;
-			} else {
-				updateLink = "?" + updateLink;
-			};
-			$.post(ajaxLink + updateLink, [tch.elementCSRFtoken()], function (data) {
+		if (KoRequest[IntervalVar]) {
+			if (KoRequest[IntervalVar].timer) clearTimeout(KoRequest[IntervalVar].timer);
+			if (KoRequest[IntervalVar].xhr && KoRequest[IntervalVar].xhr.readyState !== 4) {
+				KoRequest[IntervalVar].xhr.abort();
+			}
+		}
+
+		var reqState = {
+			active: true,
+			timer: null,
+			xhr: null,
+			binding: ElementBinding,
+			refreshTime: RefreshTime || 3000,
+			url: ajaxLink,
+			customFn: CustomRefreshFunction
+		};
+		KoRequest[IntervalVar] = reqState;
+
+		function scheduleNext() {
+			if (!reqState.active || document.hidden) return;
+			reqState.timer = setTimeout(executePoll, reqState.refreshTime);
+		}
+
+		function executePoll() {
+			if (!reqState.active || document.hidden) return;
+
+			if (typeof CustomRefreshFunction === "function") {
+				CustomRefreshFunction(ElementBinding, scheduleNext);
+				return;
+			}
+
+			reqState.xhr = $.ajax({
+				url: fullUrl,
+				type: "POST",
+				data: [tch.elementCSRFtoken()],
+				dataType: "json",
+				timeout: 8000
+			})
+			.done(function (data) {
+				if (!reqState.active) return;
 				for (var i = 0; i < arrayLength; i++) {
-					if (data[ElementBindingList[i]] != undefined) {
-						ElementBinding[ElementBindingList[i]](data[ElementBindingList[i]]);
+					var key = ElementBindingList[i];
+					if (data && data[key] !== undefined && ElementBinding[key]() !== data[key]) {
+						ElementBinding[key](data[key]);
 					}
 				}
-			}, "json")
-				.done(function(data) {
-					if(connectionissue==1) {
-						if ($("#popUp").is(":visible"))
-							tch.removeProgress();
-						connectionissue = 0;
-					}
-				})
-				.fail(function(data) {
-					connectionissue = 1;
-					switch (data.status) {
-						case 200:
-							if(data.responseText.indexOf("sign-me-in") !== -1 ) {
-								if(!$("#popUp").is(":visible"))
-									tch.showProgress(loginMsg);
-								window.location.href = "/";
-							}
-							break;
-						case 500:
-							window.location.href = "/error.lp?status="+data.status+"&err="+data.getResponseHeader("error-msg");
-							break;
-						default:
-							if(!$("#popUp").is(":visible"))
-								tch.showProgress(connectionLost + " " + data.statusText);
-					}
-				});
-		};
+				if (connectionissue === 1) {
+					if ($("#popUp").is(":visible")) tch.removeProgress();
+					connectionissue = 0;
+				}
+			})
+			.fail(function (data, textStatus) {
+				if (textStatus === "abort") return;
+				connectionissue = 1;
+				if (data && data.status === 200 && data.responseText && data.responseText.indexOf("sign-me-in") !== -1) {
+					if (!$("#popUp").is(":visible")) tch.showProgress(loginMsg);
+					window.location.href = "/";
+				}
+			})
+			.always(function () {
+				reqState.xhr = null;
+				scheduleNext();
+			});
+		}
 
-		AjaxRefresh(ElementBinding);
+		executePoll();
 
 		if (!ko.dataFor(element))
 			ko.applyBindings(ElementBinding, element);
-		KoRequest[IntervalVar] = {
-			interval : setInterval(AjaxRefresh,RefreshTime,ElementBinding),
-			function : AjaxRefresh,
-			binding : ElementBinding,
-			refreshTime: RefreshTime,
-		};
 	}
 
 	function linkCheckUpdate() {
@@ -179,16 +199,29 @@ var modgui = modgui || {};
 	}
 
 	function clearKoInterval() {
-		Object.keys(KoRequest).forEach(function(interval) {
-			if(KoRequest[interval])
-				clearInterval(KoRequest[interval].interval);
+		if (window.registeredIntervals && window.registeredIntervals.length > 0) {
+			window.registeredIntervals.forEach(function(id) {
+				clearTimeout(id);
+				clearInterval(id);
+			});
+			window.registeredIntervals = [];
+		}
+		Object.keys(KoRequest).forEach(function(key) {
+			var req = KoRequest[key];
+			if (req) {
+				req.active = false;
+				if (req.timer) clearTimeout(req.timer);
+				if (req.xhr && req.xhr.readyState !== 4) req.xhr.abort();
+			}
 		});
 	}
 
 	function restartKoInterval() {
-		Object.keys(KoRequest).forEach(function(interval) {
-			if(KoRequest[interval])
-				KoRequest[interval].interval = setInterval(KoRequest[interval].function,KoRequest[interval].refreshTime,KoRequest[interval].binding);
+		Object.keys(KoRequest).forEach(function(key) {
+			var req = KoRequest[key];
+			if (req && !req.active) {
+				createAjaxUpdateCard(key, req.url || "", key, req.refreshTime, req.customFn);
+			}
 		});
 	}
 
@@ -297,6 +330,11 @@ $(function () {
 		modgui.clearKoInterval();
 		KoRequest = {};
 
+		var dynamicContainer = document.querySelector(".dynamic-content");
+		if (dynamicContainer && window.ko) {
+			ko.cleanNode(dynamicContainer);
+		}
+
 		$.get(page + "?contentonly=true").done(function (data) {
 			$(".dynamic-content").replaceWith(data);
 			$("#cards-text").text(text);
@@ -332,54 +370,50 @@ $(function () {
 $(document).ready(function () {
 	ko.bindingHandlers.text = {
 		init: function (element, valueAccessor) {
-			$(element).text(ko.unwrap(valueAccessor()));
+			element.textContent = ko.unwrap(valueAccessor()) || "";
 		},
 		update: function (element, valueAccessor) {
-			var value = ko.unwrap(valueAccessor());
-			if (value != $(element).text()) {
-				if (!$(element).hasClass("hide") && gui_var.gui_animation == "1") {
-					$(element).fadeOut(function () {
-						$(this).text(value).fadeIn();
-					});
-				} else {
-					$(element).text(value);
+			var value = String(ko.unwrap(valueAccessor()) || "");
+			if (element.textContent !== value) {
+				element.textContent = value;
+				if (gui_var.gui_animation === "1" && !element.classList.contains("hide")) {
+					element.classList.remove("data-pulse");
+					void element.offsetWidth;
+					element.classList.add("data-pulse");
 				}
 			}
 		}
 	};
 	ko.bindingHandlers.log_text = {
 		init: function (element, valueAccessor) {
-			$(element).text(ko.unwrap(valueAccessor()));
+			element.textContent = ko.unwrap(valueAccessor()) || "";
 		},
 		update: function (element, valueAccessor) {
-			var value = ko.unwrap(valueAccessor());
-			$(element).text(value);
-			$(element).parent().parent().parent().scrollTop($(element).parent().parent().parent()[0].scrollHeight);
+			var value = ko.unwrap(valueAccessor()) || "";
+			element.textContent = value;
+			var container = element.parentElement && element.parentElement.parentElement && element.parentElement.parentElement.parentElement;
+			if (container) {
+				container.scrollTop = container.scrollHeight;
+			}
 		}
 	};
 	ko.bindingHandlers.html = {
 		init: function (element, valueAccessor) {
-			$(element).html(ko.unwrap(valueAccessor()));
+			element.innerHTML = ko.unwrap(valueAccessor()) || "";
 		},
 		update: function (element, valueAccessor) {
-			var value = ko.unwrap(valueAccessor());
-			if (value != $(element).html()) {
-				if (!$(element).hasClass("hide") && gui_var.gui_animation == "1") {
-					$(element).fadeOut(function () {
-						$(this).html(value).fadeIn();
-					});
-				} else {
-					$(element).html(value);
-				}
+			var value = ko.unwrap(valueAccessor()) || "";
+			if (element.innerHTML !== value) {
+				element.innerHTML = value;
 			}
 		}
 	};
 
 	document.addEventListener("visibilitychange", function () {
 		if (document.hidden) {
-			clearKoInterval();
+			modgui.clearKoInterval();
 		} else {
-			restartKoInterval();
+			modgui.restartKoInterval();
 		}
 	});
 });

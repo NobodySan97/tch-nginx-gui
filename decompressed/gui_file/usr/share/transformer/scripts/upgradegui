@@ -286,32 +286,30 @@ done
 
 set_transformer "rpc.system.modgui.executeCommand.state" "Extracting"
 
-logecho "Extracting file..."
-# Extract new GUI to /
-bzcat "$WORKING_DIR/$FILE_NAME" |
-  tar -C "$TARGET_DIR" -xvf - |
-  while read -r line; do
-    nfile_extracted=$((nfile_extracted + 1))
-    if [ $(($nfile_extracted % 100)) -eq 0 ]; then
-      logecho "Extracted $nfile_extracted files"
-    fi
-  done
+logecho "Extracting GUI files to $TARGET_DIR..."
+# Extract new GUI to / using fast tar extraction without slow shell pipe loop
+if [ -f "$WORKING_DIR/$FILE_NAME" ]; then
+  case "$FILE_NAME" in
+    *.tar.gz) zcat "$WORKING_DIR/$FILE_NAME" | tar -C "$TARGET_DIR" -xf - ;;
+    *) bzcat "$WORKING_DIR/$FILE_NAME" | tar -C "$TARGET_DIR" -xf - ;;
+  esac
+fi
 
 #Remove deprecated GUI packages if found in /root
 if [ -f /root/GUI_dev.tar.bz2 ]; then
   logecho "Deleting /root/GUI_dev.tar.bz2..."
-  rm /root/GUI_dev.tar.bz2
+  rm -f /root/GUI_dev.tar.bz2
 fi
 if [ -f /root/GUI.tar.gz ]; then
   logecho "Deleting GUI.tar.gz..."
-  rm /root/GUI.tar.gz
+  rm -f /root/GUI.tar.gz
 fi
 
 if [ -z "$update_branch" ] || [ "$FORCE_SAVE_GUI" = "1" ]; then
   logecho "Copying file to permanent dir..."
   #Copy GUI file to permanent dir
   if [ -f "$PERMANENT_STORE_DIR/$FILE_NAME" ]; then
-    rm "$PERMANENT_STORE_DIR/$FILE_NAME"
+    rm -f "$PERMANENT_STORE_DIR/$FILE_NAME"
   fi
   cp "$WORKING_DIR/$FILE_NAME" "$PERMANENT_STORE_DIR/$STABLE_FILE_NAME"
 fi
@@ -325,18 +323,20 @@ logecho "Running rootdevice script"
 # Run init.d script
 set_transformer "rpc.system.modgui.executeCommand.state" "In Progress"
 /etc/init.d/rootdevice "$rootdevice_call"
-/etc/init.d/do_migrate_overlay preserve_files
+/etc/init.d/do_migrate_overlay preserve_files 2>/dev/null || true
 
-# Explicitly reset outdated state in UCI config
-uci set modgui.gui.outdated_ver=0
-uci set modgui.gui.new_ver="Unknown"
-uci commit modgui
+# Explicitly reset outdated state in UCI config via atomic batch
+uci -q batch <<EOF
+set modgui.gui.outdated_ver='0'
+set modgui.gui.new_ver='Unknown'
+commit modgui
+EOF
 
 if [ -f "$WORKING_DIR/$FILE_NAME" ]; then
-  rm "$WORKING_DIR/$FILE_NAME"
+  rm -f "$WORKING_DIR/$FILE_NAME"
 fi
 if [ -f "$WORKING_DIR/$CHECKSUM_FILE" ]; then
-  rm "$WORKING_DIR/$CHECKSUM_FILE"
+  rm -f "$WORKING_DIR/$CHECKSUM_FILE"
 fi
 
 ubus send fwupgrade '{"state":"done"}'

@@ -4,37 +4,38 @@
 
 move_env_var() {
 	if [ ! -f /etc/config/modgui ]; then
-		subpart="gui app var"
-
-		gui_entities="autoupgrade randomcolor autoupgrade_hour firstpage gui_skin new_ver outdated_ver autoupgradeview gui_hash update_branch"
-		app_entities="xupnp_app voipblock_for_mmpbx voipblock_for_asterisk blacklist_app telstra_webui transmission_webui aria2_webui amule_webui luci_webui"
-		var_entities="isp ppp_mgmt ppp_realm_ipv6 ppp_realm_ipv4 encrypted_pass check_obp reboot_reason_msg"
-
 		touch /etc/config/modgui
-
-		for part in $subpart; do
-			uci set modgui.$part=$part
-			for value in $(eval 'echo $'"$part"_entities); do
-				uci_val="$(uci get -q env.var.$value)"
-				if [ -n "$uci_val" ]; then
-					uci set modgui.$part.$value=$uci_val
-					uci delete env.var.$value
-				fi
+		{
+			echo "set modgui.gui=gui"
+			echo "set modgui.app=app"
+			echo "set modgui.var=var"
+			for val in autoupgrade randomcolor autoupgrade_hour firstpage gui_skin new_ver outdated_ver autoupgradeview gui_hash update_branch; do
+				uci_val="$(uci -q get env.var.$val)"
+				[ -n "$uci_val" ] && echo "set modgui.gui.$val='$uci_val'" && echo "delete env.var.$val"
 			done
-		done
-
-		uci commit env
-		uci commit modgui
+			for val in xupnp_app voipblock_for_mmpbx voipblock_for_asterisk blacklist_app telstra_webui transmission_webui aria2_webui amule_webui luci_webui; do
+				uci_val="$(uci -q get env.var.$val)"
+				[ -n "$uci_val" ] && echo "set modgui.app.$val='$uci_val'" && echo "delete env.var.$val"
+			done
+			for val in isp ppp_mgmt ppp_realm_ipv6 ppp_realm_ipv4 encrypted_pass check_obp reboot_reason_msg; do
+				uci_val="$(uci -q get env.var.$val)"
+				[ -n "$uci_val" ] && echo "set modgui.var.$val='$uci_val'" && echo "delete env.var.$val"
+			done
+			echo "commit env"
+			echo "commit modgui"
+		} | uci -q batch
 	fi
 }
 
 create_section_modgui() {
-	for section in gui var app; do
-		if [ -z "$(uci get -q modgui.$section)" ]; then
-			uci set modgui.$section=$section
-		fi
-	done
-	uci commit modgui
+	{
+		for section in gui var app; do
+			if [ -z "$(uci -q get modgui.$section)" ]; then
+				echo "set modgui.$section=$section"
+			fi
+		done
+		echo "commit modgui"
+	} | uci -q batch
 }
 
 check_tmp_permission() {

@@ -8954,3 +8954,19 @@ textarea:focus {
     transform: translate(-50%, -50%) !important;
   }
 }
+
+@keyframes dataPulseAnim {
+  0% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.data-pulse {
+  animation: dataPulseAnim 0.25s ease-out;
+}
+
+.span3 .smallcard,
+.dynamic-content .smallcard,
+.info-card {
+  contain: layout style;
+}
+
