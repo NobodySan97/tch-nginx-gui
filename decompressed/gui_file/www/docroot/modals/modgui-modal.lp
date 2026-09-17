@@ -512,7 +512,9 @@ html[#html + 1] = ui_helper.createSwitch(T"GUI Auto Update", "update_autoupgrade
 html[#html + 1] = ui_helper.createInputText(T"Update Hours", "update_autoupgrade_hour", modgui_settings["update_autoupgrade_hour"],autoupgrade_mon_1)
 if content["outdated_ver"] == "1" then
         html[#html + 1] = ui_helper.createLabel(T"State", T"Update Found", basic)
-        html[#html + 1] = ui_helper.createLabel(T"New Version", format("<a target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a>", content["new_ver"], content["new_ver"]), basic)
+        local new_ver_str = content["new_ver"] or ""
+        local new_tag = new_ver_str:match("^v") and new_ver_str or ("v" .. new_ver_str)
+        html[#html + 1] = ui_helper.createLabel(T"New Version", format("<a target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a>", new_tag, new_ver_str), basic)
         html[#html + 1] = ui_helper.createButton(T"Update GUI", T"Update", "icon-refresh", upgrade_gui)
 else
         html[#html + 1] = ui_helper.createLabel(T"State", T"No Update found", basic)

@@ -48,7 +48,9 @@ ngx.print('\
       ');
 
 	local html = {}
-	html[#html + 1] = format(T"GUI Version <a onclick=\"event.stopPropagation()\" target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a>", (content.gui_version or ""):match("(.+)-") or (content.gui_version or ""), content.gui_version)
+	local clean_ver = (content.gui_version or ""):match("(.+)-") or (content.gui_version or "")
+	local tag_ver = clean_ver:match("^v") and clean_ver or ("v" .. clean_ver)
+	html[#html + 1] = format(T"GUI Version <a onclick=\"event.stopPropagation()\" target=\"_blank\" href=https://github.com/NobodySan97/tch-nginx-gui/releases/tag/%s>%s</a>", tag_ver, content.gui_version)
 	html[#html + 1] = '<span class="simple-desc">'
 	html[#html + 1] = '  <div class="light_icon fas fa-cog gui_version_status '..content.outdated_ver..'"></div>'
 	html[#html + 1] = '<span class="gui_version_status_text">'..content.outdated_ver_text..'</span>'

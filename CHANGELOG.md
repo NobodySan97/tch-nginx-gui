@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.48 (Stable)
+---------------------------------------------------------------------------
+- **Fix Link Tag Release GitHub**:
+  - `001_modgui.lp`, `header.lp`, `modgui-modal.lp`: Aggiunto il prefisso `v` obbligatorio (`v9.8.x`) nella generazione dei link alle release di GitHub (`https://github.com/NobodySan97/tch-nginx-gui/releases/tag/v...`), risolvendo l'errore 404 quando si clicca sul numero di versione nella card o nel banner superiore.
+
 9.8.47 (Stable)
 ---------------------------------------------------------------------------
 - **Fix Esecuzione Log Modal & Direct Upgrade**:
