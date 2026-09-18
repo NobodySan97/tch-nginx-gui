@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.54 (Stable)
+---------------------------------------------------------------------------
+- **Auto-Redirect e Notifica di Successo al Login dopo Upgrade**:
+  - `command-log-read-modal.lp`: Aggiunto countdown automatico di 3 secondi al completamento dell'aggiornamento con reindirizzamento trasparente alla schermata di login, senza richiedere il click manuale su "Chiudi".
+  - `login.lp`: Aggiunto banner di notifica di avvenuto aggiornamento con indicazione dinamica della nuova versione installata (`Aggiornamento completato con successo alla versione v9.8.x`).
+
 9.8.53 (Stable)
 ---------------------------------------------------------------------------
 - **QoS Subsystem & Upgrade Flow Validation**:

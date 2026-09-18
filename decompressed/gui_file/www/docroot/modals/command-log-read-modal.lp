@@ -122,10 +122,26 @@ ngx.print('\
 					$("#upgrade-gui-bar").removeClass("hide");\
 					$("#show_progress").text("");\
 					if (data.state == "Complete") {\
+						var targetVer = (data.new_version_text && data.new_version_text !== "Unknown") ? data.new_version_text : "";\
+						if (!targetVer) {\
+							var matchVer = clean_log.match(/version_gui=([0-9]+\\.[0-9]+\\.[0-9]+)/i) || clean_log.match(/Online version:\\s*([0-9]+\\.[0-9]+\\.[0-9]+)/i);\
+							if (matchVer && matchVer[1]) targetVer = matchVer[1];\
+						}\
+						var successMsg = "Aggiornamento completato con successo" + (targetVer ? " alla versione v" + targetVer : "") + "!";\
+						try { sessionStorage.setItem("gui_upgrade_success", successMsg); } catch(e) {}\
 						$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info").addClass("bar-success");\
 						$("#progress-percent").text("100%");\
-						$("#update-text").text("Aggiornamento completato con successo!");\
 						$("#header_title").text("Aggiornamento Completato");\
+						var countdown = 3;\
+						$("#update-text").html("Aggiornamento completato con successo!<br><span style=\'font-size: 13px; font-weight: normal; opacity: 0.9;\'>Reindirizzamento automatico al login in <strong id=\'redirect-countdown\'>" + countdown + "</strong>s...</span>");\
+						var redirectTimer = setInterval(function() {\
+							countdown--;\
+							if ($("#redirect-countdown").length) $("#redirect-countdown").text(countdown);\
+							if (countdown <= 0) {\
+								clearInterval(redirectTimer);\
+								window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");\
+							}\
+						}, 1000);\
 					} else {\
 						$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info").addClass("bar-danger");\
 						$("#update-text").text("Aggiornamento non riuscito.");\
@@ -138,25 +154,16 @@ ngx.print('\
 					$(".modal-action-close").show().css("display", "block");\
 					$("#close-config, .modal-action-close, .btn-close").off("click").on("click", function(e) {\
 						e.preventDefault();\
-						tch.showProgress("Ricaricamento interfaccia in corso...");\
-						setTimeout(function() {\
-							window.location.reload(true);\
-						}, 1500);\
+						if (typeof redirectTimer !== "undefined") clearInterval(redirectTimer);\
+						window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");\
 					});\
 				}\
 			})\
             .fail(function(data) {\
 				if(data.status==200 && data.responseText && data.responseText.indexOf("sign-me-in") !== -1){\
 					isUpgradeComplete = true;\
-					$("#header_title").text("Login Required");\
-					$("#show_progress").text("");\
-					$("body, .modal, #modal-container").addClass("upgrade-finished");\
-					$(".modal-footer, .modal-action-close, #close-config").show().css("display", "block");\
-					if (KoRequest.CommandLogReadInterval) {\
-						KoRequest.CommandLogReadInterval.active = false;\
-						if (KoRequest.CommandLogReadInterval.timer) clearTimeout(KoRequest.CommandLogReadInterval.timer);\
-						if (KoRequest.CommandLogReadInterval.interval) clearInterval(KoRequest.CommandLogReadInterval.interval);\
-					}\
+					try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}\
+					window.location.href = "/login.lp";\
 				}\
 				$("#show_progress").text($("#show_progress").text().replace(/[\\.]{10}/g, ""));\
 				$("#show_progress").append(\'<span style="color: red;">.</span>\');\

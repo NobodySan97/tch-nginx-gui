@@ -581,7 +581,12 @@ if assistance_port ~= "0" then
 end
 ngx.print('    </div>\n')
 
-ngx.print('    <div id="erroruserpass" class="auth-alert-toast"><i class="fas fa-exclamation-circle"></i><span>'); ngx.print(T"Invalid Username or Password."); ngx.print('</span></div>\n')
+ngx.print('    <div id="upgrade-success-toast" class="auth-alert-toast" style="display: none; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); color: #047857; padding: 12px 16px; border-radius: var(--radius-control); margin-bottom: 20px; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 500; animation: none;">
+      <i class="fas fa-check-circle" style="color: #10b981; font-size: 18px; flex-shrink: 0;"></i>
+      <span id="upgrade-success-msg">Aggiornamento completato con successo!</span>
+    </div>
+
+    <div id="erroruserpass" class="auth-alert-toast"><i class="fas fa-exclamation-circle"></i><span>'); ngx.print(T"Invalid Username or Password."); ngx.print('</span></div>\n')
 
 ngx.print([[
     <div id="login-section">
@@ -786,6 +791,24 @@ ngx.print([[
     if (assistance_port != "0" && document.location.port == assistance_port) {
       document.getElementById("srp_username").value = "assist";
     }
+
+    try {
+      var upMsg = sessionStorage.getItem("gui_upgrade_success");
+      if (!upMsg && typeof window.location.search === "string" && window.location.search.length > 0) {
+        var params = new URLSearchParams(window.location.search);
+        var upVer = params.get("upgraded_version");
+        if (upVer && upVer !== "Unknown") {
+          upMsg = "Aggiornamento completato con successo alla versione v" + upVer + "!";
+        } else if (upVer) {
+          upMsg = "Aggiornamento completato con successo!";
+        }
+      }
+      if (upMsg) {
+        sessionStorage.removeItem("gui_upgrade_success");
+        $("#upgrade-success-msg").text(upMsg);
+        $("#upgrade-success-toast").css("display", "flex").hide().fadeIn(400);
+      }
+    } catch(e) {}
 
     $("#sign-me-in").on("click", function() {
       var btn = $(this);
