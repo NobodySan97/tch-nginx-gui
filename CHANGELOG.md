@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.61 (Stable)
+---------------------------------------------------------------------------
+- **Fix Background Tab Polling Freeze & Auto-Resume Wakeup**:
+  - `shared-script.js`: Rimosso il blocco irreversibile `document.hidden` che causava l'interruzione permanente dei timer AJAX (`KoRequest`) quando l'utente cambiava scheda o riduceva a icona la finestra durante l'aggiornamento. Aggiunto ascoltatore globale `visibilitychange` per risincronizzare istantaneamente lo stato e i log non appena la scheda torna visibile.
+  - `command-log-read-modal.lp`: Aggiunto trigger immediato all'apertura del modale (entro 100ms) e ascoltatore dell'evento di `focus` della finestra per garantire l'aggiornamento continuo della barra di progresso e del testo in tempo reale sotto qualsiasi condizione del browser.
+
 9.8.60 (Stable)
 ---------------------------------------------------------------------------
 - **Fix Upgrade Modal JavaScript Regex Syntax & CSRF Serialization**:
