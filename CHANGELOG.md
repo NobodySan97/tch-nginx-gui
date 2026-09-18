@@ -1,8 +1,14 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.57 (Stable)
+---------------------------------------------------------------------------
+- **Upgrade Modal Template Clean Syntax Fix**:
+  - `command-log-read-modal.lp`: Ristrutturato il file con sintassi pulita a stringhe letterali blocco Lua (`[[ ... ]]`), eliminando gli errori di compilazione stringa/escaping `lp.lua` su Nginx e garantendo l'apertura immediata del modal e la visualizzazione del log in tempo reale.
+
 9.8.56 (Stable)
 ---------------------------------------------------------------------------
+
 - **Live Upgrade Log Stream & Terminal UI Fix**:
   - `wrapper.sh`: Risolta la collisione dei descrittori di file shell (`>$LOG_LOCATION 2>&1` anziché `2>"$LOG_LOCATION" >"$LOG_LOCATION"`), garantendo la cattura affidabile e sincronizzata di stdout/stderr durante l'aggiornamento senza sovrascritture o schermate vuote.
   - `commandlogread.lua`: Aggiunta rimozione delle sequenze di escape ANSI e dei pattern spuri di avanzamento curl, gestione del fallback a stringa descrittiva durante il download iniziale e capping dinamico alle ultime 80 righe per serializzazione JSON rapida ed efficiente.
