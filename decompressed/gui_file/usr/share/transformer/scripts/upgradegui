@@ -58,6 +58,32 @@ logecho() {
   echo "Upgrade Script" "$1"
 }
 
+if [ "$1" = "SetTime" ]; then
+  time="$(uci get -q modgui.gui.autoupgrade_hour)"
+  time="${time:-03:00}"
+  if echo "$time" | grep -q ":"; then
+    hour="$(echo "$time" | cut -d: -f1)"
+    minute="$(echo "$time" | cut -d: -f2)"
+  else
+    hour="$time"
+    minute="00"
+  fi
+  # Format valid numbers
+  hour="$(echo "$hour" | sed 's/^0*\([0-9]\)/\1/')"
+  minute="$(echo "$minute" | sed 's/^0*\([0-9]\)/\1/')"
+  hour="${hour:-3}"
+  minute="${minute:-0}"
+  autoupgrade="$(uci get -q modgui.gui.autoupgrade)"
+  mkdir -p /etc/crontabs
+  touch /etc/crontabs/root
+  sed -i '/upgradegui/d' /etc/crontabs/root
+  if [ "$autoupgrade" = "1" ]; then
+    echo "$minute $hour * * * /usr/share/transformer/scripts/upgradegui AutoUpgrade >/dev/null 2>&1" >>/etc/crontabs/root
+    /etc/init.d/cron restart >/dev/null 2>&1 || true
+  fi
+  exit 0
+fi
+
 LOCKFILE=/var/run/upgradegui.pid
 if [ -f "$LOCKFILE" ]; then
   OLDPID="$(cat "$LOCKFILE" 2>/dev/null)"
@@ -70,20 +96,6 @@ echo $$ > "$LOCKFILE"
 trap 'rm -f "$LOCKFILE"' EXIT INT TERM
 
 if [ "$1" ]; then
-  if [ "$1" = "SetTime" ]; then
-    time="$(uci get modgui.gui.autoupgrade_hour)"
-    hour="$(echo $time | sed "s|:.*||")"
-    minute="$(echo $time | sed "s|.*:||")"
-    autoupgrade="$(uci get modgui.gui.autoupgrade)"
-    if [ -f /etc/crontabs/root ] && grep -q upgradegui /etc/crontabs/root 2>/dev/null; then
-      sed -i '/upgradegui/d' /etc/crontabs/root
-    fi
-    if [ "$autoupgrade" = "1" ]; then
-      echo "$minute $hour * * * /usr/share/transformer/scripts/upgradegui AutoUpgrade >/dev/null 2>&1" >>/etc/crontabs/root
-    fi
-    exit 0
-  fi
-
   if [ "$1" = "AutoUpgrade" ]; then
     /usr/share/transformer/scripts/checkver
     if [ "$(uci get modgui.gui.outdated_ver)" = "0" ]; then
@@ -94,7 +106,6 @@ if [ "$1" ]; then
     uci set modgui.gui.autoupgradeview=auto
     uci commit modgui
   fi
-
 else
   print_logo
   # Enabling alert for the gui about the manual upgrade
