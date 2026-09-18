@@ -72,10 +72,23 @@ else
 			clean_lines = truncated
 		end
 		data["log"] = table.concat(clean_lines, "\n")
-	elseif data["state"] == "Requested" or data["state"] == "Downloading" then
-		data["log"] = "[Inizializzazione] Avvio procedura in corso..."
+	end
+
+	if not data["log"] or data["log"] == "" then
+		if data["state"] == "Downloading" then
+			data["log"] = string.format("[1/3] Download pacchetto GUI in corso... (%d%%)", math.floor(data["progress"] or 0))
+		elseif data["state"] == "Extracting" then
+			data["log"] = "[1/3] Download pacchetto completato.\n[2/3] Estrazione e installazione componenti in corso..."
+		elseif data["state"] == "In Progress" then
+			data["log"] = "[1/3] Download pacchetto completato.\n[2/3] Estrazione completata.\n[3/3] Finalizzazione script di sistema e riavvio servizi..."
+		elseif data["state"] == "Requested" then
+			data["log"] = "[Inizializzazione] Avvio procedura in corso..."
+		elseif data["state"] == "Complete" then
+			data["log"] = "[Aggiornamento] Operazione completata con successo!"
+		end
 	end
 end
+
 
 
 local buffer = {}

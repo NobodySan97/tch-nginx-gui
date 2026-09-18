@@ -38,15 +38,16 @@ html[#html + 1] = [[
 </style>
 ]]
 
-html[#html + 1] = '<fieldset class="modal-body hide" id="upgrade-gui-bar" style="min-height: unset; margin-bottom: 15px;">'
+html[#html + 1] = '<fieldset class="modal-body" id="upgrade-gui-bar" style="min-height: unset; margin-bottom: 15px;">'
 html[#html + 1] = '<div class="alert alert-info" style="margin-bottom: 0;">'
 html[#html + 1] = '<div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 6px;"><span id="update-text">'..T"Update in progress... Do not turn off your modem."..'</span><span id="progress-percent">0%</span></div>'
 html[#html + 1] = '  <div class="progress progress-striped active" style="margin-bottom: 0;">'
-html[#html + 1] = '     <div id="upgrade-progress-bar-fill" class="bar bar-warning" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>'
+html[#html + 1] = '     <div id="upgrade-progress-bar-fill" class="bar bar-warning" role="progressbar" style="width: 5%;" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100"></div>'
 html[#html + 1] = '</div></div>'
 html[#html + 1] = '</fieldset>'
 html[#html + 1] = '<fieldset>'
 html[#html + 1] = '<div id="command-log-text-container" style="white-space: pre-wrap; font-family: monospace; font-size: 12px; max-height: 280px; overflow-y: auto; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px;" data-bind="log_text: log">'
+html[#html + 1] = '[Inizializzazione] Avvio procedura di aggiornamento...'
 html[#html + 1] = '</div>'
 html[#html + 1] = '</fieldset>'
 
@@ -85,14 +86,23 @@ html[#html + 1] = [[
 					.replace(/^[#=\\-O\\s]*\\d+\\.?\\d*%\\s*$/gm, "")
 					.replace(/^[#=\\-O\\s]+$/gm, "")
 					.replace(/\\n\\s*\\n/g, "\\n");
-				if (!clean_log && hasStartedExecution) {
-					clean_log = "[Download] Download pacchetto in corso... Attendere...";
+				if (!clean_log) {
+					if (data.state == "Extracting") {
+						clean_log = "[1/3] Download pacchetto completato (100%).\n[2/3] Estrazione e installazione file GUI in corso...";
+					} else if (data.state == "In Progress") {
+						clean_log = "[1/3] Download pacchetto completato.\n[2/3] Estrazione file completata.\n[3/3] Configurazione e migrazione overlay in corso...";
+					} else if (data.state == "Downloading") {
+						clean_log = "[1/3] Download pacchetto in corso" + (data.progress ? " (" + Math.round(data.progress) + "%)" : "") + "...";
+					} else {
+						clean_log = "[Inizializzazione] Avvio procedura di aggiornamento in corso...";
+					}
 				}
 				ElementBinding.log(clean_log);
 				var $logElem = $("#command-log-text-container, [data-bind*='log_text']");
 				if ($logElem.length && $logElem[0]) {
 					$logElem.scrollTop($logElem[0].scrollHeight);
 				}
+
 				var header_text = $("#header_title").text();
 
 				if (data.state && header_text != data.state) $("#header_title").text(data.state);

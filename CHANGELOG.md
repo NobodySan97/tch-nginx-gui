@@ -1,8 +1,15 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.58 (Stable)
+---------------------------------------------------------------------------
+- **Real-Time Upgrade Stage Tracker & Guaranteed Log Fallback**:
+  - `command-log-read-modal.lp`: Barra di progresso e placeholder informativo resi immediatamente visibili all'apertura del modal. Aggiunto fallback dinamico multistadio (`[1/3] Download...`, `[2/3] Estrazione...`, `[3/3] Finalizzazione...`) per garantire che il log a schermo non rimanga mai vuoto in nessuna fase dell'aggiornamento.
+  - `commandlogread.lua`: Risolto il bug di risposta vuota quando il file di log viene ruotato o non è ancora pronto, garantendo l'output descrittivo continuo per tutti gli stati del demone (`Requested`, `Downloading`, `Extracting`, `In Progress`, `Complete`).
+
 9.8.57 (Stable)
 ---------------------------------------------------------------------------
+
 - **Upgrade Modal Template Clean Syntax Fix**:
   - `command-log-read-modal.lp`: Ristrutturato il file con sintassi pulita a stringhe letterali blocco Lua (`[[ ... ]]`), eliminando gli errori di compilazione stringa/escaping `lp.lua` su Nginx e garantendo l'apertura immediata del modal e la visualizzazione del log in tempo reale.
 
