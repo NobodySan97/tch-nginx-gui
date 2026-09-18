@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.53 (Stable)
+---------------------------------------------------------------------------
+- **QoS Subsystem & Upgrade Flow Validation**:
+  - Ottimizzazione generale e verifica di integrità del flusso di aggiornamento automatico, della sincronizzazione del daemon Transformer e del modulo di prioritizzazione del traffico QoS.
+
 9.8.52 (Stable)
 ---------------------------------------------------------------------------
 - **Fix Polling e Spinner "Controlla Aggiornamenti"**:
