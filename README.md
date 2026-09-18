@@ -16,6 +16,15 @@
 
 ---
 
+> [!NOTE]
+> ### 🤖 AI-Assisted Development & Maintenance / Sviluppo Assistito da IA
+> 
+> **EN:** This repository and its ongoing maintenance, modern refactoring, bug fixes, automated build pipelines, and performance enhancements are actively developed with the assistance of advanced **AI coding agents** (pair programming), coupled with strict code auditing and live testing on physical Technicolor hardware.
+> 
+> **IT:** Questo repository e la sua continua manutenzione, i refactoring del codice, la correzione dei bug, le pipeline di build automatizzate e le ottimizzazioni delle prestazioni sono sviluppati attivamente con l'ausilio di **agenti di Intelligenza Artificiale avanzata (AI pair programming)**, affiancati da revisione del codice e test diretti su modem/router fisici Technicolor.
+
+---
+
 > [!CAUTION]
 > ### ⚠️ Disclaimer / Limitazione di Responsabilità
 > 
