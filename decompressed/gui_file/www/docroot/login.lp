@@ -581,12 +581,14 @@ if assistance_port ~= "0" then
 end
 ngx.print('    </div>\n')
 
-ngx.print('    <div id="upgrade-success-toast" class="auth-alert-toast" style="display: none; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); color: #047857; padding: 12px 16px; border-radius: var(--radius-control); margin-bottom: 20px; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 500; animation: none;">
+ngx.print([[
+    <div id="upgrade-success-toast" class="auth-alert-toast" style="display: none; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); color: #047857; padding: 12px 16px; border-radius: var(--radius-control); margin-bottom: 20px; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 500; animation: none;">
       <i class="fas fa-check-circle" style="color: #10b981; font-size: 18px; flex-shrink: 0;"></i>
       <span id="upgrade-success-msg">Aggiornamento completato con successo!</span>
     </div>
+]])
 
-    <div id="erroruserpass" class="auth-alert-toast"><i class="fas fa-exclamation-circle"></i><span>'); ngx.print(T"Invalid Username or Password."); ngx.print('</span></div>\n')
+ngx.print('    <div id="erroruserpass" class="auth-alert-toast"><i class="fas fa-exclamation-circle"></i><span>'); ngx.print(T"Invalid Username or Password."); ngx.print('</span></div>\n')
 
 ngx.print([[
     <div id="login-section">
