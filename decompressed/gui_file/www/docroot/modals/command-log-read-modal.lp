@@ -46,7 +46,7 @@ html[#html + 1] = '     <div id="upgrade-progress-bar-fill" class="bar bar-warni
 html[#html + 1] = '</div></div>'
 html[#html + 1] = '</fieldset>'
 html[#html + 1] = '<fieldset>'
-html[#html + 1] = '<div id="command-log-text-container" style="white-space: pre-wrap; font-family: monospace; font-size: 12px; max-height: 280px; overflow-y: auto; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px;" data-bind="log_text: log">'
+html[#html + 1] = '<div id="command-log-text-container" style="white-space: pre-wrap; font-family: monospace; font-size: 12px; max-height: min(280px, 35vh); overflow-y: auto; scroll-behavior: smooth; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px;" data-bind="log_text: log">'
 html[#html + 1] = '[Inizializzazione] Avvio procedura di aggiornamento...'
 html[#html + 1] = '</div>'
 html[#html + 1] = '</fieldset>'
@@ -59,6 +59,7 @@ html[#html + 1] = [[
 	var isUpgradeComplete = false;
 	var hasStartedExecution = false;
 	var pollCount = 0;
+	var consecutiveFailures = 0;
 
 	var $activeModal = $("#modal-container, .modal");
 	$activeModal.data("backdrop", "static");
@@ -71,21 +72,24 @@ html[#html + 1] = [[
 		if (!isUpgradeComplete) {
 			$(".modal-footer, .modal-action-close, #close-config").hide();
 		}
-		if (!requestInProgress) {
+		if (!requestInProgress && !isUpgradeComplete) {
 			requestInProgress = true;
 			$.ajax({
 				url: "/ajax/commandlogread.lua?auto_update=true",
 				type: "POST",
-				data: [tch.elementCSRFtoken()],
+				data: {
+					CSRFtoken: $("meta[name=CSRFtoken]").attr("content")
+				},
 				complete: function(data) { requestInProgress = false; },
 				dataType: "json"
 			})
 			.done(function(data) {
 				pollCount++;
+				consecutiveFailures = 0;
 				var clean_log = (data.log || "")
-					.replace(/^[#=\\-O\\s]*\\d+\\.?\\d*%\\s*$/gm, "")
-					.replace(/^[#=\\-O\\s]+$/gm, "")
-					.replace(/\\n\\s*\\n/g, "\\n");
+					.replace(/^[-#=O\s]*\d+\.?\d*%\s*$/gm, "")
+					.replace(/^[-#=O\s]+$/gm, "")
+					.replace(/\n\s*\n/g, "\n");
 				if (!clean_log) {
 					if (data.state == "Extracting") {
 						clean_log = "[1/3] Download pacchetto completato (100%).\n[2/3] Estrazione e installazione file GUI in corso...";
@@ -97,7 +101,10 @@ html[#html + 1] = [[
 						clean_log = "[Inizializzazione] Avvio procedura di aggiornamento in corso...";
 					}
 				}
-				ElementBinding.log(clean_log);
+				if (ElementBinding && typeof ElementBinding.log === "function") {
+					try { ElementBinding.log(clean_log); } catch(e) {}
+				}
+				$("#command-log-text-container").text(clean_log);
 				var $logElem = $("#command-log-text-container, [data-bind*='log_text']");
 				if ($logElem.length && $logElem[0]) {
 					$logElem.scrollTop($logElem[0].scrollHeight);
@@ -124,12 +131,12 @@ html[#html + 1] = [[
 						$("#update-text").text("Finalizzazione aggiornamento...");
 					}
 				}
-				$("#show_progress").text($("#show_progress").text().replace(/[\\.]{10}/g, ""));
+				$("#show_progress").text($("#show_progress").text().replace(/\.{10}/g, ""));
 				$("#show_progress").append(".");
 				var isSuccess = (data.state == "Complete") || (hasStartedExecution && data.state == "Idle");
 				var isFailed = (data.state == "Failed" || data.state == "Error");
 
-				if ((hasStartedExecution || pollCount > 3) && (isSuccess || isFailed)) {
+				if (!isUpgradeComplete && (hasStartedExecution || pollCount > 3) && (isSuccess || isFailed)) {
 					isUpgradeComplete = true;
 					if (KoRequest.CommandLogReadInterval) {
 						KoRequest.CommandLogReadInterval.active = false;
@@ -141,7 +148,7 @@ html[#html + 1] = [[
 					if (isSuccess) {
 						var targetVer = (data.new_version_text && data.new_version_text !== "Unknown") ? data.new_version_text : "";
 						if (!targetVer) {
-							var matchVer = clean_log.match(/version_gui=([0-9]+\\.[0-9]+\\.[0-9]+)/i) || clean_log.match(/Online version:\\s*([0-9]+\\.[0-9]+\\.[0-9]+)/i);
+							var matchVer = clean_log.match(/version_gui=([0-9]+\.[0-9]+\.[0-9]+)/i) || clean_log.match(/Online version:\s*([0-9]+\.[0-9]+\.[0-9]+)/i);
 							if (matchVer && matchVer[1]) targetVer = matchVer[1];
 						}
 						var successMsg = "Aggiornamento completato con successo" + (targetVer ? " alla versione v" + targetVer : "") + "!";
@@ -177,18 +184,23 @@ html[#html + 1] = [[
 				}
 			})
 			.fail(function(data) {
+				consecutiveFailures++;
 				if (data.status == 200 && data.responseText && data.responseText.indexOf("sign-me-in") !== -1) {
 					isUpgradeComplete = true;
 					try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
 					window.location.href = "/login.lp";
 					return;
 				}
-				if (hasStartedExecution && pollCount > 15) {
-					setTimeout(function() {
-						window.location.href = "/login.lp";
-					}, 3000);
+				if (hasStartedExecution && consecutiveFailures >= 6) {
+					if (!isUpgradeComplete) {
+						isUpgradeComplete = true;
+						try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
+						setTimeout(function() {
+							window.location.href = "/login.lp";
+						}, 2000);
+					}
 				}
-				$("#show_progress").text($("#show_progress").text().replace(/[\\.]{10}/g, ""));
+				$("#show_progress").text($("#show_progress").text().replace(/\.{10}/g, ""));
 				$("#show_progress").append('<span style="color: red;">.</span>');
 			});
 

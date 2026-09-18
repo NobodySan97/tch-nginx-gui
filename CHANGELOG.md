@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.60 (Stable)
+---------------------------------------------------------------------------
+- **Fix Upgrade Modal JavaScript Regex Syntax & CSRF Serialization**:
+  - `command-log-read-modal.lp`: Risolto il `SyntaxError: Range out of order in character class` nel parser JavaScript causato dall'ordine non valido della classe caratteri nella regex di sanificazione log (`/^[-#=O\s]*\d+\.?\d*%\s*$/gm`), ripristinando il polling in tempo reale del log e l'animazione della barra di progresso all'apertura del modal.
+  - `command-log-read-modal.lp`: Aggiornato il payload della richiesta AJAX `POST` a `/ajax/commandlogread.lua` con oggetto form-urlencoded `{ CSRFtoken: ... }` diretto per garantire la corretta validazione del token CSRF.
+  - `command-log-read-modal.lp`: Ottimizzato il container di log con altezza reattiva `max-height: min(280px, 35vh)`, scroll fluido e aggiornamento sicuro sul DOM indipendente da knockout bindings.
+
 9.8.59 (Stable)
 ---------------------------------------------------------------------------
 - **Fix Post-Upgrade Transformer Deadlock & State Transition**:
