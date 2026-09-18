@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.55 (Stable)
+---------------------------------------------------------------------------
+- **Fix Sintassi Template e Robustezza AutoUpgrade**:
+  - `login.lp`: Corretta la sintassi del blocco di stampa raw Lua in `ngx.print` per il banner di notifica di avvenuto aggiornamento.
+  - `upgradegui`: Spostato l'handler `SetTime` prima del controllo del file di lock PID per evitare blocchi nella configurazione crontab dell'aggiornamento automatico e aggiunto il riavvio immediato del demone `crond`.
+
 9.8.54 (Stable)
 ---------------------------------------------------------------------------
 - **Auto-Redirect e Notifica di Successo al Login dopo Upgrade**:
