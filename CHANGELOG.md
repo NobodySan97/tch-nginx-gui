@@ -1,24 +1,15 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
-9.8.61 (Stable)
+9.8.62 (Stable)
 ---------------------------------------------------------------------------
-- **Fix Background Tab Polling Freeze & Auto-Resume Wakeup**:
-  - `shared-script.js`: Rimosso il blocco irreversibile `document.hidden` che causava l'interruzione permanente dei timer AJAX (`KoRequest`) quando l'utente cambiava scheda o riduceva a icona la finestra durante l'aggiornamento. Aggiunto ascoltatore globale `visibilitychange` per risincronizzare istantaneamente lo stato e i log non appena la scheda torna visibile.
-  - `command-log-read-modal.lp`: Aggiunto trigger immediato all'apertura del modale (entro 100ms) e ascoltatore dell'evento di `focus` della finestra per garantire l'aggiornamento continuo della barra di progresso e del testo in tempo reale sotto qualsiasi condizione del browser.
-
-9.8.60 (Stable)
----------------------------------------------------------------------------
-- **Fix Upgrade Modal JavaScript Regex Syntax & CSRF Serialization**:
-  - `command-log-read-modal.lp`: Risolto il `SyntaxError: Range out of order in character class` nel parser JavaScript causato dall'ordine non valido della classe caratteri nella regex di sanificazione log (`/^[-#=O\s]*\d+\.?\d*%\s*$/gm`), ripristinando il polling in tempo reale del log e l'animazione della barra di progresso all'apertura del modal.
+- **Upgrade System Overhaul & Complete Polling Engine Resilience**:
+  - `command-log-read-modal.lp`: Risolto il `SyntaxError: Range out of order in character class` nel parser JavaScript causato dall'ordine errato della classe caratteri nella regex di sanificazione log (`/^[-#=O\s]*\d+\.?\d*%\s*$/gm`), ripristinando il polling in tempo reale del log e l'animazione della barra di progresso all'apertura del modal.
+  - `command-log-read-modal.lp`: Risolto il completamento prematuro: lo stato `Complete` o `Idle` viene accettato come successo solo ed esclusivamente se il nuovo processo di upgrade è stato effettivamente rilevato in esecuzione (`hasStartedExecution === true`), ignorando eventuali residui di stato precedenti nel datamodel di transformer.
   - `command-log-read-modal.lp`: Aggiornato il payload della richiesta AJAX `POST` a `/ajax/commandlogread.lua` con oggetto form-urlencoded `{ CSRFtoken: ... }` diretto per garantire la corretta validazione del token CSRF.
-  - `command-log-read-modal.lp`: Ottimizzato il container di log con altezza reattiva `max-height: min(280px, 35vh)`, scroll fluido e aggiornamento sicuro sul DOM indipendente da knockout bindings.
-
-9.8.59 (Stable)
----------------------------------------------------------------------------
-- **Fix Post-Upgrade Transformer Deadlock & State Transition**:
+  - `command-log-read-modal.lp`: Ottimizzato il container di log con altezza reattiva `max-height: min(280px, 35vh)`, scroll fluido automatico, refresh immediato all'apertura (100ms) e auto-wakeup al focus della finestra (`$(window).on("focus")`).
+  - `shared-script.js`: Rimosso il blocco irreversibile `document.hidden` che causava l'interruzione permanente dei timer AJAX (`KoRequest`) quando l'utente cambiava scheda o riduceva a icona la finestra durante l'aggiornamento. Aggiunto ascoltatore globale `visibilitychange` per risincronizzare istantaneamente lo stato e i log non appena la scheda torna visibile.
   - `99_postreq.sh`: Risolto il deadlock in `do_wait` causato dalla chiamata bloccante `lua -e require('datamodel').get` subito dopo il riavvio di `transformer`. Implementato polling sicuro e non bloccante tramite `transformer-cli get` con retry progressivo.
-  - `command-log-read-modal.lp`: Perfezionata la gestione della transizione di stato al termine dell'aggiornamento, gestendo correttamente il reset allo stato `Idle` post-restart di transformer e garantendo il completamento al 100% e il redirect automatico al login.
 
 9.8.58 (Stable)
 ---------------------------------------------------------------------------

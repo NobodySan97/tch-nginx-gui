@@ -113,7 +113,7 @@ html[#html + 1] = [[
 				var header_text = $("#header_title").text();
 
 				if (data.state && header_text != data.state) $("#header_title").text(data.state);
-				if (data.state == "Downloading" || data.progress !== undefined || data.state == "Extracting" || data.state == "In Progress" || data.state == "Clearing" || data.state == "Requested") {
+				if (data.state == "Downloading" || (data.progress !== undefined && data.progress > 0) || data.state == "Extracting" || data.state == "In Progress" || data.state == "Clearing" || data.state == "Requested" || (clean_log && clean_log.indexOf("Upgrade Script") !== -1)) {
 					hasStartedExecution = true;
 					$("#upgrade-gui-bar").removeClass("hide");
 					if (data.progress !== undefined) {
@@ -133,10 +133,10 @@ html[#html + 1] = [[
 				}
 				$("#show_progress").text($("#show_progress").text().replace(/\.{10}/g, ""));
 				$("#show_progress").append(".");
-				var isSuccess = (data.state == "Complete") || (hasStartedExecution && data.state == "Idle");
-				var isFailed = (data.state == "Failed" || data.state == "Error");
+				var isSuccess = hasStartedExecution && ((data.state == "Complete") || (pollCount > 8 && data.state == "Idle"));
+				var isFailed = hasStartedExecution && (data.state == "Failed" || data.state == "Error");
 
-				if (!isUpgradeComplete && (hasStartedExecution || pollCount > 3) && (isSuccess || isFailed)) {
+				if (!isUpgradeComplete && hasStartedExecution && (isSuccess || isFailed)) {
 					isUpgradeComplete = true;
 					if (KoRequest.CommandLogReadInterval) {
 						KoRequest.CommandLogReadInterval.active = false;
