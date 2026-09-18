@@ -3,56 +3,13 @@
 
 9.8.55 (Stable)
 ---------------------------------------------------------------------------
-- **Fix Sintassi Template e Robustezza AutoUpgrade**:
-  - `login.lp`: Corretta la sintassi del blocco di stampa raw Lua in `ngx.print` per il banner di notifica di avvenuto aggiornamento.
-  - `upgradegui`: Spostato l'handler `SetTime` prima del controllo del file di lock PID per evitare blocchi nella configurazione crontab dell'aggiornamento automatico e aggiunto il riavvio immediato del demone `crond`.
-
-9.8.54 (Stable)
----------------------------------------------------------------------------
-- **Auto-Redirect e Notifica di Successo al Login dopo Upgrade**:
-  - `command-log-read-modal.lp`: Aggiunto countdown automatico di 3 secondi al completamento dell'aggiornamento con reindirizzamento trasparente alla schermata di login, senza richiedere il click manuale su "Chiudi".
-  - `login.lp`: Aggiunto banner di notifica di avvenuto aggiornamento con indicazione dinamica della nuova versione installata (`Aggiornamento completato con successo alla versione v9.8.x`).
-
-9.8.53 (Stable)
----------------------------------------------------------------------------
-- **QoS Subsystem & Upgrade Flow Validation**:
-  - Ottimizzazione generale e verifica di integrità del flusso di aggiornamento automatico, della sincronizzazione del daemon Transformer e del modulo di prioritizzazione del traffico QoS.
-
-9.8.52 (Stable)
----------------------------------------------------------------------------
-- **Fix Polling e Spinner "Controlla Aggiornamenti"**:
-  - `shared-script.js`: Risolto il blocco a rotazione infinita dello spinner in "Controlla aggiornamenti": aumentato il timeout della richiesta AJAX da 500ms a 4000ms per evitare l'interruzione su router embedded, esteso l'intervallo di polling a 1s e gestiti correttamente gli stati di transizione (`Checking`, `Complete`, `Idle`). Aggiunto un watchdog di sicurezza di 20s.
-  - `commandlogread.lua`: Restituzione garantita dei metadati di versione (`new_version_text`, `outdated_ver`) con parametro `auto_update=true` sia durante che al termine del check.
-
-9.8.51 (Stable)
----------------------------------------------------------------------------
-- **Fix Timing Apertura Modale Log ed Esecuzione Aggiornamento**:
-  - `shared-script.js`: Apertura della modale di log (`command-log-read-modal.lp`) spostata all'interno del callback di completamento della richiesta POST di avvio comando, assicurando che il processo `upgradegui` sia già inizializzato prima dell'apertura del popup.
-  - `command-log-read-modal.lp`: Aggiunto tracciamento di stato di avvio (`hasStartedExecution`) per impedire la chiusura prematura del log in caso di stati residui pregressi.
-
-9.8.50 (Stable)
----------------------------------------------------------------------------
-- **Atomic Single-Instance PID Lock & Polling Guard**:
-  - `upgradegui`: Aggiunto lock atomico con PID in `/var/run/upgradegui.pid` per prevenire istanze duplicate o conflitti di estrazione in caso di click multipli.
-  - `command-log-read-modal.lp`: Aggiunto filtro di ciclo polling (`pollCount > 1`) per ignorare stati pregressi completati e garantire la visualizzazione corretta della progressione di avanzamento (download -> estrazione -> installazione).
-
-9.8.49 (Stable)
----------------------------------------------------------------------------
-- **Fix Esecuzione Upgrade e Reset Log Stale**:
-  - `system.modgui.map`: Rimosso il wrapping errato di `start-stop-daemon` senza `--` per `upgradegui`, che ignorava i parametri di esecuzione del comando.
-  - `wrapper.sh`: Pulizia automatica dei vecchi file di log residui (`/tmp/command_log`) all'avvio di un nuovo comando per prevenire la visualizzazione di log obsoleti di `checkver`.
-  - `modgui-modal.lp`: Reset preventivo dello stato di esecuzione e del file di log all'invio di `sendcmd`.
-
-9.8.48 (Stable)
----------------------------------------------------------------------------
-- **Fix Link Tag Release GitHub**:
-  - `001_modgui.lp`, `header.lp`, `modgui-modal.lp`: Aggiunto il prefisso `v` obbligatorio (`v9.8.x`) nella generazione dei link alle release di GitHub (`https://github.com/NobodySan97/tch-nginx-gui/releases/tag/v...`), risolvendo l'errore 404 quando si clicca sul numero di versione nella card o nel banner superiore.
-
-9.8.47 (Stable)
----------------------------------------------------------------------------
-- **Fix Esecuzione Log Modal & Direct Upgrade**:
-  - `shared-script.js`: Corretta la gestione di `ajaxLink` nullo in `createAjaxUpdateCard` per evitare l'eccezione `TypeError: Cannot read properties of null (reading 'indexOf')` che bloccava il binding di KnockoutJS e impediva la visualizzazione del log live nella modale "Esecuzione" durante l'aggiornamento.
-  - `command-log-read-modal.lp`: Aggiunto metodo esplicito `POST` alla richiesta AJAX verso `/ajax/commandlogread.lua` e gestione robusta dello stop del timer alla conclusione dell'aggiornamento.
+- **Upgrade System Overhaul & Auto-Redirect**:
+  - `command-log-read-modal.lp`: Aggiunto countdown automatico di 3 secondi al completamento dell'aggiornamento con reindirizzamento trasparente alla schermata di login. Tracciamento in tempo reale della barra di progressione (download -> estrazione -> finalizzazione).
+  - `login.lp`: Aggiunto banner di notifica verde di avvenuto aggiornamento con indicazione dinamica della nuova versione installata.
+  - `shared-script.js`: Risolto il blocco a rotazione infinita dello spinner in "Controlla aggiornamenti" (timeout elevato a 4s, intervallo a 1s, gestione stati `Checking`/`Complete`/`Idle` e watchdog a 20s).
+  - `commandlogread.lua`: Restituzione garantita dei metadati di versione con `auto_update=true`.
+  - `upgradegui`: Lock atomico con PID in `/var/run/upgradegui.pid` per prevenire istanze duplicate e ottimizzazione della configurazione crontab in `SetTime` con riavvio immediato di `crond`.
+  - `001_modgui.lp`, `header.lp`, `modgui-modal.lp`: Aggiunto il prefisso `v` obbligatorio (`releases/tag/v...`) nei link alle release GitHub per prevenire errori 404.
 
 9.8.46 (Stable)
 ---------------------------------------------------------------------------
