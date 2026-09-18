@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.63 (Stable)
+---------------------------------------------------------------------------
+- **Realistic Multi-Stage Progress Bar & Monotonic Percentage Engine**:
+  - `command-log-read-modal.lp`: Implementato un motore di avanzamento percentuale realistico e monotonicamente crescente (Download 5-50%, Preparazione 58%, Estrazione 75%, Script di sistema 83-96%, Completamento 100%). Eliminati i salti all'indietro della barra e aggiunte etichette descrittive dinamiche per ogni fase del processo.
+
 9.8.62 (Stable)
 ---------------------------------------------------------------------------
 - **Upgrade System Overhaul & Complete Polling Engine Resilience**:

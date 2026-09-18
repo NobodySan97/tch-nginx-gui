@@ -61,6 +61,8 @@ html[#html + 1] = [[
 	var pollCount = 0;
 	var consecutiveFailures = 0;
 
+	var lastProgress = 5;
+
 	var $activeModal = $("#modal-container, .modal");
 	$activeModal.data("backdrop", "static");
 	$activeModal.data("keyboard", false);
@@ -111,26 +113,56 @@ html[#html + 1] = [[
 				}
 
 				var header_text = $("#header_title").text();
-
 				if (data.state && header_text != data.state) $("#header_title").text(data.state);
-				if (data.state == "Downloading" || (data.progress !== undefined && data.progress > 0) || data.state == "Extracting" || data.state == "In Progress" || data.state == "Clearing" || data.state == "Requested" || (clean_log && clean_log.indexOf("Upgrade Script") !== -1)) {
+
+				var targetProgress = 5;
+				var stageText = "Avvio procedura di aggiornamento...";
+
+				if (data.state == "Downloading" || (data.progress !== undefined && data.progress > 0)) {
 					hasStartedExecution = true;
-					$("#upgrade-gui-bar").removeClass("hide");
-					if (data.progress !== undefined) {
-						var pct = Math.round(data.progress);
-						$("#upgrade-progress-bar-fill").css("width", pct + "%").attr("aria-valuenow", pct);
-						$("#progress-percent").text(pct + "%");
-						$("#update-text").text("Download in corso (" + pct + "%)... Non spegnere il modem");
-					} else if (data.state == "Extracting") {
-						$("#upgrade-progress-bar-fill").css("width", "85%").removeClass("bar-warning").addClass("bar-info");
-						$("#progress-percent").text("85%");
-						$("#update-text").text("Estrazione e installazione file in corso...");
-					} else if (data.state == "In Progress") {
-						$("#upgrade-progress-bar-fill").css("width", "95%").removeClass("bar-warning").addClass("bar-info");
-						$("#progress-percent").text("95%");
-						$("#update-text").text("Finalizzazione aggiornamento...");
+					var dlPct = (data.progress !== undefined) ? Math.round(data.progress) : 0;
+					targetProgress = Math.min(50, Math.max(5, Math.round(dlPct * 0.50)));
+					stageText = "Download pacchetto GUI (" + dlPct + "%)... Non spegnere il modem";
+				} else if (data.state == "Clearing" || (clean_log && clean_log.indexOf("Cleaning www") !== -1)) {
+					hasStartedExecution = true;
+					targetProgress = 58;
+					stageText = "Download completato (100%). Preparazione file di sistema...";
+				} else if (data.state == "Extracting" || (clean_log && clean_log.indexOf("Extracting GUI") !== -1)) {
+					hasStartedExecution = true;
+					targetProgress = 75;
+					stageText = "Estrazione e decompressione componenti GUI (75%)...";
+				} else if (data.state == "In Progress" || (clean_log && clean_log.indexOf("Root Script") !== -1)) {
+					hasStartedExecution = true;
+					if (clean_log.indexOf("transformer") !== -1 || clean_log.indexOf("restarting services") !== -1) {
+						targetProgress = 96;
+						stageText = "Riavvio servizi di rete e finalizzazione (96%)...";
+					} else if (clean_log.indexOf("05_app") !== -1 || clean_log.indexOf("Adblock") !== -1 || clean_log.indexOf("Trafficmon") !== -1) {
+						targetProgress = 90;
+						stageText = "Configurazione estensioni e overlay (90%)...";
+					} else {
+						targetProgress = 83;
+						stageText = "Applicazione script di root e permessi (83%)...";
 					}
+				} else if (clean_log && clean_log.indexOf("Upgrade Script") !== -1) {
+					hasStartedExecution = true;
+					targetProgress = 15;
+					stageText = "Inizializzazione procedura di aggiornamento...";
 				}
+
+				if (targetProgress > lastProgress) {
+					lastProgress = targetProgress;
+				}
+
+				if (hasStartedExecution) {
+					$("#upgrade-gui-bar").removeClass("hide");
+					$("#upgrade-progress-bar-fill").css("width", lastProgress + "%").attr("aria-valuenow", lastProgress);
+					if (lastProgress >= 50 && lastProgress < 100) {
+						$("#upgrade-progress-bar-fill").removeClass("bar-warning").addClass("bar-info");
+					}
+					$("#progress-percent").text(lastProgress + "%");
+					$("#update-text").text(stageText);
+				}
+
 				$("#show_progress").text($("#show_progress").text().replace(/\.{10}/g, ""));
 				$("#show_progress").append(".");
 				var isSuccess = hasStartedExecution && ((data.state == "Complete") || (pollCount > 8 && data.state == "Idle"));
