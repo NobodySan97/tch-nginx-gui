@@ -1,8 +1,16 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.56 (Stable)
+---------------------------------------------------------------------------
+- **Live Upgrade Log Stream & Terminal UI Fix**:
+  - `wrapper.sh`: Risolta la collisione dei descrittori di file shell (`>$LOG_LOCATION 2>&1` anziché `2>"$LOG_LOCATION" >"$LOG_LOCATION"`), garantendo la cattura affidabile e sincronizzata di stdout/stderr durante l'aggiornamento senza sovrascritture o schermate vuote.
+  - `commandlogread.lua`: Aggiunta rimozione delle sequenze di escape ANSI e dei pattern spuri di avanzamento curl, gestione del fallback a stringa descrittiva durante il download iniziale e capping dinamico alle ultime 80 righe per serializzazione JSON rapida ed efficiente.
+  - `command-log-read-modal.lp`: Aggiunto auto-scroll automatico (`scrollTop`) del container log su ogni poll AJAX, box stile terminale e fallback informativo quando il log è in fase di download iniziale.
+
 9.8.55 (Stable)
 ---------------------------------------------------------------------------
+
 - **Upgrade System Overhaul & Auto-Redirect**:
   - `command-log-read-modal.lp`: Aggiunto countdown automatico di 3 secondi al completamento dell'aggiornamento con reindirizzamento trasparente alla schermata di login. Tracciamento in tempo reale della barra di progressione (download -> estrazione -> finalizzazione).
   - `login.lp`: Aggiunto banner di notifica verde di avvenuto aggiornamento con indicazione dinamica della nuova versione installata.

@@ -13,10 +13,11 @@ rm -f "$LOG_LOCATION"
 set_transformer "rpc.system.modgui.executeCommand.state" "Requested"
 
 (
-	eval "$1" 2>"$LOG_LOCATION" >"$LOG_LOCATION"
+	eval "$1" >"$LOG_LOCATION" 2>&1
 	sync
 	set_transformer "rpc.system.modgui.executeCommand.state" "Complete"
 	sleep 3
 	set_transformer "rpc.system.modgui.executeCommand.state" "Idle"
 	rm -f "$LOG_LOCATION"
 ) &
+

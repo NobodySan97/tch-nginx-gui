@@ -22,10 +22,13 @@ local action = {
 	end,
 }
 
-if action[string.untaint(data.state)] then 
-	for key, val in pairs(action[string.untaint(data.state)]()) do
+local untaint = string.untaint or function(s) return s end
+
+if action[untaint(data.state)] then 
+	for key, val in pairs(action[untaint(data.state)]()) do
 		data[key] = val
 	end
+
 else
 	if ngx.req.get_uri_args().auto_update == "true" then
 		local new_ver = proxy.get("uci.modgui.gui.new_ver")
@@ -48,17 +51,32 @@ else
 		if last_pct then
 			data["progress"] = tonumber(last_pct)
 		end
-		-- Strip curl progress bar artifacts from console display
+		-- Strip curl progress bar artifacts and ANSI escape sequences
 		local clean_lines = {}
 		for line in content:gmatch("[^\r\n]+") do
-			local sanitized = line:gsub("^[%s#=%-O]*%d+%.?%d*%%[%s#=%-O]*", ""):gsub("^[%s#=%-O]+", ""):gsub("^%s+", "")
-			if sanitized ~= "" then
-				clean_lines[#clean_lines + 1] = sanitized
+			local sanitized = line:gsub("\27%[[0-9;]*[a-zA-Z]", ""):gsub("\27%[[0-9;]*m", "")
+			local stripped = sanitized:gsub("^[%s#=%-O]*%d+%.?%d*%%[%s#=%-O]*", ""):gsub("^[%s#=%-O]+$", ""):gsub("^%s+$", "")
+			if stripped ~= "" then
+				clean_lines[#clean_lines + 1] = stripped
 			end
 		end
+		if #clean_lines == 0 and data["progress"] then
+			clean_lines[1] = string.format("[Download] Download in corso... %d%%", math.floor(data["progress"]))
+		end
+		-- Keep only the most recent 80 lines for fast JSON serialization and UI rendering
+		if #clean_lines > 80 then
+			local truncated = {}
+			for i = #clean_lines - 79, #clean_lines do
+				truncated[#truncated + 1] = clean_lines[i]
+			end
+			clean_lines = truncated
+		end
 		data["log"] = table.concat(clean_lines, "\n")
+	elseif data["state"] == "Requested" or data["state"] == "Downloading" then
+		data["log"] = "[Inizializzazione] Avvio procedura in corso..."
 	end
 end
+
 
 local buffer = {}
 if json.encode (data, { indent = false, buffer = buffer }) then

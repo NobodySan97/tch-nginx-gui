@@ -49,9 +49,10 @@ html[#html + 1] = '     <div id="upgrade-progress-bar-fill" class="bar bar-warni
 html[#html + 1] = '</div></div>'
 html[#html + 1] = '</fieldset>'
 html[#html + 1] = '<fieldset>'
-html[#html + 1] = '<div style="white-space: pre-wrap" data-bind="log_text: log">'
+html[#html + 1] = '<div id="command-log-text-container" style="white-space: pre-wrap; font-family: monospace; font-size: 12px; max-height: 280px; overflow-y: auto; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px;" data-bind="log_text: log">'
 html[#html + 1] = '</div>'
 html[#html + 1] = '</fieldset>'
+
 
 ngx.print(html)
 
@@ -89,8 +90,16 @@ ngx.print('\
 					.replace(/^[#=\\-O\\s]*\\d+\\.?\\d*%\\s*$/gm, "")\
 					.replace(/^[#=\\-O\\s]+$/gm, "")\
 					.replace(/\\n\\s*\\n/g, "\\n");\
+				if (!clean_log && hasStartedExecution) {\
+					clean_log = "[Download] Download pacchetto in corso... Attendere...";\
+				}\
 				ElementBinding.log(clean_log);\
+				var $logElem = $("#command-log-text-container, [data-bind*=\'log_text\']");\
+				if ($logElem.length && $logElem[0]) {\
+					$logElem.scrollTop($logElem[0].scrollHeight);\
+				}\
 				var header_text = $("#header_title").text();\
+
 				if (data.state && header_text != data.state) $("#header_title").text(data.state);\
 				if (data.state == "Downloading" || data.progress !== undefined || data.state == "Extracting" || data.state == "In Progress" || data.state == "Clearing" || data.state == "Requested") {\
 					hasStartedExecution = true;\
