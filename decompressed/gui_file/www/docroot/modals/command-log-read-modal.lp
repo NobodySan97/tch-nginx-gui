@@ -208,6 +208,15 @@ html[#html + 1] = [[
 	};
 
 	modgui.createAjaxUpdateCard("commandlogmodal", null, "CommandLogReadInterval", 1000, CommandLogReadRefresh);
+	setTimeout(function() {
+		CommandLogReadRefresh();
+	}, 100);
+
+	$(window).on("focus", function() {
+		if (!isUpgradeComplete) {
+			CommandLogReadRefresh();
+		}
+	});
 </script>
 ]]
 

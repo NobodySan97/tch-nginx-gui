@@ -94,13 +94,14 @@ var modgui = modgui || {};
 		KoRequest[IntervalVar] = reqState;
 
 		function scheduleNext() {
-			if (!reqState.active || document.hidden) return;
+			if (!reqState.active) return;
+			if (reqState.timer) clearTimeout(reqState.timer);
 			reqState.timer = setTimeout(executePoll, reqState.refreshTime);
 			reqState.interval = reqState.timer;
 		}
 
 		function executePoll() {
-			if (!reqState.active || document.hidden) return;
+			if (!reqState.active) return;
 
 			if (typeof CustomRefreshFunction === "function") {
 				try {
@@ -153,6 +154,18 @@ var modgui = modgui || {};
 		if (!ko.dataFor(element))
 			ko.applyBindings(ElementBinding, element);
 	}
+
+	$(document).on("visibilitychange", function() {
+		if (!document.hidden) {
+			for (var key in KoRequest) {
+				if (KoRequest.hasOwnProperty(key) && KoRequest[key] && KoRequest[key].active) {
+					if (typeof KoRequest[key].customFn === "function") {
+						try { KoRequest[key].customFn(KoRequest[key].binding); } catch(e) {}
+					}
+				}
+			}
+		}
+	});
 
 	function linkCheckUpdate() {
 		$(".check_update").on("click", function (e) {
