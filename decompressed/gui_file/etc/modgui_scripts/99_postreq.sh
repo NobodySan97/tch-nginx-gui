@@ -48,8 +48,13 @@ logecho "Process complete, restarting services."
 
 logecho "Restarting transformer..."
 /etc/init.d/transformer restart
-#Call a random value to check start of transformer
-lua -e "require('datamodel').get('uci.env.var.oui')" > /dev/null
+sleep 1
+for i in 1 2 3 4 5; do
+	if transformer-cli get uci.env.var.oui >/dev/null 2>&1; then
+		break
+	fi
+	sleep 1
+done
 
 #This file is present only in newer build that don't suffer this strange bug
 #if [ ! -f /usr/lib/lua/tch/logger.lua ]; then

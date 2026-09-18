@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.59 (Stable)
+---------------------------------------------------------------------------
+- **Fix Post-Upgrade Transformer Deadlock & State Transition**:
+  - `99_postreq.sh`: Risolto il deadlock in `do_wait` causato dalla chiamata bloccante `lua -e require('datamodel').get` subito dopo il riavvio di `transformer`. Implementato polling sicuro e non bloccante tramite `transformer-cli get` con retry progressivo.
+  - `command-log-read-modal.lp`: Perfezionata la gestione della transizione di stato al termine dell'aggiornamento, gestendo correttamente il reset allo stato `Idle` post-restart di transformer e garantendo il completamento al 100% e il redirect automatico al login.
+
 9.8.58 (Stable)
 ---------------------------------------------------------------------------
 - **Real-Time Upgrade Stage Tracker & Guaranteed Log Fallback**:

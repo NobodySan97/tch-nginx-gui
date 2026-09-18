@@ -126,7 +126,10 @@ html[#html + 1] = [[
 				}
 				$("#show_progress").text($("#show_progress").text().replace(/[\\.]{10}/g, ""));
 				$("#show_progress").append(".");
-				if ((hasStartedExecution || pollCount > 3) && (data.state == "Complete" || data.state == "Failed" || data.state == "Error")) {
+				var isSuccess = (data.state == "Complete") || (hasStartedExecution && data.state == "Idle");
+				var isFailed = (data.state == "Failed" || data.state == "Error");
+
+				if ((hasStartedExecution || pollCount > 3) && (isSuccess || isFailed)) {
 					isUpgradeComplete = true;
 					if (KoRequest.CommandLogReadInterval) {
 						KoRequest.CommandLogReadInterval.active = false;
@@ -135,7 +138,7 @@ html[#html + 1] = [[
 					}
 					$("#upgrade-gui-bar").removeClass("hide");
 					$("#show_progress").text("");
-					if (data.state == "Complete") {
+					if (isSuccess) {
 						var targetVer = (data.new_version_text && data.new_version_text !== "Unknown") ? data.new_version_text : "";
 						if (!targetVer) {
 							var matchVer = clean_log.match(/version_gui=([0-9]+\\.[0-9]+\\.[0-9]+)/i) || clean_log.match(/Online version:\\s*([0-9]+\\.[0-9]+\\.[0-9]+)/i);
@@ -178,10 +181,17 @@ html[#html + 1] = [[
 					isUpgradeComplete = true;
 					try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
 					window.location.href = "/login.lp";
+					return;
+				}
+				if (hasStartedExecution && pollCount > 15) {
+					setTimeout(function() {
+						window.location.href = "/login.lp";
+					}, 3000);
 				}
 				$("#show_progress").text($("#show_progress").text().replace(/[\\.]{10}/g, ""));
 				$("#show_progress").append('<span style="color: red;">.</span>');
 			});
+
 		}
 	};
 
