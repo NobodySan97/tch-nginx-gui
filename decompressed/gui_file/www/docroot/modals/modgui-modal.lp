@@ -848,13 +848,22 @@ ngx.print('\
   function genericButtonFunction(headingText, processMsgText, ConfirmationDialogueText, resetIDName, btnID, callFunctionName, customCallBack) {\
         var heading = headingText;\
         var processMsg = processMsgText;\
-        confirmationDialogue(ConfirmationDialogueText,heading);\
-        var PopUpHeaderText = "."+$(".popUp>.header>.header-title>p").text().split(" ")[0];\
-        $(document).on("click", PopUpHeaderText, function() {\
+        confirmationDialogue(ConfirmationDialogueText, heading);\
+        $(document).off("click.genericConfirm");\
+        $(document).on("click.genericConfirm", "#popUp #ok", function(e) {\
+                   e.preventDefault();\
+                   $(document).off("click.genericConfirm");\
+                   $(".popUpBG, #popUp").remove();\
                    tch.removeProgress();\
                    tch.showProgress(processMsg);\
-                   return resetreboot($(resetIDName), $(btnID), callFunctionName, customCallBack );\
+                   return resetreboot($(resetIDName), $(btnID), callFunctionName, customCallBack);\
         });\
+        $(document).on("click.genericConfirm", "#popUp #cancel, .popUpBG", function(e) {\
+                   e.preventDefault();\
+                   $(document).off("click.genericConfirm");\
+                   $(".popUpBG, #popUp").remove();\
+        });\
+        return false;\
   };\
 \
   $("#btn-reset-gui").on("click", function() { return genericButtonFunction(\

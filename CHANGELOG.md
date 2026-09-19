@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.64 (Stable)
+---------------------------------------------------------------------------
+- **Confirmation Popup & Advanced Reset Modernization**:
+  - `gw.css`: Risolto il bug di posizionamento del popup di conferma `#popUp` (era coperto dal container modale o spinto fuori dal viewport a causa di stili ereditati). Aggiunto posizionamento `fixed` centrato (`z-index: 3100`), backdrop scuro con `backdrop-filter: blur` (`z-index: 3050`), styling moderno per i pulsanti `Ok` e `Cancel` e design responsivo.
+  - `modgui-modal.lp`: Riscritto `genericButtonFunction` per eseguire il binding pulito e sicuro degli eventi sui pulsanti `#popUp #ok`, `#popUp #cancel` e sullo sfondo oscurato, eliminando il selettore fragile basato sulla traduzione del testo del titolo. Risolta la mancata visualizzazione del popup per *Ripristina GUI Stock*, *Reset Configurazione*, *Factory Reset* e *Reset CWMP*.
+
 9.8.63 (Stable)
 ---------------------------------------------------------------------------
 - **Realistic Multi-Stage Progress Bar & Monotonic Percentage Engine**:
