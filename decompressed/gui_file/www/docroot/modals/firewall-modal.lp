@@ -839,13 +839,13 @@ ngx.print(ui_helper.createMessages(message_helper.popMessages()))
 ');  ngx.print(ui_helper.createFooter())   ngx.print('\
 \
 <script>\
-(function() {\
-    //by disabling the add new rule button, we prevent that the user start adding a rule, before the adapted firewall level user is saved.\
-    //as this is a special case, we implement this here and not in actions.js\
-    $(document).on("change", \'.modal select:not(.no-save):not(.disabled)\', function() {\
-        $(".btn-table-new").addClass("disabled");\
-    });\
-}());\
+(function() {
+    //by disabling the add new rule button, we prevent that the user start adding a rule, before the adapted firewall level user is saved.
+    //as this is a special case, we implement this here and not in actions.js
+    $(".modal form").on("change", 'select:not(.no-save):not(.disabled)', function() {
+        $(".btn-table-new").addClass("disabled");
+    });
+}());
 var portLessProtocol = {};\
 ');  for _, v in ipairs(protolist.portless_proto) do   ngx.print('\
    portLessProtocol["');  ngx.print(v[1]); ngx.print('"] = true;\

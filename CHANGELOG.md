@@ -1,6 +1,17 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.65 (Stable)
+---------------------------------------------------------------------------
+- **System-Wide Confirmation Dialogues, Mobile Overlay & Event Lifecycle Fixes**:
+  - `responsive.css`: Risolto il conflitto di layering su dispositivi mobili/tablet (`<= 767px`): rimossa la regola obsoleta a `z-index: 2500` con `position: absolute` che causava l'occultamento dei dialoghi di conferma sotto `.popUpBG` (`z-index: 3050`). Assegnato `position: fixed !important; z-index: 3100 !important` e centratura perfetta.
+  - `gateway-modal.lp`: Refattorizzati i trigger di *Riavvia Dispositivo* (`#btn-system-reboot`) e *Ripristino Impostazioni di Fabbrica* (`#btn-system-reset`) eliminando i selettori basati sulla prima parola del testo tradotto e il leak di listener su `document`. Risolto il deadlock dell'interfaccia nel riavvio pianificato (`schedulerebootset`) causato dall'errato callback `wait_for_webserver_down`.
+  - `main-min-nojquery.js`: Modernizzata la funzione core `confirmationDialogue()`: garantita la rimozione preventiva di popup duplicati, chiusura corretta dei tag HTML, rimozione della classe `.smallcard` (che innescava reload indesiderati) e gestione predefinita della chiusura su `Cancel` e sullo sfondo oscurato.
+  - `contentsharing-modal.lp`: Risolto il blocco a tempo indefinito nel salvataggio di cartelle Samba/DLNA: il loop `wait_for_webserver_down` viene invocato solo se è stato effettivamente modificato lo switch hardware USB 3.1.
+  - `adblck-config-modal.lp`: Aggiunti gli attributi `data-name="action"` e `data-value="reload"` al pulsante *Aggiorna Liste Ora*, ripristinandone la piena funzionalità.
+  - `assistance-modal.lp` & `firewall-modal.lp`: Rimossa la manomissione di `$._data` e ristretto lo scope dei listener di validazione al solo form attivo.
+  - `lte-sim.lp`: Rimosso il ciclo distruttivo `while(id--) clearTimeout(id)` che cancellava tutti i timer di sistema e polling della dashboard.
+
 9.8.64 (Stable)
 ---------------------------------------------------------------------------
 - **Confirmation Popup & Advanced Reset Modernization**:

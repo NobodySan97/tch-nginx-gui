@@ -257,30 +257,21 @@ ngx.print('\
 \
 	$.getScript("/js/srp-min.js");\
 \
-	var oldhandler;\
-	$.each($._data(document, "events"), function(i, event){\
-		$.each(event, function(i, handler){\
-			if(handler["selector"] == "#save-config"){\
-				oldhandler = handler[\'handler\'];\
-			}\
-		});\
-	});\
-	$(document).off("click", "#save-config");\
-    $("#save-config").on("click", function (event) {\
-        var user = "'); ngx.print( assistant:username() ); ngx.print('";\
-        var password = $(\'input[name="password"]\').val();\
-		var port = $(\'input[name="port"]\').val();\
+	function updateSrpCredentials() {\
+		var user = "'); ngx.print( assistant:username() ); ngx.print('";\
+		var password = $('input[name="password"]').val();\
+		if (password != "") {\
+			var srp = new SRP();\
+			srp.generateSaltAndVerifierTheCallback(user, password, function(salt, verifier) {\
+				$('input[name="salt"]').val(salt);\
+				$('input[name="verifier"]').val(verifier);\
+				$('input[name="password"]').val("");\
+			});\
+		}\
+	}\
 \
-        if(password != "" ) {\
-             var srp = new SRP();\
-             srp.generateSaltAndVerifierTheCallback(user, password, function(salt, verifier) {\
-                 $(\'input[name="salt"]\').val(salt);\
-                 $(\'input[name="verifier"]\').val(verifier);\
-                 $(\'input[name="password"]\').val(""); // clean that up no need to send it over the air\
-				oldhandler();\
-             });\
-        } else oldhandler();\
-    });\
+	$('input[name="password"]').on("change blur", updateSrpCredentials);\
+	$("#save-config").on("mousedown touchstart", updateSrpCredentials);\
 </script>\
 \
-'); 
+');

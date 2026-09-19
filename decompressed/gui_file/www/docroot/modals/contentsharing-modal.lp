@@ -543,10 +543,11 @@ $("#toggle-usb3").on("change", function() {\
   }\
 });\
 \
-$(document).on("click", "#save-config", function() {\
+$("#save-config").off("click.csSave").on("click.csSave", function() {\
   var form = $(".modal form");\
   var params = form.serializeArray();\
-  if (($("#cs-flag").val() === "1") && (usb3_support !== $("#toggle-usb3").val())) {\
+  var isRebootNeeded = ($("#cs-flag").val() === "1") && (usb3_support !== $("#toggle-usb3").val());\
+  if (isRebootNeeded) {\
     $("#rebooting-msg").removeClass("hide");\
     $("#warning-msg").addClass("hide");\
     $("#reboot-warning-msg").addClass("hide");\
@@ -567,13 +568,16 @@ $(document).on("click", "#save-config", function() {\
     value : "YES"\
   }, tch.elementCSRFtoken());\
   var target = form.attr("action");\
+  var callback = isRebootNeeded ? wait_for_webserver_down : function(data) {\
+    // Normal save completed\
+  };\
   $.post(\
     target,\
     params,\
-    wait_for_webserver_down,\
+    callback,\
     "json"\
   );\
   return false;\
 });\
 </script>\
-'); 
+');

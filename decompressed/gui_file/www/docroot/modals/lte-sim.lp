@@ -246,11 +246,6 @@ ngx.print(ui_helper.createFooter())
 		var new_error_msg = "');  ngx.print( T"Please enter a valid PIN." ); ngx.print('"+" "+pin_error_msg;\
 		var rnew_error_msg = "');  ngx.print( T"New PIN code and confirmed PIN code don't match." ); ngx.print('";\
 \
-		var id = window.setTimeout(function() {}, 0);\
-		while (id--) {\
-			window.clearTimeout(id);\
-		}\
-\
 		function validatePin(code) {\
 			return /^\\d{4,8}$/.test(code);\
 		}\

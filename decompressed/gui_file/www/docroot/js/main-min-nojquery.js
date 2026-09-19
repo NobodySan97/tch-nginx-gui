@@ -2035,17 +2035,17 @@ $(function () {
 (jQuery);
 var tch = tch || {};
 function confirmationDialogue(t, e) {
-	var n = '<div class="header"><div data-toggle="modal" class="header-title pull-left"><p>' + e + "</p></div></div>";
-	$("body").append('<div class="popUpBG"></div>'),
-	$("body").append('<div id="popUp"  class="popUp smallcard popUp-modal">' + n + '<div id="Poptxt" class="content"></div>');
-	var i = t + '<br/><div class = "pull-center"><div id="ok" class= "btn btn-primary btn-large ' + e + '" align="center">' + okButton + '</div><div id="cancel" class="btn btn-primary btn-large" align="center">' + cancelButton + "</div></div>",
-	o = $(document).height(),
-	a = (n = $(window).height(), $(window).scrollTop());
-	$("#Poptxt").html(i),
-	$(".popUpBG").css("height", o),
-	i = $(".header .settings").css("background-color"),
-	$(".spinner3 div").css("background-color", i),
-	10 < a && $("#popUp").css("top", .4 * n + a)
+	$(".popUpBG, #popUp").remove();
+	var n = '<div class="header"><div data-toggle="modal" class="header-title pull-left"><p>' + (e || "") + "</p></div></div>";
+	$("body").append('<div class="popUpBG"></div>');
+	$("body").append('<div id="popUp" class="popUp popUp-modal">' + n + '<div id="Poptxt" class="content"></div></div>');
+	var i = (t || "") + '<br/><div class="pull-center"><div id="ok" class="btn btn-primary btn-large btn-confirm-ok" align="center">' + okButton + '</div><div id="cancel" class="btn btn-primary btn-large btn-confirm-cancel" align="center">' + cancelButton + "</div></div>";
+	$("#Poptxt").html(i);
+	$(document).off("click.coreConfirmDismiss");
+	$(document).on("click.coreConfirmDismiss", "#popUp #cancel, .popUpBG", function(e) {
+		$(document).off("click.coreConfirmDismiss");
+		$(".popUpBG, #popUp").remove();
+	});
 }
 !function (t) {
 	function e() {

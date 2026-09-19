@@ -38,9 +38,8 @@ end
 local reload_button = {
   button = {
     id = "btn-reload-adb",
-    name = "action",
-    value = "reload",
-    type = "submit",
+    ["data-name"] = "action",
+    ["data-value"] = "reload",
   }
 }
 

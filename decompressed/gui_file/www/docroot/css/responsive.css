@@ -82,12 +82,17 @@ h2.span4{
 }
 
 @media screen and (max-width: 767px) {
-    .popUp {
-        z-index:2500;
-        position: absolute;
-        top: 35%;
-        left: 3%;
-        width: 93%;
+    .popUp, #popUp.popUp, div#popUp {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        -webkit-transform: translate(-50%, -50%) !important;
+        width: 90% !important;
+        max-width: 92vw !important;
+        max-height: 85vh !important;
+        z-index: 3100 !important;
+        margin: 0 !important;
     }
 
     .hidden-desktop {

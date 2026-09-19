@@ -894,16 +894,34 @@ ngx.print('\
     );\
     return false;\
   }\
-  $("#btn-system-reboot").on("click", function() {\
-      var heading = "');  ngx.print(T'Restart Device'); ngx.print('";\
-      var processMsg = "');  ngx.print(T'Rebooting'); ngx.print('";\
-      confirmationDialogue(\'');  ngx.print(T"Do you want to continue?"); ngx.print('\',heading);\
-	  var PopUpHeaderText = "."+$(".popUp>.header>.header-title>p").text().split(" ")[0];\
-      $(document).on("click", PopUpHeaderText, function() {\
+  function genericGatewayButton(headingText, processMsgText, confirmationText, resetMsgElement, btnElement, actionName) {\
+      confirmationDialogue(confirmationText, headingText);\
+      $(document).off("click.gwConfirm");\
+      $(document).on("click.gwConfirm", "#popUp #ok", function(e) {\
+           e.preventDefault();\
+           $(document).off("click.gwConfirm");\
+           $(".popUpBG, #popUp").remove();\
            tch.removeProgress();\
-           tch.showProgress(processMsg);\
-           return resetreboot($("#rebooting-msg"), $(this), "system_reboot" );\
-	  });\
+           tch.showProgress(processMsgText);\
+           return resetreboot(resetMsgElement, btnElement, actionName);\
+      });\
+      $(document).on("click.gwConfirm", "#popUp #cancel, .popUpBG", function(e) {\
+           e.preventDefault();\
+           $(document).off("click.gwConfirm");\
+           $(".popUpBG, #popUp").remove();\
+      });\
+      return false;\
+  }\
+\
+  $("#btn-system-reboot").on("click", function() {\
+      return genericGatewayButton(\
+          "');  ngx.print(T'Restart Device'); ngx.print('",\
+          "');  ngx.print(T'Rebooting'); ngx.print('",\
+          "');  ngx.print(T"Do you want to continue?"); ngx.print('",\
+          $("#rebooting-msg"),\
+          $(this),\
+          "system_reboot"\
+      );\
   });\
 \
   $("#btn-schedule-reboot").on("click", function() {\
@@ -921,9 +939,12 @@ ngx.print('\
       $("#btn-schedule-reboot").addClass("hide");\
       $(".schedule_message_get").removeClass("hide");\
 \
-       $.post(\
-          target,\
-          { action: "schedulerebootset", CSRFtoken: $("meta[name=CSRFtoken]").attr("content"),paramvalue :schedule_time },wait_for_webserver_down,"json");\
+        $.post(\
+           target,\
+           { action: "schedulerebootset", CSRFtoken: $("meta[name=CSRFtoken]").attr("content"),paramvalue :schedule_time },\
+           function(data) {},\
+           "json"\
+        );\
      }\
     else\
      {\
@@ -932,15 +953,14 @@ ngx.print('\
  });\
 \
   $("#btn-system-reset").on("click", function() {\
-      var heading = "');  ngx.print(T'Factory Defaults'); ngx.print('";\
-      var processMsg = "');  ngx.print(T'Resetting'); ngx.print('";\
-      confirmationDialogue(\'');  ngx.print(T"Do you want to continue? "); ngx.print('\',heading);\
-	  var PopUpHeaderText = "."+$(".popUp>.header>.header-title>p").text().split(" ")[0];\
-      $(document).on("click", PopUpHeaderText, function() {\
-          tch.removeProgress();\
-          tch.showProgress(processMsg);\
-          return resetreboot($("#resetting-msg"), $(this), "system_reset");\
-	  });\
+      return genericGatewayButton(\
+          "');  ngx.print(T'Factory Defaults'); ngx.print('",\
+          "');  ngx.print(T'Resetting'); ngx.print('",\
+          "');  ngx.print(T"Do you want to continue? "); ngx.print('",\
+          $("#resetting-msg"),\
+          $(this),\
+          "system_reset"\
+      );\
   });\
 \
   if ("');  ngx.print(content["schedule_reboot_get"]); ngx.print('" == "1") {\
