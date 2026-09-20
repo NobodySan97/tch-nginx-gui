@@ -63,11 +63,10 @@ devicelog = function()
       end
     else
       log = popen("/sbin/logread")
-      logString = log:read("*a")
-    end
-
-    if log == nil then
-        return ""
+      if log then
+        logString = log:read("*a")
+        log:close()
+      end
     end
 
     if logString == nil then

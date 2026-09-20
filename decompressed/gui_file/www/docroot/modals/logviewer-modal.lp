@@ -64,16 +64,34 @@ end
 
 local log_array = {}
 local processes_list = {}
-local line_pattern = "^([^%s]+%s+%d+ %d+:%d+:%d+) [^%s]+ ([^%s]+) ([^%s:]+):%s*(.*)$"
+local line_patterns = {
+    "^([%a]+%s+[%a]+%s+%d+%s+%d+:%d+:%d+%s+%d+)%s+([^%s]+)%s+([^%s:]+):?%s*(.*)$",
+    "^([^%s]+%s+%d+%s+%d+:%d+:%d+)%s+[^%s]+%s+([^%s]+%.[^%s]+)%s+([^%s:]+):?%s*(.*)$",
+    "^([^%s]+%s+%d+%s+%d+:%d+:%d+)%s+([^%s]+)%s+([^%s:]+):?%s*(.*)$",
+    "^([%d%-%a%:%+%.]+)%s+([^%s]+)%s+([^%s:]+):?%s*(.*)$",
+}
 
 for line in string.gmatch(logdata or "", "([^\r\n]+)") do
-    local date, facility, process, message = string.match(line, line_pattern)
+    local date, facility, process, message
+    for _, pat in ipairs(line_patterns) do
+        date, facility, process, message = string.match(line, pat)
+        if date and process then
+            break
+        end
+    end
+    if not (date and process) then
+        local d, r = string.match(line, "^(%S+)%s*(.*)$")
+        date = d or ""
+        facility = "syslog"
+        process = "system"
+        message = r or line
+    end
     if date and process then
         local p = string.match(process, "[^%[]+") or process
         if not current_process or p == current_process then
             log_array[#log_array+1] = { date, facility, process, message or "" }
         end
-        if p then
+        if p and p ~= "" then
             processes_list[p] = true
         end
     end
