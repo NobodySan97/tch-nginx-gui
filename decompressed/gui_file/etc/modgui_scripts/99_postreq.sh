@@ -3,17 +3,19 @@
 . /etc/init.d/rootdevice
 
 check_gui_tmp() {
-	if [ -f /tmp/GUI_dev.tar.bz2 ]; then
-		logecho "Found GUI_dev in tmp dir... Cleaning..."
-		rm /tmp/GUI_dev.tar.bz2
-	fi
-	if [ -f /tmp/GUI.tar.bz2 ]; then
-		logecho "Found GUI in tmp dir... Cleaning..."
-		rm /tmp/GUI.tar.bz2
-	fi
-	if [ -d /total ]; then
-		rm -r /total
-	fi
+	logecho "Cleaning temporary installation files and archives from /tmp..."
+	rm -rf /tmp/GUI_dev.tar.bz2 \
+	       /tmp/GUI.tar.bz2 \
+	       /tmp/gui_file.tar.bz2 \
+	       /tmp/base.tar.bz2 \
+	       /tmp/3.4_ipk \
+	       /tmp/4.1.38_ipk \
+	       /tmp/upgrade-pack-* \
+	       /tmp/md5check \
+	       /tmp/ledfw* \
+	       /tmp/web_unlock \
+	       /tmp/dosprotect_orig \
+	       /total 2>/dev/null || true
 }
 
 start_stop_nginx() {
