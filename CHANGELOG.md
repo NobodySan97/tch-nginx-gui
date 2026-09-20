@@ -1,6 +1,17 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.67 (Stable)
+---------------------------------------------------------------------------
+- **Comprehensive UI/Modal Layout Overhaul, Wi-Fi Nurse AP Detection & Tab Guards**:
+  - `gw.css` & `responsive.css`: Modernizzato il layout responsive dei modali con struttura a due colonne a larghezza flessibile; aggiunta protezione da troncamento e overflow con scrolling orizzontale ottimizzato per tabelle dense fino a 10 colonne su qualsiasi risoluzione desktop e mobile.
+  - `wifi-nurse-modal.lp`: Riscritto il motore di discovery degli access point con scansione dinamica di tutte le interfacce radio (`@ap0`, `@ap1`, `@ap2`, `@ap3`), mappatura automatica SSID-banda (2.4GHz / 5GHz), risoluzione hostnames da DHCP e nuovo alert esplicativo in caso di nessun client connesso.
+  - `tabs-voice.lp`: Risolto il bug di annidamento in `tinsert` e protetto il controllo di `content.variant` per la tab DECT, prevenendo errori di rendering nei sottomenu voce.
+  - `relay-modal.lp`: Aggiunto fallback difensivo nella lettura di `uci.network.interface.@wan.ifname` per prevenire crash su connessioni WAN non ancora inizializzate.
+  - `dyndns-modal.lp`: Corretto lo scambio di variabili tra `content.Interface` e `content.Domain` nel salvataggio dei parametri DDNS.
+  - `cards/009_extensions.lp`: Implementata conversione numerica sicura (`tonumber(marketing_version[1].value:sub(1,4)) or 0`) per evitare eccezioni di confronto con versioni firmware anomale.
+  - **Audit Multi-Agent & Playwright**: Verificati e validati con successo tutti i 64 modali e 77 tab/subtab live sul router (`192.168.1.1`).
+
 9.8.66 (Stable)
 ---------------------------------------------------------------------------
 - **Restore Stock GUI & Factory Reset Preserving Permanent Root SSH**:
