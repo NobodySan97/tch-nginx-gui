@@ -133,21 +133,23 @@ ngx.print('\
       html[#html + 1] = ui_helper.createLanguageSelect('webui-core', gettext.language())
       html[#html + 1] = '</div>'
     html[#html + 1] = '<div class="header-sub-button">'
-    if session:isdefaultuser() then
+    local is_default_user = not session or (session.isdefaultuser and session:isdefaultuser())
+    if is_default_user then
             html[#html + 1] = '<a href="login.lp" class="btn" id="signin">'
             html[#html + 1] = T"Sign in"
             html[#html + 1] = '</a>'
         else
+            local cur_user = (session and session.getusername and session:getusername()) or ""
             html[#html + 1] = [[          <div class="btn-group" id="logged">
                     <button class="btn"> ]]
-            html[#html + 1] = session:getusername()
+            html[#html + 1] = cur_user
             html[#html + 1] = [[ </button>
                     <button class="btn dropdown-toggle" data-toggle="dropdown"><span class="caret"></span> ]]
       html[#html + 1] = T"Advanced "
             html[#html + 1] = [[
                     </button>
                     <ul class="dropdown-menu pull-right"> ]]
-            if session:getusername() ~= assistant:username() then
+            if cur_user ~= assistant:username() then
                 html[#html + 1] = [[ <li><a tabindex="-1" href="/password.lp" id="changepass"> ]]
                 html[#html + 1] = T"Profile Settings"
                 html[#html + 1] = [[ </a></li><li class="divider"></li> ]]
@@ -158,7 +160,7 @@ ngx.print('\
         html[#html + 1] = [[ <li><a tabindex="-1" href="https://github.com/NobodySan97/tch-nginx-gui" target="_blank"> ]]
         html[#html + 1] = T"GitHub GUI"
         html[#html + 1] = [[ </a></li><li class="divider"></li> ]]
-      if not ( session:getusername() == "guest" ) then
+      if not ( cur_user == "guest" ) then
         if cui.luci_webui == "1" then
           html[#html + 1] = [[ <li><a tabindex="-1" target="_blank" href="/"
                   onclick="javascript:event.target.port=9080;event.target.protocol='http'"> ]]
@@ -182,8 +184,8 @@ ngx.print('\
         html[#html + 1] = T"Transmission Webui"
         html[#html + 1] = [[ </a></li><li class="divider"></li> ]]
         end
-      end
-            html[#html + 1] = '<li><a tabindex="-1" href="'..session:getLoginPath()..'" id="signout">'
+            local login_path = (session and session.getLoginPath and session:getLoginPath()) or "/login.lp"
+            html[#html + 1] = '<li><a tabindex="-1" href="'..login_path..'" id="signout">'
             html[#html + 1] = T"Sign out"
             html[#html + 1] = [[</a></li></ul></div>]]
 
