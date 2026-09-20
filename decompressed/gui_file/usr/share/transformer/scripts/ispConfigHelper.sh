@@ -155,22 +155,38 @@ firewall_specific_sip_rules_FASTWEB() {
   fi
 }
 
+get_cwmp_section() {
+  if [ -n "$(uci get -q cwmpd.operationalACS1)" ]; then
+    echo "operationalACS1"
+  elif [ -n "$(uci get -q cwmpd.cwmpd_config)" ]; then
+    echo "cwmpd_config"
+  elif [ -n "$(uci get -q cwmpd.@operACS[0])" ]; then
+    echo "@operACS[0]"
+  elif [ -n "$(uci get -q cwmpd.@cwmpd[0])" ]; then
+    echo "@cwmpd[0]"
+  else
+    uci -q set cwmpd.cwmpd_config=cwmpd
+    echo "cwmpd_config"
+  fi
+}
+
 cwmp_specific_FASTWEB() {
   logecho "FASTWEB ISP detected, finding CWMP server..."
   if uci get -q versioncusto.override.fwversion_override | grep -q FW; then
     #Make modem think this is a fastweb modem so the server permit voip registration with internal value
-    uci set versioncusto.override.fwversion_override_old="$(uci get -q versioncusto.override.fwversion_override)"
-    uci set versioncusto.override.fwversion_override='18.3.0237_FW_216_FGA2130'
-    uci commit versioncusto
+    uci -q set versioncusto.override.fwversion_override_old="$(uci get -q versioncusto.override.fwversion_override)"
+    uci -q set versioncusto.override.fwversion_override='18.3.0237_FW_216_FGA2130'
+    uci -q commit versioncusto
   fi
-  if [ -n "$(uci get -q cwmpd.cwmpd_config.acs_url)" ]; then
-    if [ "$(uci get -q cwmpd.cwmpd_config.acs_url)" != "http://59.0.121.191:8080/ACS-server/ACS" ]; then
+  cwmp_sec="$(get_cwmp_section)"
+  if [ -n "$(uci get -q cwmpd.$cwmp_sec.acs_url)" ]; then
+    if [ "$(uci get -q cwmpd.$cwmp_sec.acs_url)" != "http://59.0.121.191:8080/ACS-server/ACS" ]; then
       #Fastweb requires device registred in CWMP to make voip work in MAN voip registar
       #Fastweb will autoconfigure acs username and password with empty acs_url
       #Make the device think is first power on by removing cwmpd db
       [ -f /etc/cwmpd.db ] && rm /etc/cwmpd.db
-      uci set cwmpd.cwmpd_config.acs_url=""
-      uci commit cwmpd
+      uci -q set cwmpd.$cwmp_sec.acs_url=""
+      uci -q commit cwmpd
       /etc/init.d/cwmpd enable
       if [ ! "$(pgrep "cwmpd")" ]; then
         /etc/init.d/cwmpd start
@@ -182,7 +198,8 @@ cwmp_specific_FASTWEB() {
 }
 
 cwmp_specific_TIM() {
-  cwmp_url="$(uci get cwmpd.cwmpd_config.acs_url)"
+  cwmp_sec="$(get_cwmp_section)"
+  cwmp_url="$(uci get -q cwmpd.$cwmp_sec.acs_url)"
   detected_acs="Undetected"
   logecho "TIM ISP detected, finding CWMP server..."
   new_fw220=https://fwa.cdp.tim.it/cwmpdWeb/CPEMgt
@@ -204,7 +221,7 @@ cwmp_specific_TIM() {
   logecho "CWMP Server detected: $detected_acs"
 
   logecho "Resetting unlock bit..."
-  uci set env.var.unlockedstatus='0'
+  uci -q set env.var.unlockedstatus='0'
 
   [ -z "$cwmp_url" ] && cwmp_url="None"
 
@@ -212,12 +229,12 @@ cwmp_specific_TIM() {
 
     #Make the device think is first power on by removing cwmpd db
     [ -f /etc/cwmpd.db ] && rm /etc/cwmpd.db
-    uci set cwmpd.cwmpd_config.acs_url="$detected_acs"
-    if [ "$(uci get -q cwmpd.cwmpd_config.interface)" != "wan" ]; then
-      uci set cwmpd.cwmpd_config.interface='wan'
+    uci -q set cwmpd.$cwmp_sec.acs_url="$detected_acs"
+    if [ "$(uci get -q cwmpd.$cwmp_sec.interface)" != "wan" ]; then
+      uci -q set cwmpd.$cwmp_sec.interface='wan'
     fi
-    uci commit cwmpd
-    if [ "$(uci get -q cwmpd.cwmpd_config.acs_url)" = "None" ]; then
+    uci -q commit cwmpd
+    if [ "$(uci get -q cwmpd.$cwmp_sec.acs_url)" = "None" ]; then
       [ "$(pgrep "cwmpd")" ] && /etc/init.d/cwmpd stop
     else
       /etc/init.d/cwmpd enable
@@ -233,9 +250,9 @@ cwmp_specific_TIM() {
 check_clean() {
   if [ -n "$(uci get -q firewall.Allow_restricted_sip_1.name)" ] && [ "$1" != "Fastweb" ]; then
     if [ $(uci get -q versioncusto.override.fwversion_override_old) ]; then
-      uci set versioncusto.override.fwversion_override="$(uci get -q versioncusto.override.fwversion_override_old)"
-      uci del versioncusto.override.fwversion_override_old
-      uci commit versioncusto
+      uci -q set versioncusto.override.fwversion_override="$(uci get -q versioncusto.override.fwversion_override_old)"
+      uci -q del versioncusto.override.fwversion_override_old
+      uci -q commit versioncusto
     fi
   fi
   if [ -n "$(uci get -q modgui.var.ppp_mgmt)" ] && [ "$1" != "TIM" ]; then
@@ -246,37 +263,38 @@ check_clean() {
 
 setup_ISP() {
   logecho "Checking detected ISP and setting CWMP..."
+  cwmp_sec="$(get_cwmp_section)"
   case $1 in
   Tiscali)
     check_clean Tiscali
-    uci set cwmpd.cwmpd_config.acs_url="http://webdirect.tr69.tiscali.it:8080/ftacs-basic/ACS"
-    uci set cwmpd.cwmpd_config.acs_user="technicolor"
-    uci set cwmpd.cwmpd_config.acs_pass="techn_tr69@"
-    uci commit cwmpd
-    [ "$(uci get -q mmpbxrvsipnet.sip_net.user_param_value)" ] && uci del mmpbxrvsipnet.sip_net.user_param_value
+    uci -q set cwmpd.$cwmp_sec.acs_url="http://webdirect.tr69.tiscali.it:8080/ftacs-basic/ACS"
+    uci -q set cwmpd.$cwmp_sec.acs_user="technicolor"
+    uci -q set cwmpd.$cwmp_sec.acs_pass="techn_tr69@"
+    uci -q commit cwmpd
+    [ "$(uci get -q mmpbxrvsipnet.sip_net.user_param_value)" ] && uci -q del mmpbxrvsipnet.sip_net.user_param_value
     ;;
   Fastweb)
     check_clean Fastweb
-    [ "$(uci get -q mmpbxrvsipnet.sip_net.user_param_value)" ] && uci del mmpbxrvsipnet.sip_net.user_param_value
+    [ "$(uci get -q mmpbxrvsipnet.sip_net.user_param_value)" ] && uci -q del mmpbxrvsipnet.sip_net.user_param_value
     firewall_specific_sip_rules_FASTWEB
     cwmp_specific_FASTWEB
     ;;
   TIM)
     check_clean TIM
     cwmp_specific_TIM
-    uci set modgui.var.ppp_mgmt="$(uci -q get env.var.serial)-$(uci -q get env.var.oui)@00000.aliceres.mgmt"
-    uci set modgui.var.ppp_realm_ipv6="$(uci -q get env.var.serial)-$(uci -q get env.var.oui)@alice6.it"
+    uci -q set modgui.var.ppp_mgmt="$(uci -q get env.var.serial)-$(uci -q get env.var.oui)@00000.aliceres.mgmt"
+    uci -q set modgui.var.ppp_realm_ipv6="$(uci -q get env.var.serial)-$(uci -q get env.var.oui)@alice6.it"
     if [ ! "$(uci get -q dhcp.dnsmasq.server)" ]; then
-      uci set dhcp.dnsmasq.server='151.99.125.1'
+      uci -q set dhcp.dnsmasq.server='151.99.125.1'
       restart_dnsmasq=1
     fi
-    [ ! "$(uci get -q mmpbxrvsipnet.sip_net.user_param_value)" ] && uci set mmpbxrvsipnet.sip_net.user_param_value=phone
+    [ ! "$(uci get -q mmpbxrvsipnet.sip_net.user_param_value)" ] && uci -q set mmpbxrvsipnet.sip_net.user_param_value=phone
     ;;
   Other)
     check_clean Other
     if [ "$(uci -q get modgui.var.isp_autodetect)" = "1" ]; then #this disable cwmpd if it's not known ISP...
-      uci set cwmpd.cwmpd_config.state='0'
-      uci commit cwmpd
+      uci -q set cwmpd.$cwmp_sec.state='0'
+      uci -q commit cwmpd
       if [ -f /var/run/cwmpd.pid ]; then
         /etc/init.d/cwmpd stop
       fi
@@ -290,7 +308,7 @@ setup_ISP() {
   esac
   logecho "Restarting dnsmasq if needed..."
   if [ $restart_dnsmasq -eq 1 ]; then
-    uci commit
+    uci -q commit
     killall dnsmasq
     /etc/init.d/dnsmasq restart
   fi
@@ -300,22 +318,23 @@ autodetect_isp() { #Detect ISP based on cwmp or wan settings (Italian only)
   if [ "$(uci -q get modgui.var.isp_autodetect)" = "1" ]; then
     logecho "Detecting ISP and cleanup..."
     ppp_user=$(uci -q get network.wan.username)
-    cwmp_url=$(uci -q get cwmpd.cwmpd_config.acs_url)
+    cwmp_sec="$(get_cwmp_section)"
+    cwmp_url=$(uci -q get cwmpd.$cwmp_sec.acs_url)
     if echo "$ppp_user" | grep -q "alice" ||
       echo "$ppp_user" | grep -q "agcombo" ||
       echo "$ppp_user" | grep -q "unica" ||
       echo "$ppp_user" | grep -q "aliceres" ||
       echo "$ppp_user" | grep -q "@00000."; then
-      uci set modgui.var.isp="TIM"
+      uci -q set modgui.var.isp="TIM"
     elif echo "$ppp_user" | grep -q "tiscali.it" || #acs tiscali is preconfigured
       echo "$cwmp_url" | grep -q "tiscali.it"; then #on tiscali firmware only
-      uci set modgui.var.isp="Tiscali"
+      uci -q set modgui.var.isp="Tiscali"
     elif echo "$cwmp_url" | grep -q "59.0.121.191"; then #on fastweb firmware only
-      uci set modgui.var.isp="Fastweb"
+      uci -q set modgui.var.isp="Fastweb"
     else
-      uci set modgui.var.isp="Other"
+      uci -q set modgui.var.isp="Other"
     fi
-    uci commit modgui
+    uci -q commit modgui
   fi
 }
 
