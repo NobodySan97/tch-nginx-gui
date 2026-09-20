@@ -57,7 +57,9 @@ restoreOriginalGui() {
 	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && cp -p /overlay/$running_bank/etc/init.d/rootdevice $emergencydir/etc/init.d/ 2>/dev/null
 	[ -f "/overlay/$running_bank/usr/bin/rtfd" ] && cp -p /overlay/$running_bank/usr/bin/rtfd $emergencydir/usr/bin/ 2>/dev/null
 	[ -f "/overlay/$running_bank/usr/bin/sysupgrade-safe" ] && cp -p /overlay/$running_bank/usr/bin/sysupgrade-safe $emergencydir/usr/bin/ 2>/dev/null
-	[ -e "/overlay/$running_bank/etc/rc.d/S94rootdevice" ] && cp -dp /overlay/$running_bank/etc/rc.d/S94rootdevice $emergencydir/etc/rc.d/ 2>/dev/null
+	for f in /overlay/$running_bank/etc/rc.d/*rootdevice*; do
+		[ -e "$f" ] && cp -dp "$f" $emergencydir/etc/rc.d/ 2>/dev/null
+	done
 	
 	#Delete any change from running bank
 	rm -rf /overlay/$running_bank
@@ -81,6 +83,15 @@ restoreOriginalGui() {
 	#Root only
 	emergencydir=/tmp/rootfile/emergency
 	[ -d "$emergencydir" ] && cp -drp $emergencydir/* /overlay/$running_bank/ 2>/dev/null
+	
+	#Ensure autostart symlinks and Dropbear SSH are always active
+	mkdir -p /overlay/$running_bank/etc/rc.d
+	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && {
+		chmod +x /overlay/$running_bank/etc/init.d/rootdevice 2>/dev/null
+		ln -sf ../init.d/rootdevice /overlay/$running_bank/etc/rc.d/S94rootdevice 2>/dev/null
+		ln -sf ../init.d/rootdevice /overlay/$running_bank/etc/rc.d/S10rootdevice 2>/dev/null
+	}
+	
 	sync
 	reboot
 }
@@ -105,7 +116,9 @@ restoreOriginalGuiFull() {
 	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && cp -p /overlay/$running_bank/etc/init.d/rootdevice $emergencydir/etc/init.d/ 2>/dev/null
 	[ -f "/overlay/$running_bank/usr/bin/rtfd" ] && cp -p /overlay/$running_bank/usr/bin/rtfd $emergencydir/usr/bin/ 2>/dev/null
 	[ -f "/overlay/$running_bank/usr/bin/sysupgrade-safe" ] && cp -p /overlay/$running_bank/usr/bin/sysupgrade-safe $emergencydir/usr/bin/ 2>/dev/null
-	[ -e "/overlay/$running_bank/etc/rc.d/S94rootdevice" ] && cp -dp /overlay/$running_bank/etc/rc.d/S94rootdevice $emergencydir/etc/rc.d/ 2>/dev/null
+	for f in /overlay/$running_bank/etc/rc.d/*rootdevice*; do
+		[ -e "$f" ] && cp -dp "$f" $emergencydir/etc/rc.d/ 2>/dev/null
+	done
 	
 	#Delete any change from running bank (wiping modded GUI and configs)
 	rm -rf /overlay/$running_bank
@@ -118,9 +131,42 @@ restoreOriginalGuiFull() {
 		chmod 600 /overlay/$running_bank/etc/shadow 2>/dev/null
 	fi
 	
-	#Restore Root only
+	#Restore Root files
 	emergencydir=/tmp/rootfile/emergency
 	[ -d "$emergencydir" ] && cp -drp $emergencydir/* /overlay/$running_bank/ 2>/dev/null
+	
+	#Force Dropbear configuration to be permanently enabled on LAN port 22
+	mkdir -p /overlay/$running_bank/etc/config
+	cat << 'EOF' > /overlay/$running_bank/etc/config/dropbear
+config dropbear 'lan'
+	option Port '22'
+	option Interface 'lan'
+	option enable '1'
+	option RootPasswordAuth 'on'
+	option PasswordAuth 'on'
+	option RootLogin '1'
+EOF
+
+	#Create uci-defaults script to guarantee rootdevice and dropbear execution at first boot
+	mkdir -p /overlay/$running_bank/etc/uci-defaults
+	cat << 'EOF' > /overlay/$running_bank/etc/uci-defaults/99-rootdevice
+[ -x /etc/init.d/rootdevice ] && /etc/init.d/rootdevice enable 2>/dev/null
+[ -x /etc/init.d/dropbear ] && {
+	/etc/init.d/dropbear enable 2>/dev/null
+	/etc/init.d/dropbear restart 2>/dev/null
+}
+exit 0
+EOF
+	chmod +x /overlay/$running_bank/etc/uci-defaults/99-rootdevice 2>/dev/null
+	
+	#Ensure autostart symlinks are explicitly present in etc/rc.d
+	mkdir -p /overlay/$running_bank/etc/rc.d
+	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && {
+		chmod +x /overlay/$running_bank/etc/init.d/rootdevice 2>/dev/null
+		ln -sf ../init.d/rootdevice /overlay/$running_bank/etc/rc.d/S94rootdevice 2>/dev/null
+		ln -sf ../init.d/rootdevice /overlay/$running_bank/etc/rc.d/S10rootdevice 2>/dev/null
+	}
+	
 	sync
 	reboot
 }

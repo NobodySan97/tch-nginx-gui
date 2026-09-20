@@ -5,6 +5,7 @@
 ---------------------------------------------------------------------------
 - **Restore Stock GUI & Factory Reset Preserving Permanent Root SSH**:
   - `resetUtility.sh`: Implementata la funzione `restoreOriginalGuiFull()` (invocata con `--resetGuiFull`) che pulisce l'intera partizione `/overlay` rimuovendo sia la custom GUI che tutte le personalizzazioni e configurazioni utente per un factory reset totale, preservando in modo sicuro e persistente l'accesso di root, i file di emergenza (`/tmp/rootfile/emergency/rootdevice`, `platform.sh`, `sysupgrade-safe`, `rtfd`) e l'hash della password di `/etc/shadow`.
+  - `resetUtility.sh`: Garantito l'avvio automatico e immediato di Dropbear SSH al boot generando la configurazione attiva in `/etc/config/dropbear`, il job di autostart `/etc/uci-defaults/99-rootdevice` e i link simbolici in `/etc/rc.d/S94rootdevice` e `S10rootdevice`.
   - `system.modgui.map`: Aggiunto il mapping RPC transformer `resetguifull = "/usr/share/transformer/scripts/resetUtility.sh --resetGuiFull"`.
   - `modgui-modal.lp`: Aggiunta la nuova opzione grafica *"Ripristina GUI Stock e Reset Fabbrica"* (`#btn-reset-gui-full`) con avviso dedicato di sicurezza e dialogo di conferma interattivo con supporto per annullamento.
   - `webui-core.po`: Aggiornate e compilate le traduzioni complete in italiano e tedesco.
