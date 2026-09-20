@@ -96,23 +96,22 @@ local function handleStatsFile(name, statsData, times, binit)
 				local start_idx = (#data > datanum) and (#data - datanum + 2) or 2
 				for index = start_idx, #data do
 					local value = data[index]
-						local timePart = value:match("(%d+:%d+)$")
-						local oldtimes = timePart and tonumber((timePart:gsub(":", "")))
-						local ntimes = tonumber((times:gsub(":", "")))
-						if oldtimes and ntimes and oldtimes == ntimes then
-							if not insert then
-								f:write(statsData .. " " ..  times .. "\n")
-								insert = true
-							end
-						elseif oldtimes and ntimes and oldtimes > ntimes then
-							if not insert then
-								f:write(statsData .. " " ..  times .. "\n")
-								insert = true
-							end
-							f:write(value .. "\n")
-						else
-							f:write(value .. "\n")
+					local timePart = value:match("(%d+:%d+)$")
+					local oldtimes = timePart and tonumber((timePart:gsub(":", "")))
+					local ntimes = tonumber((times:gsub(":", "")))
+					if oldtimes and ntimes and oldtimes == ntimes then
+						if not insert then
+							f:write(statsData .. " " ..  times .. "\n")
+							insert = true
 						end
+					elseif oldtimes and ntimes and oldtimes > ntimes then
+						if not insert then
+							f:write(statsData .. " " ..  times .. "\n")
+							insert = true
+						end
+						f:write(value .. "\n")
+					else
+						f:write(value .. "\n")
 					end
 				end
 				if not insert then
