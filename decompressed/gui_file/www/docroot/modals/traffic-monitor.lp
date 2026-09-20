@@ -263,9 +263,11 @@ ngx.print(ui_helper.createHeader(T"Traffic Monitor", false, true) ); ngx.print('
     ngx.print(ui_helper.createMessages(message_helper.popMessages()))
       local html = {}
 	  local attributes = {
-			label = { class = "control-label" } ,
-			span = { class = "text-right traffic_data" } ,
-			}
+			group = { class = "control-group traffic-stat-row" },
+			label = { class = "control-label" },
+			controls = { class = "controls" },
+			span = { class = "text-right traffic_data" },
+	  }
 	  local info_box = {
           alert = {
 		  	class = "alert alert-info",
@@ -293,9 +295,9 @@ ngx.print(ui_helper.createHeader(T"Traffic Monitor", false, true) ); ngx.print('
 		}
 	  }
 	  
-	  html[#html+1] = '<div class="row" style="margin-left:0px;flex-wrap: wrap;">'
+	  html[#html+1] = '<div class="row" style="margin-left:0px;display:flex;flex-wrap:wrap;gap:16px;width:100%;">'
 	  for i in pairs(traffic_section) do
-		html[#html+1] = '<div class="span3" style="flex:1;">'
+		html[#html+1] = '<div style="flex:1 1 270px;min-width:250px;">'
 	    html[#html+1] =   "<fieldset><legend>" .. traffic_section[i].desc .. "</legend>"
 	    html[#html+1] =     ui_helper.createLabel(T"Total Mixed", traffic_section[i].total , attributes)
 	    html[#html+1] =     ui_helper.createLabel(T"Total Send", traffic_section[i].tx, attributes)

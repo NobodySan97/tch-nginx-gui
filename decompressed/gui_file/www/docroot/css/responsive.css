@@ -1950,8 +1950,8 @@ h2.span4{
   margin-left: 0 !important;
   margin-right: 0 !important;
   margin-bottom: 0 !important;
-  width: 700px !important;
-  max-width: 92vw !important;
+  width: 960px !important;
+  max-width: 96vw !important;
   max-height: 88vh !important;
   display: none !important;
   pointer-events: none !important;
@@ -1982,7 +1982,7 @@ h2.span4{
 
 @media screen and (min-width: 1200px) {
   .modal {
-    width: 720px !important;
+    width: 1020px !important;
     left: 50% !important;
     top: 50% !important;
     margin: 0 !important;

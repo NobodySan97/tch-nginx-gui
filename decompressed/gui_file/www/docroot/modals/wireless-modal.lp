@@ -158,7 +158,7 @@ for i,v in ipairs(wl_list) do
         curiface = v.value
         curap = match(v.path, "rpc%.wireless%.ap%.@([^%.]+)%.")
         local _ig = proxy.get(v.path .. "ap_isolation"); isguest = (_ig and _ig[1] and _ig[1].value) or "0"
-        cur_ssid = values[2].value
+        cur_ssid = values[2] and values[2].value or ""
     end
  end
 end
@@ -513,8 +513,9 @@ for i,v in ipairs(aap) do
 end
 
 -- If this AP connects to STB, "engineer" role has full access, other roles only have simple stats
-if proxy.get(pathiface .. "stb")[1].value == "1" then
-    if ngx.ctx.session:getrole() ~= "engineer" then
+local _stb = proxy.get(pathiface .. "stb")
+if _stb and _stb[1] and _stb[1].value == "1" then
+    if ngx.ctx.session and ngx.ctx.session.getrole and ngx.ctx.session:getrole() ~= "engineer" then
         stbLimit = true
     end
 end
@@ -529,7 +530,8 @@ local function getValidateBandSteerPeerFields(value, object, key)
     end
     if session:retrieve("bs_check_action") == "TRUE" then
         session:store("bs_check_action", "")
-        bandsteer_enabled = proxy.get("uci.wireless.wifi-ap.@ap0.bandsteer_id")[1].value
+        local _bs = proxy.get("uci.wireless.wifi-ap.@ap0.bandsteer_id")
+        bandsteer_enabled = (_bs and _bs[1] and _bs[1].value) or ""
     else
         bandsteer_enabled = object.band_steer_enabled
     end
@@ -582,9 +584,14 @@ end
 
 local bandsteerpath = "uci.wireless.wifi-bandsteer."
 local bandsteers = content_helper.convertResultToObject(bandsteerpath .. "@.", proxy.get(bandsteerpath))
-table.sort(bandsteers, function(a,b)
-    return a.paramindex < b.paramindex
-end)
+if bandsteers and #bandsteers > 1 then
+    table.sort(bandsteers, function(a,b)
+        if not a or not b then return false end
+        local ap = tonumber(a.paramindex) or tostring(a.paramindex or "")
+        local bp = tonumber(b.paramindex) or tostring(b.paramindex or "")
+        return ap < bp
+    end)
+end
 
 local bandsteerindex = "0"
 if not bandsteers or 0 == #bandsteers then
@@ -599,12 +606,12 @@ local param = {
 }
 content_helper.getExactContent(param)
 local allowed_channels = { {"auto", T"Auto"} }
-for i in string.gmatch(param["allowed_channels"], "%S+") do
+for i in string.gmatch(param["allowed_channels"] or "", "%S+") do
     allowed_channels[#allowed_channels + 1] = {i, i}
 end
 
 local supported_countries = {}
-for i in string.gmatch(param["supported_countries"], "%S+") do
+for i in string.gmatch(param["supported_countries"] or "", "%S+") do
     supported_countries[#supported_countries + 1] = {i, i}
 end
 

@@ -277,13 +277,41 @@ local function getSessionAddress()
   }
 end
 
+local function cleanupIfNoSession(self, session)
+  if not session then
+    local now = clock_gettime(CLOCK_MONOTONIC)
+    for sid, sess in pairs(self.sessions) do
+      local expired = sessionExpired(self, sess, sid, now, self.timeout)
+      if expired then
+        ngx.log(ngx.WARN, "Removed session " .. tostring(sid))
+      end
+    end
+  end
+end
+
 local function newSession(mgr, address)
   local session
   local sessionID
   if sessionLimitReached(mgr, address.remote) then
-    -- the maximum number of sessions has been exceeded.
-	ngx.log(ngx.ERR, "Session limit reached")
-    return
+    cleanupIfNoSession(mgr, nil)
+    if sessionLimitReached(mgr, address.remote) then
+      local oldest_sid, oldest_time = nil, math.huge
+      for sid, sess in pairs(mgr.sessions) do
+        if (not address.remote or sess.remoteIP == address.remote) and (not sess.username or sess.username == "guest" or (sess.isdefaultuser and sess:isdefaultuser())) then
+          if (sess.timestamp or 0) < oldest_time then
+            oldest_time = sess.timestamp or 0
+            oldest_sid = sid
+          end
+        end
+      end
+      if oldest_sid then
+        removeSession(mgr, oldest_sid)
+      end
+    end
+    if sessionLimitReached(mgr, address.remote) then
+      ngx.log(ngx.ERR, "Session limit reached")
+      return
+    end
   end
   -- Loop should only occur once and is here to avoid session ID clashes.
   while not sessionID or mgr.sessions[sessionID] do
@@ -307,22 +335,6 @@ local function redirectIfServiceNotAvailable(session)
   if not session then
 	ngx.log(ngx.ERR, "Service not available")
     ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE, "Service not available. Probably too much session open. Wait 20 seconds and retry.")
-  end
-end
-
-
-local function cleanupIfNoSession(self , session)
-
-  if not session then
-	
-	--Remove every session inactive for 20 second
-	for sid, session in pairs(self.sessions) do
-		local expired = sessionExpired(self, session, sid, now, timeout)
-		if expired then
-			ngx.log(ngx.ERR,"Removed session "..sid)
-		end
-	end
-	
   end
 end
 

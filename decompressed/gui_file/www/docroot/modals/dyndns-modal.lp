@@ -133,7 +133,7 @@ local function onUpdateDDns(index, content)
 
 	local ddns_path = "uci.ddns.service.@"..index
 	local domain = untaint(content.Domain)
-	local interface = untaint(content.Domain)
+	local interface = untaint(content.Interface)
 
 	if not domain then
 		local _dom = proxy.get(ddns_path..".domain"); domain = (_dom and _dom[1] and _dom[1].value) or ""
@@ -146,15 +146,15 @@ local function onUpdateDDns(index, content)
 	local ddns_lookup_host_path = ddns_path..".lookup_host"
 	local ddns_lookup_host = proxy.get(ddns_lookup_host_path)
 	
-	if domain and ddns_lookup_host and domain ~= ddns_lookup_host[1].value then
-		proxy.set(ddns_lookup_host_path,untaint(content.Domain))
+	if domain and ddns_lookup_host and #ddns_lookup_host > 0 and domain ~= ddns_lookup_host[1].value then
+		proxy.set(ddns_lookup_host_path, untaint(content.Domain or domain))
 	end
 	
 	local ddns_ip_network_path = ddns_path..".ip_network"
 	local ddns_ip_network = proxy.get(ddns_ip_network_path)
 	
-	if interface and ddns_ip_network and domain ~= ddns_ip_network[1].value then
-		proxy.set(ddns_ip_network_path,untaint(content.Interface))
+	if interface and ddns_ip_network and #ddns_ip_network > 0 and interface ~= ddns_ip_network[1].value then
+		proxy.set(ddns_ip_network_path, untaint(content.Interface or interface))
 	end
 end
 

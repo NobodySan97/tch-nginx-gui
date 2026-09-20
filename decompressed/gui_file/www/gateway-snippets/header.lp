@@ -190,6 +190,7 @@ ngx.print('\
             html[#html + 1] = [[</a></li></ul></div>]]
 
         end
+    end
     html[#html + 1] =   "</div>"
         html[#html + 1] =  "</div>"
     html[#html + 1] = "</div>"

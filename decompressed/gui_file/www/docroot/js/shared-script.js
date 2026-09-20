@@ -1,4 +1,8 @@
 
+window.processMsg = window.processMsg || 'Processing';
+window.openMsg = window.openMsg || 'Loading...';
+window.waitMsg = window.waitMsg || 'Please wait...';
+
 window.registeredIntervals = window.registeredIntervals || [];
 window.addRegisteredInterval = window.addRegisteredInterval || function(id) {
     if (id) window.registeredIntervals.push(id);

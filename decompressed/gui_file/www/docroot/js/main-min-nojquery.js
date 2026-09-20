@@ -2,6 +2,10 @@
 
 $.Link (part of noUiSlider) - WTFPL
 $.fn.noUiSlider - WTFPL - refreshless.com/nouislider/ */
+var processMsg = window.processMsg || "Processing";
+var openMsg = window.openMsg || "Loading...";
+var waitMsg = window.waitMsg || "Please wait...";
+var loginMsg = window.loginMsg || "Login Expired. Reloading.";
 !function (t) {
 	"function" == typeof define && define.amd ? "undefined" != typeof jQuery ? define(["jquery"], t) : define([], t) : "undefined" != typeof jQuery ? t(jQuery) : t()
 }

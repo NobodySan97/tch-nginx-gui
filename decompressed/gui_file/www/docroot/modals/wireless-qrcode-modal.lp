@@ -8,8 +8,8 @@ local content_helper = require("web.content_helper")
 local untaint_mt = require("web.taint").untaint_mt
 
 local getargs = ngx.req.get_uri_args()
-local getiface = string.format("%s",getargs.iface or "")
-local getap = string.format("%s",getargs.ap or "")
+local getiface = string.format("%s", getargs.iface or "wl0")
+local getap = string.format("%s", getargs.ap or "ap0")
 local ifacepath = "uci.wireless.wifi-iface.@"
 local appath = "uci.wireless.wifi-ap.@"
 
@@ -55,11 +55,11 @@ local javascript_escape_entities = {  ["\\"] = "\\\\", ["\'"] = "\\'", ['"'] = '
 --Use WLAN configuratin to compose a string: "WIFI:T:WEP;S:mynetwork;P:mypassword;;"
 --These parameters are needed: SSID, Security Mode and password
 local wlanconfstr = ""
-if content.ssid then
-    local mode =  secmodes[content.secmode]
-    local password = keypassphrases[content.secmode]
-    local ssid = content.ssid
-    local public = content.public
+if content.ssid and content.ssid ~= "" then
+    local mode = secmodes[content.secmode] or "WPA"
+    local password = keypassphrases[content.secmode] or content.wpakey or ""
+    local ssid = content.ssid or ""
+    local public = content.public or "1"
     --qr code escaping of dynamic data
     ssid = ssid:gsub('[\\\'".:,;]', qrcode_escape_entities)
     password = password:gsub('[\\\'".:,;]', qrcode_escape_entities)

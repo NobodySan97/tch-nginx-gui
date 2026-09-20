@@ -14,9 +14,11 @@ local cputype = (cputype_res and cputype_res[1] and cputype_res[1].value) or ""
 
 local extension_supported = 0
 
-if marketing_version then
-	marketing_version = tonumber(marketing_version[1].value:sub(1,4))
+local mv = 0
+if marketing_version and marketing_version[1] and marketing_version[1].value then
+	mv = tonumber(marketing_version[1].value:sub(1,4)) or 0
 end
+marketing_version = mv
 
 local mapParams = {
 	telstra_webui = "uci.modgui.app.telstra_webui"

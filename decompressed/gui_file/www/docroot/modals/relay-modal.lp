@@ -162,7 +162,9 @@ ngx.print(ui_helper.createMessages(message_helper.popMessages()))
 --\
 --</fieldset>');
 
-if proxy.get("uci.network.interface.@wan.ifname")[1].value == relay_Values["uci_pppoerelay_laninterface"] then
+local wanif_res = proxy.get("uci.network.interface.@wan.ifname")
+local wanif = wanif_res and wanif_res[1] and wanif_res[1].value or ""
+if wanif ~= "" and wanif == relay_Values["uci_pppoerelay_laninterface"] then
   uci_pppoerelay_status = "1"
 end
 ngx.print('\

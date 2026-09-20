@@ -21,9 +21,9 @@ local items = {
 if content.mmpbx_state == "1" then
 
 	if content.emission_state == "1" and 
-		variant == "Technicolor TG799vac" or variant == "Technicolor TG800vac" then
+		(content.variant == "Technicolor TG799vac" or content.variant == "Technicolor TG800vac") then
 		
-		tinsert(items, tinsert(items, {"mmpbx-dect-modal.lp", T"DECT"}))
+		tinsert(items, {"mmpbx-dect-modal.lp", T"DECT"})
 	end
 	
 	tinsert(items, {"mmpbx-contacts-modal.lp", T"Phone Book"})
