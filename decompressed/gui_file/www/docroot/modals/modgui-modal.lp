@@ -254,6 +254,9 @@ if ngx.req.get_method() == "POST" then
         if action == "system_reset_gui" then
                 return sendcmd("resetgui")
         end
+        if action == "system_reset_gui_full" then
+                return sendcmd("resetguifull")
+        end
         if action == "system_upgrade_gui" then
                 return sendcmd("upgradegui_terminate")
         end
@@ -634,6 +637,15 @@ local reset_gui = {
                 class = "custom-handler"
         }
 }
+local reset_gui_full = {
+        group = {
+                class = "wait-for-reset"
+        },
+        button = {
+                id = "btn-reset-gui-full",
+                class = "custom-handler"
+        }
+}
 local remove_root = {
         group = {
                 class = "wait-for-reset"
@@ -677,6 +689,12 @@ local resetting = {
                 id = "resetting-msg"
         }
 }
+local resetting_gui_full = {
+        alert = {
+                class = "alert hide",
+                id = "resetting-gui-full-msg"
+        }
+}
 local unrooting = {
         alert = {
                 class = "alert hide",
@@ -695,19 +713,25 @@ html[#html + 1] = ui_helper.createAlertBlock(T"Reset CWMP database and force ini
 html[#html + 1] = ui_helper.createButton(T"Force CWMP provisioning", T"Reset CWMP", "icon-refresh", reset_cwmp)
 html[#html + 1] = '<hr style="margin: 15px 0;" />'
 
--- 2. Restore Stock GUI
+-- 2. Restore Stock GUI (Preserve Config)
 html[#html + 1] = ui_helper.createAlertBlock(T"Reset the modem to the firmware stock GUI. Network configuration and root SSH access will be preserved.", info_box)
 html[#html + 1] = ui_helper.createAlertBlock(T"Resetting to default GUI, please wait...", resetting)
 html[#html + 1] = ui_helper.createButton(T"Restore Stock GUI", T"Restore GUI", "icon-repeat", reset_gui)
 html[#html + 1] = '<hr style="margin: 15px 0;" />'
 
--- 3. Reset Config (Keep Modded GUI)
+-- 3. Restore Stock GUI & Factory Reset (Preserve Root SSH)
+html[#html + 1] = ui_helper.createAlertBlock(T"Reset the modem to the firmware stock GUI and revert all configurations to factory defaults. Root SSH access will be preserved.", info_box)
+html[#html + 1] = ui_helper.createAlertBlock(T"Resetting to default GUI and factory defaults, please wait...", resetting_gui_full)
+html[#html + 1] = ui_helper.createButton(T"Restore Stock GUI & Factory Reset", T"Restore Stock & Reset", "icon-bolt", reset_gui_full)
+html[#html + 1] = '<hr style="margin: 15px 0;" />'
+
+-- 4. Reset Config (Keep Modded GUI)
 html[#html + 1] = ui_helper.createAlertBlock(T"Reset all network and service configurations to factory defaults, while keeping the modded Custom GUI installed.", info_box)
 html[#html + 1] = ui_helper.createAlertBlock(T"Resetting config to default, please wait...", resetting_config)
 html[#html + 1] = ui_helper.createButton(T"Reset Configuration", T"Remove Config", "icon-refresh", remove_config)
 html[#html + 1] = '<hr style="margin: 15px 0;" />'
 
--- 4. Factory Reset & Remove Root
+-- 5. Factory Reset & Remove Root
 html[#html + 1] = ui_helper.createAlertBlock(T"Complete factory reset: wipes the entire overlay partition, removing the modded GUI and permanent root access.", warning_box)
 html[#html + 1] = ui_helper.createAlertBlock(T"Unrooting and reverting to factory defaults, please wait...", unrooting)
 html[#html + 1] = ui_helper.createButton(T"Factory Reset & Remove Root", T"Remove Root", "icon-trash", remove_root)
@@ -873,6 +897,15 @@ ngx.print('\
                 "#resetting-msg",\
                 "#btn-reset-gui",\
                 "system_reset_gui"\
+        )}\
+  );\
+  $("#btn-reset-gui-full").on("click", function() { return genericButtonFunction(\
+                "');  ngx.print(T'Restore Stock GUI & Factory Reset'); ngx.print('",\
+                "');  ngx.print(T'Restoring Stock GUI and wiping configuration, please wait...'); ngx.print('",\
+                "');  ngx.print(T'Are you sure you want to restore the official stock GUI and reset all configurations to factory defaults? Root SSH access will be preserved.'); ngx.print('",\
+                "#resetting-gui-full-msg",\
+                "#btn-reset-gui-full",\
+                "system_reset_gui_full"\
         )}\
   );\
   $("#btn-remove-root").on("click", function() { return genericButtonFunction(\

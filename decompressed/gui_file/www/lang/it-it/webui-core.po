@@ -4370,6 +4370,24 @@ msgstr "Ripristino della GUI Stock in corso, attendere..."
 msgid "Are you sure you want to restore the official stock GUI? Network configuration and root SSH access will be preserved."
 msgstr "Sei sicuro di voler ripristinare la GUI stock ufficiale? La configurazione di rete e l'accesso root SSH saranno preservati."
 
+msgid "Reset the modem to the firmware stock GUI and revert all configurations to factory defaults. Root SSH access will be preserved."
+msgstr "Ripristina il modem alla GUI stock di fabbrica e azzera tutte le configurazioni ai valori di fabbrica. L'accesso root SSH sarà preservato."
+
+msgid "Resetting to default GUI and factory defaults, please wait..."
+msgstr "Ripristino della GUI stock e azzeramento configurazione in corso, attendere..."
+
+msgid "Restore Stock GUI & Factory Reset"
+msgstr "Ripristina GUI Stock e Reset Fabbrica"
+
+msgid "Restore Stock & Reset"
+msgstr "Ripristina Stock e Reset"
+
+msgid "Restoring Stock GUI and wiping configuration, please wait..."
+msgstr "Ripristino della GUI Stock e azzeramento configurazione in corso, attendere..."
+
+msgid "Are you sure you want to restore the official stock GUI and reset all configurations to factory defaults? Root SSH access will be preserved."
+msgstr "Sei sicuro di voler ripristinare la GUI stock ufficiale e azzerare tutte le configurazioni ai valori di fabbrica? L'accesso root SSH sarà preservato."
+
 msgid "Reset all network and service configurations to factory defaults, while keeping the modded Custom GUI installed."
 msgstr "Reimposta tutte le configurazioni di rete e dei servizi ai valori di fabbrica, mantenendo installata la Custom GUI."
 

@@ -128,6 +128,7 @@ register(SYSTEM_MODGUI_)
 
 local commands_helper = {
   resetgui = "/usr/share/transformer/scripts/resetUtility.sh --resetGui",
+  resetguifull = "/usr/share/transformer/scripts/resetUtility.sh --resetGuiFull",
   removeroot = "/usr/share/transformer/scripts/resetUtility.sh --removeRoot",
   resetconfig = "/usr/share/transformer/scripts/resetUtility.sh --removeConfig",
   resetcwmp = "/usr/share/transformer/scripts/resetUtility.sh --resetCWMP",

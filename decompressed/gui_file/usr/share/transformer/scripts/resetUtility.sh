@@ -85,6 +85,46 @@ restoreOriginalGui() {
 	reboot
 }
 
+restoreOriginalGuiFull() {
+	running_bank="$(cat /proc/banktable/booted 2>/dev/null)"; running_bank="${running_bank:-bank_1}"
+	
+	#Saving shadow for root password
+	mkdir -p /tmp/shadow_file
+	[ -f "/overlay/$running_bank/etc/shadow" ] && cp -p /overlay/$running_bank/etc/shadow /tmp/shadow_file/ 2>/dev/null
+	
+	#Saving root files
+	emergencydir=/tmp/rootfile/emergency
+	mkdir -p /tmp/rootfile
+	mkdir -p $emergencydir/etc/init.d 
+	mkdir -p $emergencydir/etc/rc.d 
+	mkdir -p $emergencydir/usr/bin 
+	mkdir -p $emergencydir/lib/upgrade 
+	mkdir -p $emergencydir/sbin
+	[ -f "/overlay/$running_bank/lib/upgrade/platform.sh" ] && cp -p /overlay/$running_bank/lib/upgrade/platform.sh $emergencydir/lib/upgrade/ 2>/dev/null
+	[ -f "/overlay/$running_bank/sbin/sysupgrade" ] && cp -p /overlay/$running_bank/sbin/sysupgrade $emergencydir/sbin/ 2>/dev/null
+	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && cp -p /overlay/$running_bank/etc/init.d/rootdevice $emergencydir/etc/init.d/ 2>/dev/null
+	[ -f "/overlay/$running_bank/usr/bin/rtfd" ] && cp -p /overlay/$running_bank/usr/bin/rtfd $emergencydir/usr/bin/ 2>/dev/null
+	[ -f "/overlay/$running_bank/usr/bin/sysupgrade-safe" ] && cp -p /overlay/$running_bank/usr/bin/sysupgrade-safe $emergencydir/usr/bin/ 2>/dev/null
+	[ -e "/overlay/$running_bank/etc/rc.d/S94rootdevice" ] && cp -dp /overlay/$running_bank/etc/rc.d/S94rootdevice $emergencydir/etc/rc.d/ 2>/dev/null
+	
+	#Delete any change from running bank (wiping modded GUI and configs)
+	rm -rf /overlay/$running_bank
+	mkdir -p /overlay/$running_bank
+	
+	#Restore shadow password if present
+	if [ -f "/tmp/shadow_file/shadow" ]; then
+		mkdir -p /overlay/$running_bank/etc
+		cp -p /tmp/shadow_file/shadow /overlay/$running_bank/etc/shadow 2>/dev/null
+		chmod 600 /overlay/$running_bank/etc/shadow 2>/dev/null
+	fi
+	
+	#Restore Root only
+	emergencydir=/tmp/rootfile/emergency
+	[ -d "$emergencydir" ] && cp -drp $emergencydir/* /overlay/$running_bank/ 2>/dev/null
+	sync
+	reboot
+}
+
 resetConfig() {
 	running_bank="$(cat /proc/banktable/booted 2>/dev/null)"; running_bank="${running_bank:-bank_1}"
 	[ -d "/overlay/$running_bank/etc/uci-defaults" ] && rm -rf "/overlay/$running_bank/etc/uci-defaults"
@@ -113,6 +153,9 @@ case "$1" in
 			;;
 		--resetGui)
 			restoreOriginalGui
+			;;
+		--resetGuiFull)
+			restoreOriginalGuiFull
 			;;
 		--removeRoot)
 			/usr/share/transformer/scripts/hardreset.sh

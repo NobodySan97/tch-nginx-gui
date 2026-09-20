@@ -4630,3 +4630,21 @@ msgstr "Klicken Sie hier, um die GUI auf die neueste Version zu aktualisieren."
 
 
 
+
+msgid "Restore Stock & Reset"
+msgstr ""
+
+msgid "Reset the modem to the firmware stock GUI and revert all configurations to factory defaults. Root SSH access will be preserved."
+msgstr ""
+
+msgid "Restoring Stock GUI and wiping configuration, please wait..."
+msgstr ""
+
+msgid "Are you sure you want to restore the official stock GUI and reset all configurations to factory defaults? Root SSH access will be preserved."
+msgstr ""
+
+msgid "Restore Stock GUI & Factory Reset"
+msgstr ""
+
+msgid "Resetting to default GUI and factory defaults, please wait..."
+msgstr ""

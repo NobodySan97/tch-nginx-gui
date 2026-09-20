@@ -1,6 +1,14 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.66 (Stable)
+---------------------------------------------------------------------------
+- **Restore Stock GUI & Factory Reset Preserving Permanent Root SSH**:
+  - `resetUtility.sh`: Implementata la funzione `restoreOriginalGuiFull()` (invocata con `--resetGuiFull`) che pulisce l'intera partizione `/overlay` rimuovendo sia la custom GUI che tutte le personalizzazioni e configurazioni utente per un factory reset totale, preservando in modo sicuro e persistente l'accesso di root, i file di emergenza (`/tmp/rootfile/emergency/rootdevice`, `platform.sh`, `sysupgrade-safe`, `rtfd`) e l'hash della password di `/etc/shadow`.
+  - `system.modgui.map`: Aggiunto il mapping RPC transformer `resetguifull = "/usr/share/transformer/scripts/resetUtility.sh --resetGuiFull"`.
+  - `modgui-modal.lp`: Aggiunta la nuova opzione grafica *"Ripristina GUI Stock e Reset Fabbrica"* (`#btn-reset-gui-full`) con avviso dedicato di sicurezza e dialogo di conferma interattivo con supporto per annullamento.
+  - `webui-core.po`: Aggiornate e compilate le traduzioni complete in italiano e tedesco.
+
 9.8.65 (Stable)
 ---------------------------------------------------------------------------
 - **System-Wide Confirmation Dialogues, Mobile Overlay & Event Lifecycle Fixes**:
