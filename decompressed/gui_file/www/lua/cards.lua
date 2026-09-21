@@ -94,7 +94,7 @@ end
 --Returns card from modal provided or nil (In-memory O(1) lookup)
 function M.get_card_from_modal(ModalSearch)
 	if not ModalSearch then return nil end
-	local session = ngx.ctx.session
+	local session = ngx and ngx.ctx and ngx.ctx.session
 	local result
 	for _, card in pairs(config) do
 		if card.modal == ModalSearch then
@@ -121,27 +121,27 @@ end
 local card_files_cache = {}
 
 function M.cards()
-  local session = ngx.ctx.session
+  local session = ngx and ngx.ctx and ngx.ctx.session
   local limit_info = get_limit_info()
   local result = {}
-  if not includepath then return result end
+  local path = includepath or "/www/cards/"
 
-  if not card_files_cache[includepath] then
+  if not card_files_cache[path] then
     local files = {}
-    if lfs.attributes(includepath, 'mode') == 'directory' then
-      for file in lfs.dir(includepath) do
+    if lfs.attributes(path, 'mode') == 'directory' then
+      for file in lfs.dir(path) do
         if find(file, "%.lp$") then
           files[#files+1] = file
         end
       end
       sort(files)
     end
-    card_files_cache[includepath] = files
+    card_files_cache[path] = files
   end
 
-  for _, file in ipairs(card_files_cache[includepath]) do
+  for _, file in ipairs(card_files_cache[path]) do
     local cardname = file:gsub("^%d+_", "")
-    if card_visible(session, config, cardname) and not card_limited(limit_info, cardname, includepath) then
+    if card_visible(session, config, cardname) and not card_limited(limit_info, cardname, path) then
       result[#result+1] = file
     end
   end

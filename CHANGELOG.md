@@ -1,6 +1,14 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.68 (Stable)
+---------------------------------------------------------------------------
+- **Bridge Mode Switching, Dynamic WAN Hardware Detection & Dashboard Card Reliability**:
+  - `internetmode_helper.lua`: Risolto il bug critico nel cambio modalità WAN da Bridge a PPPoE/DHCP/Static in cui `network.wan.ifname` veniva sovrascritta con `br-lan`. Implementata la funzione `get_real_wan_ifname()` con rilevamento dinamico dell'hardware WAN (`wanptm0` per VDSL2/35b, `waneth4` per Ethernet/SFP, `wanatm0` per ADSL) e pulizia affidabile di `network.lan.ifname`.
+  - `cards.lua` & `cards.lp`: Aggiunto fallback difensivo `/www/cards/` per `includepath` e protezione nil-safe per `ngx.ctx.session`, prevenendo il crash o la mancata visualizzazione delle card nella dashboard al primo accesso.
+  - `header.lp`: Implementato listener JavaScript nativo in fase di capture (`addEventListener(..., true)`) per intercettare il form di promemoria password anche se Bootstrap è caricato in modalità differita (`defer`), inviando il token CSRF aggiornato via `$.post()` ed evitando errori 403 CSRF mismatch.
+  - `wireless-qrcode-modal.lp`: Aggiunto controllo di esistenza per le credenziali Wi-Fi per evitare tentativi di generazione QR code con parametri nulli.
+
 9.8.67 (Stable)
 ---------------------------------------------------------------------------
 - **Comprehensive UI/Modal Layout Overhaul, Wi-Fi Nurse AP Detection & Tab Guards**:

@@ -57,8 +57,8 @@ local javascript_escape_entities = {  ["\\"] = "\\\\", ["\'"] = "\\'", ['"'] = '
 local wlanconfstr = ""
 if content.ssid and content.ssid ~= "" then
     local mode = secmodes[content.secmode] or "WPA"
-    local password = keypassphrases[content.secmode] or content.wpakey or ""
-    local ssid = content.ssid or ""
+    local password = tostring(keypassphrases[content.secmode] or content.wpakey or "")
+    local ssid = tostring(content.ssid or "")
     local public = content.public or "1"
     --qr code escaping of dynamic data
     ssid = ssid:gsub('[\\\'".:,;]', qrcode_escape_entities)

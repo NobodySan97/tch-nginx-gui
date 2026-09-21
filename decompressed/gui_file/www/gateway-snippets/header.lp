@@ -247,24 +247,32 @@ ngx.print('\
 			html[#html + 1] = '</div>'
 			html[#html + 1] = '\
 			<script>\
-				$("#password_reminder").modal();\
-				$("input[name=passwordchange]").first().prop("checked", true);\
-				$("#save-config").on("click", function(){\
-				var value = $("input[name=passwordchange]:checked").val();\
-				if(value == "now"){\
-				window.location = "/password.lp";\
-				}else if(value == "remindlater"){\
-				$("#password_reminder").modal(\'hide\');\
-				}else if(value == "dontremind"){\
-				var csrf = $("meta[name=CSRFtoken]").attr("content") || $("input[name=CSRFtoken]").val();\
-				$.post("gateway.lp", {CSRFtoken: csrf, passwordchange: "dontremind"}, function(){\
-					$("#password_reminder").modal(\'hide\');\
-				});\
-				}else{\
-				$("#password_reminder").modal(\'hide\');\
-				}\
-				return false;\
-				});\
+			$(function(){\
+				if($(\"#password_reminder\").length === 0) return;\
+				$(\"#password_reminder\").modal();\
+				$(\"input[name=passwordchange]\").first().prop(\"checked\", true);\
+				document.addEventListener(\"click\", function pwdReminderHandler(e){\
+					var t = e.target, btn = null;\
+					while(t){ if(t.id === \"save-config\"){ btn = t; break; } t = t.parentElement; }\
+					if(!btn) return;\
+					if(!$(\"#password_reminder\").hasClass(\"in\") && !$(\"#password_reminder\").is(\":visible\")) return;\
+					e.stopPropagation();\
+					e.stopImmediatePropagation();\
+					e.preventDefault();\
+					document.removeEventListener(\"click\", pwdReminderHandler, true);\
+					var value = $(\"input[name=passwordchange]:checked\").val();\
+					if(value === \"now\"){\
+						window.location = \"/password.lp\";\
+					} else if(value === \"dontremind\"){\
+						var csrf = $(\"meta[name=CSRFtoken]\").attr(\"content\") || $(\"input[name=CSRFtoken]\").val();\
+						$.post(\"gateway.lp\", {CSRFtoken: csrf, passwordchange: \"dontremind\"}, function(){\
+							$(\"#password_reminder\").modal(\"hide\");\
+						});\
+					} else {\
+						$(\"#password_reminder\").modal(\"hide\");\
+					}\
+				}, true);\
+			});\
 			</script>\
 			'
 		end

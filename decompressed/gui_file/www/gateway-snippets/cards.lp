@@ -52,6 +52,7 @@ ngx.print('\
 	  ');
 	  	lp.setpath("/www/cards/")
         local cards = require("cards")
+        cards.setpath("/www/cards/")
         for _,v in pairs(cards.cards()) do
 			if not string.untaint(cui.gui_skin):match("Fritz") then
 				ngx.print(gen_dummy_card(cards.get_modal_from_card(v)))
