@@ -248,6 +248,7 @@ ngx.print('\
 			html[#html + 1] = '\
 			<script>\
 				$("#password_reminder").modal();\
+				$("input[name=passwordchange]").first().prop("checked", true);\
 				$("#save-config").on("click", function(){\
 				var value = $("input[name=passwordchange]:checked").val();\
 				if(value == "now"){\
@@ -255,7 +256,12 @@ ngx.print('\
 				}else if(value == "remindlater"){\
 				$("#password_reminder").modal(\'hide\');\
 				}else if(value == "dontremind"){\
-				$("#password_reminder form").submit();\
+				var csrf = $("meta[name=CSRFtoken]").attr("content") || $("input[name=CSRFtoken]").val();\
+				$.post("gateway.lp", {CSRFtoken: csrf, passwordchange: "dontremind"}, function(){\
+					$("#password_reminder").modal(\'hide\');\
+				});\
+				}else{\
+				$("#password_reminder").modal(\'hide\');\
 				}\
 				return false;\
 				});\
