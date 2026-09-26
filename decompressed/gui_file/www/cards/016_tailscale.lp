@@ -4,6 +4,19 @@ gettext.textdomain('webui-tailscale')
 local ui_helper = require("web.ui_helper")
 local content_helper = require("web.content_helper")
 
+local function file_exists(path)
+  local file = io.open(path, "r")
+  if file then
+    file:close()
+    return true
+  end
+  return false
+end
+
+if not file_exists("/usr/bin/tailscale") and not file_exists("/opt/tailscale/tailscale") and not file_exists("/etc/init.d/tailscale") then
+  return
+end
+
 local function escape(value)
   local raw = string.untaint(value or "")
   if type(raw) ~= "string" then raw = tostring(raw) end

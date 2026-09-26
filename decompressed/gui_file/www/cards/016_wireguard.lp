@@ -5,6 +5,19 @@ local ui_helper = require("web.ui_helper")
 local content_helper = require("web.content_helper")
 local format = string.format
 
+local function file_exists(path)
+  local file = io.open(path, "r")
+  if file then
+    file:close()
+    return true
+  end
+  return false
+end
+
+if not file_exists("/usr/bin/wg") and not file_exists("/etc/init.d/wireguard") and not file_exists("/sys/module/wireguard") then
+  return
+end
+
 local function escape(value)
   local raw = string.untaint(value or "")
   if type(raw) ~= "string" then raw = tostring(raw) end

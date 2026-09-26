@@ -4,6 +4,19 @@ gettext.textdomain('webui-openvpn-server')
 local ui_helper = require("web.ui_helper")
 local content_helper = require("web.content_helper")
 local format = string.format
+
+local function file_exists(path)
+  local file = io.open(path, "r")
+  if file then
+    file:close()
+    return true
+  end
+  return false
+end
+
+if not file_exists("/usr/sbin/openvpn") and not file_exists("/etc/init.d/openvpn") then
+  return
+end
 local content = {
   enabled = "uci.openvpn.openvpn.@server.enabled",
   client_enabled = "uci.openvpn.openvpn.@client.enabled",
