@@ -62,6 +62,7 @@ html[#html + 1] = [[
 	var consecutiveFailures = 0;
 
 	var lastProgress = 5;
+	var targetVer = "";
 
 	var $activeModal = $("#modal-container, .modal");
 	$activeModal.data("backdrop", "static");
@@ -177,8 +178,9 @@ html[#html + 1] = [[
 					}
 					$("#upgrade-gui-bar").removeClass("hide");
 					$("#show_progress").text("");
-					var targetVer = (data.new_version_text && data.new_version_text !== "Unknown") ? data.new_version_text : "";
-					if (!targetVer) {
+					if (data.new_version_text && data.new_version_text !== "Unknown") {
+						targetVer = data.new_version_text;
+					} else if (!targetVer) {
 						var matchVer = clean_log.match(/version_gui=([0-9]+\.[0-9]+\.[0-9]+)/i) || clean_log.match(/Online version:\s*([0-9]+\.[0-9]+\.[0-9]+)/i);
 						if (matchVer && matchVer[1]) targetVer = matchVer[1];
 					}
@@ -240,13 +242,36 @@ html[#html + 1] = [[
 					window.location.href = "/login.lp";
 					return;
 				}
-				if (hasStartedExecution && consecutiveFailures >= 6) {
-					if (!isUpgradeComplete) {
-						isUpgradeComplete = true;
-						try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
-						setTimeout(function() {
-							window.location.href = "/login.lp";
-						}, 2000);
+				if (hasStartedExecution) {
+					// Durante l'estrazione e il riavvio dei servizi il webserver è temporaneamente non raggiungibile.
+					// Mostriamo lo stato al 95% e facciamo healthcheck fino a quando /login.lp non risponde correttamente!
+					if (lastProgress < 95) lastProgress = 95;
+					$("#upgrade-gui-bar").removeClass("hide");
+					$("#upgrade-progress-bar-fill").css("width", lastProgress + "%").removeClass("bar-warning bar-danger").addClass("bar-info");
+					$("#progress-percent").text(lastProgress + "%");
+					$("#update-text").html("Finalizzazione e riavvio servizi in corso (95%)...<br><span style='font-size: 13px; font-weight: normal; opacity: 0.9;'>In attesa che il router torni online, non spegnere il modem...</span>");
+
+					if (consecutiveFailures >= 4) {
+						$.ajax({
+							url: "/login.lp",
+							type: "GET",
+							cache: false,
+							timeout: 3000,
+							success: function(resp) {
+								if (resp && (resp.indexOf("login") !== -1 || resp.indexOf("CSRFtoken") !== -1 || resp.indexOf("Gateway") !== -1)) {
+									if (!isUpgradeComplete) {
+										isUpgradeComplete = true;
+										$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info bar-danger").addClass("bar-success");
+										$("#progress-percent").text("100%");
+										$("#update-text").html("Aggiornamento completato con successo!<br><span style='font-size: 13px; font-weight: normal;'>Reindirizzamento al login in corso...</span>");
+										try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
+										setTimeout(function() {
+											window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
+										}, 1500);
+									}
+								}
+							}
+						});
 					}
 				}
 				$("#show_progress").text($("#show_progress").text().replace(/\.{10}/g, ""));

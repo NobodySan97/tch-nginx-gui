@@ -362,4 +362,5 @@ if [ -f "$WORKING_DIR/$CHECKSUM_FILE" ]; then
 fi
 
 ubus send fwupgrade '{"state":"done"}'
+set_transformer "rpc.system.modgui.executeCommand.state" "Complete"
 logecho "Upgrade Done"
