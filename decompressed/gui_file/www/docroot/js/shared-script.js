@@ -25,10 +25,10 @@ var modgui = modgui || {};
 		window.location.reload(true);
 	}
 	function postAction(action, logModal, customCloseAction, customTarget) {
-		var onClose = ( typeof customCloseAction === "function" ) && customCloseAction || function() {
+		var onClose = ( typeof customCloseAction === "function" ) ? customCloseAction : ((customCloseAction === false) ? false : function() {
 			tch.showProgress(waitMsg);
 			window.location.reload(true);
-		}
+		});
 
 		var target = customTarget ? customTarget : $(".modal form").attr("action");
 		$.post(
@@ -45,11 +45,11 @@ var modgui = modgui || {};
 						$(".modal-backdrop").off('click').css('cursor', 'default');
 						$(".modal-footer, .modal-action-close, #close-config").hide();
 						$("#close-config, .modal-action-close").off("click").on("click", function() {
-							onClose();
+							if (onClose) onClose();
 						});
 					});
 					tch.openModal("/modals/command-log-read-modal.lp");
-				} else {
+				} else if (onClose) {
 					onClose();
 				}
 			},
@@ -177,7 +177,7 @@ var modgui = modgui || {};
 		$(".check_update").on("click", function (e) {
 			e.stopPropagation();
 			if (KoRequest.CheckVer) return;
-			postAction("checkver", null, null, '/modals/modgui-modal.lp?auto_update=true');
+			postAction("checkver", false, false, '/modals/modgui-modal.lp?auto_update=true');
 			$(".check_update_spinner").addClass("fa-spin");
 
 			var pollCount = 0;
