@@ -1,6 +1,21 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.70 (Preview)
+---------------------------------------------------------------------------
+- **Upgrade Lifecycle Healthcheck, Dynamic Reconnection & Smooth Version Polling**:
+  - `command-log-read-modal.lp`: Implementato healthcheck attivo con polling asincrono su `/login.lp` durante la fase di estrazione e riavvio dei servizi. Rimosso il timeout prematuro a 6 fallimenti che reindirizzava il browser prima del termine dell'estrazione dei file causando errori 403 Forbidden e 500. La GUI ora mantiene la barra al 95% e attende che Nginx e Transformer siano completamente online al 100% prima di reindirizzare in modo fluido al login.
+  - `shared-script.js`: Eliminato il ricaricamento forzato della pagina al clic su *"Controlla aggiornamenti"*; il pulsante ora avvia l'animazione di rotazione dell'icona (`fa-spin`) e aggiorna dinamicamente in background stato e badge della versione senza sfarfallio né ricaricamento della dashboard o delle schede.
+  - `upgradegui`: Notifica esplicita dello stato `Complete` a transformer al termine di `rootdevice` ed eliminazione pulita dei file temporanei di installazione.
+  - `appInstallRemoveUtility.sh`: Pre-configurazione trasparente di AdGuard Home su porta 3000 (Web UI) e 5353 (DNS) con protezione attiva e reindirizzamento iptables con conservazione dell'IP client reale.
+
+9.8.69 (Preview)
+---------------------------------------------------------------------------
+- **AdGuard Home Automated Setup, Port Redirection & Preview Channel Release**:
+  - Integrazione estensione AdGuard Home con preconfigurazione nativa DNS su porta 5353 e Web UI su porta 3000.
+  - Regole di reindirizzamento trasparente DNS su interfaccia `br-lan` senza sovrascrivere `dnsmasq`.
+  - Disaccoppiamento della gestione log comandi tra upgrade di sistema e installazione/rimozione estensioni.
+
 9.8.68 (Stable)
 ---------------------------------------------------------------------------
 - **Bridge Mode Switching, Dynamic WAN Hardware Detection & Dashboard Card Reliability**:
