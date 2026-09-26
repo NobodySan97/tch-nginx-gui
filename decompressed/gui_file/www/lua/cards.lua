@@ -25,6 +25,7 @@ end
 local rules = get_rules_from_config()
 
 local function get_cards_from_config()
+  local rules = get_rules_from_config()
   local config = {}
   
   uci:foreach('web', 'card', function(card)
@@ -34,8 +35,8 @@ local function get_cards_from_config()
     if rule and not card['.anonymous'] then
       -- set modal to the actual path of the modal
       card.modal = rule.target
-      -- set correct value for hide (missing means true)
-      card.hide = (card.hide~='0')
+      -- set correct value for hide: '1' means hidden, '0' or missing means visible
+      card.hide = (card.hide == '1')
       card.raw_card = card.card
       -- remove any initial digits
       card.card = card.card:gsub("^%d+_", "")
@@ -47,16 +48,20 @@ local function get_cards_from_config()
   return config
 end
 
-local config = get_cards_from_config()
-
 local function card_visible(session, config, cardname)
+  -- Essential cards that should never be hidden
+  if cardname == "gateway" or cardname == "modgui" then
+    return true
+  end
+
   local card = config[cardname]
   if card then
-    local access = false
-    if session and card.modal then
-      access = session:hasAccess(card.modal)
+    -- If explicitly hidden in web config (hide = '1'), hide it
+    if card.hide then
+      return false
     end
-    if not access and card.hide then
+    -- If session exists and user does not have access to the modal, hide it
+    if session and card.modal and not session:hasAccess(card.modal) then
       return false
     end
   end
@@ -96,14 +101,15 @@ function M.get_card_from_modal(ModalSearch)
 	if not ModalSearch then return nil end
 	local session = ngx and ngx.ctx and ngx.ctx.session
 	local result
-	for _, card in pairs(config) do
+	local current_config = get_cards_from_config()
+	for _, card in pairs(current_config) do
 		if card.modal == ModalSearch then
 			result = card.raw_card or card.card
 			break
 		end
 	end
 	
-	if result and card_visible(session, config, (result:gsub("^%d+_", ""))) then
+	if result and card_visible(session, current_config, (result:gsub("^%d+_", ""))) then
 	  return result
 	end
 	
@@ -114,7 +120,8 @@ end
 function M.get_modal_from_card(CardSearch)
 	if not CardSearch then return nil end
 	local clean_name = CardSearch:gsub("^%d+_", "")
-	local card = config[clean_name] or config[CardSearch]
+	local current_config = get_cards_from_config()
+	local card = current_config[clean_name] or current_config[CardSearch]
 	return card and card.modal or nil
 end
 
@@ -125,6 +132,7 @@ function M.cards()
   local limit_info = get_limit_info()
   local result = {}
   local path = includepath or "/www/cards/"
+  local current_config = get_cards_from_config()
 
   if not card_files_cache[path] then
     local files = {}
@@ -141,7 +149,7 @@ function M.cards()
 
   for _, file in ipairs(card_files_cache[path]) do
     local cardname = file:gsub("^%d+_", "")
-    if card_visible(session, config, cardname) and not card_limited(limit_info, cardname, path) then
+    if card_visible(session, current_config, cardname) and not card_limited(limit_info, cardname, path) then
       result[#result+1] = file
     end
   end

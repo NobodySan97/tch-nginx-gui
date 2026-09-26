@@ -59,6 +59,10 @@ ngx.print('\
 	html[#html + 1] =   '<div class="light_icon fas fa-sync check_update_spinner"></div>'
 	html[#html + 1] =   format('<strong><a style="cursor: pointer;" class="check_update">%s</a></strong>',T"Check Update")
 	html[#html + 1] = "</span>"
+	html[#html + 1] = '<span class="simple-desc">'
+	html[#html + 1] =   '<div class="light_icon fas fa-th-large"></div>'
+	html[#html + 1] =   format('<strong><a style="cursor: pointer;" class="modal-link" data-toggle="modal" data-remote="/modals/cards-manager-modal.lp" data-id="cards-manager-modal">%s</a></strong>', T"Customize Cards")
+	html[#html + 1] = "</span>"
 
 ngx.print(html)
 ngx.print('\

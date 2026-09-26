@@ -79,6 +79,7 @@ local check_rule = {
 	{ name = 'adblocksourcesmodal', target = '/modals/adblck-sources-modal.lp' },
 	{ name = 'adblocklistsmodal', target = '/modals/adblck-lists-modal.lp' },
 	{ name = 'ajaxadblockstatus', target = '/ajax/adblck-status.lua' },
+	{ name = 'cardsmanagermodal', target = '/modals/cards-manager-modal.lp' },
 }
 
 --We add telstra rules anyway as nginx will respond 404 if not found

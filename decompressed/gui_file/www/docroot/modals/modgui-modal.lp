@@ -550,6 +550,16 @@ html[#html + 1] = ui_helper.createSwitch(T"Always show advanced options", "gui_a
 html[#html + 1] = ui_helper.createSwitch(T"GUI animations", "gui_animation", modgui_settings["gui_animation"])
 html[#html + 1] = '</form>'
 
+html[#html + 1] = '<form class="form-horizontal">'
+html[#html + 1] = '<legend>' .. T"Dashboard Cards" .. '</legend>'
+html[#html + 1] = ui_helper.createAlertBlock(T"Choose which cards are shown or hidden on the main dashboard, or use smart auto-detection for unconfigured services.", info_box)
+html[#html + 1] = '<div class="control-group">'
+html[#html + 1] = format('<label class="control-label">%s</label>', T"Manage Cards")
+html[#html + 1] = '<div class="controls">'
+html[#html + 1] = format('<a class="btn btn-primary modal-link" data-toggle="modal" data-remote="/modals/cards-manager-modal.lp" data-id="cards-manager-modal"><i class="fas fa-th-large"></i> %s</a>', T"Customize Dashboard Cards")
+html[#html + 1] = '</div></div>'
+html[#html + 1] = '</form>'
+
 if content.specific_app ~= "" then
 
         local upload_specific_app = {
