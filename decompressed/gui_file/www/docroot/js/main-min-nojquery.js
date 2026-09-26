@@ -4675,7 +4675,8 @@ var qrcode = function () {
 (jQuery);
 
 // Force backdrop removal and modal cleanup on hidden
-$(document).on("hidden.modal hidden", ".modal", function() {
+$(document).on("hidden.modal hidden", ".modal", function(t) {
+    if (!$(t.target).hasClass("modal")) return;
     $(".modal-backdrop").remove();
     $(this).remove();
 });
