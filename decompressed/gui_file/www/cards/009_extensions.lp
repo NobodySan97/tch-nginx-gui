@@ -14,47 +14,91 @@ local cputype = (cputype_res and cputype_res[1] and cputype_res[1].value) or ""
 
 local extension_supported = 0
 
+local function kernel_has_tun()
+	local command = io.popen("[ -c /dev/net/tun ] || zcat /proc/config.gz 2>/dev/null | grep -q '^CONFIG_TUN=y$'; echo $?", "r")
+	if not command then
+		return false
+	end
+	local result = command:read("*line")
+	command:close()
+	return result == "0"
+end
+
+local function wireguard_supported()
+	if kernel_has_tun() then return true end
+	local command = io.popen("[ \"$(uname -r)\" = 4.1.52 ] && { [ \"$(uci -q get version.@version[0].version | cut -d- -f1-2)\" = 19.4.0866-3401052 ] || uci -q get version.@version[0].version | grep -q '^19\\.4'; }; echo $?", "r")
+	if not command then return false end
+	local result = command:read("*line")
+	command:close()
+	return result == "0"
+end
+
 local mv = 0
 if marketing_version and marketing_version[1] and marketing_version[1].value then
 	mv = tonumber(marketing_version[1].value:sub(1,4)) or 0
 end
 marketing_version = mv
 
-local mapParams = {
-	telstra_webui = "uci.modgui.app.telstra_webui"
-}
+local mapParams = {}
 
 if marketing_version >= 16.3 then
 	mapParams.luci_webui = "uci.modgui.app.luci_webui"
-	mapParams.blacklist_application = "uci.modgui.app.blacklist_app"
-end
-mapParams.voipblock_for_mmpbx = "uci.modgui.app.voipblock_for_mmpbx"
-mapParams.voipblock_for_asterisk = "uci.modgui.app.voipblock_for_asterisk"
-if cputype:match("mips") then
-	mapParams.amule_webui = "uci.modgui.app.amule_webui"
 end
 mapParams.aria2_webui = "uci.modgui.app.aria2_webui"
 mapParams.transmission_webui = "uci.modgui.app.transmission_webui"
-if marketing_version >= 17.3 then
-	mapParams.xupnp_application = "uci.modgui.app.xupnp_app"
+mapParams.adblock_application = "uci.modgui.app.adblock_app"
+mapParams.rsyncd_application = "uci.modgui.app.rsyncd_app"
+mapParams.openspeedtest_application = "uci.modgui.app.openspeedtest_app"
+if cputype:match("^armv7") or cputype:match("^mips") then
+	mapParams.l2tpipsec_application = "uci.modgui.app.l2tpipsec_app"
+end
+if cputype:match("^armv7") or cputype:match("^mips") then
+	if kernel_has_tun() then
+		mapParams.openvpn_application = "uci.modgui.app.openvpn_app"
+	end
+end
+if cputype:match("^armv7") or cputype == "aarch64" or cputype == "arm64" then
+	mapParams.speedtest_application = "uci.modgui.app.speedtest_app"
+	mapParams.adguardhome_application = "uci.modgui.app.adguardhome_app"
+	if wireguard_supported() then
+		mapParams.wireguard_application = "uci.modgui.app.wireguard_app"
+	end
+	if kernel_has_tun() then
+		mapParams.tailscale_application = "uci.modgui.app.tailscale_app"
+	end
+end
+if cputype:match("^armv7") then
+	mapParams.dumaos_application = "uci.modgui.app.dumaos_app"
 end
 
 content_helper.getExactContent(mapParams)
 
 local StateParams = {}
-local ParamsText = {}
 
 for Params in pairs(mapParams) do
 	extension_supported = extension_supported + 1
-	local ParamsName = Params:gsub("_(.*)",""):gsub("^%l", string.upper)
 	if mapParams[Params] and mapParams[Params] == "1" then
 		StateParams[Params] = "1"
-		ParamsText[Params] = ParamsName .. T" is installed"
 	else
 		StateParams[Params] = "0"
-		ParamsText[Params] = ParamsName .. T" is not installed"
 	end
 end
+
+local extension_items = {
+	{ key = "luci_webui", title = T"LuCI" },
+	{ key = "aria2_webui", title = T"Aria2" },
+	{ key = "transmission_webui", title = T"Transmission" },
+	{ key = "adblock_application", title = T"Adblock" },
+	{ key = "rsyncd_application", title = T"Rsync" },
+	{ key = "speedtest_application", title = T"Speedtest" },
+	{ key = "adguardhome_application", title = T"AdGuard Home" },
+	{ key = "openspeedtest_application", title = T"OpenSpeedTest" },
+	{ key = "wireguard_application", title = T"WireGuard" },
+	{ key = "l2tpipsec_application", title = T"L2TP/IPsec" },
+	{ key = "openvpn_application", title = T"OpenVPN" },
+	{ key = "tailscale_application", title = T"Tailscale" },
+	{ key = "dumaos_application", title = T"DumaOS" },
+}
 
 local modalPath = nil
 local switchName = nil
@@ -64,18 +108,25 @@ if session:hasAccess("/modals/applications-modal.lp") and extension_supported > 
 end
 ngx.print('\
 <div class="span3">\
-  <div class="smallcard" data-aos="zoom-in" data-aos-anchor-placement="center-bottom" data-aos-easing="ease-in-back">\
+  <div class="smallcard extensions-card" data-aos="zoom-in" data-aos-anchor-placement="center-bottom" data-aos-easing="ease-in-back">\
 \
     ');  ngx.print( ui_helper.createCardHeader(T"Extensions", modalPath, switchName, nil) ); ngx.print('\
 \
     <div class="content card_bg" data-bg-text="&#xf015;">\
-	  <div class="divtable">\
+	  <div class="divtable extensions-status-grid">\
 \
       ');
 local html = {}
 
-for Params in pairs(mapParams) do
-	html[#html + 1] = ui_helper.createSimpleLight(StateParams[Params], ParamsText[Params], nil, nil  )
+for _, item in ipairs(extension_items) do
+	if StateParams[item.key] ~= nil then
+		html[#html + 1] = ui_helper.createSimpleLight(
+			StateParams[item.key],
+			item.title,
+			{ span = { class = "simple-desc extension-status" } },
+			nil
+		)
+	end
 end
 
 if extension_supported == 0 then

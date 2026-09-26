@@ -127,6 +127,7 @@ for i,v in ipairs(proxy.getPN("rpc.wireless.radio.", true)) do
     end
 end
 table.sort(radios)
+curradio = curradio or radios[1]
 
 ajax_helper.handleAjaxQuery({
     phy_rate = "rpc.wireless.radio.@" .. curradio .. ".phy_rate",

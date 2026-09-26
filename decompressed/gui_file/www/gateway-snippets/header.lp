@@ -44,11 +44,9 @@ local cui = {
   gui_skin = "uci.modgui.gui.gui_skin",
   gui_version = "rpc.system.modgui.gui_version",
   outdated_ver = "uci.modgui.gui.outdated_ver",
-  amule_webui = "uci.modgui.app.amule_webui",
   aria2_webui = "uci.modgui.app.aria2_webui",
   luci_webui = "uci.modgui.app.luci_webui",
   transmission_webui = "uci.modgui.app.transmission_webui",
-  blacklist_application = "uci.modgui.app.blacklist_app",
   new_ver = "uci.modgui.gui.new_ver",
   autoupgrade_hour= "uci.modgui.gui.autoupgrade_hour",
   autoupgrade_view = "uci.modgui.gui.autoupgradeview",
@@ -166,12 +164,6 @@ ngx.print('\
                   onclick="javascript:event.target.port=9080;event.target.protocol='http'"> ]]
           html[#html + 1] = T"Luci WebUI"
           html[#html + 1] = [[ </a></li><li class="divider"></li> ]]
-        end
-        if cui.amule_webui == "1" then
-        html[#html + 1] = [[ <li><a tabindex="-1" target="_blank" href="/"
-                onclick="javascript:event.target.port=4711;event.target.protocol='http'"> ]]
-        html[#html + 1] = T"aMule Webui"
-        html[#html + 1] = [[ </a></li><li class="divider"></li> ]]
         end
         if cui.aria2_webui == "1" then
         html[#html + 1] = [[ <li><a tabindex="-1" target="_blank" href="/aria"> ]]

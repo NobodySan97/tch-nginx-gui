@@ -15,9 +15,15 @@ local cui = {
 }
 content_helper.getExactContent(cui)
 
-if cui.firstpage == "stats" then
+local function snippet_exists(name)
+	local f = io.open("/www/gateway-snippets/" .. name, "r")
+	if f then f:close() return true end
+	return false
+end
+
+if cui.firstpage == "stats" and snippet_exists("stats.lp") then
 	firstpage = "stats.lp"
-elseif cui.firstpage == "telstra" then
+elseif cui.firstpage == "telstra" and snippet_exists("telstra-gui.lp") then
 	firstpage = "telstra-gui.lp"
 else
 	firstpage = "cards.lp"

@@ -532,7 +532,7 @@ local page = get_page(get_platform_data(), get_by_imei(current_imei, mobiled.dev
   ngx.print('\
 \
 <link href="/css/chosen.css" rel="stylesheet">\
-<script language="javascript" type="text/javascript" src="js/chosen-min.js"></script>\
+<script src="/js/chosen-min.js"></script>\
 \
 <style>\
 	.uneven {\

@@ -669,14 +669,7 @@ local function getDnsServers(key)
   elseif type(inactive) == "table" and #inactive ~= 0 then
     v = inactive
   end
-
-  if type(staticDns) == "table" then
-    servers = table.concat(staticDns, ",")
-  elseif type(staticDns) == "string" and staticDns ~= "" then
-    servers = staticDns:gsub("%s+", ",")
-  else
-    servers = ""
-  end
+  servers = staticDns ~= "" and table.concat(staticDns, ",") or ""
   for i, server in ipairs(v) do
     if (i > 1) then
       dnsServer2 = server
@@ -1002,37 +995,42 @@ network_interface_.get = {
 
 network_interface_.set = {
   dnsserver1_ping = function(_, _, _, key)
-    getDnsServers(key)
+    local interface = get_interface(key)
+    getDnsServers(interface)
     if dnsServer1 ~= "" then
-      checkIfAvailableAndStart(dnsServer1 , key)
+      checkIfAvailableAndStart(dnsServer1, interface)
     end
     return true
   end,
   dnsserver2_ping = function(_, _, _, key)
-    getDnsServers(key)
+    local interface = get_interface(key)
+    getDnsServers(interface)
     if dnsServer2 ~= "" then
-      checkIfAvailableAndStart(dnsServer2, key)
+      checkIfAvailableAndStart(dnsServer2, interface)
     end
     return true
   end,
   dnsserver1_query = function(_, _, _, key)
-    getDnsServers(key)
+    local interface = get_interface(key)
+    getDnsServers(interface)
     if dnsServer1 ~= "" then
-      checkIfResolveAndStart(dnsServer1 , key)
+      checkIfResolveAndStart(dnsServer1, interface)
     end
     return true
   end,
   dnsserver2_query = function(_, _, _, key)
-    getDnsServers(key)
+    local interface = get_interface(key)
+    getDnsServers(interface)
     if dnsServer2 ~= "" then
-      checkIfResolveAndStart(dnsServer2, key)
+      checkIfResolveAndStart(dnsServer2, interface)
     end
     return true
   end,
   nexthop_ping = function(_, _, _, key)
-    nextHopLcl =  getNexthopInfo(key)
+    local interface = get_interface(key)
+    nextHopLcl = getNexthopInfo(interface)
     if nextHopLcl ~= "" then
-      checkIfAvailableAndStart(nextHopLcl , key)
+      checkIfAvailableAndStart(nextHopLcl, interface)
     end
     return true
   end,

@@ -40,14 +40,14 @@ html[#html + 1] = [[
 
 html[#html + 1] = '<fieldset class="modal-body" id="upgrade-gui-bar" style="min-height: unset; margin-bottom: 15px;">'
 html[#html + 1] = '<div class="alert alert-info" style="margin-bottom: 0;">'
-html[#html + 1] = '<div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 6px;"><span id="update-text">'..T"Update in progress... Do not turn off your modem."..'</span><span id="progress-percent">0%</span></div>'
+html[#html + 1] = '<div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 6px;"><span id="update-text">'..T"Operation in progress... Please wait."..'</span><span id="progress-percent">0%</span></div>'
 html[#html + 1] = '  <div class="progress progress-striped active" style="margin-bottom: 0;">'
 html[#html + 1] = '     <div id="upgrade-progress-bar-fill" class="bar bar-warning" role="progressbar" style="width: 5%;" aria-valuenow="5" aria-valuemin="0" aria-valuemax="100"></div>'
 html[#html + 1] = '</div></div>'
 html[#html + 1] = '</fieldset>'
 html[#html + 1] = '<fieldset>'
 html[#html + 1] = '<div id="command-log-text-container" style="white-space: pre-wrap; font-family: monospace; font-size: 12px; max-height: min(280px, 35vh); overflow-y: auto; scroll-behavior: smooth; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 4px;" data-bind="log_text: log">'
-html[#html + 1] = '[Inizializzazione] Avvio procedura di aggiornamento...'
+html[#html + 1] = '[Inizializzazione] Avvio operazione in corso...'
 html[#html + 1] = '</div>'
 html[#html + 1] = '</fieldset>'
 
@@ -165,10 +165,10 @@ html[#html + 1] = [[
 
 				$("#show_progress").text($("#show_progress").text().replace(/\.{10}/g, ""));
 				$("#show_progress").append(".");
-				var isSuccess = hasStartedExecution && ((data.state == "Complete") || (pollCount > 8 && data.state == "Idle"));
-				var isFailed = hasStartedExecution && (data.state == "Failed" || data.state == "Error");
+				var isSuccess = (data.state == "Complete") || (data.state == "Idle" && (hasStartedExecution || pollCount >= 2));
+				var isFailed = (data.state == "Failed" || data.state == "Error");
 
-				if (!isUpgradeComplete && hasStartedExecution && (isSuccess || isFailed)) {
+				if (!isUpgradeComplete && (isSuccess || isFailed)) {
 					isUpgradeComplete = true;
 					if (KoRequest.CommandLogReadInterval) {
 						KoRequest.CommandLogReadInterval.active = false;
@@ -177,30 +177,40 @@ html[#html + 1] = [[
 					}
 					$("#upgrade-gui-bar").removeClass("hide");
 					$("#show_progress").text("");
+					var targetVer = (data.new_version_text && data.new_version_text !== "Unknown") ? data.new_version_text : "";
+					if (!targetVer) {
+						var matchVer = clean_log.match(/version_gui=([0-9]+\.[0-9]+\.[0-9]+)/i) || clean_log.match(/Online version:\s*([0-9]+\.[0-9]+\.[0-9]+)/i);
+						if (matchVer && matchVer[1]) targetVer = matchVer[1];
+					}
+					var isGuiUpgrade = !!targetVer || (clean_log && (clean_log.indexOf("Cleaning www") !== -1 || clean_log.indexOf("Extracting GUI") !== -1 || clean_log.indexOf("Root Script") !== -1));
+
 					if (isSuccess) {
-						var targetVer = (data.new_version_text && data.new_version_text !== "Unknown") ? data.new_version_text : "";
-						if (!targetVer) {
-							var matchVer = clean_log.match(/version_gui=([0-9]+\.[0-9]+\.[0-9]+)/i) || clean_log.match(/Online version:\s*([0-9]+\.[0-9]+\.[0-9]+)/i);
-							if (matchVer && matchVer[1]) targetVer = matchVer[1];
-						}
-						var successMsg = "Aggiornamento completato con successo" + (targetVer ? " alla versione v" + targetVer : "") + "!";
-						try { sessionStorage.setItem("gui_upgrade_success", successMsg); } catch(e) {}
-						$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info").addClass("bar-success");
+						$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info bar-danger").addClass("bar-success");
 						$("#progress-percent").text("100%");
-						$("#header_title").text("Aggiornamento Completato");
-						var countdown = 3;
-						$("#update-text").html("Aggiornamento completato con successo!<br><span style='font-size: 13px; font-weight: normal; opacity: 0.9;'>Reindirizzamento automatico al login in <strong id='redirect-countdown'>" + countdown + "</strong>s...</span>");
-						var redirectTimer = setInterval(function() {
-							countdown--;
-							if ($("#redirect-countdown").length) $("#redirect-countdown").text(countdown);
-							if (countdown <= 0) {
-								clearInterval(redirectTimer);
-								window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
-							}
-						}, 1000);
+						if (isGuiUpgrade) {
+							var successMsg = "Aggiornamento completato con successo" + (targetVer ? " alla versione v" + targetVer : "") + "!";
+							try { sessionStorage.setItem("gui_upgrade_success", successMsg); } catch(e) {}
+							$("#header_title").text("Aggiornamento Completato");
+							var countdown = 3;
+							$("#update-text").html("Aggiornamento completato con successo!<br><span style='font-size: 13px; font-weight: normal; opacity: 0.9;'>Reindirizzamento automatico al login in <strong id='redirect-countdown'>" + countdown + "</strong>s...</span>");
+							var redirectTimer = setInterval(function() {
+								countdown--;
+								if ($("#redirect-countdown").length) $("#redirect-countdown").text(countdown);
+								if (countdown <= 0) {
+									clearInterval(redirectTimer);
+									window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
+								}
+							}, 1000);
+						} else {
+							$("#header_title").text("Operazione Completata");
+							$("#update-text").text("Operazione completata con successo!");
+							var redirectTimer = setTimeout(function() {
+								window.location.reload(true);
+							}, 1800);
+						}
 					} else {
 						$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info").addClass("bar-danger");
-						$("#update-text").text("Aggiornamento non riuscito.");
+						$("#update-text").text(isGuiUpgrade ? "Aggiornamento non riuscito." : "Operazione non riuscita o terminata con errore.");
 						$("#header_title").text("Errore");
 					}
 					$("body, .modal, #modal-container").addClass("upgrade-finished");
@@ -210,8 +220,15 @@ html[#html + 1] = [[
 					$(".modal-action-close").show().css("display", "block");
 					$("#close-config, .modal-action-close, .btn-close").off("click").on("click", function(e) {
 						e.preventDefault();
-						if (typeof redirectTimer !== "undefined") clearInterval(redirectTimer);
-						window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
+						if (typeof redirectTimer !== "undefined") {
+							clearInterval(redirectTimer);
+							clearTimeout(redirectTimer);
+						}
+						if (isGuiUpgrade) {
+							window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
+						} else {
+							window.location.reload(true);
+						}
 					});
 				}
 			})

@@ -40,7 +40,8 @@ local xdsl_params = {
 
 content_helper.getExactContent(xdsl_params)
 
-if xdsl_params["dsl_type"] and (find(xdsl_params["dsl_type"], "ADSL") == 1 or find(xdsl_params["dsl_type"], "ADLS") == 1) then
+local dsl_type = xdsl_params["dsl_type"] or ""
+if find(dsl_type, "ADSL") == 1 or find(dsl_type, "ADLS") == 1 then
   is_adsl = true
 end
 local content_rpc_gpon = {}
@@ -49,7 +50,7 @@ if is_gpon then
 	content_rpc_gpon["gpon_status"] = "rpc.optical.Interface.1.Status"
 end
 
-if gponboard == "gpon" or gponboard == "gpon_sfp" then
+if gponboard then
 	content_rpc_gpon["gpon_status"] = "rpc.gpon.ploam.state"
 end
 
@@ -190,7 +191,7 @@ end
 local atmping_state = {}
 if is_adsl then
   for _,v in ipairs(xtmintf) do
-    local _ds = proxy.get(v["path"].."DiagnosticsState"); atmping_state[#atmping_state +1] = (_ds and _ds[1] and _ds[1].value) or "None"
+    atmping_state[#atmping_state +1] = proxy.get(v["path"].."DiagnosticsState")[1].value
   end
 end
 -- to handle state that can arise due to async logic
@@ -327,7 +328,7 @@ local attributes = {
 }
 
 if string.match(content_uci["wan_devices"],"eth%d") ~= nil or not xdsl_exist then
-    if proxy.get("rpc.docsis.status.") ~= nil then
+    if proxy.getPL("rpc.docsis.status") ~= nil then
         if content_rpc_wan["wan_up"] == "1" then
             html[#html+1] = ui_helper.createLabel(T"DOCSIS WAN Enable", format("%s %s","<i class=\"icon-ok icon-large green\"></i> ",T"Interface Enabled"), attributes)
         else
@@ -400,8 +401,8 @@ else
             end
 
             local xtm_intf_name = string.gsub(v["path"],"uci.wanatmf5loopback.@","")
-            local _vpi = proxy.get("uci.xtm.atmdevice.@"..xtm_intf_name.."vpi"); local vpi = (_vpi and _vpi[1] and _vpi[1].value) or "8"
-            local _vci = proxy.get("uci.xtm.atmdevice.@"..xtm_intf_name.."vci"); local vci = (_vci and _vci[1] and _vci[1].value) or "35"
+            local vpi = proxy.get("uci.xtm.atmdevice.@"..xtm_intf_name.."vpi")[1].value
+            local vci = proxy.get("uci.xtm.atmdevice.@"..xtm_intf_name.."vci")[1].value
             html[#html+1] = ui_helper.createLabel(T"ATM Ping Test", format("%s PVC %s/%s %s", statusIconAtmPing[k], vpi, vci, explanationAtmPing[k], attributes))
         end
     end
@@ -515,4 +516,4 @@ ngx.print (html)
 </div>\
 \
 ');  ngx.print(ui_helper.createFooter())   ngx.print('\
-'); 
+');

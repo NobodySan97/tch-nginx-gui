@@ -66,7 +66,6 @@ for i=1, #nfc_iface_number do
 end
 
 local uri = ngx.var.uri
-local help_link = { href="/help/index.html?anchor=" .. format("%s", uri:match("/([^/]+)%.lp")) }
   ngx.print('\
 \
 ');  

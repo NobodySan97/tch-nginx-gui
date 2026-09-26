@@ -309,7 +309,7 @@ end
   ngx.print('\
 \
 <link href="/css/mobiled.css" rel="stylesheet">\
-<script language="javascript" type="text/javascript" src="js/flot-min.js"></script>\
+<script src="/js/flot-min.js"></script>\
 \
 ');  ngx.print( ui_helper.createHeader(params.modal_title, true, true, nil)); ngx.print('\
 <div class="modal-body update no-save" id="lte-doctor-body" style="min-height: 50px; min-width: 300px;">\

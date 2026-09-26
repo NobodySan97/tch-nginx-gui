@@ -294,7 +294,6 @@ if ngx.var.request_method == "POST" then
 end
 
 local uri = ngx.var.uri
-local help_link = { href="/help/index.html?anchor=" .. uri:match("/([^/]+)%.lp") }
   ngx.print('\
 \
 ');  ngx.print(ui_helper.createHeader(T"Parental Controls", false, false, nil) ); ngx.print('\

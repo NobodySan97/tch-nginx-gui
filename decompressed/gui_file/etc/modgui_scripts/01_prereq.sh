@@ -13,7 +13,7 @@ move_env_var() {
 				uci_val="$(uci -q get env.var.$val)"
 				[ -n "$uci_val" ] && echo "set modgui.gui.$val='$uci_val'" && echo "delete env.var.$val"
 			done
-			for val in xupnp_app voipblock_for_mmpbx voipblock_for_asterisk blacklist_app telstra_webui transmission_webui aria2_webui amule_webui luci_webui; do
+			for val in xupnp_app voipblock_for_mmpbx voipblock_for_asterisk blacklist_app telstra_webui transmission_webui aria2_webui amule_webui luci_webui adblock_app rsyncd_app speedtest_app adguardhome_app openspeedtest_app wireguard_app l2tpipsec_app openvpn_app tailscale_app dumaos_app; do
 				uci_val="$(uci -q get env.var.$val)"
 				[ -n "$uci_val" ] && echo "set modgui.app.$val='$uci_val'" && echo "delete env.var.$val"
 			done

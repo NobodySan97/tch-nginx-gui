@@ -40,6 +40,7 @@ uci:foreach('web', 'ruleset', function(s)
 local check_rule = {
 	{ name = 'error', target = '/error.lua' },
 	{ name = 'applicationsmodal', target = '/modals/applications-modal.lp' },
+	{ name = 'asteriskprofilemodal', target = '/modals/asterisk-profile-modal.lp' },
 	{ name = 'diagnosticsxdslgraphicsmodal', target = '/modals/diagnostics-xdsl-graphics-modal.lp' },
 	{ name = 'mwanmodal', target = '/modals/mwan-modal.lp' },
 	{ name = 'fastcacheoptionmodal', target = '/modals/fast-cache-option-modal.lp' },
@@ -49,11 +50,15 @@ local check_rule = {
 	{ name = 'upnpmodal', target = '/modals/upnp-modal.lp' },
 	{ name = 'dmzmodal', target = '/modals/dmz-modal.lp' },
 	{ name = 'wolsmodal', target = '/modals/wol-modal.lp' },
-	{ name = 'custodnssmodal', target = '/modals/custodns-modal.lp' },
+	{ name = 'customdnsmodal', target = '/modals/customdns-modal.lp' },
 	{ name = 'dyndnssmodal', target = '/modals/dyndns-modal.lp' },
 	{ name = 'speedservicemodal', target = '/modals/speedservice-modal.lp' },
 	{ name = 'toddndmodal', target = '/modals/tod_dnd-modal.lp' },
 	{ name = 'nfcmodal', target = '/modals/nfc-modal.lp' },
+	{ name = 'openvpnservermodal', target = '/modals/openvpn-server-modal.lp' },
+	{ name = 'tailscalemodal', target = '/modals/tailscale-modal.lp' },
+	{ name = 'wireguardmodal', target = '/modals/wireguard-modal.lp' },
+	{ name = 'bridgegroupingmodal', target = '/modals/bridge-grouping-modal.lp' },
 	{ name = 'stats', target = '/stats.lp' },
 	{ name = 'cards', target = '/cards.lp' },
 	{ name = 'ajaxinfotrafficcard', target = '/ajax/traffic_graph.lua' },
@@ -114,13 +119,16 @@ for _ , elem in pairs(check_rule) do
 	end
 end
 
---Check every element in table
-for _ , elem in pairs(telstra_check_rule) do
-	if not contains(elem.name, ruleset) then
-		uci:set('web', elem.name ,'rule')
-		uci:set('web', elem.name , 'target', elem.target)
-		uci:set('web', elem.name , 'roles', {'admin','engineer'})
-		ruleset[#ruleset+1] = elem.name
+--Add telstra rules only if telstra files are present on the filesystem
+local has_telstra = os.execute("[ -d /www/docroot/telstra-modals ]") == 0
+if has_telstra then
+	for _ , elem in pairs(telstra_check_rule) do
+		if not contains(elem.name, ruleset) then
+			uci:set('web', elem.name ,'rule')
+			uci:set('web', elem.name , 'target', elem.target)
+			uci:set('web', elem.name , 'roles', {'admin','engineer'})
+			ruleset[#ruleset+1] = elem.name
+		end
 	end
 end
 
@@ -143,6 +151,7 @@ local card_check_rule = {
 	{ name = 'firewall_card', card = '008_firewall.lp', modal = 'firewallmodal' },
 	{ name = 'adblock_card', card = '008_adblock.lp', modal = 'adblockmodal' },
 	{ name = 'qos_card', card = '008_qos.lp', modal = 'qosqueuemodal' },
+	{ name = 'asterisk_card', card = '008_asterisk.lp', modal = 'asteriskprofilemodal' },
 	{ name = 'telephony_card', card = '008_telephony.lp', modal = 'mmpbxglobalmodal' },
 	{ name = 'diagnostics_card', card = '009_diagnostics.lp', modal = 'diagnosticspingmodal' },
 	{ name = 'extensions_card', card = '009_extensions.lp', modal = 'applicationsmodal' },
@@ -153,8 +162,11 @@ local card_check_rule = {
 	{ name = 'printersharing_card', card = '012_printersharing.lp', modal = 'printersharing' },
 	{ name = 'parental_card', card = '013_parental.lp', modal = 'parentalmodal' },
 	{ name = 'iproutes_card', card = '015_iproutes.lp', modal = 'iproutesmodal' },
+	{ name = 'openvpnserver_card', card = '015_openvpn-server.lp', modal = 'openvpnservermodal' },
 	{ name = 'tod_card', card = '015_tod.lp', modal = 'todmodal' },
 	{ name = 'nfc_card', card = '016_nfc.lp', modal = 'nfcmodal' },
+	{ name = 'tailscale_card', card = '016_tailscale.lp', modal = 'tailscalemodal' },
+	{ name = 'wireguard_card', card = '016_wireguard.lp', modal = 'wireguardmodal' },
 	{ name = 'relaysetup_card', card = '018_relaysetup.lp', modal = 'relaymodal' },
 	{ name = 'eco_card', card = '020_eco.lp', modal = 'ecomodal' },
 	{ name = 'cwmpconf_card', card = '090_cwmpconf.lp', modal = 'cwmpconf' },

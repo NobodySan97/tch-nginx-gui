@@ -93,20 +93,17 @@ adblock_support() {
 			uci set adblock.stevenblack.adb_src_rset='/^0\.0\.0\.0[[:space:]]+([[:alnum:]_-]+\.)+[[:alpha:]]+([[:space:]]|$)/{print tolower($2)}'
 			uci set adblock.stevenblack.enabled='1'
 		fi
-		if [ ! "$(uci get -q adblock.oisd)" ]; then
-			uci set adblock.oisd=source
-			uci set adblock.oisd.adb_src='https://small.oisd.nl/'
-			uci set adblock.oisd.adb_src_desc='OISD Small - Zero false positive ad and tracking domain list'
-			uci set adblock.oisd.adb_src_rset='BEGIN{FS="[[:space:]]+"} !/^#/ && NF {print tolower($1)}'
-			uci set adblock.oisd.enabled='0'
-		fi
-		if [ ! "$(uci get -q adblock.hagezi)" ]; then
-			uci set adblock.hagezi=source
-			uci set adblock.hagezi.adb_src='https://raw.githubusercontent.com/hagezi/dns-blocklists/main/domains/pro.txt'
-			uci set adblock.hagezi.adb_src_desc='Hagezi Multi Pro (Ads, Trackers, Social, OEMs, Telemetry)'
-			uci set adblock.hagezi.adb_src_rset='BEGIN{FS="[[:space:]]+"} !/^#/ && NF {print tolower($1)}'
-			uci set adblock.hagezi.enabled='0'
-		fi
+		uci set adblock.oisd=source
+		uci set adblock.oisd.adb_src='https://small.oisd.nl/domainswild2'
+		uci set adblock.oisd.adb_src_desc='OISD Small - Zero false positive ad and tracking domain list'
+		uci set adblock.oisd.adb_src_rset='BEGIN{FS="[[:space:]]+"} !/^#/ && NF {print tolower($1)}'
+		[ -z "$(uci -q get adblock.oisd.enabled)" ] && uci set adblock.oisd.enabled='0'
+
+		uci set adblock.hagezi=source
+		uci set adblock.hagezi.adb_src='https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro-onlydomains.txt'
+		uci set adblock.hagezi.adb_src_desc='Hagezi Multi Pro (Ads, Trackers, Social, OEMs, Telemetry)'
+		uci set adblock.hagezi.adb_src_rset='BEGIN{FS="[[:space:]]+"} !/^#/ && NF {print tolower($1)}'
+		[ -z "$(uci -q get adblock.hagezi.enabled)" ] && uci set adblock.hagezi.enabled='0'
 
 		# Remove dead and obsolete sources
 		for dead in hphosts shalla zeus ransomware malwarelist sysctl ut_capitole reg_cn reg_cz reg_de reg_id reg_nl reg_pl reg_ro reg_ru dshield feodo winhelp hagezi_pro; do

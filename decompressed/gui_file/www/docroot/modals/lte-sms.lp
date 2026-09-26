@@ -59,7 +59,7 @@ local params = utils.get_params()
 		margin-top: 10px;\
 	}\
 </style>\
-<script language="javascript" type="text/javascript" src="js/bootstrap-progressbar-min.js"></script>\
+<script src="/js/bootstrap-progressbar-min.js"></script>\
 \
 ');  ngx.print( ui_helper.createHeader(params.modal_title, true, true, nil)); ngx.print('\
 <div class="modal-body update" id="lte-sms-body">\

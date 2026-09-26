@@ -169,10 +169,34 @@ local function tabletostring(tbl)
   return tblvalue
 end
 
+local function interfaceList(val)
+  local list = {}
+  if type(val) == "table" then
+    for _, item in ipairs(val) do
+      if item and item ~= "" then
+        list[#list + 1] = item
+      end
+    end
+  elseif type(val) == "string" and val ~= "" then
+    for item in val:gmatch("%S+") do
+      list[#list + 1] = item
+    end
+  end
+  return list
+end
+
+local selection_post = ngx.var.request_method == "POST" and ngx.req.get_post_args() or {}
+local selected_lan = interfaceList(selection_post.lanintf)
+local selected_wan = interfaceList(selection_post.wanintf)
+
 local function validateLANIfname(value, object, key)
-    local lanvalue = tabletostring(object["lanintf"])
-    local wanvalue = tabletostring(object["wanintf"])
-    object["lanintf"] = format("%s %s", tabletostring(object["lanintf"]), tabletostring(object["wanintf"]))
+    if #selected_lan == 0 and #selected_wan == 0 then
+      return nil, T"Select at least one interface for the bridge."
+    end
+    local members = {}
+    for _, name in ipairs(selected_lan) do members[#members + 1] = name end
+    for _, name in ipairs(selected_wan) do members[#members + 1] = name end
+    object["lanintf"] = table.concat(members, " ")
     return true
 end
 

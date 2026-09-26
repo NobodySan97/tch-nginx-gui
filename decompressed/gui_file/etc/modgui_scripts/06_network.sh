@@ -243,15 +243,25 @@ unlock_ssh_wan_tiscali() {
 }
 
 disable_tcp_Sack() {
-  logecho "Apply CVE 2019-11477 workaround"
-  if grep -q 'net.ipv4.tcp_sack' /etc/sysctl.conf; then
-    sed -i 's/\(net.ipv4.tcp_sack=\)1/\10/g' /etc/sysctl.conf
-    sysctl -p 2>/dev/null 1>/dev/null
-  elif ! grep -q 'net.ipv4.tcp_sack=0' /etc/sysctl.conf; then
-    printf "\n\n" >>/etc/sysctl.conf
-    echo "# disable tcp_sack for CVE 2019-11477" >>/etc/sysctl.conf
-    echo "net.ipv4.tcp_sack=0" >>/etc/sysctl.conf
-    sysctl -p 2>/dev/null 1>/dev/null
+  local kver="$(uname -r 2>/dev/null)"
+  if [ -z "${kver##3.4*}" ]; then
+    logecho "Apply CVE 2019-11477 workaround for kernel 3.4"
+    if grep -q 'net.ipv4.tcp_sack' /etc/sysctl.conf; then
+      sed -i 's/\(net.ipv4.tcp_sack=\)1/\10/g' /etc/sysctl.conf
+      sysctl -p 2>/dev/null 1>/dev/null
+    elif ! grep -q 'net.ipv4.tcp_sack=0' /etc/sysctl.conf; then
+      printf "\n\n" >>/etc/sysctl.conf
+      echo "# disable tcp_sack for CVE 2019-11477" >>/etc/sysctl.conf
+      echo "net.ipv4.tcp_sack=0" >>/etc/sysctl.conf
+      sysctl -p 2>/dev/null 1>/dev/null
+    fi
+  else
+    # Restore tcp_sack on modern kernels (4.1+) if previously disabled
+    if grep -q 'net.ipv4.tcp_sack=0' /etc/sysctl.conf; then
+      sed -i '/net\.ipv4\.tcp_sack=0/d' /etc/sysctl.conf
+      sed -i '/# disable tcp_sack for CVE 2019-11477/d' /etc/sysctl.conf
+      sysctl -w net.ipv4.tcp_sack=1 2>/dev/null 1>/dev/null
+    fi
   fi
 }
 
