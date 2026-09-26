@@ -35,25 +35,33 @@ if session:hasAccess(modalPath) then
           <div class="divtable">\
               ');  if enabled_count ~= 0 then  ngx.print('\
                 <span class="simple-desc">\
-               <i " class="fas fa-info-circle" aria-hidden="true" href="#">&nbsp</i>\
-                ');  
-                ngx.print(format( N('<strong %1$s>%2$d Enabled Helper</strong>',
-                                    '<strong %1$s>%2$d Enabled Helpers</strong>', enabled_count),
-                                    modal_link, enabled_count))
-                  ngx.print('\
-                </span>\
-                ');  
-              end
-              if disabled_count ~= 0 then  ngx.print('\
-                <span class="simple-desc">\
-               <i " class="fas fa-info-circle" aria-hidden="true" href="#">&nbsp</i>\
-                ');  
-                ngx.print(format( N('<strong %1$s>%2$d Disabled Helper</strong>',
-                                    '<strong %1$s>%2$d Disabled Helpers</strong>', disabled_count),
-                                    modal_link, disabled_count))
-                  ngx.print('\
-                </span>\
-              ');  end  ngx.print('\
+                <i class="fas fa-info-circle" aria-hidden="true">&nbsp;</i>\
+                 ');  
+                 ngx.print(format( N('<strong %1$s>%2$d Enabled Helper</strong>',
+                                     '<strong %1$s>%2$d Enabled Helpers</strong>', enabled_count),
+                                     modal_link, enabled_count))
+                   ngx.print('\
+                 </span>\
+                 ');  
+               end
+               if disabled_count ~= 0 then  ngx.print('\
+                 <span class="simple-desc">\
+                <i class="fas fa-info-circle" aria-hidden="true">&nbsp;</i>\
+                 ');  
+                 ngx.print(format( N('<strong %1$s>%2$d Disabled Helper</strong>',
+                                     '<strong %1$s>%2$d Disabled Helpers</strong>', disabled_count),
+                                     modal_link, disabled_count))
+                   ngx.print('\
+                 </span>\
+               ');  end
+               if enabled_count == 0 and disabled_count == 0 then  ngx.print('\
+                 <span class="simple-desc">\
+                <i class="fas fa-info-circle" aria-hidden="true">&nbsp;</i>\
+                 ');
+                 ngx.print(format('<strong %s>%s</strong>', modal_link, T"No Helpers Configured"))
+                   ngx.print('\
+                 </span>\
+               ');  end  ngx.print('\
            </div>\
            </div>\
       </div>\

@@ -91,7 +91,7 @@ commit fcctlsettings
 EOF
   fi
   # Ensure default NAT ALG helpers exist in firewall config
-  if [ -f /etc/config/firewall ] && ! uci -q show firewall | grep -q "helper"; then
+  if [ -f /etc/config/firewall ] && ! uci -q show firewall | grep -q "=helper"; then
     uci -q batch <<EOF
 set firewall.ftp=helper
 set firewall.ftp.name='ftp'
