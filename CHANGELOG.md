@@ -1,6 +1,16 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.71 (Preview)
+---------------------------------------------------------------------------
+- **Dashboard Cards Visibility Manager, Smart Auto-Detect & UI Stability**:
+  - `cards-manager-modal.lp`: Nuovo pannello interattivo accessibile direttamente dalla dashboard (card *GUI Settings*) e dal modale impostazioni per personalizzare la visibilità di ciascuna delle 31 schede con switch ON/OFF, organizzate per categoria (Rete, Sicurezza, VPN, Telefonia VoIP, Condivisione, Sistema).
+  - **Smart Auto-Detect**: Pulsante di rilevamento automatico intelligente che analizza lo stato reale del sistema e nasconde con 1 clic le schede di servizi non installati o prive di hardware (NAT Helpers vuoto, Asterisk, OpenVPN, WireGuard, Tailscale, LTE 4G, server di stampa USB, NFC, Adblock non installato).
+  - `cards.lua`: Lettura dinamica in tempo reale della visibilità da `/etc/config/web` con persistenza atomica tramite script root `set_cards_visibility.sh` e IPC transformer, garantendo aggiornamento istantaneo della dashboard senza riavvio del router.
+  - `main-min-nojquery.js`: Risolto il bug di chiusura improvvisa del modale causato dal bubbling degli eventi `hide`/`hidden` dei tooltip Bootstrap interni alla tabella.
+  - `network.interface.map`: Risolto l'errore `bad argument #1 to concat (table expected, got string)` in Transformer quando i server DNS in `/etc/config/network` sono definiti come stringa separata da spazi.
+  - `04_config.sh` & `092_natalghelper.lp`: Gestione difensiva e fallback zero-state quando i moduli ALG del firewall non sono attivi.
+
 9.8.70 (Preview)
 ---------------------------------------------------------------------------
 - **Upgrade Lifecycle Healthcheck, Dynamic Reconnection & Smooth Version Polling**:
