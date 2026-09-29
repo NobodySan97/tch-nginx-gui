@@ -288,13 +288,21 @@ local executeCommandRes = "Idle"
 
 local content = io.open("/tmp/executeCommandRes")
 if content then
-  executeCommandRes = content:read("*all")
+  executeCommandRes = content:read("*all") or "Idle"
   content:close()
-  os.remove("/tmp/executeCommandRes")
+  executeCommandRes = executeCommandRes:gsub("^%s+", ""):gsub("%s+$", "")
 end
 
 SYSTEM_MODGUI_SCRIPTREQUEST_.get = {
   state = function(mapping, param)
+    local f = io.open("/tmp/executeCommandRes", "r")
+    if f then
+      local val = f:read("*all")
+      f:close()
+      if val and val ~= "" then
+        return val:gsub("^%s+", ""):gsub("%s+$", "")
+      end
+    end
     return executeCommandRes
   end
 }

@@ -4,8 +4,15 @@ LOG_LOCATION=/tmp/command_log
 
 ############TRANSFORMER UTILITY##################
 set_transformer() {
-	cmd="require('datamodel').set('$1','$2')"
-	lua -e "$cmd"
+	cmd="local dm = require('datamodel'); dm.set('$1', '$2'); dm.apply()"
+	lua -e "$cmd" >/dev/null 2>&1 || true
+	if [ "$1" = "rpc.system.modgui.executeCommand.state" ]; then
+		if [ "$2" != "Idle" ]; then
+			echo -n "$2" > /tmp/executeCommandRes
+		else
+			rm -f /tmp/executeCommandRes
+		fi
+	fi
 }
 #################################################
 

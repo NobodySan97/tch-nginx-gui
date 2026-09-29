@@ -1,6 +1,15 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.74 (Preview)
+---------------------------------------------------------------------------
+- **Upgrade Process Modal & Live Log Tracking Fix**:
+  - `command-log-read-modal.lp`: Eliminata la condizione di uscita prematura su `data.state == "Idle"` che interrompeva la visualizzazione dell'avanzamento dopo il download, reindirizzando erroneamente l'utente al login prima del completamento dell'installazione.
+  - `command-log-read-modal.lp`: Il processo di aggiornamento GUI ora traccia per intero tutte le fasi (Download -> Pulizia /www -> Decompressione pacchetto -> Esecuzione script di root `01_`..`99_postreq.sh` -> Riavvio servizi e Nginx -> Completamento effettivo al 100%), mantenendo i log di avanzamento visibili in tempo reale.
+  - `wrapper.sh`, `upgradegui`, `checkver`, `appInstallRemoveUtility.sh`: Aggiunto `dm.apply()` in `set_transformer` e sincronizzazione atomica dello stato su `/tmp/executeCommandRes`, risolvendo il mancato aggiornamento dello stato IPC su Transformer.
+  - `system.modgui.map` & `commandlogread.lua`: Implementata la lettura dinamica dello stato da file disco `/tmp/executeCommandRes` per mantenere la continuità di stato durante i riavvii dei servizi e del demone Transformer.
+  - `shared-script.js`: Inoltro del parametro `cmd_action` all'apertura del modale per una corretta discriminazione del contesto di upgrade.
+
 9.8.73 (Preview)
 ---------------------------------------------------------------------------
 - **Specific Model Patch Recognition & MIPS Feed Alignment**:

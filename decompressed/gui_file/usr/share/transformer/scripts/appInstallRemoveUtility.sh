@@ -70,12 +70,21 @@ install_from_github() {
 
 ############TRANSFORMER UTILITY##################
 set_transformer() {
-  lua - "$1" "$2" << 'EOF'
+  lua - "$1" "$2" << 'EOF' >/dev/null 2>&1 || true
 local p, v = arg[1], arg[2]
 if p and v then
-  require('datamodel').set(p, v)
+  local dm = require('datamodel')
+  dm.set(p, v)
+  dm.apply()
 end
 EOF
+  if [ "$1" = "rpc.system.modgui.executeCommand.state" ]; then
+    if [ "$2" != "Idle" ]; then
+      echo -n "$2" > /tmp/executeCommandRes
+    else
+      rm -f /tmp/executeCommandRes
+    fi
+  fi
 }
 #################################################
 

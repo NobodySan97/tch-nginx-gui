@@ -5,7 +5,18 @@ local ngx = ngx
 local data = {}
 
 local commandstatus = proxy.get("rpc.system.modgui.executeCommand.state")
-data["state"] = commandstatus and commandstatus[1] and commandstatus[1].value or "Mapper Error"
+local raw_state = commandstatus and commandstatus[1] and commandstatus[1].value
+if not raw_state or raw_state == "Idle" or raw_state == "Mapper Error" then
+	local f = io.open("/tmp/executeCommandRes", "r")
+	if f then
+		local disk_state = f:read("*all")
+		f:close()
+		if disk_state and disk_state ~= "" then
+			raw_state = disk_state:gsub("^%s+", ""):gsub("%s+$", "")
+		end
+	end
+end
+data["state"] = raw_state or "Idle"
 
 local action = { 
 	Checking = function()

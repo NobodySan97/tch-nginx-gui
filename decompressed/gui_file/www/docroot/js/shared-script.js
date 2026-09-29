@@ -48,7 +48,7 @@ var modgui = modgui || {};
 							if (onClose) onClose();
 						});
 					});
-					tch.openModal("/modals/command-log-read-modal.lp");
+					tch.openModal("/modals/command-log-read-modal.lp?cmd_action=" + encodeURIComponent(action || ""));
 				} else if (onClose) {
 					onClose();
 				}

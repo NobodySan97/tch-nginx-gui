@@ -63,7 +63,8 @@ html[#html + 1] = [[
 
 	var lastProgress = 5;
 	var targetVer = "";
-	var isGuiUpgrade = false;
+	var cmdAction = "<%= ngx.req.get_uri_args().cmd_action or '' %>";
+	var isGuiUpgrade = (cmdAction === "system_upgrade_gui") || (cmdAction === "upgradeguifile") || (cmdAction === "autoupgrade_view");
 
 	var $activeModal = $("#modal-container, .modal");
 	$activeModal.data("backdrop", "static");
@@ -167,9 +168,33 @@ html[#html + 1] = [[
 
 				$("#show_progress").text($("#show_progress").text().replace(/\.{10}/g, ""));
 				$("#show_progress").append(".");
+				if (!isGuiUpgrade) {
+					isGuiUpgrade = !!targetVer || (clean_log && (
+						clean_log.indexOf("Upgrade Script") !== -1 ||
+						clean_log.indexOf("Downloading GUI") !== -1 ||
+						clean_log.indexOf("Cleaning www") !== -1 ||
+						clean_log.indexOf("Extracting GUI") !== -1 ||
+						clean_log.indexOf("Root Script") !== -1 ||
+						clean_log.indexOf("version_gui=") !== -1
+					));
+				}
+
 				var hasFatalError = clean_log && /(?:Upgrade Script ERROR:|Root Script ERROR:|File corrupted|not enough space)/i.test(clean_log);
 				var isFailed = (data.state == "Failed" || data.state == "Error") || hasFatalError;
-				var isSuccess = !isFailed && ((data.state == "Complete") || (data.state == "Idle" && (hasStartedExecution || pollCount >= 2)));
+
+				var isUpgradeDoneInLog = clean_log && (
+					clean_log.indexOf("Upgrade Done") !== -1 ||
+					clean_log.indexOf("Process complete, restarting services") !== -1
+				);
+
+				var isSuccess = false;
+				if (isGuiUpgrade) {
+					// GUI upgrade is only completed when state is explicitly Complete or log says Upgrade Done
+					isSuccess = !isFailed && ((data.state == "Complete") || isUpgradeDoneInLog);
+				} else {
+					// For non-upgrade utilities (app install/remove, etc.)
+					isSuccess = !isFailed && ((data.state == "Complete") || (data.state == "Idle" && hasStartedExecution && pollCount >= 6));
+				}
 
 				if (!isUpgradeComplete && (isSuccess || isFailed)) {
 					isUpgradeComplete = true;
@@ -186,7 +211,6 @@ html[#html + 1] = [[
 						var matchVer = clean_log.match(/version_gui=([0-9]+\.[0-9]+\.[0-9]+)/i) || clean_log.match(/Online version:\s*([0-9]+\.[0-9]+\.[0-9]+)/i);
 						if (matchVer && matchVer[1]) targetVer = matchVer[1];
 					}
-					isGuiUpgrade = !!targetVer || (clean_log && (clean_log.indexOf("Cleaning www") !== -1 || clean_log.indexOf("Extracting GUI") !== -1 || clean_log.indexOf("Root Script") !== -1));
 
 					if (isSuccess) {
 						$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info bar-danger").addClass("bar-success");
@@ -239,10 +263,12 @@ html[#html + 1] = [[
 			.fail(function(data) {
 				consecutiveFailures++;
 				if (data.status == 200 && data.responseText && data.responseText.indexOf("sign-me-in") !== -1) {
-					isUpgradeComplete = true;
-					try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
-					window.location.href = "/login.lp";
-					return;
+					if (!isGuiUpgrade || lastProgress >= 75) {
+						isUpgradeComplete = true;
+						try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
+						window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
+						return;
+					}
 				}
 				if (hasStartedExecution) {
 					// Durante l'estrazione e il riavvio dei servizi il webserver è temporaneamente non raggiungibile.
