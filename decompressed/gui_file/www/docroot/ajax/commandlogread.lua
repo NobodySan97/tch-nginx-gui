@@ -85,6 +85,8 @@ else
 			data["log"] = "[Inizializzazione] Avvio procedura in corso..."
 		elseif data["state"] == "Complete" then
 			data["log"] = "[Aggiornamento] Operazione completata con successo!"
+		elseif data["state"] == "Failed" or data["state"] == "Error" then
+			data["log"] = "[Errore] Operazione terminata con errore. Controllare i log di sistema."
 		end
 	end
 end

@@ -35,15 +35,21 @@ if status then
   status:close()
 end
 local modal_path
-if ngx.ctx.session:hasAccess("/modals/openvpn-server-modal.lp") then modal_path = "/modals/openvpn-server-modal.lp" end
+local session = ngx.ctx.session
+if session and session:hasAccess("/modals/openvpn-server-modal.lp") then modal_path = "/modals/openvpn-server-modal.lp" end
 ngx.print('<div class="span3"><div class="smallcard">')
 ngx.print(ui_helper.createCardHeader(T"OpenVPN", modal_path))
 ngx.print('<div class="content card_bg" data-bg-text="&#xf023;">', ui_helper.createSimpleLight(enabled, status_text), '<p class="subinfos">')
 ngx.print(format(N("<strong>%d client</strong> is connected", "<strong>%d clients</strong> are connected", connected), connected))
 ngx.print('</p>', ui_helper.createSimpleLight(client_enabled, client_text), '<p class="subinfos">')
 if client_enabled == "1" then
+  local is_up = false
   local tunnel = io.open("/sys/class/net/tun1/operstate", "r")
-  ngx.print(tunnel and T"Client tunnel is up" or T"Client tunnel is down")
-  if tunnel then tunnel:close() end
+  if tunnel then
+    local state = tunnel:read("*l")
+    tunnel:close()
+    if state and state:match("up") then is_up = true end
+  end
+  ngx.print(is_up and T"Client tunnel is up" or T"Client tunnel is down")
 end
 ngx.print('</p></div></div></div>')

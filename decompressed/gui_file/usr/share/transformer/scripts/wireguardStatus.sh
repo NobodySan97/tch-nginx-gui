@@ -24,7 +24,7 @@ wg_tool=""
 [ -n "$wg_tool" ] || wg_tool="$(command -v wg 2>/dev/null)"
 if [ "$running" = "true" ] && [ -n "$wg_tool" ]; then
   live_peers="$("$wg_tool" show "$interface" latest-handshakes 2>/dev/null |
-    awk -v now="$(date +%s)" '$2 != "" && $2 != "(never)" && now - $2 < 360 { count++ } END { print count + 0 }')"
+    awk -v now="$(date +%s)" '$2 != "" && $2 != "(never)" && ($2 + 0) > 0 && (now - $2) >= 0 && (now - $2) < 360 { count++ } END { print count + 0 }')"
 fi
 [ -n "$live_peers" ] || live_peers=0
 

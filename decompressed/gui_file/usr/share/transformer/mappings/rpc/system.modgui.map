@@ -113,7 +113,8 @@ local SYSTEM_MODGUI_ = {
       if (paramValue == "0") then
         os.remove("/overlay/.disable_modoverlay")
       else
-        io.open("/overlay/.disable_modoverlay", "w"):close()
+        local f = io.open("/overlay/.disable_modoverlay", "w")
+        if f then f:close() end
       end
       return
     end
@@ -160,7 +161,8 @@ local SYSTEM_MODGUI_UTILITY_ = {
   get = {
     rip_key_B = function()
       local content = io.open("/proc/rip/0108")
-      local result = content:read("*all")
+      if not content then return "" end
+      local result = content:read("*all") or ""
       content:close()
 
       return str2hex(result:sub(1, 64))
@@ -180,7 +182,7 @@ local SYSTEM_MODGUI_UTILITY_ = {
       elseif args and args == "terminate" then
         local clean_comm =
           "for pid in $(pgrep -f " .. command .. "); do logger terminating :  $pid && kill -KILL $pid;done"
-        async_exec {[clean_comm] = true}
+        os.execute(clean_comm)
       end
       if args and args:match("sync") then
         os.execute(command)
@@ -214,29 +216,29 @@ local SYSTEM_MODGUI_DEBUGLOG_ = {
 SYSTEM_MODGUI_DEBUGLOG_.get = {
   filename = function(mapping, param)
     local handle = io.popen('find /tmp -type f -name "DebugHelper*"')
-    local filename = handle:read("*a")
+    local filename = handle and handle:read("*a") or ""
     filename = string.gsub(filename, "^%s+", "")
     filename = string.gsub(filename, "%s+$", "")
     filename = string.gsub(filename, "[\n\r]+", " ")
-    handle:close()
+    if handle then handle:close() end
     return filename
   end,
   state = function(mapping, param)
     local handle = io.popen('find /tmp -type f -name "DebugHelper*"')
-    local filename = handle:read("*a")
+    local filename = handle and handle:read("*a") or ""
     filename = string.gsub(filename, "^%s+", "")
     filename = string.gsub(filename, "%s+$", "")
     filename = string.gsub(filename, "[\n\r]+", " ")
-    handle:close()
+    if handle then handle:close() end
     if filename ~= "" then
       return "Complete"
     end
     handle = io.popen('find /tmp -type d -name "DebugHelper*"')
-    local filedir = handle:read("*a")
-    filename = string.gsub(filename, "^%s+", "")
-    filename = string.gsub(filename, "%s+$", "")
+    local filedir = handle and handle:read("*a") or ""
+    filedir = string.gsub(filedir, "^%s+", "")
+    filedir = string.gsub(filedir, "%s+$", "")
     filedir = string.gsub(filedir, "[\n\r]+", " ")
-    handle:close()
+    if handle then handle:close() end
     if filedir ~= "" then
       return "Requested"
     end
@@ -273,7 +275,9 @@ local SYSTEM_MODGUI_SCRIPTREQUEST_ = {
           "Checking",
           "Requested",
           "In Progress",
-          "Complete"
+          "Complete",
+          "Failed",
+          "Error"
         }
       }
     }
@@ -300,8 +304,10 @@ SYSTEM_MODGUI_SCRIPTREQUEST_.set = {
     executeCommandRes = paramValue
     if paramValue ~= "Idle" then
       local content = io.open("/tmp/executeCommandRes", "wb")
-      content:write(paramValue)
-      content:close()
+      if content then
+        content:write(paramValue)
+        content:close()
+      end
     else
       os.remove("/tmp/executeCommandRes")
     end
@@ -381,8 +387,9 @@ SYSTEM_MODGUI_APP_.set = {
 
     local wrapper = "/usr/share/transformer/scripts/wrapper.sh"
     local appScript = "/usr/share/transformer/scripts/appInstallRemoveUtility.sh"
+    local extra_arg = commdParse[3] and tostring(commdParse[3]):gsub("[^%w%._%-]", "") or ""
     local command =
-      string.format('%s "%s %s %s %s"', wrapper, appScript, commdParse[1], commdParse[2], commdParse[3] or "")
+      string.format('%s "%s %s %s %s"', wrapper, appScript, commdParse[1], commdParse[2], extra_arg)
     async_exec({[command] = true})
   end
 }

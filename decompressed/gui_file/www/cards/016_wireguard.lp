@@ -56,7 +56,8 @@ elseif enabled_on then
 end
 local light = (enabled_on and running) and "1" or "0"
 local modal_path
-if ngx.ctx.session:hasAccess("/modals/wireguard-modal.lp") then modal_path = "/modals/wireguard-modal.lp" end
+local session = ngx.ctx.session
+if session and session:hasAccess("/modals/wireguard-modal.lp") then modal_path = "/modals/wireguard-modal.lp" end
 
 ngx.print('<div class="span3"><div class="smallcard">')
 ngx.print(ui_helper.createCardHeader(T"WireGuard", modal_path))

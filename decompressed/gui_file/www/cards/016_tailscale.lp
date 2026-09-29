@@ -59,7 +59,8 @@ elseif online == "1" then
   state_text = T"Tailscale connected"
 end
 local modal_path
-if ngx.ctx.session:hasAccess("/modals/tailscale-modal.lp") then modal_path = "/modals/tailscale-modal.lp" end
+local session = ngx.ctx.session
+if session and session:hasAccess("/modals/tailscale-modal.lp") then modal_path = "/modals/tailscale-modal.lp" end
 
 ngx.print('<div class="span3"><div class="smallcard">')
 ngx.print(ui_helper.createCardHeader(T"Tailscale", modal_path))

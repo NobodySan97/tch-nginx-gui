@@ -26,19 +26,13 @@ end
 local function rewrite(action, key, param, value)
     local current = users()
     local index = tonumber((key or ""):match("^user(%d+)$"))
-    if not index then return nil end
-    local fd = open(password_file, "r")
-    local passwords = {}
-    if fd then
-        for line in fd:lines() do passwords[#passwords + 1] = line:match("^[^%s]+%s+(.*)$") or "" end
-        fd:close()
-    end
+    if not index and action ~= "add" then return nil end
+
     if action == "add" then
-        current[#current + 1] = { id = "user" .. tostring(#current + 1), username = "vpn_user" }
-        passwords[#passwords + 1] = "!"
+        current[#current + 1] = { id = "user" .. tostring(#current + 1), username = "vpn_user", password = "!" }
     elseif action == "delete" then
+        if not index or not current[index] then return nil end
         table.remove(current, index)
-        table.remove(passwords, index)
     elseif current[index] then
         if param == "username" then
             if not value or not value:match("^[%w_.@-]+$") then return nil end
@@ -46,22 +40,32 @@ local function rewrite(action, key, param, value)
                 if i ~= index and user.username == value then return nil end
             end
             current[index].username = value
-        end
-        if param == "password" then
+        elseif param == "password" then
             if not value or #value < 8 or value:find("%s") then return nil end
-            passwords[index] = value
+            current[index].password = value
         end
     else
         return nil
     end
-    fd = open(password_file, "w")
+    local fd = open(password_file, "w")
     if not fd then return nil end
-    for i, user in ipairs(current) do
-        fd:write(format("%s\t%s\n", user.username, passwords[i] or "!"))
+    for _, user in ipairs(current) do
+        fd:write(format("%s\t%s\n", user.username, user.password or "!"))
     end
     fd:close()
     return true
 end
+
+local parent_mapping = {
+    objectType = {
+        name = "rpc.openvpn.server.user.",
+        access = "readOnly",
+        minEntries = 1,
+        maxEntries = 1,
+        parameters = {},
+    },
+}
+register(parent_mapping)
 
 local mapping = {
     objectType = {
@@ -85,7 +89,8 @@ mapping.get = function(_, param, key)
     local user = index and users()[index]
     if not user then return "" end
     if param == "username" then return user.username end
-    return user.password or ""
+    if param == "password" then return "********" end
+    return ""
 end
 mapping.set = function(_, param, value, key) return rewrite("set", key, param, value) end
 mapping.add = function() rewrite("add", "user1"); return "user" .. tostring(#users()) end

@@ -5,6 +5,8 @@ online="false"
 ip_address=""
 dns_name=""
 version="$(uci -q get tailscale.service.download_url | sed -n 's|.*tailscale_\([0-9][0-9.]*\)_[^/]*\.tgz|\1|p')"
+[ -n "$version" ] || version="$(/usr/bin/tailscale version 2>/dev/null | awk 'NR==1 {print $1}')"
+[ -n "$version" ] || version="$(/opt/tailscale/tailscale version 2>/dev/null | awk 'NR==1 {print $1}')"
 auth_url=""
 phase="stopped"
 message="Service disabled"
@@ -25,7 +27,7 @@ read_worker_status() {
   [ -z "$worker_message" ] || message="$worker_message"
 }
 
-if [ "$enabled" = "1" ] && /etc/init.d/tailscale running >/dev/null 2>&1; then
+if [ "$enabled" = "1" ] && { [ -S /var/run/tailscale/tailscaled.sock ] || pgrep -x tailscaled >/dev/null 2>&1; }; then
 	service_running="true"
 	phase="starting"
 	message="Preparing Tailscale"

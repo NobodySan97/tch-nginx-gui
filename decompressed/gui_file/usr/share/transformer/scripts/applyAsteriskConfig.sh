@@ -27,11 +27,16 @@ if [ "$(uci -q get modgui.app.voipblock_for_asterisk)" = "1" ] && \
       print "same => n(voipblock-ok),NoOp()"
       next
     }
-    /Dial\(/ && /,r\)/ {
-      sub(/,r\)/, ",rb(Voipblock^callee_handler^1))")
-      dial_hooks++
+    /Dial\(/ {
+      dials++
+      if (/,r\)/) {
+        sub(/,r\)/, ",rb(Voipblock^callee_handler^1))")
+        dial_hooks++
+      } else if (/\)/) {
+        sub(/\)/, ",b(Voipblock^callee_handler^1))")
+        dial_hooks++
+      }
     }
-    /Dial\(/ { dials++ }
     { print }
     END {
       if (anchor != 1 || (dials > 0 && dial_hooks == 0)) exit 2

@@ -22,8 +22,6 @@ local function get_rules_from_config()
 	return rules
 end
 
-local rules = get_rules_from_config()
-
 local function get_cards_from_config()
   local rules = get_rules_from_config()
   local config = {}
@@ -42,19 +40,31 @@ local function get_cards_from_config()
       card.card = card.card:gsub("^%d+_", "")
 
       config[card.card] = card
+      config[card.card:gsub("%.lp$", "")] = card
     end
   end)
   uci:unload('web')
   return config
 end
 
+local function get_cached_cards_config()
+  if ngx and ngx.ctx then
+    if not ngx.ctx._cached_cards_config then
+      ngx.ctx._cached_cards_config = get_cards_from_config()
+    end
+    return ngx.ctx._cached_cards_config
+  end
+  return get_cards_from_config()
+end
+
 local function card_visible(session, config, cardname)
+  local clean = cardname:gsub("^%d+_", ""):gsub("%.lp$", "")
   -- Essential cards that should never be hidden
-  if cardname == "gateway" or cardname == "modgui" then
+  if clean == "gateway" or clean == "modgui" then
     return true
   end
 
-  local card = config[cardname]
+  local card = config[clean] or config[cardname]
   if card then
     -- If explicitly hidden in web config (hide = '1'), hide it
     if card.hide then
@@ -101,7 +111,7 @@ function M.get_card_from_modal(ModalSearch)
 	if not ModalSearch then return nil end
 	local session = ngx and ngx.ctx and ngx.ctx.session
 	local result
-	local current_config = get_cards_from_config()
+	local current_config = get_cached_cards_config()
 	for _, card in pairs(current_config) do
 		if card.modal == ModalSearch then
 			result = card.raw_card or card.card
@@ -120,7 +130,7 @@ end
 function M.get_modal_from_card(CardSearch)
 	if not CardSearch then return nil end
 	local clean_name = CardSearch:gsub("^%d+_", "")
-	local current_config = get_cards_from_config()
+	local current_config = get_cached_cards_config()
 	local card = current_config[clean_name] or current_config[CardSearch]
 	return card and card.modal or nil
 end
@@ -132,7 +142,7 @@ function M.cards()
   local limit_info = get_limit_info()
   local result = {}
   local path = includepath or "/www/cards/"
-  local current_config = get_cards_from_config()
+  local current_config = get_cached_cards_config()
 
   if not card_files_cache[path] then
     local files = {}

@@ -14,14 +14,20 @@ local cputype = (cputype_res and cputype_res[1] and cputype_res[1].value) or ""
 
 local extension_supported = 0
 
+local _kernel_has_tun = nil
 local function kernel_has_tun()
+	if _kernel_has_tun ~= nil then
+		return _kernel_has_tun
+	end
 	local command = io.popen("[ -c /dev/net/tun ] || zcat /proc/config.gz 2>/dev/null | grep -q '^CONFIG_TUN=y$'; echo $?", "r")
 	if not command then
+		_kernel_has_tun = false
 		return false
 	end
 	local result = command:read("*line")
 	command:close()
-	return result == "0"
+	_kernel_has_tun = (result == "0")
+	return _kernel_has_tun
 end
 
 local function wireguard_supported()

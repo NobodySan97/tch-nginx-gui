@@ -26,7 +26,7 @@ if command -v easyrsa >/dev/null 2>&1; then
     EASYRSA_PKI="$work/pki" easyrsa --batch sign-req server server
     EASYRSA_PKI="$work/pki" easyrsa --batch --req-cn=client gen-req client nopass
     EASYRSA_PKI="$work/pki" easyrsa --batch sign-req client client
-    EASYRSA_PKI="$work/pki" easyrsa --batch gen-dh
+    openssl dhparam -dsaparam -out "$work/pki/dh.pem" 2048 2>/dev/null || EASYRSA_PKI="$work/pki" easyrsa --batch gen-dh
     cp "$work/pki/ca.crt" /etc/openvpn/ca.crt
     cp "$work/pki/issued/server.crt" /etc/openvpn/server.crt
     cp "$work/pki/private/server.key" /etc/openvpn/server.key
@@ -40,7 +40,7 @@ elif [ -x /etc/easy-rsa/2.0/pkitool ]; then
     ./pkitool --initca
     ./pkitool --server server
     ./pkitool client
-    openssl dhparam -out keys/dh2048.pem 2048
+    openssl dhparam -dsaparam -out keys/dh2048.pem 2048 2>/dev/null || openssl dhparam -out keys/dh2048.pem 2048
     cp keys/ca.crt keys/server.crt keys/server.key keys/client.crt keys/client.key keys/dh2048.pem /etc/openvpn/
 else
     echo "No supported easy-rsa runtime found" >&2

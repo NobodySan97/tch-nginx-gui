@@ -153,13 +153,16 @@ elseif keygen_action == "WG_KEYGEN_PEER" then
   local address = getvalue("uci.wireguard.wg.address"):gsub("[^0-9./]", "")
   server_public = plain(server_public)
   port = plain(port)
-  address = plain(address)
-  local output = run_keygen("client " .. host .. " " .. server_public .. " " .. port .. " " .. address)
-  local public = output and output:match("public=([A-Za-z0-9+/=]+)")
-  if public then
-    keygen_note = T"Client profile generated. Add this public key to a new peer: " .. public
-  else
+  if server_public == "" then
     keygen_note = T"Client profile generation failed: generate the gateway key pair first."
+  else
+    local output = run_keygen("client " .. host .. " " .. server_public .. " " .. port .. " " .. address)
+    local public = output and output:match("public=([A-Za-z0-9+/=]+)")
+    if public then
+      keygen_note = T"Client profile generated. Add this public key to a new peer: " .. public
+    else
+      keygen_note = T"Client profile generation failed: generate the gateway key pair first."
+    end
   end
 end
 

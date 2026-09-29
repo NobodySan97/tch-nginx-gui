@@ -61,6 +61,7 @@ check_variant_friendly_name() {
       ;;
     esac
     uci set env.var.variant_friendly_name="$variant"
+    uci commit env
   fi
 }
 
@@ -400,6 +401,7 @@ check_relay_dhcp() {
   #Check if dhcp relay is enabled
   if [ ! "$(uci get -q dhcp.relay)" ]; then
     uci set dhcp.relay=relay
+    uci commit dhcp
   fi
 }
 
@@ -408,28 +410,34 @@ suppress_excessive_logging() {
   if [ "$(uci get -q igmpproxy.globals.trace)" = "1" ]; then
     logecho "Suppressing igmpproxy logs"
     uci set igmpproxy.globals.trace='0'
+    uci commit igmpproxy 2>/dev/null
   fi
   if [ "$(uci get -q wansensing.global.tracelevel)" != "3" ]; then
     logecho "Suppressing wansensing logs"
     uci set wansensing.global.tracelevel='3' #we don't need that we are still connected to vdsl -.-
+    uci commit wansensing 2>/dev/null
   fi
   if [ ! "$(uci get -q transformer.@main[0].log_level)" ]; then #shutup no description warn
     logecho "Setting transformer log level to 2"
     uci set transformer.@main[0].log_level='2'
+    uci commit transformer 2>/dev/null
   fi
   if [ ! "$(uci get -q system.@system[0].cronloglevel)" ] || [ "$(uci get -q system.@system[0].cronloglevel)" = '0' ]; then #resolve spamlog of trafficdata
     logecho "Setting cron log level to 5"
     uci set system.@system[0].cronloglevel="5"
+    uci commit system 2>/dev/null
     /etc/init.d/cron restart
   fi
   if [ ! "$(uci get -q ledfw.syslog)" ]; then #suppress loggin of ledfw... we don't need it...
     logecho "Suppressing syslog (avoid ledfw spam)"
     uci set ledfw.syslog=syslog
     uci set ledfw.syslog.trace='0'
+    uci commit ledfw 2>/dev/null
   fi
   if [ "$(uci get -q mmpbx.global.trace_level)" = "2" ]; then
     logecho "Suppressing mmpbx logs"
     uci set mmpbx.global.trace_level='0'
+    uci commit mmpbx 2>/dev/null
   fi
 }
 
@@ -490,6 +498,7 @@ new_wol_implementation() {
   if [ -f /lib/functions/firewall-wol.sh ]; then
     rm /lib/functions/firewall-wol.sh
     uci set wol.config.dest_port=9
+    uci commit wol
     /etc/init.d/wol restart
   fi
 }
@@ -511,6 +520,7 @@ add_xdsl_option() {
   # setting them to 0x000000 disable  sesdrop (second bit <6) CoMinMgn (first bit >1) 24k (first bit 1)
   uci set xdsl.dsl0.demod_cap_mask="0x00047a"
   uci set xdsl.dsl0.demod_cap_value="0x00047a"
+  uci commit xdsl
 }
 
 dosprotect_inizialize() {
@@ -641,8 +651,9 @@ cumulative_check_gui() {
   fi
 
   #Remove deprecated .gz GUI file if low space device
-  overlay_space=$(df /overlay | sed -n 2p | awk \{'{print $2}'\})
-  if [ "$overlay_space" -lt 33000 ]; then
+  overlay_space="$(df -Pk /overlay 2>/dev/null | awk 'END {print $2}')"
+  case "$overlay_space" in '' | *[!0-9]*) overlay_space=0 ;; esac
+  if [ "$overlay_space" -gt 0 ] && [ "$overlay_space" -lt 33000 ]; then
     logger -s -t 'Root Script' "Detected low flash space device..."
     if [ -f /root/GUI.tar.gz ]; then
       logger -s -t 'Root Script' "Removing unneeded gz of Stable GUI"
@@ -794,15 +805,18 @@ decrypt_config_pass() {
 clean_ping_and_traceroute() {
   if [ -n "$(uci get -q traceroute.diagping.host)" ]; then
     uci set traceroute.diagping.host=""
+    uci commit traceroute 2>/dev/null
   fi
   if [ -n "$(uci get -q ipping.diagping.host)" ]; then
     uci set ipping.diagping.host=""
+    uci commit ipping 2>/dev/null
   fi
 }
 
 clean_watchdog() {
   if [ -n "$(uci get -q watchdog.@watchdog[0].pidfile)" ]; then
     uci set watchdog.@watchdog[0].pidfile=""
+    uci commit watchdog 2>/dev/null
   fi
 }
 

@@ -63,6 +63,7 @@ html[#html + 1] = [[
 
 	var lastProgress = 5;
 	var targetVer = "";
+	var isGuiUpgrade = false;
 
 	var $activeModal = $("#modal-container, .modal");
 	$activeModal.data("backdrop", "static");
@@ -166,8 +167,9 @@ html[#html + 1] = [[
 
 				$("#show_progress").text($("#show_progress").text().replace(/\.{10}/g, ""));
 				$("#show_progress").append(".");
-				var isSuccess = (data.state == "Complete") || (data.state == "Idle" && (hasStartedExecution || pollCount >= 2));
-				var isFailed = (data.state == "Failed" || data.state == "Error");
+				var hasFatalError = clean_log && /(?:Upgrade Script ERROR:|Root Script ERROR:|File corrupted|not enough space)/i.test(clean_log);
+				var isFailed = (data.state == "Failed" || data.state == "Error") || hasFatalError;
+				var isSuccess = !isFailed && ((data.state == "Complete") || (data.state == "Idle" && (hasStartedExecution || pollCount >= 2)));
 
 				if (!isUpgradeComplete && (isSuccess || isFailed)) {
 					isUpgradeComplete = true;
@@ -184,7 +186,7 @@ html[#html + 1] = [[
 						var matchVer = clean_log.match(/version_gui=([0-9]+\.[0-9]+\.[0-9]+)/i) || clean_log.match(/Online version:\s*([0-9]+\.[0-9]+\.[0-9]+)/i);
 						if (matchVer && matchVer[1]) targetVer = matchVer[1];
 					}
-					var isGuiUpgrade = !!targetVer || (clean_log && (clean_log.indexOf("Cleaning www") !== -1 || clean_log.indexOf("Extracting GUI") !== -1 || clean_log.indexOf("Root Script") !== -1));
+					isGuiUpgrade = !!targetVer || (clean_log && (clean_log.indexOf("Cleaning www") !== -1 || clean_log.indexOf("Extracting GUI") !== -1 || clean_log.indexOf("Root Script") !== -1));
 
 					if (isSuccess) {
 						$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info bar-danger").addClass("bar-success");
@@ -226,7 +228,7 @@ html[#html + 1] = [[
 							clearInterval(redirectTimer);
 							clearTimeout(redirectTimer);
 						}
-						if (isGuiUpgrade) {
+						if (isGuiUpgrade && isSuccess) {
 							window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
 						} else {
 							window.location.reload(true);
@@ -263,11 +265,18 @@ html[#html + 1] = [[
 										isUpgradeComplete = true;
 										$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info bar-danger").addClass("bar-success");
 										$("#progress-percent").text("100%");
-										$("#update-text").html("Aggiornamento completato con successo!<br><span style='font-size: 13px; font-weight: normal;'>Reindirizzamento al login in corso...</span>");
-										try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
-										setTimeout(function() {
-											window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
-										}, 1500);
+										if (isGuiUpgrade) {
+											$("#update-text").html("Aggiornamento completato con successo!<br><span style='font-size: 13px; font-weight: normal;'>Reindirizzamento al login in corso...</span>");
+											try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
+											setTimeout(function() {
+												window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
+											}, 1500);
+										} else {
+											$("#update-text").html("Operazione completata con successo!<br><span style='font-size: 13px; font-weight: normal;'>Ricaricamento pagina in corso...</span>");
+											setTimeout(function() {
+												window.location.reload(true);
+											}, 1500);
+										}
 									}
 								}
 							}

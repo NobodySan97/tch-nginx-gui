@@ -39,6 +39,10 @@ advertise_exit_node="$(uci -q get tailscale.service.advertise_exit_node)"
 accept_routes="$(uci -q get tailscale.service.accept_routes)"
 ssh_enabled="$(uci -q get tailscale.service.ssh)"
 
+[ "$accept_routes" = "1" ] && accept_routes="true" || accept_routes="false"
+[ "$advertise_exit_node" = "1" ] && advertise_exit_node="true" || advertise_exit_node="false"
+[ "$ssh_enabled" = "1" ] && ssh_enabled="true" || ssh_enabled="false"
+
 set -- up --reset "--hostname=$hostname" "--accept-routes=$accept_routes" \
 	"--advertise-exit-node=$advertise_exit_node" "--ssh=$ssh_enabled" \
 	--netfilter-mode=off --timeout=10s

@@ -51,7 +51,7 @@ local cards_catalog = {
 
     -- Category: voice
     { id = "telephony", uci_sec = "telephony_card", file = "008_telephony.lp", title = T"Telephony (VoIP)", icon = "fas fa-phone", cat = "voice", desc = T"VoIP status, lines and incoming/outgoing calls" },
-    { id = "asterisk", uci_sec = "asterisk_card", file = "008_asterisk.lp", title = T"Asterisk PBX", icon = "fas fa-headset", cat = "voice", desc = T"Asterisk internal IP-PBX switchboard", check_fn = function() return file_exists("/etc/init.d/asterisk") or file_exists("/usr/sbin/asterisk") end },
+    { id = "asterisk", uci_sec = "asterisk_card", file = "008_asterisk.lp", title = T"Asterisk PBX", icon = "fas fa-headset", cat = "voice", desc = T"Asterisk internal IP-PBX switchboard", check_fn = function() return (file_exists("/etc/init.d/asterisk") or file_exists("/usr/sbin/asterisk")) and file_exists("/etc/init.d/pbx-asterisk") end },
 
     -- Category: sharing
     { id = "contentsharing", uci_sec = "contentsharing_card", file = "012_contentsharing.lp", title = T"Content Sharing", icon = "fas fa-share-alt", cat = "sharing", desc = T"USB file sharing via Samba, FTP and DLNA", check_fn = function() return file_exists("/usr/sbin/smbd") or file_exists("/etc/init.d/samba") end },
@@ -103,6 +103,7 @@ if ngx.req.get_method() == "POST" then
 end
 
 -- Read current card visibility states from UCI
+uci:unload("web")
 local card_states = {}
 for _, card in ipairs(cards_catalog) do
     local hide_val = uci:get("web", card.uci_sec, "hide")
@@ -218,29 +219,31 @@ ngx.print('\
     $("#modal-changes").removeClass("hide").show();\
   }\
 \
-  $(document).on("click", "#form-cards-manager .switch", function(){\
+  $(document).off(".cardsmgr");\
+\
+  $(document).on("click.cardsmgr", "#form-cards-manager .switch", function(){\
     $("#modal-no-change").addClass("hide").hide();\
     $("#modal-changes").removeClass("hide").show();\
   });\
 \
-  $(document).on("click", "#save-config", function(){\
+  $(document).on("click.cardsmgr", "#save-config", function(){\
     window._cardsManagerSaved = true;\
   });\
-  $(document).on("hidden", ".modal", function(){\
-    if (window._cardsManagerSaved) {\
+  $(document).on("hidden.cardsmgr", ".modal", function(e){\
+    if (e.target === this && window._cardsManagerSaved) {\
       window._cardsManagerSaved = false;\
       window.location.reload(true);\
     }\
   });\
 \
-  $(document).on("click", "#btn-cards-show-all", function(e){\
+  $(document).on("click.cardsmgr", "#btn-cards-show-all", function(e){\
     e.preventDefault();\
     $(".card-mgr-item").each(function(){\
       setSwitchState($(this), true);\
     });\
   });\
 \
-  $(document).on("click", "#btn-cards-autodetect", function(e){\
+  $(document).on("click.cardsmgr", "#btn-cards-autodetect", function(e){\
     e.preventDefault();\
     $(".card-mgr-item").each(function(){\
       var shouldEnable = $(this).attr("data-autodetect") === "1";\
@@ -248,7 +251,7 @@ ngx.print('\
     });\
   });\
 \
-  $(document).on("click", "#btn-cards-hide-optional", function(e){\
+  $(document).on("click.cardsmgr", "#btn-cards-hide-optional", function(e){\
     e.preventDefault();\
     var optionalCards = ["natalghelper", "printersharing", "contentsharing", "assistance", "tod", "nfc", "lte", "relaysetup", "asterisk", "tailscale", "wireguard", "openvpnserver", "adblock"];\
     $(".card-mgr-item").each(function(){\

@@ -17,17 +17,20 @@ local function escape(value)
 end
 local args = ngx.req.get_uri_args()
 if args.download == "1" then
-  local ca = getvalue("rpc.openvpn.server.client.ca")
-  local cert = getvalue("rpc.openvpn.server.client.cert")
-  local key = getvalue("rpc.openvpn.server.client.key")
+  local untaint = string.untaint or function(s) return s end
+  local ca = untaint(getvalue("rpc.openvpn.server.client.ca"))
+  local cert = untaint(getvalue("rpc.openvpn.server.client.cert"))
+  local key = untaint(getvalue("rpc.openvpn.server.client.key"))
   if ca == "" or cert == "" or key == "" then
     ngx.status = ngx.HTTP_NOT_FOUND
     ngx.say(T"Client keys are not available. Start the server once to generate them.")
     return ngx.exit(ngx.HTTP_NOT_FOUND)
   end
-  local host = (ngx.var.http_host or "vpn.example.com"):gsub(":%d+$", "")
-  local proto = getvalue("uci.openvpn.openvpn.@server.proto")
-  local port = getvalue("uci.openvpn.openvpn.@server.port")
+  local raw_host = untaint(ngx.var.http_host or "vpn.example.com")
+  local host = raw_host:gsub(":%d+$", ""):gsub("[^A-Za-z0-9%.%-]", "")
+  if host == "" then host = "vpn.example.com" end
+  local proto = untaint(getvalue("uci.openvpn.openvpn.@server.proto"))
+  local port = untaint(getvalue("uci.openvpn.openvpn.@server.port"))
   ngx.header.content_type = "application/x-openvpn-profile"
   ngx.header.content_disposition = 'attachment; filename="modgui-openvpn-client.ovpn"'
   ngx.print("client\ndev tun\nproto ", proto, "\nremote ", host, " ", port, "\nresolv-retry infinite\nnobind\npersist-key\npersist-tun\nremote-cert-tls server\nauth-user-pass\ncipher AES-256-CBC\nauth SHA256\nverb 3\n<ca>\n", ca, "\n</ca>\n<cert>\n", cert, "\n</cert>\n<key>\n", key, "\n</key>\n")

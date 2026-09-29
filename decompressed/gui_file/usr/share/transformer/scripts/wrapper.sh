@@ -14,8 +14,13 @@ set_transformer "rpc.system.modgui.executeCommand.state" "Requested"
 
 (
 	eval "$1" >"$LOG_LOCATION" 2>&1
+	exit_code=$?
 	sync
-	set_transformer "rpc.system.modgui.executeCommand.state" "Complete"
+	if [ $exit_code -eq 0 ]; then
+		set_transformer "rpc.system.modgui.executeCommand.state" "Complete"
+	else
+		set_transformer "rpc.system.modgui.executeCommand.state" "Failed"
+	fi
 	sleep 3
 	set_transformer "rpc.system.modgui.executeCommand.state" "Idle"
 	rm -f "$LOG_LOCATION"

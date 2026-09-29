@@ -61,8 +61,19 @@ client)
   address="${5:-$(uci -q get wireguard.wg.address)}"
   network_base="${address%/*}"
   prefix="${address#*/}"
-  client_address="${network_base%.*}.10"
-  [ "$client_address" != "$network_base" ] || client_address="${network_base%.*}.11"
+  net_prefix="${network_base%.*}"
+  assigned_ips="$(uci -q show wireguard | sed -n 's/.*allowed_ips='\''*\([0-9.]*\)\/.*/\1/p')"
+  client_host=10
+  client_address=""
+  while [ "$client_host" -lt 250 ]; do
+    candidate="$net_prefix.$client_host"
+    if [ "$candidate" != "$network_base" ] && ! echo "$assigned_ips" | grep -q "^$candidate$"; then
+      client_address="$candidate"
+      break
+    fi
+    client_host=$((client_host + 1))
+  done
+  [ -n "$client_address" ] || client_address="${net_prefix}.10"
   case "$client_address" in
   '' | *[!0-9.]*) client_address="10.66.66.10" ;;
   esac
@@ -76,6 +87,8 @@ client)
     echo "Key generation failed" >&2
     exit 1
   }
+  rm -f /tmp/modgui-wireguard-client.conf
+  ( umask 077 && : > /tmp/modgui-wireguard-client.conf )
   cat > /tmp/modgui-wireguard-client.conf <<EOF
 [Interface]
 PrivateKey = $client_private

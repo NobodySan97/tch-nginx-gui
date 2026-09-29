@@ -1,2 +1,2 @@
-^tailscale%. /usr/share/transformer/scripts/tailscaleApply.sh
+^tailscale /usr/share/transformer/scripts/tailscaleApply.sh
 

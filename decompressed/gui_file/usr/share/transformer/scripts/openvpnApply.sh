@@ -85,6 +85,7 @@ if [ "$enabled" = "1" ] || [ "$client_enabled" = "1" ]; then
     fi
     if [ "$start_error" = "1" ] && [ "$enabled" = "1" ]; then
         echo "OpenVPN did not create tun0" >&2
+        /etc/init.d/openvpn stop 1000>&- >/dev/null 2>&1 || true
         enabled=0
         uci set openvpn.server.enabled=0
         uci commit openvpn

@@ -44,9 +44,10 @@ local function appapply(action)
 end
 
 if ngx.req.get_method() == "POST" then
-	local action = string.untaint(ngx.req.get_post_args().action)
-	if action:match("install") or action:match("remove") or
-		action:match("start") or action:match("stop") then
+	local post_args = ngx.req.get_post_args()
+	local raw_action = post_args and post_args.action
+	local action = raw_action and string.untaint(raw_action)
+	if action and (action:match("^install_") or action:match("^remove_") or action:match("^start_") or action:match("^stop_") or action:match("^restart_")) then
 		return appapply(action)
 	end
 end

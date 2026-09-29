@@ -1,6 +1,26 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.72 (Preview)
+---------------------------------------------------------------------------
+- **Root & Dropbear SSH Preservation Overhaul (`resetUtility.sh`)**:
+  - Risolto il difetto architetturale per cui il ripristino o reset da Web GUI faceva perdere in modo permanente l'accesso di root e SSH sui router con Overlay Bank Protection (OBP / doppio banco).
+  - Implementata la funzione di ricerca multilivello a tolleranza d'errore (`copy_preserved_file`) che effettua il backup prioritario dal filesystem attivo `/`, `/modoverlay/bank_mod` e `/saferoot`, eliminando la dipendenza dalla partizione grezza `/overlay` che nei sistemi dual-bank viene migrata e svuotata.
+  - Estesa la matrice di salvataggio a tutti i 15 file e hook critici di boot: `mount_modoverlay`, `mount_root-mod`, `05_transfer_basefiles`, `do_migrate_overlay`, `rootdevice`, `platform.sh`, `sysupgrade-safe`, `rtfd`, `random_seed`, `insmod`, `/etc/passwd`, `/etc/shadow` e l'hash salvato in `uci modgui.var.encrypted_pass`.
+  - Ripristino garantito di Dropbear SSH attivo su interfaccia LAN porta 22 con autenticazione root abilitata e shell `/bin/ash`, unitamente allo script di salvaguardia `/etc/uci-defaults/99-rootdevice`.
+  - Messa in sicurezza di `resetConfig` per impedire la disattivazione di Dropbear dopo il ripristino dei file di configurazione da `/rom`.
+- **Upgrade System & Command Log Engine Reliability**:
+  - `system.modgui.map`: Risolto il blocco dell'aggiornamento GUI quando invocato con `upgradegui_terminate`, terminando i vecchi processi in modo sincrono e consentendo ad `async_exec` di avviare regolarmente `upgradegui`.
+  - `system.modgui.map` & `wrapper.sh`: Estesa l'enumerazione di `executeCommand.state` con `Failed` ed `Error` e introdotto il controllo dell'exit code `$?` in `wrapper.sh` per segnalare tempestivamente i fallimenti di curl, checksum o spazio su flash.
+  - `command-log-read-modal.lp` & `commandlogread.lua`: Rilevamento in tempo reale degli errori fatali nel log, barra rossa (`bar-danger`) su insuccesso, inibizione del falso countdown di successo e cancellazione del redirect forzato al login.
+- **CommitApply, VPN & Web GUI Integration Fixes**:
+  - `uci_openvpn.ca`, `uci_wireguard.ca`, `uci_tailscale.ca`, `uci_pbx.ca`: Corretto il pattern regex di trigger CommitApply (`^pkg` invece di `^pkg%.`), garantendo il ricaricamento effettivo dei demoni WireGuard, Tailscale, OpenVPN e Asterisk al salvataggio dei modali.
+  - `shared-script.js`: Corretto il timer KO in `restartKoInterval()` con memorizzazione di `cardId` per evitare l'interruzione permanente del polling delle card al cambio scheda del browser.
+  - `cards.lua`: Introdotto request caching per la configurazione delle card (risparmiate oltre 60 letture flash per richiesta HTTP) e normalizzazione dell'estensione `.lp` nei controlli di visibilità.
+  - `openvpn-server-modal.lp`: Applicato `untaint()` sui certificati client nei profili `.ovpn` scaricati per prevenire l'auto-escaping HTML dei tag `<ca>`.
+  - `tailscaleStatus.sh` & `tailscale.connect`: Verifica stato demone tramite socket unix e normalizzazione booleani Go CLI.
+  - `wireguardKeygen.sh` & `wireguardStatus.sh`: Assegnazione dinamica del prossimo IP client disponibile in base ad `allowed_ips`, permessi `0600` e calcolo sicuro dell'handshake.
+
 9.8.71 (Preview)
 ---------------------------------------------------------------------------
 - **Dashboard Cards Visibility Manager, Smart Auto-Detect & UI Stability**:

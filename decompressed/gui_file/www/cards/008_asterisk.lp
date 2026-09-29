@@ -15,7 +15,7 @@ local function file_exists(path)
   return false
 end
 
-if not session:hasAccess(modal_path) or
+if not session or not session:hasAccess(modal_path) or
     not file_exists("/etc/init.d/asterisk") or
     not file_exists("/etc/init.d/pbx-asterisk") then
   return

@@ -33,111 +33,128 @@ showUsage() {
 
 
 
-restoreOriginalGui() {
-	running_bank="$(cat /proc/banktable/booted 2>/dev/null)"; running_bank="${running_bank:-bank_1}"
-	config_tmp=/tmp/config_tmp
-	
-	#Copying config simulating a firmware upgrade
-	echo "Copying config files to config_tmp dir in RAM..."
-	mkdir -p /tmp/config_tmp
-	mkdir -p /tmp/shadow_file
-	[ -d "/overlay/$running_bank/etc/config" ] && cp -r /overlay/$running_bank/etc/config/* $config_tmp/ 2>/dev/null
-	[ -f "/overlay/$running_bank/etc/shadow" ] && cp -p /overlay/$running_bank/etc/shadow /tmp/shadow_file/ 2>/dev/null
-	
-	#Saving root files
-	emergencydir=/tmp/rootfile/emergency
-	mkdir -p /tmp/rootfile
-	mkdir -p $emergencydir/etc/init.d 
-	mkdir -p $emergencydir/etc/rc.d 
-	mkdir -p $emergencydir/usr/bin 
-	mkdir -p $emergencydir/lib/upgrade 
-	mkdir -p $emergencydir/sbin
-	[ -f "/overlay/$running_bank/lib/upgrade/platform.sh" ] && cp -p /overlay/$running_bank/lib/upgrade/platform.sh $emergencydir/lib/upgrade/ 2>/dev/null
-	[ -f "/overlay/$running_bank/sbin/sysupgrade" ] && cp -p /overlay/$running_bank/sbin/sysupgrade $emergencydir/sbin/ 2>/dev/null
-	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && cp -p /overlay/$running_bank/etc/init.d/rootdevice $emergencydir/etc/init.d/ 2>/dev/null
-	[ -f "/overlay/$running_bank/usr/bin/rtfd" ] && cp -p /overlay/$running_bank/usr/bin/rtfd $emergencydir/usr/bin/ 2>/dev/null
-	[ -f "/overlay/$running_bank/usr/bin/sysupgrade-safe" ] && cp -p /overlay/$running_bank/usr/bin/sysupgrade-safe $emergencydir/usr/bin/ 2>/dev/null
-	for f in /overlay/$running_bank/etc/rc.d/*rootdevice*; do
-		[ -e "$f" ] && cp -dp "$f" $emergencydir/etc/rc.d/ 2>/dev/null
-	done
-	
-	#Delete any change from running bank
-	rm -rf /overlay/$running_bank
-	mkdir -p /overlay/$running_bank
-	
-	#Restore config to be converted and preserve in running bank
-	if [ -d "$config_tmp" ]; then
-		mkdir -p /overlay/homeware_conversion/etc/config
-		mkdir -p /overlay/$running_bank/etc/config
-		cp -r $config_tmp/* /overlay/homeware_conversion/etc/config/ 2>/dev/null
-		cp -r $config_tmp/* /overlay/$running_bank/etc/config/ 2>/dev/null
-		[ -f "$config_tmp/modgui" ] && cp $config_tmp/modgui /overlay/homeware_conversion/etc/modgui_old 2>/dev/null
-		if [ -f "/tmp/shadow_file/shadow" ]; then
-			cp -p /tmp/shadow_file/shadow /overlay/homeware_conversion/etc/ 2>/dev/null
-			cp -p /tmp/shadow_file/shadow /overlay/$running_bank/etc/shadow 2>/dev/null
-			cp -p /tmp/shadow_file/shadow /overlay/$running_bank/shadow_old 2>/dev/null
-			chmod 600 /overlay/$running_bank/etc/shadow 2>/dev/null
-		fi
+copy_preserved_file() { # <file_path> <dest_dir>
+	local f="$1"
+	local dest="$2"
+	local src=""
+
+	# 1. Live active filesystem (highest priority: always current in runtime)
+	if [ -f "$f" ] || [ -L "$f" ]; then
+		src="$f"
+	# 2. Modoverlay upperdir (when dual-bank OBP is mounted)
+	elif [ -f "/modoverlay/bank_mod$f" ] || [ -L "/modoverlay/bank_mod$f" ]; then
+		src="/modoverlay/bank_mod$f"
+	# 3. Saferoot (old root after pivot)
+	elif [ -f "/saferoot$f" ] || [ -L "/saferoot$f" ]; then
+		src="/saferoot$f"
+	elif [ -f "/saferoot/overlay/$running_bank$f" ] || [ -L "/saferoot/overlay/$running_bank$f" ]; then
+		src="/saferoot/overlay/$running_bank$f"
+	# 4. Direct overlay partition
+	elif [ -f "/overlay/$running_bank$f" ] || [ -L "/overlay/$running_bank$f" ]; then
+		src="/overlay/$running_bank$f"
 	fi
-	
-	#Root only
-	emergencydir=/tmp/rootfile/emergency
-	[ -d "$emergencydir" ] && cp -drp $emergencydir/* /overlay/$running_bank/ 2>/dev/null
-	
-	#Ensure autostart symlinks and Dropbear SSH are always active
-	mkdir -p /overlay/$running_bank/etc/rc.d
-	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && {
-		chmod +x /overlay/$running_bank/etc/init.d/rootdevice 2>/dev/null
-		ln -sf ../init.d/rootdevice /overlay/$running_bank/etc/rc.d/S94rootdevice 2>/dev/null
-		ln -sf ../init.d/rootdevice /overlay/$running_bank/etc/rc.d/S10rootdevice 2>/dev/null
-	}
-	
-	sync
-	reboot
+
+	if [ -n "$src" ]; then
+		mkdir -p "$dest$(dirname "$f")"
+		cp -dp "$src" "$dest$f" 2>/dev/null
+		return 0
+	fi
+	return 1
 }
 
-restoreOriginalGuiFull() {
-	running_bank="$(cat /proc/banktable/booted 2>/dev/null)"; running_bank="${running_bank:-bank_1}"
-	
-	#Saving shadow for root password
+preserve_root_files() {
+	emergencydir=/tmp/rootfile/emergency
+	rm -rf /tmp/rootfile /tmp/shadow_file
+	mkdir -p "$emergencydir"
 	mkdir -p /tmp/shadow_file
-	[ -f "/overlay/$running_bank/etc/shadow" ] && cp -p /overlay/$running_bank/etc/shadow /tmp/shadow_file/ 2>/dev/null
-	
-	#Saving root files
-	emergencydir=/tmp/rootfile/emergency
-	mkdir -p /tmp/rootfile
-	mkdir -p $emergencydir/etc/init.d 
-	mkdir -p $emergencydir/etc/rc.d 
-	mkdir -p $emergencydir/usr/bin 
-	mkdir -p $emergencydir/lib/upgrade 
-	mkdir -p $emergencydir/sbin
-	[ -f "/overlay/$running_bank/lib/upgrade/platform.sh" ] && cp -p /overlay/$running_bank/lib/upgrade/platform.sh $emergencydir/lib/upgrade/ 2>/dev/null
-	[ -f "/overlay/$running_bank/sbin/sysupgrade" ] && cp -p /overlay/$running_bank/sbin/sysupgrade $emergencydir/sbin/ 2>/dev/null
-	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && cp -p /overlay/$running_bank/etc/init.d/rootdevice $emergencydir/etc/init.d/ 2>/dev/null
-	[ -f "/overlay/$running_bank/usr/bin/rtfd" ] && cp -p /overlay/$running_bank/usr/bin/rtfd $emergencydir/usr/bin/ 2>/dev/null
-	[ -f "/overlay/$running_bank/usr/bin/sysupgrade-safe" ] && cp -p /overlay/$running_bank/usr/bin/sysupgrade-safe $emergencydir/usr/bin/ 2>/dev/null
-	for f in /overlay/$running_bank/etc/rc.d/*rootdevice*; do
-		[ -e "$f" ] && cp -dp "$f" $emergencydir/etc/rc.d/ 2>/dev/null
+
+	# Essential root binaries, scripts, and preinit mount hooks
+	local preserve_list="
+		/etc/init.d/rootdevice
+		/etc/rc.d/S94rootdevice
+		/etc/rc.d/S10rootdevice
+		/usr/sbin/random_seed
+		/sbin/insmod
+		/usr/sbin/mount_modoverlay
+		/sbin/mount_root-mod
+		/lib/mount_modroot/05_transfer_basefiles
+		/etc/init.d/do_migrate_overlay
+		/lib/upgrade/platform.sh
+		/sbin/sysupgrade
+		/usr/bin/sysupgrade-safe
+		/usr/bin/rtfd
+		/etc/passwd
+		/etc/shadow
+	"
+
+	for file in $preserve_list; do
+		copy_preserved_file "$file" "$emergencydir"
 	done
-	
-	#Delete any change from running bank (wiping modded GUI and configs)
-	rm -rf /overlay/$running_bank
-	mkdir -p /overlay/$running_bank
-	
-	#Restore shadow password if present
-	if [ -f "/tmp/shadow_file/shadow" ]; then
-		mkdir -p /overlay/$running_bank/etc
-		cp -p /tmp/shadow_file/shadow /overlay/$running_bank/etc/shadow 2>/dev/null
-		chmod 600 /overlay/$running_bank/etc/shadow 2>/dev/null
+
+	# Isolate shadow and encrypted password
+	if [ -f "$emergencydir/etc/shadow" ]; then
+		cp -p "$emergencydir/etc/shadow" /tmp/shadow_file/shadow 2>/dev/null
+	elif [ -f "/etc/shadow" ]; then
+		cp -p /etc/shadow /tmp/shadow_file/shadow 2>/dev/null
 	fi
-	
-	#Restore Root files
+
+	local saved_pass="$(uci -q get modgui.var.encrypted_pass)"
+	if [ -n "$saved_pass" ]; then
+		echo "$saved_pass" > /tmp/shadow_file/encrypted_pass
+	fi
+}
+
+deploy_root_and_ssh() {
+	local target="/overlay/$running_bank"
 	emergencydir=/tmp/rootfile/emergency
-	[ -d "$emergencydir" ] && cp -drp $emergencydir/* /overlay/$running_bank/ 2>/dev/null
-	
-	#Force Dropbear configuration to be permanently enabled on LAN port 22
-	mkdir -p /overlay/$running_bank/etc/config
-	cat << 'EOF' > /overlay/$running_bank/etc/config/dropbear
+
+	# 1. Restore emergency root files
+	if [ -d "$emergencydir" ]; then
+		cp -drp "$emergencydir"/* "$target"/ 2>/dev/null
+	fi
+
+	# 2. Guarantee root login shell in /etc/passwd is ash
+	if [ -f "$target/etc/passwd" ]; then
+		sed -i 's#/root:.*$#/root:/bin/ash#' "$target/etc/passwd" 2>/dev/null
+	elif [ -f "/etc/passwd" ]; then
+		mkdir -p "$target/etc"
+		cp -p /etc/passwd "$target/etc/passwd" 2>/dev/null
+		sed -i 's#/root:.*$#/root:/bin/ash#' "$target/etc/passwd" 2>/dev/null
+	fi
+
+	# 3. Restore shadow file and set strict permissions
+	if [ -f "/tmp/shadow_file/shadow" ]; then
+		mkdir -p "$target/etc"
+		cp -p /tmp/shadow_file/shadow "$target/etc/shadow" 2>/dev/null
+		chmod 600 "$target/etc/shadow" 2>/dev/null
+	fi
+
+	# 4. If encrypted password was in UCI, guarantee it's injected into shadow
+	if [ -f "/tmp/shadow_file/encrypted_pass" ] && [ -f "$target/etc/shadow" ]; then
+		local pass="$(cat /tmp/shadow_file/encrypted_pass)"
+		if [ -n "$pass" ]; then
+			sed -i "s|^root:[^:]*:|root:${pass}:|" "$target/etc/shadow" 2>/dev/null
+		fi
+	fi
+
+	# 5. Fix executable permissions on all critical root and boot binaries
+	chmod +x "$target/etc/init.d/rootdevice" 2>/dev/null
+	chmod +x "$target/sbin/mount_root-mod" 2>/dev/null
+	chmod +x "$target/usr/sbin/mount_modoverlay" 2>/dev/null
+	chmod +x "$target/lib/mount_modroot/05_transfer_basefiles" 2>/dev/null
+	chmod +x "$target/etc/init.d/do_migrate_overlay" 2>/dev/null
+	chmod +x "$target/sbin/sysupgrade" 2>/dev/null
+	chmod +x "$target/usr/bin/sysupgrade-safe" 2>/dev/null
+	chmod +x "$target/usr/bin/rtfd" 2>/dev/null
+
+	# 6. Ensure rootdevice autostart symlinks in /etc/rc.d
+	mkdir -p "$target/etc/rc.d"
+	ln -sf ../init.d/rootdevice "$target/etc/rc.d/S94rootdevice" 2>/dev/null
+	ln -sf ../init.d/rootdevice "$target/etc/rc.d/S10rootdevice" 2>/dev/null
+
+	# 7. Force Dropbear SSH to be enabled on LAN port 22 with root password auth
+	mkdir -p "$target/etc/config"
+	cat << 'EOF' > "$target/etc/config/dropbear"
 config dropbear 'lan'
 	option Port '22'
 	option Interface 'lan'
@@ -147,25 +164,76 @@ config dropbear 'lan'
 	option RootLogin '1'
 EOF
 
-	#Create uci-defaults script to guarantee rootdevice and dropbear execution at first boot
-	mkdir -p /overlay/$running_bank/etc/uci-defaults
-	cat << 'EOF' > /overlay/$running_bank/etc/uci-defaults/99-rootdevice
-[ -x /etc/init.d/rootdevice ] && /etc/init.d/rootdevice enable 2>/dev/null
+	# 8. Create uci-defaults script as secondary safety net at boot
+	mkdir -p "$target/etc/uci-defaults"
+	cat << 'EOF' > "$target/etc/uci-defaults/99-rootdevice"
+[ -x /etc/init.d/rootdevice ] && {
+	/etc/init.d/rootdevice enable 2>/dev/null
+	/etc/init.d/rootdevice boot 2>/dev/null
+}
 [ -x /etc/init.d/dropbear ] && {
 	/etc/init.d/dropbear enable 2>/dev/null
 	/etc/init.d/dropbear restart 2>/dev/null
 }
 exit 0
 EOF
-	chmod +x /overlay/$running_bank/etc/uci-defaults/99-rootdevice 2>/dev/null
+	chmod +x "$target/etc/uci-defaults/99-rootdevice" 2>/dev/null
+
+	# 9. Clean modoverlay if mounted so custom GUI files don't conflict after reset
+	if mount | grep -q '/modoverlay/bank_mod'; then
+		rm -rf /modoverlay/bank_mod/www 2>/dev/null
+		rm -rf /modoverlay/bank_mod/etc/config/modgui* 2>/dev/null
+		rm -rf /modoverlay/bank_mod/usr/share/transformer 2>/dev/null
+		# Mirror emergency base files into modoverlay as well for double protection
+		cp -drp "$emergencydir"/* /modoverlay/bank_mod/ 2>/dev/null
+	fi
+}
+
+restoreOriginalGui() {
+	running_bank="$(cat /proc/banktable/booted 2>/dev/null)"; running_bank="${running_bank:-bank_1}"
+	config_tmp=/tmp/config_tmp
 	
-	#Ensure autostart symlinks are explicitly present in etc/rc.d
-	mkdir -p /overlay/$running_bank/etc/rc.d
-	[ -f "/overlay/$running_bank/etc/init.d/rootdevice" ] && {
-		chmod +x /overlay/$running_bank/etc/init.d/rootdevice 2>/dev/null
-		ln -sf ../init.d/rootdevice /overlay/$running_bank/etc/rc.d/S94rootdevice 2>/dev/null
-		ln -sf ../init.d/rootdevice /overlay/$running_bank/etc/rc.d/S10rootdevice 2>/dev/null
-	}
+	echo "Preserving root files..."
+	preserve_root_files
+
+	echo "Copying config files to config_tmp dir in RAM..."
+	mkdir -p "$config_tmp"
+	if [ -d "/etc/config" ]; then
+		cp -r /etc/config/* "$config_tmp"/ 2>/dev/null
+	elif [ -d "/overlay/$running_bank/etc/config" ]; then
+		cp -r /overlay/$running_bank/etc/config/* "$config_tmp"/ 2>/dev/null
+	fi
+	rm -f "$config_tmp"/modgui* 2>/dev/null
+	
+	# Delete any changes from running bank
+	rm -rf /overlay/$running_bank
+	mkdir -p /overlay/$running_bank
+	
+	# Restore user configs into running bank
+	if [ -d "$config_tmp" ]; then
+		mkdir -p /overlay/$running_bank/etc/config
+		cp -r "$config_tmp"/* /overlay/$running_bank/etc/config/ 2>/dev/null
+	fi
+	
+	# Deploy root and Dropbear SSH
+	deploy_root_and_ssh
+	
+	sync
+	reboot
+}
+
+restoreOriginalGuiFull() {
+	running_bank="$(cat /proc/banktable/booted 2>/dev/null)"; running_bank="${running_bank:-bank_1}"
+	
+	echo "Preserving root files..."
+	preserve_root_files
+	
+	# Delete any changes from running bank (wiping modded GUI and user configs)
+	rm -rf /overlay/$running_bank
+	mkdir -p /overlay/$running_bank
+	
+	# Deploy root and Dropbear SSH
+	deploy_root_and_ssh
 	
 	sync
 	reboot
@@ -178,7 +246,22 @@ resetConfig() {
 	cp -r /rom/etc/config/* /etc/config/
 	[ "$(pgrep "cwmpd")" ] && /etc/init.d/cwmpd stop
 	[ -f /etc/cwmpd.db ] && rm -f /etc/cwmpd.db
-	touch /root/.install_gui #this is needed to trigger GUI full install after reboot mainly to reapply all custom edits to stock config files needed by custom GUI
+
+	# Guarantee Dropbear is enabled on LAN port 22 even after stock config reset
+	cat << 'EOF' > /etc/config/dropbear
+config dropbear 'lan'
+	option Port '22'
+	option Interface 'lan'
+	option enable '1'
+	option RootPasswordAuth 'on'
+	option PasswordAuth 'on'
+	option RootLogin '1'
+EOF
+
+	# Ensure root shell in /etc/passwd remains /bin/ash
+	sed -i 's#/root:.*$#/root:/bin/ash#' /etc/passwd 2>/dev/null
+
+	touch /root/.install_gui # this is needed to trigger GUI full install after reboot
 	sync
 	reboot
 }

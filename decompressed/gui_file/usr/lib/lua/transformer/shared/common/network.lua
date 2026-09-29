@@ -23,8 +23,8 @@ local binding = {}
 local AF_INET = posix.AF_INET
 local emptyTable = {}
 local open = io.open
-local integratedQtnMAC = string.lower(uciHelper.get_from_uci({config = "env", sectionname = "var", option = "qtn_eth_mac"}))
-local lxcMAC = string.lower(uciHelper.get_from_uci({config = "env", sectionname = "var", option = "local_eth_mac_lxc"}))
+local integratedQtnMAC = string.lower(uciHelper.get_from_uci({config = "env", sectionname = "var", option = "qtn_eth_mac"}) or "")
+local lxcMAC = string.lower(uciHelper.get_from_uci({config = "env", sectionname = "var", option = "local_eth_mac_lxc"}) or "")
 local match, find, sub, len = string.match, string.find, string.sub, string.len
 
 local intfType, macAddr, keyValue, remotelyManaged
@@ -178,10 +178,10 @@ function M.getHostInfo(hostData, getInfo)
   local data = hostData or conn:call("hostmanager.device", "get", emptyTable) or emptyTable
   local vpndata = conn:call("vpn.device", "get" , emptyTable) or emptyTable
   local lanInterfaces = M.getLanInterfaces()
+  local seen = {}
   for dev, info in pairs(data) do
-    if lanInterfaces[info.interface] and info["mac-address"] ~= integratedQtnMAC and info["mac-address"] ~= lxcMAC and checkHostTechnology(info) then
-      hosts[#hosts+1] = getInfo and getInfo(info) or dev
-    end
+    local is_lan = lanInterfaces[info.interface] and info["mac-address"] ~= integratedQtnMAC and info["mac-address"] ~= lxcMAC and checkHostTechnology(info)
+    local is_vpn = false
     for _, vpninfo in pairs(vpndata) do
       if vpninfo and info["mac-address"] == vpninfo["mac-address"] then
          info["l3interface"] = vpninfo["interface"]
@@ -191,7 +191,15 @@ function M.getHostInfo(hostData, getInfo)
              infodata["address"] = vpninfo["lan-ip"]
            end
          end
-         hosts[#hosts+1] = getInfo and getInfo(info) or dev
+         is_vpn = true
+         break
+      end
+    end
+    if is_lan or is_vpn then
+      local val = getInfo and getInfo(info) or dev
+      if val and not seen[val] then
+        seen[val] = true
+        hosts[#hosts+1] = val
       end
     end
   end

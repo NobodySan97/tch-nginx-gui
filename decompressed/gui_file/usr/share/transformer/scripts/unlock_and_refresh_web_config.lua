@@ -30,12 +30,16 @@ local ruleset={}
 
 --Pupulate ruleset table with ruleset from config
 uci:foreach('web', 'ruleset', function(s)
-	if s['.name'] == 'ruleset_main' then
-		for _ , s in pairs(s.rules) do
-			ruleset[#ruleset+1] = s
+	if s['.name'] == 'ruleset_main' and s.rules then
+		if type(s.rules) == "table" then
+			for _, r in ipairs(s.rules) do
+				ruleset[#ruleset+1] = r
+			end
+		elseif type(s.rules) == "string" then
+			ruleset[#ruleset+1] = s.rules
 		end
 	end
-  end)
+end)
 
 local check_rule = {
 	{ name = 'error', target = '/error.lua' },

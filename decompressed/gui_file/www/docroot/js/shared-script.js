@@ -88,6 +88,7 @@ var modgui = modgui || {};
 		}
 
 		var reqState = {
+			cardId: CardIdRefresh,
 			active: true,
 			timer: null,
 			interval: null,
@@ -284,7 +285,7 @@ var modgui = modgui || {};
 		Object.keys(KoRequest).forEach(function(key) {
 			var req = KoRequest[key];
 			if (req && !req.active) {
-				createAjaxUpdateCard(key, req.url || null, key, req.refreshTime, req.customFn);
+				createAjaxUpdateCard(req.cardId || key, req.url || null, key, req.refreshTime, req.customFn);
 			}
 		});
 	}

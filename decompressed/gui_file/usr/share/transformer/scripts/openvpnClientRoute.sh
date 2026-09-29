@@ -65,8 +65,8 @@ add_guest() {
     [ "$(uci -q get wireless."$iface")" = wifi-iface ] || return 1
     [ "$(uci -q get wireless."$iface".mode)" = ap ] || return 1
     subnet="$(guest_subnet "$iface")" || { echo "Guest subnet unavailable" >&2; return 1; }
-    ip rule show | grep -q "^$priority:" && { echo "Routing priority $priority is in use" >&2; return 1; }
-    ip route show table "$table" | grep -q . && { echo "Routing table $table is in use" >&2; return 1; }
+    ip rule del pref "$priority" 2>/dev/null || true
+    ip route flush table "$table" 2>/dev/null || true
     echo "$priority $subnet $table" >> "$state"
     ip route add unreachable default table "$table" || return 1
     ip rule add pref "$priority" from "$subnet" table "$table" || return 1
@@ -87,12 +87,12 @@ iptables -t nat -I POSTROUTING 1 -j "$nat_chain" || { delete_rules; exit 1; }
 selected="$(uci -q show openvpn.client | sed -n "s/^openvpn\.client\.ssid_\([a-zA-Z0-9_]*\)='1'$/\1/p")"
 for iface in $selected; do
     [ "$(uci -q get wireless."$iface")" = wifi-iface ] || continue
-    iptables -A "$filter_chain" -i "$iface" -j REJECT || exit 1
+    iptables -A "$filter_chain" -i "$iface" -j REJECT || { delete_rules; exit 1; }
 done
 index=0
 for iface in $selected; do
-    [ "$index" -lt 32 ] || exit 1
-    add_guest "$iface" "$((21010 + index))" "$((10010 + index))" || exit 1
+    [ "$index" -lt 32 ] || { delete_rules; exit 1; }
+    add_guest "$iface" "$((21010 + index))" "$((10010 + index))" || { delete_rules; exit 1; }
     index=$((index + 1))
 done
 exit 0

@@ -1,5 +1,17 @@
 local register = register
+local commitapply = commitapply
 local uci = mapper("ucihelper")
+
+local parent_mapping = {
+    objectType = {
+        name = "rpc.openvpn.client.ssid.",
+        access = "readOnly",
+        minEntries = 1,
+        maxEntries = 1,
+        parameters = {},
+    },
+}
+register(parent_mapping)
 
 local function isolated(network)
     local found = false

@@ -56,11 +56,15 @@ install_from_github() {
     fi
     tar -xzf "/tmp/$2.tar.gz" -C "/tmp/$2" 2>/dev/null
     rm -f "/tmp/$2.tar.gz"
-    cd /tmp/"$2"/* || return 1
   fi
+
+  cur_pwd="$PWD"
+  target_dir="$(find "/tmp/$2" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | head -n 1)"
+  [ -n "$target_dir" ] && cd "$target_dir" || cd "/tmp/$2" || { cd "$cur_pwd"; rm -rf "/tmp/$2"; return 1; }
 
   chmod +x ./setup.sh
   ./setup.sh "$4"
+  cd "$cur_pwd"
   rm -rf "/tmp/$2"
 }
 
@@ -1723,7 +1727,11 @@ app_tailscale() {
   }
 
   tailscale_has_space() {
-    tailscale_available_kb="$(df -Pk "$2" 2>/dev/null | awk 'END {print $4}')"
+    target_check="$2"
+    while [ ! -d "$target_check" ] && [ "$target_check" != "/" ]; do
+      target_check="$(dirname "$target_check")"
+    done
+    tailscale_available_kb="$(df -Pk "$target_check" 2>/dev/null | awk 'END {print $4}')"
     case "$tailscale_available_kb" in '' | *[!0-9]*) return 1 ;; esac
     [ "$tailscale_available_kb" -ge "$1" ]
   }
@@ -1848,12 +1856,12 @@ app_tailscale() {
     if tailscale_has_space 98304 /opt; then
       tailscale_runtime_dir="/opt/tailscale"
       tailscale_storage_dir="$tailscale_runtime_dir"
-      tailscale_archive_path=""
+      [ -n "$tailscale_archive_path" ] || tailscale_archive_path=""
       tailscale_download_url=""
     elif tailscale_has_space 131072 /tmp; then
       tailscale_runtime_dir="/tmp/modgui-tailscale-runtime"
       tailscale_storage_dir="$tailscale_runtime_dir"
-      tailscale_archive_path=""
+      [ -n "$tailscale_archive_path" ] || tailscale_archive_path=""
       tailscale_download_url="https://pkgs.tailscale.com/stable/tailscale_${tailscale_version}_${tailscale_arch}.tgz"
     else
       echo "Tailscale needs 96 MB in /opt or 128 MB of temporary RAM for low-storage mode"
@@ -2341,7 +2349,7 @@ call_app_type() {
 
 case "$1" in
 install | remove | stop | start | refresh)
-  call_app_type "$1" "$2" "$3"
+  call_app_type "$1" "$2" "$3" || exit $?
   ;;
 *)
   echo "usage: install|remove APP_NAME" 1>&2
