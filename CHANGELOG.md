@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
-9.8.74 (Preview)
+9.8.74 (Stable)
 ---------------------------------------------------------------------------
 - **Upgrade Process Modal & Live Log Tracking Fix**:
   - `command-log-read-modal.lp`: Eliminata la condizione di uscita prematura su `data.state == "Idle"` che interrompeva la visualizzazione dell'avanzamento dopo il download, reindirizzando erroneamente l'utente al login prima del completamento dell'installazione.
