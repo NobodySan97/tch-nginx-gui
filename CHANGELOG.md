@@ -1,6 +1,16 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.73 (Preview)
+---------------------------------------------------------------------------
+- **Specific Model Patch Recognition & MIPS Feed Alignment**:
+  - `modgui-modal.lp`: Corretta la funzione `getSupportedModel()` per firmware moderni (>= 18 / 19.x / 20.x su ARM), garantendo la corretta risoluzione del pacchetto modello su `"DGA"` anziché sul nome esteso friendly_name.
+  - `02_specific.sh`: Aggiunto fallback dinamico su `env.var.prod_name` in assenza di `prod_friendly_name` in configurazione UCI.
+  - `02_specific.sh`: Uniformati i feed repository OpenWrt Chaos Calmer MIPS (`routing` e `telephony`) su `15.05.1` (eliminando gli errori 404 sui mirror di archivio OpenWrt).
+- **Modular Distribution Cleanup & Package Integrity**:
+  - Epurazione definitiva dei pacchetti orfani legacy (`custom-ripdrv-specificDGA`, `dlnad_supprto-specificDGA`, `upnpfix-specificDGA`, `wgetfix-specificDGA`, `telnet_support-specific*`) dal repository di distribuzione, poiché completamente integrati nei pacchetti unificati `upgrade-pack-specific*`.
+  - Rigenerazione deterministica di tutti i pacchetti modulari e verifica integrità checksum MD5.
+
 9.8.72 (Preview)
 ---------------------------------------------------------------------------
 - **Root & Dropbear SSH Preservation Overhaul (`resetUtility.sh`)**:
