@@ -149,7 +149,7 @@ local function getSupportedModel()
                 elseif cputype:match("mips") then
                         return "TG789"
                 end
-        elseif marketing_version < 19 then
+        else
                 if cputype:match("armv7l") then
                         return "DGA"
                 elseif cputype:match("mips") then

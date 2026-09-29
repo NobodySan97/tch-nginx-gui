@@ -46,6 +46,7 @@ extract_with_check() {
 
 #Some globals var to check the right things to install
 device_type="$(uci get -q env.var.prod_friendly_name)"
+device_type="${device_type:-$(uci get -q env.var.prod_name)}"
 marketing_version="$(uci get -q version.@version[0].marketing_version)"
 cpu_type="$(uname -m)"
 
@@ -147,8 +148,8 @@ EOF
 src/gz chaos_calmer_base http://archive.openwrt.org/chaos_calmer/15.05.1/brcm63xx/generic/packages/base
 src/gz chaos_calmer_packages http://archive.openwrt.org/chaos_calmer/15.05.1/brcm63xx/generic/packages/packages
 src/gz chaos_calmer_luci http://archive.openwrt.org/chaos_calmer/15.05.1/brcm63xx/generic/packages/luci
-src/gz chaos_calmer_routing http://archive.openwrt.org/chaos_calmer/15.05/brcm63xx/generic/packages/routing
-src/gz chaos_calmer_telephony http://archive.openwrt.org/chaos_calmer/15.05/brcm63xx/generic/packages/telephony
+src/gz chaos_calmer_routing http://archive.openwrt.org/chaos_calmer/15.05.1/brcm63xx/generic/packages/routing
+src/gz chaos_calmer_telephony http://archive.openwrt.org/chaos_calmer/15.05.1/brcm63xx/generic/packages/telephony
 src/gz chaos_calmer_management http://archive.openwrt.org/chaos_calmer/15.05.1/brcm63xx/generic/packages/management
 
 arch all 100
