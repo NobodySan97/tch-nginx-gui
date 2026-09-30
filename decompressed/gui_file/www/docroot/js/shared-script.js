@@ -148,6 +148,7 @@ var modgui = modgui || {};
 			.fail(function (data, textStatus) {
 				if (textStatus === "abort") return;
 				connectionissue = 1;
+				if ($("#commandlogmodal").length > 0 || window.isUpgrading) return;
 				if (data && data.status === 200 && data.responseText && data.responseText.indexOf("sign-me-in") !== -1) {
 					if (!$("#popUp").is(":visible")) tch.showProgress(loginMsg);
 					window.location.href = "/";

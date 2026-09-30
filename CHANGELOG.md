@@ -1,6 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.77 (Preview)
+---------------------------------------------------------------------------
+- **Upgrade Modal Lifecycle & Smooth Completion Fix**:
+  - `command-log-read-modal.lp`: Eliminato il reindirizzamento prematuro al login durante l'estrazione e il riavvio dei servizi; implementata la barra di avanzamento al 100% con badge di successo e countdown visibile di 4 secondi prima del redirect alla schermata di accesso.
+  - `shared-script.js`: Inibito il reindirizzamento forzato di sessione dai polling delle card in background quando il modale di aggiornamento (`#commandlogmodal`) è attivo.
+
 9.8.76 (Preview)
 ---------------------------------------------------------------------------
 - **Upgrade Verification & Distribution Pipeline Refresh**:

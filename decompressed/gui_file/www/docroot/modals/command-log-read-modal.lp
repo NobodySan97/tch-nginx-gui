@@ -65,6 +65,7 @@ html[#html + 1] = [[
 	var targetVer = "";
 	var cmdAction = "<%= ngx.req.get_uri_args().cmd_action or '' %>";
 	var isGuiUpgrade = (cmdAction === "system_upgrade_gui") || (cmdAction === "upgradeguifile") || (cmdAction === "autoupgrade_view");
+	window.isUpgrading = isGuiUpgrade;
 
 	var $activeModal = $("#modal-container, .modal");
 	$activeModal.data("backdrop", "static");
@@ -262,24 +263,57 @@ html[#html + 1] = [[
 			})
 			.fail(function(data) {
 				consecutiveFailures++;
-				if (data.status == 200 && data.responseText && data.responseText.indexOf("sign-me-in") !== -1) {
-					if (!isGuiUpgrade || lastProgress >= 75) {
+				var isAuthRedirect = (data.status == 200 && data.responseText && data.responseText.indexOf("sign-me-in") !== -1);
+				
+				// Se Nginx ha riavviato i servizi, ha azzerato le sessioni in memoria. Se l'aggiornamento era già in fase avanzata (>= 75% o almeno 12 fallimenti di transizione), l'update è completato!
+				if (isAuthRedirect && (lastProgress >= 75 || consecutiveFailures >= 12)) {
+					if (!isUpgradeComplete) {
 						isUpgradeComplete = true;
-						try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
-						window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
+						window.isUpgrading = false;
+						if (KoRequest.CommandLogReadInterval) {
+							KoRequest.CommandLogReadInterval.active = false;
+							if (KoRequest.CommandLogReadInterval.timer) clearTimeout(KoRequest.CommandLogReadInterval.timer);
+							if (KoRequest.CommandLogReadInterval.interval) clearInterval(KoRequest.CommandLogReadInterval.interval);
+						}
+						$("#upgrade-gui-bar").removeClass("hide");
+						$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info bar-danger").addClass("bar-success");
+						$("#progress-percent").text("100%");
+						$("#header_title").text("Aggiornamento Completato");
+						
+						var successMsg = "Aggiornamento completato con successo" + (targetVer ? " alla versione v" + targetVer : "") + "!";
+						try { sessionStorage.setItem("gui_upgrade_success", successMsg); } catch(e) {}
+						
+						var countdown = 4;
+						$("#update-text").html("Aggiornamento completato con successo!<br><span style='font-size: 13px; font-weight: normal; opacity: 0.9;'>Reindirizzamento automatico alla pagina di accesso in <strong id='redirect-countdown'>" + countdown + "</strong>s...</span>");
+						var redirectTimer = setInterval(function() {
+							countdown--;
+							if ($("#redirect-countdown").length) $("#redirect-countdown").text(countdown);
+							if (countdown <= 0) {
+								clearInterval(redirectTimer);
+								window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
+							}
+						}, 1000);
+						$("body, .modal, #modal-container").addClass("upgrade-finished");
+						$(".modal-footer, #close-config, .modal-action-close").show().css("display", "block");
 						return;
 					}
 				}
+
 				if (hasStartedExecution) {
 					// Durante l'estrazione e il riavvio dei servizi il webserver è temporaneamente non raggiungibile.
-					// Mostriamo lo stato al 95% e facciamo healthcheck fino a quando /login.lp non risponde correttamente!
-					if (lastProgress < 95) lastProgress = 95;
+					// Facciamo avanzare la barra con gradualità e non usciamo prematuramente prima che l'estrazione sia reale!
+					if (lastProgress < 75) {
+						lastProgress = 75;
+					} else if (lastProgress < 95 && consecutiveFailures >= 6) {
+						lastProgress = 95;
+					}
 					$("#upgrade-gui-bar").removeClass("hide");
 					$("#upgrade-progress-bar-fill").css("width", lastProgress + "%").removeClass("bar-warning bar-danger").addClass("bar-info");
 					$("#progress-percent").text(lastProgress + "%");
-					$("#update-text").html("Finalizzazione e riavvio servizi in corso (95%)...<br><span style='font-size: 13px; font-weight: normal; opacity: 0.9;'>In attesa che il router torni online, non spegnere il modem...</span>");
+					$("#update-text").html("Estrazione e riavvio servizi in corso (" + lastProgress + "%)...<br><span style='font-size: 13px; font-weight: normal; opacity: 0.9;'>In attesa che il router torni online, non spegnere il modem...</span>");
 
-					if (consecutiveFailures >= 4) {
+					// Solo dopo che sono trascorsi almeno 15-20 secondi di estrazione verifichiamo la risposta effettiva di /login.lp
+					if (consecutiveFailures >= 15) {
 						$.ajax({
 							url: "/login.lp",
 							type: "GET",
@@ -289,20 +323,25 @@ html[#html + 1] = [[
 								if (resp && (resp.indexOf("login") !== -1 || resp.indexOf("CSRFtoken") !== -1 || resp.indexOf("Gateway") !== -1)) {
 									if (!isUpgradeComplete) {
 										isUpgradeComplete = true;
+										window.isUpgrading = false;
 										$("#upgrade-progress-bar-fill").css("width", "100%").removeClass("bar-warning bar-info bar-danger").addClass("bar-success");
 										$("#progress-percent").text("100%");
-										if (isGuiUpgrade) {
-											$("#update-text").html("Aggiornamento completato con successo!<br><span style='font-size: 13px; font-weight: normal;'>Reindirizzamento al login in corso...</span>");
-											try { sessionStorage.setItem("gui_upgrade_success", "Aggiornamento completato con successo!"); } catch(e) {}
-											setTimeout(function() {
+										$("#header_title").text("Aggiornamento Completato");
+										var successMsg = "Aggiornamento completato con successo" + (targetVer ? " alla versione v" + targetVer : "") + "!";
+										try { sessionStorage.setItem("gui_upgrade_success", successMsg); } catch(e) {}
+										
+										var countdown = 4;
+										$("#update-text").html("Aggiornamento completato con successo!<br><span style='font-size: 13px; font-weight: normal; opacity: 0.9;'>Reindirizzamento alla schermata di accesso in <strong id='redirect-countdown'>" + countdown + "</strong>s...</span>");
+										var redirectTimer = setInterval(function() {
+											countdown--;
+											if ($("#redirect-countdown").length) $("#redirect-countdown").text(countdown);
+											if (countdown <= 0) {
+												clearInterval(redirectTimer);
 												window.location.href = "/login.lp" + (targetVer ? "?upgraded_version=" + encodeURIComponent(targetVer) : "");
-											}, 1500);
-										} else {
-											$("#update-text").html("Operazione completata con successo!<br><span style='font-size: 13px; font-weight: normal;'>Ricaricamento pagina in corso...</span>");
-											setTimeout(function() {
-												window.location.reload(true);
-											}, 1500);
-										}
+											}
+										}, 1000);
+										$("body, .modal, #modal-container").addClass("upgrade-finished");
+										$(".modal-footer, #close-config, .modal-action-close").show().css("display", "block");
 									}
 								}
 							}
