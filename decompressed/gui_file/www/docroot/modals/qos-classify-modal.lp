@@ -131,7 +131,7 @@ local label_data, label_helpMsg = post_helper.handleTableQuery(label_columns, la
 ----------------------------------------------------------------------------------
 local options_labeltarget = {}
 
-for i,v in ipairs(proxy.getPN(uci_label_path, true)) do
+for i,v in ipairs(proxy.getPN(uci_label_path, true) or {}) do
     local label = smatch(v.path, "uci%.qos%.label%.@([^%.]+)%.")
     if label then
         options_labeltarget[#options_labeltarget+1] = { label, label }

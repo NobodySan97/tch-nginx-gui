@@ -922,7 +922,7 @@ FWEOF
     fi
     iptables -t nat -D prerouting_rule -i br-lan -p udp --dport domain -j REDIRECT --to-ports 5353 2>/dev/null
     iptables -t nat -D prerouting_rule -i br-lan -p tcp --dport domain -j REDIRECT --to-ports 5353 2>/dev/null
-    sed -i '/AdGuard Home DNS redirect/,+5d' /etc/firewall.user 2>/dev/null
+    sed -i '/AdGuard Home DNS redirect/,/fi/d' /etc/firewall.user 2>/dev/null
     rm -rf "$adguard_dir"
     [ "$adguard_work" = "/tmp/AdGuardHomeWork" ] && rm -rf "$adguard_work"
     set_extension_state adguardhome_app 0
@@ -1984,7 +1984,7 @@ app_tailscale() {
       }
       tailscale_hostname="$(uci -q get system.@system[0].hostname | tr 'A-Z_' 'a-z-')"
       case "$tailscale_hostname" in '' | [!a-z0-9]* | *[!a-z0-9.-]*) tailscale_hostname="technicolor" ;; esac
-      tailscale_subnet="$(ip -4 route show dev br-lan 2>/dev/null | awk '$1 ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\/[0-9]+$/ { print $1; exit }')"
+      tailscale_subnet="$(ip route show dev br-lan 2>/dev/null | awk '$1 ~ /^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\/[0-9]+$/ { print $1; exit }')"
       uci set "tailscale.service.hostname=$tailscale_hostname"
       [ -z "$tailscale_subnet" ] || uci set "tailscale.service.advertise_routes=$tailscale_subnet"
       uci set "tailscale.service.runtime_dir=$tailscale_runtime_dir"

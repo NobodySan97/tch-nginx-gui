@@ -35,10 +35,10 @@ local function set_pem(kind, value)
     if kind == "key" then
         label = value:match("%-%-%-%-%-BEGIN ([A-Z ]*PRIVATE KEY)%-%-%-%-%-")
     end
-    if not label then return false end
+    if not label then return nil, "Invalid private key label" end
     if not value:find("-----BEGIN " .. label .. "-----", 1, true) or
        not value:find("-----END " .. label .. "-----", 1, true) then
-        return false
+        return nil, "Invalid certificate format"
     end
     return write_secret(files[kind], value:gsub("\r\n", "\n"))
 end
@@ -76,7 +76,7 @@ local mapping = {
         key = function(_, _, value) return set_pem("key", value) end,
         password = function(_, _, value)
             if type(value) ~= "string" or value == "" then return true end
-            if value:find("[\r\n]") then return false end
+            if value:find("[\r\n]") then return nil, "Password cannot contain newlines" end
             return write_secret(files.password, value)
         end,
     },

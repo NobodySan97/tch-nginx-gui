@@ -3,10 +3,19 @@
 umask 077
 
 keygen_lock=/tmp/modgui-wireguard-keygen.lock
-mkdir "$keygen_lock" 2>/dev/null || {
-  echo "Another WireGuard key generation is already running" >&2
-  exit 1
-}
+if ! mkdir "$keygen_lock" 2>/dev/null; then
+  old_pid="$(cat "$keygen_lock/pid" 2>/dev/null)"
+  if [ -n "$old_pid" ] && kill -0 "$old_pid" 2>/dev/null; then
+    echo "Another WireGuard key generation is already running" >&2
+    exit 1
+  fi
+  rm -rf "$keygen_lock"
+  mkdir "$keygen_lock" 2>/dev/null || {
+    echo "Another WireGuard key generation is already running" >&2
+    exit 1
+  }
+fi
+echo "$$" > "$keygen_lock/pid"
 trap 'rm -rf "$keygen_lock"' EXIT HUP INT TERM
 
 wg_tool=""

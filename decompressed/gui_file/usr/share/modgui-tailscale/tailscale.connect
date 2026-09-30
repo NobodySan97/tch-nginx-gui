@@ -75,7 +75,7 @@ if grep -q 'https://login.tailscale.com/' "$auth_file"; then
 	while [ "$attempt" -lt 300 ]; do
 		[ "$(uci -q get tailscale.service.enabled)" = 1 ] || exit 0
 		[ "$(uci -q get tailscale.service.connect)" = 1 ] || exit 0
-		if ip -4 addr show dev tailscale0 2>/dev/null | grep -q 'inet '; then
+		if ip addr show dev tailscale0 2>/dev/null | grep -q 'inet '; then
 			rm -f "$auth_file"
 			set_status connected "Connected"
 			exit 0

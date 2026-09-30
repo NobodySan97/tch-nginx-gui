@@ -43,6 +43,7 @@ valid_cidr() {
 }
 
 remove_network() {
+  ubus call network.interface.modgui_wg0 down 2>/dev/null || true
   for section in $(uci -q show network 2>/dev/null | awk -F'[.=]' '$2 ~ /^modgui_wg0/ {print $2}' | sort -u); do
     uci -q delete "network.$section"
   done
@@ -55,6 +56,8 @@ remove_network() {
   uci commit firewall
   /etc/init.d/network reload >/dev/null 2>&1
   /etc/init.d/firewall reload >/dev/null 2>&1
+  ip link delete dev modgui_wg0 2>/dev/null || true
+  killall wireguard-go 2>/dev/null || true
 }
 
 add_peer() {
@@ -177,9 +180,9 @@ if [ "$enabled" != "1" ]; then
   exit 0
 fi
 
-if [ ! -c /dev/net/tun ] && zcat /proc/config.gz 2>/dev/null | grep -q '^CONFIG_TUN=y$'; then
+if [ ! -c /dev/net/tun ]; then
   mkdir -p /dev/net
-  mknod /dev/net/tun c 10 200
+  mknod /dev/net/tun c 10 200 2>/dev/null
 fi
 [ -c /dev/net/tun ] || { echo "TUN is unavailable" >&2; exit 1; }
 if [ ! -x /usr/bin/wireguard-go ] && ! command -v wg >/dev/null 2>&1; then

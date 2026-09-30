@@ -269,6 +269,7 @@ local function getall(mapping, key, parentkey)
       staData[k] = tostring(v)
     end
     staData["FriendlyName"] = wifi.getUserFriendlyName(key)
+    staData["signalStrength"] = tonumber(wifi.getSignalStrength(staData["rssi"])) or 1
     return staData
 end
 
@@ -278,7 +279,7 @@ local function get(mapping, paramName, key, parentkey)
     local staData = apData[key] or {}
     if paramName == "signalStrength" then
         local rssi = staData["rssi"]
-        return wifi.getSignalStrength(rssi)
+        return tonumber(wifi.getSignalStrength(rssi)) or 1
     elseif paramName == "FriendlyName" then
         return wifi.getUserFriendlyName(key)
     end

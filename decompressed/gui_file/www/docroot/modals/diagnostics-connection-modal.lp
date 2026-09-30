@@ -93,7 +93,7 @@ local content_rpc_wan6 = {}
 
 local intf6
 
-for i,v in ipairs(proxy.getPN("rpc.network.interface.", true)) do
+for i,v in ipairs(proxy.getPN("rpc.network.interface.", true) or {}) do
     local intf = string.match(v.path, "rpc%.network%.interface%.@([^%.]+)%.")
     if intf then
          if intf == "6rd" then

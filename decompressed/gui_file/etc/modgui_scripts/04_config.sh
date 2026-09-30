@@ -34,7 +34,7 @@ check_webui_config() {
 }
 
 check_nanocdn() {
-  if [ -f /etc/init.d/nanocdn ]; then
+  if [ -f /etc/init.d/nanocdn ] && ! uci -q show network 2>/dev/null | grep -q "iptv"; then
     /etc/init.d/nanocdn stop 2>/dev/null
     /etc/init.d/nanocdn disable 2>/dev/null
     killall -9 nanocdn-rr 2>/dev/null
@@ -350,12 +350,13 @@ create_gui_type() {
   else
     uci set modgui.app.dumaos_app="0"
   fi
+  current_duma_modal="$(uci -q get web.dumaos_card.modal)"
   if [ "$(uci get -q modgui.app.dumaos_app)" = "1" ] &&
     [ -f /usr/share/modgui-dumaos/015_dumaos.lp ] &&
     { [ ! -f /www/cards/015_dumaos.lp ] ||
       [ ! -s /www/data/shorthash ] ||
       [ ! -f /www/docroot/modals/dumaos-modal.lp ] ||
-      [ "$(uci -q get web.dumaos_card.modal)" != "dumaosmodal" ] ||
+      { [ "$current_duma_modal" != "dumaosmodal" ] && [ "$current_duma_modal" != "duma_desktop_index" ]; } ||
       ! cmp -s /usr/share/modgui-dumaos/015_dumaos.lp /www/cards/015_dumaos.lp; }; then
     logecho "Restoring the DumaOS card after upgrade..."
     /usr/share/transformer/scripts/appInstallRemoveUtility.sh refresh dumaos >/dev/null 2>&1

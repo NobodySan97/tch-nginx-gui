@@ -17,7 +17,7 @@ local format, find = string.format, string.find
 local concat = table.concat
 
 local sipnet_options={}
-for i,v in ipairs(proxy.getPN("uci.mmpbxrvsipnet.network.", true)) do
+for i,v in ipairs(proxy.getPN("uci.mmpbxrvsipnet.network.", true) or {}) do
     local sipnet = string.match(v.path, "uci%.mmpbxrvsipnet%.network%.@([^%.]+)%.")
     if sipnet then
         local _sn = proxy.get(v.path .. "user_friendly_name"); local sipnet_name = (_sn and _sn[1] and _sn[1].value) or ""

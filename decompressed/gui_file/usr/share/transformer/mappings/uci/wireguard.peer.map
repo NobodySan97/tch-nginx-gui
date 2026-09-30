@@ -117,10 +117,10 @@ mapping.get = function(_, param, key)
 end
 
 mapping.set = function(_, param, value, key)
-    if not valid_section(key) or not known_parameter(param) then return false end
+    if not valid_section(key) or not known_parameter(param) then return nil, "Invalid parameter" end
     if param == "preshared_key" and tostring(value or "") == "********" then return true end
     local check = validators[param]
-    if check and not check(tostring(value or "")) then return false end
+    if check and not check(tostring(value or "")) then return nil, "Invalid value" end
     uci.set_on_uci({ config = wireguard_config, sectionname = key, option = param }, value, commitapply)
     return true
 end

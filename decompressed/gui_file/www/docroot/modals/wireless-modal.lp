@@ -117,7 +117,7 @@ elseif getWifiAnalyzer and getargs.getAcsData then
 end
 
 local radios = {}
-for i,v in ipairs(proxy.getPN("rpc.wireless.radio.", true)) do
+for i,v in ipairs(proxy.getPN("rpc.wireless.radio.", true) or {}) do
     local radio = match(v.path, "rpc%.wireless%.radio%.@([^%.]+)%.")
     if radio then
         radios[#radios+1] = radio
@@ -588,9 +588,12 @@ local bandsteers = content_helper.convertResultToObject(bandsteerpath .. "@.", p
 if bandsteers and #bandsteers > 1 then
     table.sort(bandsteers, function(a,b)
         if not a or not b then return false end
-        local ap = tonumber(a.paramindex) or tostring(a.paramindex or "")
-        local bp = tonumber(b.paramindex) or tostring(b.paramindex or "")
-        return ap < bp
+        local ap = tonumber(a.paramindex)
+        local bp = tonumber(b.paramindex)
+        if ap and bp then
+            return ap < bp
+        end
+        return tostring(a.paramindex or "") < tostring(b.paramindex or "")
     end)
 end
 
@@ -901,7 +904,7 @@ for i in string.gmatch(param["allowed_channels"], "%S+") do
 end
 
 local radion_data=proxy.get(pathradio)
-for _, v in pairs(radion_data) do
+for _, v in pairs(radion_data or {}) do
     if not content[v.param] then
         content[v.param]=v.value
     end
@@ -986,7 +989,7 @@ if #wls > 0 then
     end
     -- If wifi analyzer enabled, draw it
     local wifi_analyzer_disable = proxy.get("uci.wireless.wifi.@global.wifi_analyzer_disable")
-    if wifi_analyzer_disable and wifi_analyzer_disable[1].value ~= "1" then
+    if wifi_analyzer_disable and wifi_analyzer_disable[1] and wifi_analyzer_disable[1].value ~= "1" then
       html[#html+1] = string.format('<li class="nav-header">%s</li>', T"Wireless Data")
       local freq = "2.4"
       local isDuplicate = {}

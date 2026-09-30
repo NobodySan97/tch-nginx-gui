@@ -31,7 +31,15 @@ if [ ! -x "$runtime_dir/tailscale" ] || [ ! -x "$runtime_dir/tailscaled" ]; then
 	if [ -n "$download_url" ]; then
 		set_status downloading "Downloading verified Tailscale runtime"
 		rm -f "$archive"
-		curl -kfL "$download_url" --output "$archive" || fail "Runtime download failed"
+		download_success=0
+		for attempt in 1 2 3 4 5; do
+			if curl -kfL --connect-timeout 10 --max-time 120 "$download_url" --output "$archive"; then
+				download_success=1
+				break
+			fi
+			sleep 5
+		done
+		[ "$download_success" -eq 1 ] || fail "Runtime download failed"
 		boot_archive="$archive"
 	fi
 	[ -s "$boot_archive" ] || fail "Runtime archive is unavailable"

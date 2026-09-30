@@ -70,7 +70,10 @@ if [ "$client_enabled" = "1" ]; then
     mv /etc/openvpn/modgui-client.conf.tmp /etc/openvpn/modgui-client.conf || exit 1
 fi
 
-if [ "$enabled" = "1" ] || [ "$client_enabled" = "1" ]; then
+    if [ ! -c /dev/net/tun ]; then
+        mkdir -p /dev/net
+        mknod /dev/net/tun c 10 200 2>/dev/null
+    fi
     [ -c /dev/net/tun ] || { echo "TUN is unavailable" >&2; exit 1; }
     if [ "$enabled" = "1" ]; then
     /usr/share/transformer/scripts/openvpnGenerateKeys.sh || exit 1

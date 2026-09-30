@@ -2505,12 +2505,14 @@ function confirmationDialogue(t, e) {
 	$(document).on("click", '[data-toggle="modal"]', function (t) {
 		t.preventDefault();
 		t.stopPropagation();
+		lastCardClicked = $(this).closest(".smallcard");
+		if (!lastCardClicked.length) lastCardClicked = null;
 		var remote = $(this).attr("data-remote") || $(this).data("remote");
 		var id = $(this).attr("data-id") || $(this).data("id");
 		openCardModal(remote, id);
 	});
 	$(document).on("click", ".smallcard", function (t) {
-		if ($(t.target).closest(".card-direct-link").length) return;
+		if ($(t.target).closest(".card-direct-link").length || $(t.target).closest(".switch, .switcher").length) return;
 		if ($(t.target).is("input, select, button, a:not([data-toggle='modal'])")) return;
 		t.preventDefault();
 		lastCardClicked = $(this);

@@ -98,7 +98,7 @@ local dectdev_data, dectdev_helpmsg = post_helper.handleTableQuery(dectdev_colum
 local function findHandsetID(handset_name)
     local devName = ""
 
-    for _,v in ipairs(proxy.getPN("uci.mmpbxbrcmdectdev.device.",true)) do -- get the path
+    for _,v in ipairs(proxy.getPN("uci.mmpbxbrcmdectdev.device.",true) or {}) do -- get the path
         local _dn = proxy.get(v["path"].."user_friendly_name"); devName = format("%s", (_dn and _dn[1] and _dn[1].value) or "")
         if handset_name == devName then
             local num = string.find(v["path"],"@")

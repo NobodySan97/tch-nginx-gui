@@ -126,7 +126,7 @@ local function flashMemory()
   local sysPath = "/sys/class/mtd/"
   if lfs.attributes(sysPath, "mode") == "directory" then
     for file in lfs.dir(sysPath) do
-      local mtdIndex = match(file, "mtd([%d])$")
+      local mtdIndex = match(file, "mtd(%d+)$")
       if mtdIndex then
         local nameFile = iopen(sysPath.. "mtd" .. mtdIndex .."/name")
         if nameFile then
@@ -200,7 +200,9 @@ sys_mem_.get = {
     return tostring(tonumber(flashMemory()) - tonumber(flashFreeMemory()))
   end,
 
-  flashFree = flashFreeMemory(),
+  flashFree = function()
+    return flashFreeMemory()
+  end,
 
   memAvailable = function()
     local memAvail = memInfo()

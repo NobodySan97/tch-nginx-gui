@@ -13,7 +13,7 @@ message="Service disabled"
 enabled="$(uci -q get tailscale.service.enabled)"
 service_running="false"
 
-ip_address="$(ip -4 addr show dev tailscale0 2>/dev/null | awk '/inet / { sub("/.*", "", $2); print $2; exit }')"
+ip_address="$(ip addr show dev tailscale0 2>/dev/null | awk '/inet / { sub("/.*", "", $2); print $2; exit }')"
 
 if [ -r /tmp/modgui-tailscale-auth ]; then
   auth_url="$(grep -Eo 'https://login\.tailscale\.com/[^[:space:]]+' /tmp/modgui-tailscale-auth | tail -n 1)"

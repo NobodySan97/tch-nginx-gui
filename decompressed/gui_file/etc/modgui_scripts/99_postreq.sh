@@ -35,7 +35,7 @@ if [ "$(cat /proc/banktable/booted)" = "bank_1" ] && [ ! "$(uci get -q modgui.va
 fi
 
 logecho "Applying modifications"
-uci commit
+uci -q commit modgui
 
 check_gui_tmp
 logecho "Resetting cwmp and watchdog"

@@ -275,7 +275,7 @@ function M.setDHCPMaxAddress(interface, address, commitapply)
     return nil, "Invalid End address"
   end
   local newValue = newEnd - data.ipStart + 1
-  local result , err = overlapCheck(data.network, interface, data.ipStart - data.network, newValue, data.ipMax)
+  local result , err = overlapCheck(data.network, data.name, data.ipStart - data.network, newValue, data.ipMax)
   if result then
     dhcpBinding.sectionname = interface
     dhcpBinding.option = "limit"
@@ -534,7 +534,7 @@ function M.domainValidation(value)
       if #strippedLabel == 0 or #strippedLabel > 63 then
         return nil, "Label should not be empty or more than 63 characters"
       end
-      local correctLabel = match(strippedLabel, "^[a-zA-z0-9][a-zA-Z0-9-_]*[a-zA-Z0-9]")
+      local correctLabel = match(strippedLabel, "^[a-zA-Z0-9][%w%-]*[a-zA-Z0-9]$")
       if #strippedLabel == 1 then
         if not match(strippedLabel, "[a-zA-Z0-9]") then
           return nil, "Label within domain name has invalid syntax"

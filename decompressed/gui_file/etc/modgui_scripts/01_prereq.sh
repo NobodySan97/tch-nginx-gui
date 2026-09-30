@@ -94,7 +94,10 @@ protect_system_libraries() {
   done
   # Restore native ROM www/lua modules if missing (e.g. generic/app.lua)
   if [ -d /rom/www/lua ]; then
-    cp -r -n /rom/www/lua/* /www/lua/ 2>/dev/null || true
+    for f in /rom/www/lua/*; do
+      dest="/www/lua/${f##*/}"
+      [ ! -e "$dest" ] && cp -rf "$f" "$dest" 2>/dev/null || true
+    done
   fi
 }
 

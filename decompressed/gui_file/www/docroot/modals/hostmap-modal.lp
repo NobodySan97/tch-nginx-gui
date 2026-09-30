@@ -91,9 +91,11 @@ end
   hosts = ch.convertResultToObject("sys.hosts.host.",hosts)
   local wifiAP = ch.getMatchedContent("rpc.wireless.ap.")
   for _,f in ipairs(hosts) do
-      local displayname = f.HostName
+      local displayname = f.HostName or ""
+      local mac_addr = f.MACAddress or ""
       if displayname == "" then
-         f.HostName = format("%s%s",T"Unknown",string.upper(f.MACAddress):sub(-6))
+         local suffix = #mac_addr >= 6 and string.upper(mac_addr):sub(-6) or "DEVICE"
+         f.HostName = format("%s %s", T"Unknown", suffix)
       end
       local intf = f.L2Interface
       if intf == "vlan_eth0" or intf == "eth0" or intf == "eth0_0" then
@@ -123,31 +125,31 @@ end
   --ETH0
   html[#html+1]="<td class=\"twentyfive\">"
   for x=1, #eth0, 1 do
-      html[#html+1] = generate_host(eth0[x].HostName, eth0[x].IPAddress, eth0[x].MACAddress:upper(), ethstate["eth0"], eth0[x].State, eth0[x].path)
+      html[#html+1] = generate_host(eth0[x].HostName, eth0[x].IPAddress, (eth0[x].MACAddress or ""):upper(), ethstate["eth0"], eth0[x].State, eth0[x].path)
   end
   html[#html+1]="</td>"
   --ETH1
   html[#html+1]="<td class=\"twentyfive\">"
   for x=1, #eth1, 1 do
-      html[#html+1] = generate_host(eth1[x].HostName, eth1[x].IPAddress, eth1[x].MACAddress:upper(), ethstate["eth1"], eth1[x].State, eth1[x].path)
+      html[#html+1] = generate_host(eth1[x].HostName, eth1[x].IPAddress, (eth1[x].MACAddress or ""):upper(), ethstate["eth1"], eth1[x].State, eth1[x].path)
   end
   html[#html+1]="</td>"
   --ETH2
   html[#html+1]="<td class=\"twentyfive\">"
   for x=1, #eth2, 1 do
-      html[#html+1] = generate_host(eth2[x].HostName, eth2[x].IPAddress, eth2[x].MACAddress:upper(), ethstate["eth2"], eth2[x].State, eth2[x].path)
+      html[#html+1] = generate_host(eth2[x].HostName, eth2[x].IPAddress, (eth2[x].MACAddress or ""):upper(), ethstate["eth2"], eth2[x].State, eth2[x].path)
   end
   html[#html+1]="</td>"
   --ETH3
   html[#html+1]="<td class=\"twentyfive\">"
   for x=1, #eth3, 1 do
-      html[#html+1] = generate_host(eth3[x].HostName, eth3[x].IPAddress, eth3[x].MACAddress:upper(), ethstate["eth3"], eth3[x].State, eth3[x].path)
+      html[#html+1] = generate_host(eth3[x].HostName, eth3[x].IPAddress, (eth3[x].MACAddress or ""):upper(), ethstate["eth3"], eth3[x].State, eth3[x].path)
   end
   html[#html+1]="</td>"
   --MoCA
   html[#html+1]="<td class=\"twentyfive\">"
   for x=1, #moca0 do
-      html[#html+1] = generate_host(moca0[x].HostName, moca0[x].IPAddress, moca0[x].MACAddress:upper(), ethstate["moca0"], moca0[x].State, moca0[x].path)
+      html[#html+1] = generate_host(moca0[x].HostName, moca0[x].IPAddress, (moca0[x].MACAddress or ""):upper(), ethstate["moca0"], moca0[x].State, moca0[x].path)
   end
   html[#html+1]="</td></tr></table><br/>"
   --WIFI
@@ -158,7 +160,8 @@ end
   wifiintf_extra = ch.convertResultToObject("rpc.wireless.ssid.",wifiintf_extra)
   local paramindex = {}
   local apindex = {}
-  local wifispan = 100 / #wifiintf
+  local num_wifi = wifiintf and #wifiintf or 0
+  local wifispan = num_wifi > 0 and (100 / num_wifi) or 100
   html[#html+1]=format("<script>$(\".wifilist\").css({\"width\":\"%s%s\"})</script>",wifispan,"%")
   html[#html+1]=format("<legend>%s</legend>",T"Wireless Networks")
   html[#html+1]="<table class=\"hostmaptable\">"

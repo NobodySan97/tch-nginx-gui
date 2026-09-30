@@ -8,7 +8,7 @@ running="false"
 online="false"
 message="Service disabled"
 
-ip_address="$(ip -4 addr show dev "$interface" 2>/dev/null | awk '/inet / { sub("/.*", "", $2); print $2; exit }')"
+ip_address="$(ip addr show dev "$interface" 2>/dev/null | awk '/inet / { sub("/.*", "", $2); print $2; exit }')"
 [ -n "$ip_address" ] && running="true"
 
 configured_peers=0

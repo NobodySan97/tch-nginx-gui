@@ -35,12 +35,14 @@ local function get_cards_from_config()
       card.modal = rule.target
       -- set correct value for hide: '1' means hidden, '0' or missing means visible
       card.hide = (card.hide == '1')
-      card.raw_card = card.card
-      -- remove any initial digits
-      card.card = card.card:gsub("^%d+_", "")
+      if card.card and type(card.card) == "string" then
+        card.raw_card = card.card
+        -- remove any initial digits
+        card.card = card.card:gsub("^%d+_", "")
 
-      config[card.card] = card
-      config[card.card:gsub("%.lp$", "")] = card
+        config[card.card] = card
+        config[card.card:gsub("%.lp$", "")] = card
+      end
     end
   end)
   uci:unload('web')
@@ -137,6 +139,14 @@ end
 
 local card_files_cache = {}
 
+function M.flush_cache()
+  card_files_cache = {}
+  if ngx and ngx.ctx then
+    ngx.ctx._cached_cards_config = nil
+    ngx.ctx._card_files_cache = nil
+  end
+end
+
 function M.cards()
   local session = ngx and ngx.ctx and ngx.ctx.session
   local limit_info = get_limit_info()
@@ -144,7 +154,17 @@ function M.cards()
   local path = includepath or "/www/cards/"
   local current_config = get_cached_cards_config()
 
-  if not card_files_cache[path] then
+  local cache
+  if ngx and ngx.ctx then
+    if not ngx.ctx._card_files_cache then
+      ngx.ctx._card_files_cache = {}
+    end
+    cache = ngx.ctx._card_files_cache
+  else
+    cache = card_files_cache
+  end
+
+  if not cache[path] then
     local files = {}
     if lfs.attributes(path, 'mode') == 'directory' then
       for file in lfs.dir(path) do
@@ -154,10 +174,10 @@ function M.cards()
       end
       sort(files)
     end
-    card_files_cache[path] = files
+    cache[path] = files
   end
 
-  for _, file in ipairs(card_files_cache[path]) do
+  for _, file in ipairs(cache[path]) do
     local cardname = file:gsub("^%d+_", "")
     if card_visible(session, current_config, cardname) and not card_limited(limit_info, cardname, path) then
       result[#result+1] = file

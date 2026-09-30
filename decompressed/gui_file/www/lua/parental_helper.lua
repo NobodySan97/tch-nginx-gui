@@ -294,15 +294,15 @@ function M.getTodwifi()
 
 	local wifi_list = {}
 	
-	for i,v in ipairs(proxy.getPN("rpc.wireless.ap.", true)) do
+	for i,v in ipairs(proxy.getPN("rpc.wireless.ap.", true) or {}) do
 		local radio = match(v.path, "rpc%.wireless%.ap%.@([^%.]+)%.")
 		
 		local ssid = proxy.get("rpc.wireless.ap.@"..radio..".ssid")
-		ssid = ssid and ssid[1].value or nil
+		ssid = ssid and ssid[1] and ssid[1].value or nil
 		
 		if ssid then
 			local freq = proxy.get("rpc.wireless.ssid.@"..ssid..".radio")
-			if freq and freq[1].value then
+			if freq and freq[1] and freq[1].value then
 				freq = match(freq[1].value,"radio_5G") and "5GHz" or "2.4GHz"
 			end
 			local name = proxy.get("rpc.wireless.ssid.@"..ssid..".ssid")

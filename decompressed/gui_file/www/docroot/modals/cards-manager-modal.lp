@@ -8,7 +8,7 @@ local message_helper = require("web.uimessage_helper")
 local session = ngx.ctx.session
 local format = string.format
 
-if not session:hasAccess("/modals/modgui-modal.lp") and not session:hasAccess("/modals/cards-manager-modal.lp") then
+if not session or (not session:hasAccess("/modals/modgui-modal.lp") and not session:hasAccess("/modals/cards-manager-modal.lp")) then
     ngx.redirect("/login.lp")
     return
 end

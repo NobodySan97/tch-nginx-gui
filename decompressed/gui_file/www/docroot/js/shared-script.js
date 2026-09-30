@@ -63,13 +63,16 @@ var modgui = modgui || {};
 		var element = document.getElementById(CardIdRefresh);
 		if (!element) return ;
 
-		var ElementBinding = {};
+		var existingData = ko.dataFor(element);
+		var ElementBinding = existingData || {};
 		var ElementBindingList = [];
 		var ObserveElement;
 		$("#" + CardIdRefresh).find("[data-bind]").each(function () {
 			ObserveElement = $(this).data("bind").split(":")[1].trim();
 			ElementBindingList.push(ObserveElement);
-			ElementBinding[ObserveElement] = ko.observable();
+			if (!ElementBinding[ObserveElement]) {
+				ElementBinding[ObserveElement] = ko.observable();
+			}
 		});
 
 		var arrayLength = ElementBindingList.length;
@@ -329,11 +332,18 @@ window.onscroll = function () {
 };
 
 $(function () {
-	$("a[href*=\'#\']").on("click", function (e) {
-		e.preventDefault();
-		$("html, body").animate({
-			scrollTop: $($(this).attr("href")).offset().top
-		}, 500, "linear");
+	$("a[href*='#']").on("click", function (e) {
+		var href = $(this).attr("href");
+		if (!href || href === "#" || href.indexOf("#") === -1) return;
+		try {
+			var target = $(href);
+			if (target.length && target.offset()) {
+				e.preventDefault();
+				$("html, body").animate({
+					scrollTop: target.offset().top
+				}, 500, "linear");
+			}
+		} catch (err) {}
 	});
 
 	$(document).on('mouseenter', 'td[data-toggle="tooltip_mac"]', function () {

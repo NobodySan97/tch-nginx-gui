@@ -133,7 +133,7 @@ end
 function M.getSignalStrength(rssi)
   local strength = "1"
   rssi = tonumber(rssi)
-  if rssi then
+  if rssi and rssi < 0 then
     if rssi <= -127 then
       strength = "1"
     elseif rssi < -85 and rssi > -127 then

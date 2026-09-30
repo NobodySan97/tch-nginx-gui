@@ -49,7 +49,7 @@ local vNES = post_helper.validateNonEmptyString
 
 local session = ngx.ctx.session
 local tech = false
-if session:getrole() == "engineer" then
+if session and session.getrole and session:getrole() == "engineer" then
     tech = true
 end
 
@@ -102,7 +102,8 @@ for _, v in pairs(content_helper.convertResultToObject(net_intfs_path .. "@.", p
 	end
 end
 local wireless_radio = {}
-for i,v in ipairs(proxy.getPN("rpc.wireless.ssid.", true)) do
+local w_ssids = proxy.getPN("rpc.wireless.ssid.", true) or {}
+for i,v in ipairs(w_ssids) do
   local radios = match(v.path, "rpc%.wireless%.ssid%.@([^%.]+)%.")
   if radios then
     wireless_radio[radios] = true
@@ -111,15 +112,16 @@ end
 local lan_intfs = {}
 local pppIntf, pppDev
 for k,v in ipairs(all_intfs) do
-    if v.type == "lan" and (not find(v["ppp.ll_intf"], "wl") or wireless_radio[untaint(v["ppp.ll_intf"])])then
+    local ll_intf = v["ppp.ll_intf"] or ""
+    local ll_dev = v["ppp.ll_dev"] or ""
+    if v.type == "lan" and (ll_intf == "" or not find(ll_intf, "wl") or wireless_radio[untaint(ll_intf)]) then
         local radio = "noradio"
         local name = ""
-        local w1_exist = proxy.get("rpc.wireless.ssid.@"..v["ppp.ll_dev"]..".ssid")
-        if match(v["ppp.ll_dev"], "wl") then
-            local ssid_res = proxy.get("rpc.wireless.ssid.@"..v["ppp.ll_dev"]..".ssid")
+        if ll_dev ~= "" and match(ll_dev, "wl") then
+            local ssid_res = proxy.get("rpc.wireless.ssid.@"..ll_dev..".ssid")
             if ssid_res and ssid_res[1] and ssid_res[1].value then
                 name = ssid_res[1].value
-                local radio_res = proxy.get("rpc.wireless.ssid.@"..v["ppp.ll_dev"]..".radio")
+                local radio_res = proxy.get("rpc.wireless.ssid.@"..ll_dev..".radio")
                 if radio_res and radio_res[1] and radio_res[1].value and match(radio_res[1].value, "radio_5G") then
                     radio = "5GHz"
                 else
@@ -240,20 +242,20 @@ local function setupIpv6TIM(active)
 			proxy.set(wan_voip_path..param,getFromWan(param))
 		end
 		proxy.set(wan_voip_path.."metric","1000")
-		for i,v in ipairs(proxy.getPN("uci.mmpbxrvsipnet.network.", true)) do
+		for i,v in ipairs(proxy.getPN("uci.mmpbxrvsipnet.network.", true) or {}) do
 			proxy.set(v.path.."interface", "wan_voip")
 		end
 		local index = proxy.add("uci.firewall.zone.@wan.network.")
 		proxy.set("uci.firewall.zone.@wan.network.".."@".."index.value","wan_voip")
 		proxy.set(pppuser, envIPv6)
 	else
-		for i,v in ipairs(proxy.getPN("uci.firewall.zone.@wan.network.", true)) do
+		for i,v in ipairs(proxy.getPN("uci.firewall.zone.@wan.network.", true) or {}) do
 			local value = proxy.get(v.path.."value")
-			if value and value[1].value == "wan_voip" then
+			if value and value[1] and value[1].value == "wan_voip" then
 				proxy.del(v.path)
 			end
 		end
-		for i,v in ipairs(proxy.getPN("uci.mmpbxrvsipnet.network.", true)) do
+		for i,v in ipairs(proxy.getPN("uci.mmpbxrvsipnet.network.", true) or {}) do
 			proxy.set(v.path.."interface", "wan")
 		end
 		proxy.set(pppuser, envIPv4)
@@ -527,7 +529,7 @@ local sfp_presence = proxy.get("uci.env.rip.sfp")
 
 --Support ethernet mode for devices with no eth4 port
 local ethname = proxy.get("sys.eth.port.@eth4.status")
-if ethname and ethname[1].value then
+if ethname and ethname[1] and ethname[1].value then
     ethname =  "eth4"
 else
     ethname =  "eth3"
@@ -654,9 +656,9 @@ function isQtnGuestWiFi(intf)
         local radio_val = (radio and radio[1] and radio[1].value) or ""
         local isRemote = radio_val ~= "" and proxy.get(format("rpc.wireless.radio.@%s.remotely_managed", radio_val))
         if isRemote and isRemote[1] and isRemote[1].value == "1" then
-            for _, v in ipairs(proxy.getPN("rpc.wireless.ap.", true)) do
+            for _, v in ipairs(proxy.getPN("rpc.wireless.ap.", true) or {}) do
                 local isGuest = proxy.get(v.path.."ap_isolation")
-                if isGuest and isGuest[1].value == "1" then
+                if isGuest and isGuest[1] and isGuest[1].value == "1" then
                     return true
                 end
             end
@@ -799,7 +801,7 @@ end
 -- from the new DHCP Range with respect to the subnet mask & Network Address
 local function validateDHCPStart(value, object)
     local dhcpIgnore = proxy.get(mapParams["dhcpIgnore"])
-    if GWIPChanged() or ( dhcpIgnore and dhcpIgnore[1].value == "1") then --we bypass validation as the gateway ip has changed
+    if GWIPChanged() or ( dhcpIgnore and dhcpIgnore[1] and dhcpIgnore[1].value == "1") then --we bypass validation as the gateway ip has changed
         return true
     end
     if match(value, "^[0-9]*$") then

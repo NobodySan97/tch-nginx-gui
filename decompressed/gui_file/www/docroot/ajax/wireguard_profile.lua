@@ -1,5 +1,12 @@
 gettext.textdomain('webui-wireguard')
 
+local session = ngx.ctx.session
+if not session or not session:hasAccess("/modals/wireguard-modal.lp") then
+  ngx.status = ngx.HTTP_FORBIDDEN
+  ngx.say(T"Access denied.")
+  return ngx.exit(ngx.HTTP_FORBIDDEN)
+end
+
 local client_profile = "/tmp/modgui-wireguard-client.conf"
 local client_name_file = "/tmp/modgui-wireguard-client.name"
 

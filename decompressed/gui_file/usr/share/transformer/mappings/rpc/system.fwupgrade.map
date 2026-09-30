@@ -304,14 +304,17 @@ SYSTEM_FWUPGRADE_.set = {
     fwupgrade_mapdata.filename = value
   end,
   upgrade_type = function(mapping, param, value)
-    if value ~= "Reset" then
+    if value ~= "Reset" and value ~= "Normal" then
       return nil, "invalid value"
     else
       fwupgrade_mapdata.upgrade_type = value
     end
   end,
   gui_install_type = function(mapping, param, value)
-    if value ~= "Rootonly" then
+    if value == "RootOnly" then
+      value = "Rootonly"
+    end
+    if value ~= "Rootonly" and value ~= "Normal" then
       return nil, "invalid value"
     else
       fwupgrade_mapdata.gui_install_type = value

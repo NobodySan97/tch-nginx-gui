@@ -22,12 +22,14 @@ purge_telemetry() { #disable TIM telemetry services
     logecho "Disabling and killing Acotel agent..."
     uci set system.acotel.enabled='0'
     uci commit system
-    kill -9 "$(cat /tmp/acotel/agent.pid 2>/dev/null)" 2>/dev/null
-    pkill -9 -f "Acotel_UA/main.py" 2>/dev/null
-    pkill -9 -f "run_main.sh" 2>/dev/null
+    acotel_pid="$(cat /tmp/acotel/agent.pid 2>/dev/null)"
+    [ -n "$acotel_pid" ] && kill -9 "$acotel_pid" 2>/dev/null
+    for pid in $(ps w 2>/dev/null | grep -E "Acotel_UA/main\.py|run_main\.sh" | grep -v grep | awk '{print $1}'); do
+      kill -9 "$pid" 2>/dev/null
+    done
     rm -f /tmp/acotel/agent.pid
-    [ -f /rom/chroot/Acotel_UA/TRACER.log ] && cp /rom/chroot/Acotel_UA/TRACER.log /chroot/Acotel_UA/TRACER.log
-    [ -f /rom/chroot/Acotel_UA/Acotel_run.log ] && cp /rom/chroot/Acotel_UA/Acotel_run.log /chroot/Acotel_run.log
+    [ -f /rom/chroot/Acotel_UA/TRACER.log ] && cp /rom/chroot/Acotel_UA/TRACER.log /chroot/Acotel_UA/TRACER.log 2>/dev/null
+    [ -f /rom/chroot/Acotel_UA/Acotel_run.log ] && cp /rom/chroot/Acotel_UA/Acotel_run.log /chroot/Acotel_run.log 2>/dev/null
   fi
 
   if [ -f /etc/init.d/bulkdata ] && [ "$(uci -q get bulkdata.global.enabled)" != "0" ]; then
@@ -273,7 +275,7 @@ cwmp_specific_TIM() {
 
 check_clean() {
   if [ -n "$(uci get -q firewall.Allow_restricted_sip_1.name)" ] && [ "$1" != "Fastweb" ]; then
-    if [ $(uci get -q versioncusto.override.fwversion_override_old) ]; then
+    if [ -n "$(uci get -q versioncusto.override.fwversion_override_old)" ]; then
       uci -q set versioncusto.override.fwversion_override="$(uci get -q versioncusto.override.fwversion_override_old)"
       uci -q del versioncusto.override.fwversion_override_old
       uci -q commit versioncusto
@@ -332,7 +334,7 @@ setup_ISP() {
   esac
   logecho "Restarting dnsmasq if needed..."
   if [ $restart_dnsmasq -eq 1 ]; then
-    uci -q commit
+    uci -q commit dhcp
     killall dnsmasq
     /etc/init.d/dnsmasq restart
   fi

@@ -118,7 +118,7 @@ fix_dns_dhcp_bug() {
     /etc/init.d/odhcpd start
   fi
   #reenable it to make ipv6 works
-  if [ -n "$(find /etc/rc.d/ -iname *odhcpd*)" ]; then
+  if [ -n "$(find /etc/rc.d/ -iname "*odhcpd*" 2>/dev/null)" ]; then
     logecho "Enabling odhcpd on boot"
     /etc/init.d/odhcpd enable
   fi
@@ -301,7 +301,7 @@ check_xtm_atmwan #needed for UNO firmware
 
 logecho "Restarting dnsmasq if needed..."
 if [ "$restart_dnsmasq" = "1" ]; then
-  uci commit
+  uci -q commit dhcp
   killall dnsmasq
   /etc/init.d/dnsmasq restart
 fi

@@ -107,9 +107,9 @@ if [ "$enabled" != "1" ]; then
   exit 0
 fi
 
-if [ ! -c /dev/net/tun ] && zcat /proc/config.gz 2>/dev/null | grep -q '^CONFIG_TUN=y$'; then
+if [ ! -c /dev/net/tun ]; then
   mkdir -p /dev/net
-  mknod /dev/net/tun c 10 200
+  mknod /dev/net/tun c 10 200 2>/dev/null
 fi
 [ -c /dev/net/tun ] || { echo "TUN is unavailable" >&2; exit 1; }
 configure_network || exit 1

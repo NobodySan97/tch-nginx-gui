@@ -97,25 +97,29 @@ end
 
 local function getUSBSortedPath(path)
   local usbPath = {}
-  for file in lfs.dir(path) do
-    usbPath[#usbPath+1] = file:match("[^%.]*")
+  if lfs.attributes(path, "mode") == "directory" then
+    for file in lfs.dir(path) do
+      local name = file:match("[^%.]*")
+      if name and name ~= "" then
+        usbPath[#usbPath+1] = name
+      end
+    end
+    table.sort(usbPath)
   end
-  table.sort(usbPath)
   return usbPath
 end
 
 -- Function to return the dirctory name in the path specified(used to get the usb mount path) in case of reboot the mount path changes
 local function getDirName()
   local path = "/mnt/usb"
-  local dirPath
   local usbPath = getUSBSortedPath(path)
   for _, file in ipairs(usbPath) do
     -- file matches only USB-A1 or USB-B1 allowed
     if file and file:match("^%u+-%u%d$") then
-      dirPath = path .. "/" .. file
-    end
-    if dirPath and (lfs.attributes(file, "mode") ~= "directory") and isWritePermissionEnabled(dirPath) then
-      return dirPath
+      local dirPath = path .. "/" .. file
+      if (lfs.attributes(dirPath, "mode") == "directory") and isWritePermissionEnabled(dirPath) then
+        return dirPath
+      end
     end
   end
   return ""

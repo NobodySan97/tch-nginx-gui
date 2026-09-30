@@ -182,7 +182,7 @@ elseif keygen_action == "WG_KEYGEN_PEER" then
   local generated_name, selected_address = next_client_identity(address, requested_name)
   local output
   if generated_name and selected_address then
-    output = run_keygen("client-profile " .. host .. " " .. server_public .. " " .. port .. " " .. address .. " " .. generated_name .. " " .. selected_address)
+    output = run_keygen(string.format("client-profile %q %q %q %q %q %q", host, server_public, port, address, generated_name, selected_address))
   end
   local public = output and output:match("public=([A-Za-z0-9+/=]+)")
   local preshared = output and output:match("preshared=([A-Za-z0-9+/=]+)")
