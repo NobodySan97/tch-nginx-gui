@@ -298,6 +298,26 @@
 - Testati e verificati tutti i 9 temi grafici della GUI con resa perfetta e traduzioni italiane UTF-8 complete
 
 
+### Upstream FrancYescO & Ansuel Synced Contributions:
+- Add a WireGuard management card and modal for the pinned userspace runtime: tunnel interface, peer table, gateway/client keypair generation, status and opt-in firewall rules applied through a dedicated netifd interface
+- Add a checksum-verified DumaOS 2.0-32 extension for ARMv7 gateways with automatic upgrades, service controls and an authenticated UI card
+- Add a pinned, checksum-verified Tailscale extension for ARM gateways with an asynchronous cold-start/login flow, native status card, login link, subnet-router, exit-node, route-acceptance and Tailscale SSH controls
+- Share the checksum-verified TUN module lifecycle across WireGuard, OpenVPN and Tailscale, allowing any of them to bootstrap a clean supported DGA4130
+- Generate complete WireGuard client peers from the modal with automatic address allocation, `.conf` download and QR import
+- Add an installable OpenVPN extension with server/client tabs, dynamically discovered isolated Wi-Fi SSIDs for optional client routing, profile export, TUN/runtime safety checks and a state-coupled WAN firewall rule
+- Add a standalone Asterisk PBX card for SIP accounts and status, with guarded Voipblock integration
+- Integrate Adblock, rsyncd, Ookla Speedtest and AdGuard Home in the Extensions card
+- Add a pinned and checksum-verified OpenSpeedTest LAN/Wi-Fi server on port 5678
+- Detect ARM-only extensions and keep AdGuard Home isolated from dnsmasq during first-run setup
+- Add a pinned, checksum-verified WireGuard userspace runtime with kernel-TUN capability gating and no automatic network or firewall changes
+- Integrate the legacy L2TP/IPsec VPN card with safe dependency ownership, persistent GUI repair, Android retry mitigation and a non-blocking IPsec restart path
+- Add TG-1/VANT-5 nginx compatibility for legacy Lua and non-SSL builds, with validation and automatic rollback
+- Fix FGA221DFWB (NeXXt One) dashboard crash by skipping the xDSL info card and guarding all its values on devices without xDSL hardware https://github.com/Ansuel/tch-nginx-gui/issues/1220
+- Port getULAPrefixBackup/getULAEnable/getSTS and the vpn.device host merge from the 22.2 firmware lib to keep the stock device2 IP maps loading on newer firmwares https://github.com/Ansuel/tch-nginx-gui/issues/1220
+- Fix wireless security info on firmwares exposing it through the wireless.accesspoint ubus object instead of wireless.accesspoint.security https://github.com/Ansuel/tch-nginx-gui/issues/1220
+- Guard xdslctl transformer getters on devices without the xdslctl binary to stop the periodic transformer errors https://github.com/Ansuel/tch-nginx-gui/issues/1220
+- Fallback to a known gateway picture when the device model has no dedicated image (eg. NeXXt One)
+
 ---------------------------------------------------------------------------
 # Mainline 18.3 Cobalt
 
