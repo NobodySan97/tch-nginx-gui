@@ -1,5 +1,12 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
+
+9.8.76 (Preview)
+---------------------------------------------------------------------------
+- **Upgrade Verification & Distribution Pipeline Refresh**:
+  - Nuova build di anteprima sul canale Preview per il collaudo del flusso di aggiornamento da interfaccia grafica e verifica del live tracking dei log in tempo reale.
+  - Sincronizzazione dei metadati di rilascio e rigenerazione di tutti i pacchetti con checksum aggiornati.
+
 9.8.75 (Preview)
 ---------------------------------------------------------------------------
 - **Upstream Community Alignment & System Hardening (FrancYescO)**:
