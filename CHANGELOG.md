@@ -1,5 +1,15 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
+9.8.75 (Preview)
+---------------------------------------------------------------------------
+- **Upstream Community Alignment & System Hardening (FrancYescO)**:
+  - Allineati i fix dall'upstream di FrancYescO: ciclo di vita del modulo kernel TUN condiviso per WireGuard, OpenVPN e Tailscale, fix sui gestori dei pulsanti WPS in wireless-modal per firmware agtef_2.3.4, e pin della versione repack DumaOS a 2.0-46.
+- **BusyBox Ash & POSIX Compatibility**:
+  - Risolti i bashismi storici `==` all'interno dei costrutti `[ ... ]` negli init script `etc/init.d/telnet` dei pacchetti specifici hardware (DGA, TG789, TG789Xtream35B, TG800) convertiti a standard POSIX `=` con query `uci -q get`.
+  - Piena conformità POSIX verificata su tutti gli script di sistema e utility di upgrade (`upgradegui`, `checkver`, `appInstallRemoveUtility.sh`).
+- **Web UI & Lua Controller Resilience**:
+  - Risolti potenziali crash nil su `wireguard_profile.lua`, `cards.lua` e modali di sistema (`ethernet-modal.lp`, `hostmap-modal.lp`, `wireless-modal.lp`).
+  - Corretti mapping Transformer e trigger CommitApply per evitare fallimenti silenziosi nei salvataggi di rete e firewall.
 
 9.8.74 (Stable)
 ---------------------------------------------------------------------------
