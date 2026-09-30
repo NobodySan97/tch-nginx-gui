@@ -131,7 +131,8 @@ end
 
 -- function to calculate the signal strength of wireless device
 function M.getSignalStrength(rssi)
-  local strength = 1
+  local strength = "1"
+  rssi = tonumber(rssi)
   if rssi then
     if rssi <= -127 then
       strength = "1"

@@ -96,9 +96,28 @@ posix.statvfs = function() return {f_bsize = 1024, f_bfree = 200} end
 assert(getrefcountusb() == '100')
 """)
 
+    def test_signal_strength_handles_string_and_numeric_rssi(self):
+        text = source("usr/lib/lua/transformer/shared/wifi.lua")
+        sig_func = lua_function(text, "function M.getSignalStrength")
+        self.run_lua("""
+local M = {}
+""" + sig_func + """
+assert(M.getSignalStrength(-130) == '1')
+assert(M.getSignalStrength('-130') == '1')
+assert(M.getSignalStrength('-100') == '2')
+assert(M.getSignalStrength(-85) == '3')
+assert(M.getSignalStrength('-85') == '3')
+assert(M.getSignalStrength('-80') == '4')
+assert(M.getSignalStrength('-50') == '5')
+assert(M.getSignalStrength(nil) == '1')
+assert(M.getSignalStrength('invalid') == '1')
+""")
+
     def test_optional_conntrack_helper_is_guarded(self):
         text = source("usr/share/transformer/commitapply/uci_firewall.ca")
         self.assertIn("[ -x /usr/bin/remove_conntrack.sh ] &&", text)
+        mmpbx = source("usr/share/transformer/commitapply/rpc_mmpbx.ca")
+        self.assertIn("[ -x /usr/lib/parameter_conversion/mmpbx_dectemission.sh ] &&", mmpbx)
 
 
 if __name__ == "__main__":
