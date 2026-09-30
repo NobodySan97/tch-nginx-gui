@@ -2483,12 +2483,14 @@ function confirmationDialogue(t, e) {
 		modalToCard = lastCardClicked ? lastCardClicked.find(".settings").data("remote") : null;
 		if (count > 0 && $(t.target).hasClass("modal")) {
 			if (modalToCard != null) {
-				$.get("/ajax/get_card.lua?modal=" + modalToCard, function (data) {
-					$(lastCardClicked).parent().replaceWith(data);
+				var cardToRefresh = $(lastCardClicked).parent();
+				$.get("/ajax/get_card.lua?modal=" + encodeURIComponent(modalToCard), function (data) {
+					cardToRefresh.replaceWith(data);
 				});
 			} else {
 				window.location.reload(!0);
 			}
+			count = 0;
 		}
 	});
 	var y = !1;
@@ -2508,6 +2510,7 @@ function confirmationDialogue(t, e) {
 		openCardModal(remote, id);
 	});
 	$(document).on("click", ".smallcard", function (t) {
+		if ($(t.target).closest(".card-direct-link").length) return;
 		if ($(t.target).is("input, select, button, a:not([data-toggle='modal'])")) return;
 		t.preventDefault();
 		lastCardClicked = $(this);

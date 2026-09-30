@@ -14,6 +14,8 @@ require_free_space() {
 set_extension_state() {
   uci set "modgui.app.$1=$2"
   uci commit modgui
+}
+
 
 # Shared TUN lifecycle for WireGuard, OpenVPN and Tailscale.  The reviewed
 # DGA4130 module is kernel/build exact; other platforms may use their matching
