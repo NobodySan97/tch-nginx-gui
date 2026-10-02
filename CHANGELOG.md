@@ -1,6 +1,21 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.78 (Stable)
+---------------------------------------------------------------------------
+- **Upgrade Process Stability & Live Modal Feedback**:
+  - `command-log-read-modal.lp`: Risolto il reindirizzamento prematuro al login durante l'aggiornamento; introdotta barra di avanzamento fluida al 100%, badge di successo e countdown visibile di 4 secondi prima del redirect alla schermata di accesso.
+  - `shared-script.js`: Inibito il reindirizzamento forzato di sessione dai polling delle card in background quando il modale di aggiornamento (`#commandlogmodal`) o l'upgrade è attivo.
+  - `wrapper.sh`, `upgradegui`, `checkver`, `appInstallRemoveUtility.sh`: Tracciamento completo dello stato del comando di aggiornamento con persistenza atomica su file di stato per continuità durante i riavvii del demone Nginx/Transformer.
+- **Upstream Community Alignment & POSIX Compliance (FrancYescO)**:
+  - Allineati tutti i fix dall'upstream di FrancYescO: ciclo di vita del modulo kernel TUN condiviso (WireGuard, OpenVPN, Tailscale), fix sui gestori dei pulsanti WPS in wireless-modal per firmware agtef_2.3.4, e pin della versione repack DumaOS a 2.0-46.
+  - Risolti i bashismi nei costrutti `[ ... ]` degli init script `etc/init.d/telnet` dei pacchetti specifici hardware (DGA, TG789, TG789Xtream35B, TG800) convertiti a standard POSIX `=` con query protetta `uci -q get`.
+- **System Hardening & Data Model Mapping**:
+  - Risolti potenziali crash nil su `wireguard_profile.lua`, `cards.lua` e modali di sistema (`ethernet-modal.lp`, `hostmap-modal.lp`, `wireless-modal.lp`).
+  - Corretti mapping Transformer e trigger CommitApply per evitare fallimenti silenziosi nei salvataggi di rete e firewall.
+- **Rilascio Ufficiale Canale Stable**:
+  - Consolidamento cumulativo delle migliorie testate nei rilasci preview 9.8.75, 9.8.76 e 9.8.77 in versione di produzione stabile ufficiale.
+
 9.8.77 (Preview)
 ---------------------------------------------------------------------------
 - **Upgrade Modal Lifecycle & Smooth Completion Fix**:
