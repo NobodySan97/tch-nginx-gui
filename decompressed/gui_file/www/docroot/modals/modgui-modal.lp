@@ -351,6 +351,7 @@ local content = {
         outdated_ver = "uci.modgui.gui.outdated_ver",
         new_ver = "uci.modgui.gui.new_ver",
         specific_app = "uci.modgui.app.specific_app",
+        marketing_version = "uci.version.version.@version[0].marketing_version",
         telstra_gui = "uci.modgui.app.telstra_webui",
         fwversion_real = "uci.versioncusto.override.fwversion_override_real",
         activebank = "sys.banktable.activebank",
@@ -560,7 +561,8 @@ html[#html + 1] = format('<a class="btn btn-primary modal-link" data-toggle="mod
 html[#html + 1] = '</div></div>'
 html[#html + 1] = '</form>'
 
-if content.specific_app ~= "" then
+local marketing_major = tonumber((content.marketing_version or ""):match("^%d+"))
+if content.specific_app ~= "" and (not marketing_major or marketing_major < 19) then
 
         local upload_specific_app = {
                 button = {

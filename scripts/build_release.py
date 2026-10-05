@@ -29,7 +29,8 @@ MODULAR_DIRS = [
     "upgrade-pack-specificTG789", "upgrade-pack-specificTG789Xtream35B",
     "telstra_gui", "ledfw_support-specificTG788", "ledfw_support-specificTG789",
     "ledfw_support-specificTG799", "ledfw_support-specificTG800",
-    "ledfw_support-specificDGA", "ledfw_support-specificDGA4131"
+    "ledfw_support-specificDGA", "ledfw_support-specificDGA4131",
+    "ledfw_support-specificDGA4331"
 ]
 
 

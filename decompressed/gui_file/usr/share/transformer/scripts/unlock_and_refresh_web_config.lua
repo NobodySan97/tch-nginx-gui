@@ -86,6 +86,11 @@ local check_rule = {
 	{ name = 'cardsmanagermodal', target = '/modals/cards-manager-modal.lp' },
 	{ name = 'wireguardprofileajax', target = '/ajax/wireguard_profile.lua' },
 	{ name = 'dumaosmodal', target = '/modals/dumaos-modal.lp' },
+	{ name = 'easyMeshConfiguration', target = '/modals/easy-mesh-configuration.lp' },
+	{ name = 'wifiExtender', target = '/modals/wifi-extender-status.lp' },
+	{ name = 'certificateslists', target = '/modals/certificates-list-modal.lp' },
+	{ name = 'datausagemodal', target = '/modals/datausage.lp' },
+	{ name = 'datausageajax', target = '/ajax/datausage.lua' },
 }
 
 --We add telstra rules anyway as nginx will respond 404 if not found
@@ -180,6 +185,9 @@ local card_check_rule = {
 	{ name = 'system_card', card = '091_system.lp', modal = 'systemmodal' },
 	{ name = 'natalghelper_card', card = '092_natalghelper.lp', modal = 'natalghelper' },
 	{ name = 'xdsl_card', card = '093_xdsl.lp', modal = 'xdsllowmodal' },
+	{ name = 'datausage_card', card = '011_datausage.lp', modal = 'datausagemodal' },
+	{ name = 'certificates_card', card = '021_certificates.lp', modal = 'certificateslists' },
+	{ name = 'wifiExtender_card', card = '020_wifiExtender.lp', modal = 'easyMeshConfiguration' },
 }
 
 --Check every element in table

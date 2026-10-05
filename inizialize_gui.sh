@@ -16,6 +16,7 @@ declare -a modular_dir=(
 	"ledfw_support-specificTG800"
 	"ledfw_support-specificDGA"
 	"ledfw_support-specificDGA4131"
+	"ledfw_support-specificDGA4331"
 )
 
 AUTOBUILD_DIR="${AUTOBUILD_DIR:-$HOME/gui-dev-build-auto}"
