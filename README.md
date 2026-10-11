@@ -2,11 +2,21 @@
 
 # 🚀 Ansuel Custom GUI for Technicolor Gateways
 
-[![Donate Ko-fi](https://img.shields.io/badge/Donate-Ko--fi-ff5e5b.svg)](https://ko-fi.com/nobodysan)
-[![License](https://img.shields.io/github/license/NobodySan97/tch-nginx-gui.svg?style=flat)](https://github.com/NobodySan97/tch-nginx-gui/blob/master/LICENSE)
-[![Build Status](https://github.com/NobodySan97/tch-nginx-gui/actions/workflows/autobuild.yml/badge.svg)](https://github.com/NobodySan97/tch-nginx-gui/actions)
-[![Release](https://img.shields.io/github/v/release/NobodySan97/tch-nginx-gui?label=Release)](https://github.com/NobodySan97/tch-nginx-gui/releases)
-[![Downloads](https://img.shields.io/github/downloads/NobodySan97/tch-nginx-gui/total.svg)](https://github.com/NobodySan97/tch-nginx-gui/releases)
+  <a href="https://ko-fi.com/nobodysan">
+    <img src="https://img.shields.io/badge/Donate-Ko--fi-ff5e5b?logo=kofi&logoColor=white&style=for-the-badge" alt="Donate Ko-fi" />
+  </a>
+  <a href="https://github.com/NobodySan97/tch-nginx-gui/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/NobodySan97/tch-nginx-gui?style=for-the-badge&color=yellow" alt="License" />
+  </a>
+  <a href="https://github.com/NobodySan97/tch-nginx-gui/actions">
+    <img src="https://img.shields.io/github/actions/workflow/status/NobodySan97/tch-nginx-gui/autobuild.yml?branch=master&logo=githubactions&logoColor=white&style=for-the-badge" alt="Build Status" />
+  </a>
+  <a href="https://github.com/NobodySan97/tch-nginx-gui/releases">
+    <img src="https://img.shields.io/github/v/release/NobodySan97/tch-nginx-gui?include_prereleases&logo=github&style=for-the-badge&color=007ec6" alt="Latest Release" />
+  </a>
+  <a href="https://github.com/NobodySan97/tch-nginx-gui/releases">
+    <img src="https://img.shields.io/github/downloads/NobodySan97/tch-nginx-gui/total?logo=github&style=for-the-badge&color=2ea44f" alt="Total Downloads" />
+  </a>
 
 <p align="center">
   <b>A highly modified, universal, and modern web interface for Technicolor Homeware / OpenWrt gateways.</b>
