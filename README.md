@@ -38,6 +38,7 @@
 
 This GUI is designed and tested for all Technicolor Homeware-based gateways, including but not limited to:
 
+* **DGA4331** (TIM HUB+ / ZTE H388X / AGTHF)
 * **DGA4132** (TIM HUB / VBNT-S)
 * **DGA4131** (Fastweb FastGate / VBNT-O)
 * **DGA4130** (Smart Modem Plus / VBNT-K)
@@ -58,6 +59,7 @@ This GUI is designed and tested for all Technicolor Homeware-based gateways, inc
 * 📊 **Quick Glance Statistics Dashboard**: Real-time traffic, DSL sync, Wi-Fi clients, and CPU/RAM load.
 * ⚡ **High-Performance Architecture**: Zero-Fork native `/proc` calculation for CPU and memory usage.
 * ⏸️ **Smart Background Polling**: Automatic pause of AJAX polling via HTML5 Page Visibility API when the browser tab is in background.
+* 🔒 **Modern VPN & Networking**: Native integrations for WireGuard, Tailscale, OpenVPN (Server & Client), and EasyMesh Wi-Fi extender topology.
 * 🔑 **VoIP & SIP Password Viewer**: View VoIP credentials and SIP parameters directly from the web interface.
 * 🔄 **Firmware & GUI Manager**: Upgrade, downgrade, or switch update channels (Stable / Preview / Dev) directly from the GUI.
 * 💾 **Backup & Restore**: Export and restore full modem configuration and bank switching.
@@ -67,7 +69,7 @@ This GUI is designed and tested for all Technicolor Homeware-based gateways, inc
 * 🛡️ **DoS & Fast Cache Protections**: Built-in firewall rules, SYN flood mitigation, and DNS caching options.
 * 📶 **Advanced xDSL Diagnostics**: Detailed SNR margin graphs, bit loading, error counters (FEC/CRC), and driver selector.
 * 🎨 **Multiple Themes & Skins**: TIM, Vodafone, Fritz!Box, Fastweb, Dark Mode, and Custom styles.
-* 🧩 **Integrated App Store**: One-click install for LuCI, Transmission, Aria2, Amule, AdBlock DNS sinkhole, and more.
+* 🧩 **Integrated App Store**: One-click install for LuCI, Transmission, Aria2, Amule, AdBlock DNS sinkhole, DumaOS, and more.
 
 ---
 
