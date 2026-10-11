@@ -147,6 +147,7 @@ class AsteriskManagerTests(unittest.TestCase):
         self.assertIn("asteriskprofilemodal", source)
         self.assertIn("/modals/asterisk-profile-modal.lp", source)
 
+    @unittest.skipUnless(shutil.which("sh"), "sh is not installed")
     def test_shell_helper_parses(self):
         subprocess.run(["sh", "-n", APPLY], check=True)
 

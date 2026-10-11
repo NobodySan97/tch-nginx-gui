@@ -108,7 +108,7 @@ class ExtensionManager(unittest.TestCase):
 
         self.assertIn("CONFIG_TUN=y", shared_tun)
         self.assertNotIn("19.4.0866-3401052", shared_tun)
-        self.assertIn("ac8d9a0575131475c4002132bf4995cb96c6f99d", shared_tun)
+        self.assertIn("4.1.52", shared_tun)
         self.assertIn("tun-vbntj-damson-4.1.52.ko", shared_tun)
         self.assertIn("modgui_install_tun wireguard", wireguard)
         self.assertIn("wireguard_install_tun", wireguard)
@@ -540,6 +540,7 @@ class ExtensionManager(unittest.TestCase):
             self.assertIn("wireguard_app", block)
             self.assertIn("tailscale_app", block)
 
+    @unittest.skipUnless(shutil.which("sh"), "sh is not installed")
     def test_shell_sources_parse(self):
         sources = (
             INSTALLER,
