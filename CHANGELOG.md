@@ -1,6 +1,25 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.79 (Stable)
+---------------------------------------------------------------------------
+- **Supporto TIM HUB+ DGA4331 (PR #1228 upstream / ZioCook)**:
+  - Integrazione completa del supporto base per TIM HUB+ DGA4331 (AGTHF): immagini gateway WebP/PNG ad alta risoluzione, pacchetto LED modulare `ledfw_support-specificDGA4331` con macchina a stati dedicata.
+  - Nuove funzionalità integrate: card e modale Consumo Dati (`011_datausage.lp`), EasyMesh & WiFi Extender (`020_wifiExtender.lp`), lista certificati (`021_certificates.lp`) e relative regole Transformer / AJAX.
+- **Risoluzione Deadlock Upgrade Firmware (FrancYescO)**:
+  - Eliminato il controllo bloccante di apertura file su named pipe FIFO in `system.fwupgrade.map`, prevenendo il blocco del demone Transformer all'avvio dell'aggiornamento.
+- **Gestione Init Scripts & Monitoraggio in Tempo Reale**:
+  - `system.init.map`: Aggiunti comandi espliciti `enable`/`disable` e verifica stato del processo (`/etc/init.d/<nome> running`).
+  - `system-init-modal.lp`: Implementato controllo AJAX dello stato dei servizi di sistema con aggiornamento dinamico dei pulsanti senza ricaricare la pagina.
+  - `shared-script.js`: Aggiunto helper globale `get_bitrate` per il calcolo e la formattazione dei consumi dati.
+- **Affidabilità & Compatibilità Moduli di Sistema**:
+  - `mobiled_upgrade.sh`: Inserito parametro `device_error` negli eventi UBUS per prevenire fallimenti di upgrade FOTA LTE su firmware recenti.
+  - Sotto-tab EasyMesh protetti con verifica preventiva dell'esistenza dei modali prima del rendering.
+  - `appInstallRemoveUtility.sh` & `applications-modal.lp`: Rilassato il vincolo sull'hash del kernel per l'installazione del modulo TUN su architetture ARMv7 con kernel 4.1.52.
+- **Pipeline & Packaging Release Engine**:
+  - Aggiornato `build_release.py` per includere `ledfw_support-specificDGA4331.tar.bz2` tra i pacchetti modulari con generazione e verifica automatica del checksum MD5.
+  - Allineata la suite di test Python con esecuzione multipiattaforma garantita.
+
 9.8.78 (Stable)
 ---------------------------------------------------------------------------
 - **Upgrade Process Stability & Live Modal Feedback**:
