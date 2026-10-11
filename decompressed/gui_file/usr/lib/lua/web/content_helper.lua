@@ -4,7 +4,7 @@ local open = io.open
 local pairs, ipairs, unpack, type, tonumber = pairs, ipairs, unpack, type, tonumber
 local concat, sort = table.concat, table.sort
 local string = string
-local untaint = string.untaint
+local untaint = string.untaint or function(s) return s end
 
 --- content_helper module
 --  @module content_helper

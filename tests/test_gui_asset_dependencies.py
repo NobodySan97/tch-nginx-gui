@@ -24,6 +24,10 @@ class GuiAssetDependencies(unittest.TestCase):
         modal = WWW / "docroot/modals/wireless-client-modal.lp"
         self.assertIn('action="modals/wireless-client-modal.lp"', modal.read_text())
 
+    def test_content_helper_untaint_fallback_for_standalone_scripts(self):
+        content_helper = (WWW.parent / "usr/lib/lua/web/content_helper.lua").read_text()
+        self.assertIn("local untaint = string.untaint or function(s) return s end", content_helper)
+
 
 if __name__ == "__main__":
     unittest.main()
