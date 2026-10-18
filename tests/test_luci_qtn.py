@@ -11,7 +11,7 @@ BIT_SHIM = r'''
 unpack = unpack or table.unpack
 if not pcall(require, 'bit') then
   package.preload.bit = function()
-    return assert(load([[
+    local ok, fn = pcall(loadstring or load, [[
       local mask=0xffffffff
       local function fold(op,...)
         local a={...}; local v=a[1]&mask
@@ -26,7 +26,9 @@ if not pcall(require, 'bit') then
         rol=function(a,n) a=a&mask; return ((a<<n)|(a>>(32-n)))&mask end,
         tobit=function(a) a=a&mask; return a>=0x80000000 and a-0x100000000 or a end
       }
-    ]]))()
+    ]])
+    if ok and fn then return fn() end
+    error("bit module required")
   end
 end
 '''

@@ -54,7 +54,7 @@ jobs:
       - name: Install Test Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y lua5.1 gawk bzip2
+          sudo apt-get install -y lua5.1 lua-bitop gawk bzip2
           sudo ln -sf /usr/bin/lua5.1 /usr/bin/lua || true
           sudo ln -sf /usr/bin/luac5.1 /usr/bin/luac || true
 
