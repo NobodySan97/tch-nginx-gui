@@ -170,8 +170,10 @@ install_from_github() {
 
   chmod +x ./setup.sh
   ./setup.sh "$4"
+  setup_status=$?
   cd "$cur_pwd"
   rm -rf "/tmp/$2"
+  return "$setup_status"
 }
 
 ############TRANSFORMER UTILITY##################
@@ -197,9 +199,11 @@ EOF
 app_transmission() {
 
   install_arm() {
-    opkg update
-    opkg install transmission-web transmission-daemon-openssl
-    [ ! -f /rom/usr/lib/libmbedcrypto.so.1 ] && opkg install libmbedtls #workaround for 19.x firmware
+    opkg update || return 1
+    opkg install transmission-web transmission-daemon-openssl || return 1
+    if [ ! -f /rom/usr/lib/libmbedcrypto.so.1 ]; then
+      opkg install libmbedtls || return 1 #workaround for 19.x firmware
+    fi
 
     uci set transmission.@transmission[0].enabled=1
     uci set transmission.@transmission[0].rpc_whitelist='127.0.0.1,192.168.*.*'
@@ -225,15 +229,22 @@ app_transmission() {
   install() {
     case $marketing_version in
     "16.1"* | "16.2"*)
-      [ "$cpu_type" = "armv7l" ] && install_from_github FrancYescO/sharing_tg789 transmission-xtream
-      [ "$cpu_type" = "mips" ] && install_from_github FrancYescO/sharing_tg789 transmission
+      case "$cpu_type" in
+        armv7l) install_from_github FrancYescO/sharing_tg789 transmission-xtream || return 1 ;;
+        mips) install_from_github FrancYescO/sharing_tg789 transmission || return 1 ;;
+        *) return 1 ;;
+      esac
       ;;
     "16."* | "17."* | "18."* | "19."* | "20."*)
-      [ "$cpu_type" = "armv7l" ] && install_arm
-      [ "$cpu_type" = "mips" ] && install_from_github FrancYescO/sharing_tg789 transmission
+      case "$cpu_type" in
+        armv7l) install_arm || return 1 ;;
+        mips) install_from_github FrancYescO/sharing_tg789 transmission || return 1 ;;
+        *) return 1 ;;
+      esac
       ;;
     *)
       echo "Unknown app install script for $marketing_version $cpu_type"
+      return 1
       ;;
     esac
     uci set modgui.app.transmission_webui="1"
@@ -242,8 +253,8 @@ app_transmission() {
 
   remove() {
     [ -f /etc/init.d/transmission ] && { /etc/init.d/transmission stop 2>/dev/null; /etc/init.d/transmission disable 2>/dev/null; }
-    opkg remove --force-removal-of-dependent-packages transmission-daemon-openssl transmission-web
-    [ ! -f /rom/usr/lib/libmbedcrypto.so.1 ] && opkg install libmbedtls #workaround for 19.x firmware
+    opkg remove --force-removal-of-dependent-packages transmission-daemon-openssl transmission-web || return 1
+    [ ! -f /rom/usr/lib/libmbedcrypto.so.1 ] && opkg install libmbedtls 2>/dev/null #workaround for 19.x firmware
     rm -rf /www/docroot/transmission
     rm -rf /etc/config/transmission*
     rm -rf /var/transmission
@@ -321,18 +332,29 @@ app_telstra() {
 app_luci() {
   install() {
     luci_install_arm() {
-      opkg update
-      [ ! -f /rom/usr/lib/libjson-c.so.2 ] && [ -f /usr/lib/libjson-c.so.4 ] && ln -sf /usr/lib/libjson-c.so.4 /usr/lib/libjson-c.so.2 #workaround for 18.x feeds used on 19.x firmware
-      rm -rf /etc/config/uhttpd
+      opkg update || return 1
+      if [ ! -f /rom/usr/lib/libjson-c.so.2 ] && [ ! -e /usr/lib/libjson-c.so.2 ]; then
+        ln -s /usr/lib/libjson-c.so.4 /usr/lib/libjson-c.so.2 || return 1
+      fi
       rm -f /usr/lib/lua/uci.so #remove to avoid lua-uci conflict during install
-      opkg install --force-reinstall uhttpd libuci-lua luci rpcd px5g-standalone
-      mkdir -p /www_luci
-      [ -d /www/cgi-bin ] && mv /www/cgi-bin /www_luci/
-      [ -d /www/luci-static ] && mv /www/luci-static /www_luci/
-      [ -f /www/index.html ] && mv /www/index.html /www_luci/
-      [ -f /rom/usr/lib/lua/uci.so ] && cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ #restore lib as it gets removed by libuci-lua
-      [ -f /usr/lib/lua/luci/model/uci.lua ] && sed -i 's/require "uci"/require "uci_luci"/g' /usr/lib/lua/luci/model/uci.lua #modify luci to load his original lib with different name
-      [ -f /usr/lib/lua/luci/view/sysauth.htm ] && sed -i '/if (document.location.protocol != .https:.) {/,/}/d' /usr/lib/lua/luci/view/sysauth.htm
+      opkg install --force-reinstall libuci-lua luci rpcd uhttpd
+      luci_opkg_status=$?
+      # Restore the firmware binding even when opkg fails.
+      cp /rom/usr/lib/lua/uci.so /usr/lib/lua/ || return 1
+      [ "$luci_opkg_status" -eq 0 ] || return "$luci_opkg_status"
+      [ -f /usr/lib/lua/luci/model/uci.lua ] && [ -x /etc/init.d/uhttpd ] || return 1
+      mkdir -p /www_luci || return 1
+      for luci_asset in cgi-bin luci-static index.html; do
+        if [ -d "/www/$luci_asset" ]; then
+          mkdir -p "/www_luci/$luci_asset" || return 1
+          cp -R "/www/$luci_asset/." "/www_luci/$luci_asset/" || return 1
+          rm -rf "/www/$luci_asset"
+        elif [ -f "/www/$luci_asset" ]; then
+          mv "/www/$luci_asset" /www_luci/ || return 1
+        fi
+      done
+      [ -f /www_luci/cgi-bin/luci ] || return 1
+      sed -i 's/require "uci"/require "uci_luci"/g' /usr/lib/lua/luci/model/uci.lua || return 1
 
       if [ ! -f /etc/config/uhttpd ]; then
         touch /etc/config/uhttpd
@@ -354,57 +376,61 @@ app_luci() {
         uci add_list uhttpd.main.listen_https='0.0.0.0:9443'
         uci add_list uhttpd.main.listen_https='[::]:9443'
         uci set uhttpd.main.redirect_https='0'
-      else
-        uci del_list uhttpd.main.listen_http='0.0.0.0:80' 2>/dev/null
-        uci add_list uhttpd.main.listen_http='0.0.0.0:9080'
-        uci del_list uhttpd.main.listen_http='[::]:80' 2>/dev/null
-        uci add_list uhttpd.main.listen_http='[::]:9080'
-        uci del_list uhttpd.main.listen_https='0.0.0.0:443' 2>/dev/null
-        uci add_list uhttpd.main.listen_https='0.0.0.0:9443'
-        uci del_list uhttpd.main.listen_https='[::]:443' 2>/dev/null
-        uci add_list uhttpd.main.listen_https='[::]:9443'
-        uci set uhttpd.main.redirect_https='0'
-        uci set uhttpd.main.home='/www_luci'
       fi
+      uci set uhttpd.main.home='/www_luci' || return 1
 
-      uci commit uhttpd
-      if [ -f /etc/init.d/uhttpd ]; then
-        /etc/init.d/uhttpd enable
-        /etc/init.d/uhttpd restart
-      fi
+      uci commit uhttpd || return 1
+      # Legacy rc.common returns 1 after creating the boot link when STOP is
+      # unset. Check the enabled state before treating that as a failure.
+      /etc/init.d/uhttpd enable || /etc/init.d/uhttpd enabled || return 1
+      /etc/init.d/uhttpd restart || return 1
     }
 
     luci_install_mips() {
-      curl -k -L https://raw.githubusercontent.com/nutterpc/tg-luci/master/install.sh --output /tmp/install.sh
-      chmod +x /tmp/install.sh
+      curl -fk -L https://raw.githubusercontent.com/nutterpc/tg-luci/master/install.sh --output /tmp/install.sh || return 1
+      chmod +x /tmp/install.sh || return 1
       /tmp/install.sh
     }
 
     case $marketing_version in
     "16.1"* | "16.2"*)
-      [ "$cpu_type" = "armv7l" ] && echo "Unknown app install script for $marketing_version $cpu_type"
-      [ "$cpu_type" = "mips" ] && luci_install_mips
+      [ "$cpu_type" = "mips" ] && luci_install_mips || return 1
       ;;
     "16."* | "17."*)
-      [ "$cpu_type" = "armv7l" ] && {
-        luci_install_arm
-        opkg install --force-reinstall --force-overwrite libuci-lua
-        [ -f /usr/lib/lua/luci/model/uci.lua ] && sed -i 's/require "uci_luci"/require "uci"/g' /usr/lib/lua/luci/model/uci.lua
-      }
-      [ "$cpu_type" = "mips" ] && luci_install_mips
+      if [ "$cpu_type" = "armv7l" ]; then
+        luci_install_arm || return 1
+        opkg install --force-reinstall --force-overwrite libuci-lua || return 1
+        sed -i 's/require "uci_luci"/require "uci"/g' /usr/lib/lua/luci/model/uci.lua || return 1
+      elif [ "$cpu_type" = "mips" ]; then
+        luci_install_mips || return 1
+      else
+        return 1
+      fi
       ;;
     "18."* | "19."* | "20."*)
-      [ "$cpu_type" = "armv7l" ] && luci_install_arm
-      [ "$cpu_type" = "mips" ] && luci_install_mips
+      if [ "$cpu_type" = "armv7l" ]; then
+        luci_install_arm || return 1
+      elif [ "$cpu_type" = "mips" ]; then
+        luci_install_mips || return 1
+      else
+        return 1
+      fi
       ;;
     *)
       echo "Unknown app install script for $marketing_version $cpu_type"
+      return 1
       ;;
     esac
+    if [ "$cpu_type" = "armv7l" ]; then
+      install_from_github "" luci_wireless specificapp install || return 1
+    fi
     uci set modgui.app.luci_webui="1"
     uci commit modgui
   }
   remove() {
+    if [ -f /usr/share/modgui-luci-wireless/setup.sh ]; then
+      sh /usr/share/modgui-luci-wireless/setup.sh remove || return 1
+    fi
     luci_remove_arm() {
       [ -f /etc/init.d/uhttpd ] && { /etc/init.d/uhttpd stop 2>/dev/null; /etc/init.d/uhttpd disable 2>/dev/null; }
       opkg remove --force-removal-of-dependent-packages uhttpd rpcd rpcd-mod-* libuci-lua luci luci-* liblucihttp* px5g-standalone
@@ -489,14 +515,14 @@ app_amule() {
 app_aria2() {
   install() {
     install_arm() {
-      opkg update
-      opkg install aria2 libstdcpp
-      curl -sLk https://github.com/mayswind/AriaNg-DailyBuild/tarball/master --output /tmp/ariang.tar.gz
-      rm -rf /tmp/ariang /www/docroot/aria
-      mkdir -p /tmp/ariang /www/docroot/aria
-      tar -xzf /tmp/ariang.tar.gz -C /tmp/ariang/ 2>/dev/null
-      cp -r /tmp/ariang/*/* /www/docroot/aria/ 2>/dev/null || cp -r /tmp/ariang/* /www/docroot/aria/ 2>/dev/null
-      rm -rf /tmp/ariang /tmp/ariang.tar.gz
+      opkg update || return 1
+      # libstdcpp6 in the stock firmware already provides libstdcpp.
+      # Let opkg resolve providers instead of forcing a conflicting package.
+      opkg install aria2 || return 1
+      curl -fLsSk https://github.com/mayswind/AriaNg-DailyBuild/tarball/master --output /tmp/ariang.tar.gz || return 1
+      tar -xzf /tmp/ariang.tar.gz -C /www/docroot/ || return 1
+      rm /tmp/ariang.tar.gz
+      mv /www/docroot/*AriaNg* /www/docroot/aria || return 1
 
       ARIA2_DIR="/etc/aria2"
 
@@ -520,32 +546,39 @@ app_aria2() {
 			aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --daemon=true --conf-path=/etc/aria2/aria2.conf' /etc/rc.local
 
       # start the daemon
-      killall aria2c 2>/dev/null
-      aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --daemon=true --conf-path="$ARIA2_DIR/aria2.conf"
+      killall aria2c 2>/dev/null || true
+      aria2c --enable-rpc --rpc-listen-all=true --rpc-allow-origin-all --daemon=true --conf-path="$ARIA2_DIR/aria2.conf" || return 1
     }
 
     case $marketing_version in
     "16.1"* | "16.2"*)
-      [ "$cpu_type" = "armv7l" ] && install_from_github FrancYescO/sharing_tg789 aria2-xtream
-      [ "$cpu_type" = "mips" ] && install_from_github FrancYescO/sharing_tg789 aria2
+      case "$cpu_type" in
+        armv7l) install_from_github FrancYescO/sharing_tg789 aria2-xtream || return 1 ;;
+        mips) install_from_github FrancYescO/sharing_tg789 aria2 || return 1 ;;
+        *) return 1 ;;
+      esac
       ;;
     "16."* | "17."* | "18."* | "19."* | "20."*)
-      [ "$cpu_type" = "armv7l" ] && install_arm
-      [ "$cpu_type" = "mips" ] && install_from_github FrancYescO/sharing_tg789 aria2
+      case "$cpu_type" in
+        armv7l) install_arm || return 1 ;;
+        mips) install_from_github FrancYescO/sharing_tg789 aria2 || return 1 ;;
+        *) return 1 ;;
+      esac
       ;;
     *)
       echo "Unknown app install script for $marketing_version $cpu_type"
+      return 1
       ;;
     esac
     uci set modgui.app.aria2_webui="1"
     uci commit modgui
   }
   remove() {
-    killall aria2c 2>/dev/null
-    opkg remove --force-removal-of-dependent-packages aria2
+    killall aria2c 2>/dev/null || true
+    opkg remove --force-removal-of-dependent-packages aria2 || return 1
     rm -rf /www/docroot/aria
     rm -rf /etc/aria2
-    sed -i '/aria2c/d' /etc/rc.local 2>/dev/null
+    sed -i '/aria2c/d' /etc/rc.local 2>/dev/null || true
     uci set modgui.app.aria2_webui="0"
     uci commit modgui
   }
@@ -684,15 +717,15 @@ app_blacklist() {
 
 app_xupnp() {
   install() {
-    opkg update
-    opkg install xupnpd
+    opkg update || return 1
+    opkg install xupnpd || return 1
     [ -f /etc/init.d/xupnpd ] && { /etc/init.d/xupnpd enable 2>/dev/null; /etc/init.d/xupnpd restart 2>/dev/null; }
     uci set modgui.app.xupnp_app="1"
     uci commit modgui
   }
   remove() {
     [ -f /etc/init.d/xupnpd ] && { /etc/init.d/xupnpd stop 2>/dev/null; /etc/init.d/xupnpd disable 2>/dev/null; }
-    opkg remove --force-removal-of-dependent-packages xupnpd
+    opkg remove --force-removal-of-dependent-packages xupnpd || return 1
     uci set modgui.app.xupnp_app="0"
     uci commit modgui
   }
@@ -703,6 +736,87 @@ app_xupnp() {
     ;;
   remove)
     remove
+    ;;
+  *)
+    echo "Unsupported action"
+    return 1
+    ;;
+  esac
+}
+
+set_extension_state() {
+  uci set "modgui.app.$1=$2"
+  uci commit modgui
+}
+
+require_free_space() {
+  required_kb="$1"
+  target_path="$2"
+  available_kb="$(df -Pk "$target_path" 2>/dev/null | awk 'END {print $4}')"
+  case "$available_kb" in
+  *[!0-9]* | "")
+    echo "Unable to determine free space on $target_path"
+    return 1
+    ;;
+  esac
+  if [ "$available_kb" -lt "$required_kb" ]; then
+    echo "Not enough free space on $target_path: ${available_kb} KB available, ${required_kb} KB required"
+    return 1
+  fi
+}
+
+adblock_cleanup_dns() {
+  # The legacy package leaves its servers file attached to Technicolor dnsmasq
+  # instances even after uninstall. Preserve unrelated/custom servers files.
+  local changed=0 section
+  for section in $(uci -q show dhcp | sed -n 's/^dhcp\.\([^.=]*\)=dnsmasq$/\1/p'); do
+    if [ "$(uci -q get "dhcp.$section.serversfile")" = "/tmp/adb_list.overall" ]; then
+      uci -q delete "dhcp.$section.serversfile"
+      changed=1
+    fi
+  done
+  if [ "$changed" = 1 ]; then
+    uci commit dhcp
+    /etc/init.d/dnsmasq reload || return 1
+  fi
+  return 0
+}
+
+app_adblock() {
+  adblock_owned="/etc/.modgui-adblock-installed"
+  case "$1" in
+  install)
+    if ! opkg list-installed | grep -q '^adblock '; then
+      touch "$adblock_owned"
+    fi
+    opkg update || return 1
+    opkg install adblock || return 1
+    [ -n "$(uci get -q adblock.global)" ] || uci set adblock.global=adblock
+    uci set adblock.global.adb_enabled=1
+    uci set adblock.global.adb_dns=dnsmasq
+    uci set adblock.global.adb_fetchutil=curl
+    uci commit adblock
+    /etc/init.d/adblock enable
+    /etc/init.d/adblock restart
+    set_extension_state adblock_app 1
+    ;;
+  remove)
+    [ -x /etc/init.d/adblock ] && /etc/init.d/adblock stop
+    [ -x /etc/init.d/adblock ] && /etc/init.d/adblock disable
+    if opkg list-installed | grep -q '^adblock '; then
+      opkg remove adblock || return 1
+    fi
+    adblock_cleanup_dns || return 1
+    if [ -f "$adblock_owned" ]; then
+      rm -f /etc/config/adblock "$adblock_owned"
+    fi
+    set_extension_state adblock_app 0
+    ;;
+  start)
+    /etc/init.d/adblock restart
+    ;;
+  stop)
+    /etc/init.d/adblock stop
     ;;
   *)
     echo "Unsupported action"
@@ -1414,7 +1528,14 @@ app_l2tpipsec() {
       rm -f "$l2tpipsec_before"
       return 1
     }
-    opkg install xl2tpd strongswan-default || {
+    # Preserve the firmware's existing xl2tpd version and configuration.
+    if ! opkg status xl2tpd 2>/dev/null | grep -q '^Status:.*installed'; then
+      opkg install xl2tpd || {
+        l2tpipsec_rollback_install
+        return 1
+      }
+    fi
+    opkg install strongswan-default || {
       l2tpipsec_rollback_install
       return 1
     }
@@ -2073,9 +2194,9 @@ app_dumaos() {
   }
 
   dumaos_repair_gui() {
-    [ -f /usr/share/modgui-dumaos/015_dumaos.lp ] || return 1
-    cp /usr/share/modgui-dumaos/015_dumaos.lp /www/cards/015_dumaos.lp || return 1
-    chmod 644 /www/cards/015_dumaos.lp
+    # DumaOS is opened from Extensions; retire the card shipped by the IPK.
+    rm -f /www/cards/015_dumaos.lp
+    uci -q delete web.dumaos_card
     mkdir -p /www/data || return 1
     if [ -s /dumaossystem/version ]; then
       cp /dumaossystem/version /www/data/shorthash || return 1
@@ -2090,13 +2211,6 @@ app_dumaos() {
       uci add_list web.dumaosmodal.roles=admin
       uci add_list web.dumaosmodal.roles=engineer
       uci add_list web.dumaosmodal.roles=superuser
-    fi
-    uci set web.dumaos_card=card
-    uci set web.dumaos_card.card=015_dumaos.lp
-    if [ -f /www/docroot/modals/dumaos-modal.lp ]; then
-      uci set web.dumaos_card.modal=dumaosmodal
-    else
-      uci set web.dumaos_card.modal=duma_desktop_index
     fi
     uci commit web
   }
@@ -2220,7 +2334,6 @@ app_dumaos() {
       rm -f "$dumaos_tmp"
     fi
     [ -x /etc/init.d/dumaos ] && [ -x /etc/init.d/ndhttpd ] &&
-      [ -f /www/cards/015_dumaos.lp ] &&
       [ -f /usr/share/transformer/mappings/rpc/dumaos.map ] || {
         echo "DumaOS package does not contain the expected services and GUI files"
         return 1
@@ -2286,77 +2399,6 @@ install_specific_files() {
   case $1 in
   install)
     install "$2"
-    ;;
-  remove)
-    remove
-    ;;
-  *)
-    echo "Unsupported action"
-    return 1
-    ;;
-  esac
-}
-
-app_adblock() {
-  install() {
-    opkg update
-    opkg install adblock ca-bundle ca-certificates
-    mkdir -p /tmp/dnsmasq.d
-
-    uci set adblock.global.adb_enabled='1'
-    uci set adblock.global.adb_dns='dnsmasq'
-    uci set adblock.global.adb_dnscanary='1'
-    uci set adblock.global.adb_tld='0'
-
-    uci set adblock.stevenblack=source
-    uci set adblock.stevenblack.adb_src='https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts'
-    uci set adblock.stevenblack.adb_src_desc='stevenblack unified hosts (ads, malware, social trackers, analytics, telemetry)'
-    uci set adblock.stevenblack.adb_src_rset='/^0\.0\.0\.0[[:space:]]+([[:alnum:]_-]+\.)+[[:alpha:]]+([[:space:]]|$)/{print tolower($2)}'
-    uci set adblock.stevenblack.enabled='1'
-
-    uci set adblock.oisd=source
-    uci set adblock.oisd.adb_src='https://small.oisd.nl/domainswild2'
-    uci set adblock.oisd.adb_src_desc='OISD Small - Zero false positive ad and tracking domain list'
-    uci set adblock.oisd.adb_src_rset='BEGIN{FS="[[:space:]]+"} !/^#/ && NF {print tolower($1)}'
-    [ -z "$(uci -q get adblock.oisd.enabled)" ] && uci set adblock.oisd.enabled='0'
-
-    uci set adblock.hagezi=source
-    uci set adblock.hagezi.adb_src='https://raw.githubusercontent.com/hagezi/dns-blocklists/main/wildcard/pro-onlydomains.txt'
-    uci set adblock.hagezi.adb_src_desc='Hagezi Multi Pro (Ads, Trackers, Social, OEMs, Telemetry)'
-    uci set adblock.hagezi.adb_src_rset='BEGIN{FS="[[:space:]]+"} !/^#/ && NF {print tolower($1)}'
-    [ -z "$(uci -q get adblock.hagezi.enabled)" ] && uci set adblock.hagezi.enabled='0'
-
-    for dead in hphosts shalla zeus ransomware malwarelist sysctl ut_capitole reg_cn reg_cz reg_de reg_id reg_nl reg_pl reg_ro reg_ru dshield feodo winhelp hagezi_pro; do
-      uci -q delete adblock.$dead
-    done
-
-    if [ -f /usr/bin/adblock.sh ]; then
-      sed -i 's|adb_dnsdir="${adb_dnsdir:-"/tmp"}"|adb_dnsdir="${adb_dnsdir:-"/tmp/dnsmasq.d"}"|g' /usr/bin/adblock.sh
-      sed -i 's|adb_dnsdeny="awk.*|adb_dnsdeny="awk '"'"'{print \\\\"address=/\\\\"\\\\$0\\\\"/0.0.0.0\\\\"}'"'"'"|g' /usr/bin/adblock.sh
-      sed -i 's|killall -q -HUP "${adb_dns}"|/etc/init.d/dnsmasq restart|g' /usr/bin/adblock.sh
-    fi
-
-    uci commit adblock
-    /etc/init.d/adblock enable
-    /etc/init.d/adblock restart
-    /etc/init.d/transformer restart
-    uci set modgui.app.adblock_app="1"
-    uci commit modgui
-  }
-
-  remove() {
-    /etc/init.d/adblock stop 2>/dev/null
-    /etc/init.d/adblock disable 2>/dev/null
-    rm -f /tmp/dnsmasq.d/adb_list.overall
-    /etc/init.d/dnsmasq restart
-    opkg remove adblock
-    uci set modgui.app.adblock_app="0"
-    uci commit modgui
-  }
-
-  case $1 in
-  install)
-    install
     ;;
   remove)
     remove

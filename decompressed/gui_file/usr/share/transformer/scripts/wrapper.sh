@@ -16,20 +16,25 @@ set_transformer() {
 }
 #################################################
 
-rm -f "$LOG_LOCATION"
+finish() {
+	status=$?
+	trap - EXIT HUP INT TERM
+	if [ "$status" -ne 0 ]; then
+		printf '\nCommand failed (exit status %s).\n' "$status" >> "$LOG_LOCATION"
+	fi
+	set_transformer "rpc.system.modgui.executeCommand.state" "Complete"
+	exit "$status"
+}
+
+trap finish EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT
+trap 'exit 129' HUP
+
 set_transformer "rpc.system.modgui.executeCommand.state" "Requested"
 
-(
-	eval "$1" >"$LOG_LOCATION" 2>&1
-	exit_code=$?
-	sync
-	if [ $exit_code -eq 0 ]; then
-		set_transformer "rpc.system.modgui.executeCommand.state" "Complete"
-	else
-		set_transformer "rpc.system.modgui.executeCommand.state" "Failed"
-	fi
-	sleep 3
-	set_transformer "rpc.system.modgui.executeCommand.state" "Idle"
-	rm -f "$LOG_LOCATION"
-) &
+# Use one file descriptor so stderr cannot overwrite stdout. Keep the final
+# state and log until the next command: polling may miss a one-second window.
+$1 >"$LOG_LOCATION" 2>&1
+exit $?
 

@@ -52,8 +52,14 @@ if ngx.req.get_method() == "POST" then
 	end
 end
 
+-- Use the hostname of the page request, including access through other interfaces.
+local webui_host = ngx.var.host
+if webui_host:find(":", 1, true) and webui_host:sub(1, 1) ~= "[" then
+	webui_host = "[" .. webui_host .. "]"
+end
+
 local mapParams = {
-	local_ip_modem = "uci.network.interface.@lan.ipaddr",
+	telstra_webui = "uci.modgui.app.telstra_webui",
 }
 if marketing_version >= 16.3 then
 	mapParams.luci_webui = "uci.modgui.app.luci_webui"
@@ -193,7 +199,7 @@ if StateParams["luci_webui"] ~= nil then
 	html[#html+1] = '<legend>' .. T"LuCI GUI" .. '</legend>'
 	html[#html+1] = ui_helper.createAlertBlock(T"This will install uHTTPd and LuCI", info_box)
 	append_app_status("luci_webui", T"LuCI GUI")
-	local luci_link = format("http://%s:9080",mapParams.local_ip_modem)
+	local luci_link = format("http://%s:9080", webui_host)
 	html[#html+1] = T"Webui on: " .. '<a target="_blank" href="' .. luci_link .. '">' .. luci_link .. "</a>"
 	html[#html+1] = "<br/>"
 	html[#html+1] = "<br/>"
@@ -207,6 +213,27 @@ if StateParams["luci_webui"] ~= nil then
 	html[#html+1] = "</div>"
 end
 
+if StateParams["amule_webui"] ~= nil then
+	html[#html+1] = '<div class="application-card">'
+	html[#html+1] = "<fieldset>"
+	html[#html+1] = '<legend>' .. T"aMule" .. '</legend>'
+	html[#html+1] = ui_helper.createAlertBlock(T"This will install aMule webui", info_box)
+	append_app_status("amule_webui", T"aMule")
+	local amule_direct_link = format("http://%s:4711/", webui_host)
+	html[#html+1] = T"Webui on: " .. '<a target="_blank" href="' .. amule_direct_link .. '">' .. amule_direct_link .. "</a>"
+	html[#html+1] = "<br/>"
+	if mapParams["amule_webui"] and mapParams["amule_webui"] == "1" then
+        if cputype:match("mips") then
+            html[#html+1] = ui_helper.createSimpleButton(T"Start".." aMule", "fa fa-play", btn_table.amule.start)
+            html[#html+1] = ui_helper.createSimpleButton(T"Stop".." aMule", "fa fa-stop", btn_table.amule.stop)
+        end
+		html[#html+1] = ui_helper.createSimpleButton(T"Remove".." aMule", "fa fa-times-circle", btn_table.amule.remove)
+	else
+		html[#html+1] = ui_helper.createSimpleButton(T"Install".." aMule", "fa fa-download", btn_table.amule.install)
+	end
+	html[#html+1] = "</fieldset>"
+	html[#html+1] = "</div>"
+end
 if StateParams["aria2_webui"] ~= nil then
 	html[#html+1] = '<div class="application-card">'
 	html[#html+1] = "<fieldset>"
@@ -236,7 +263,7 @@ if StateParams["transmission_webui"] ~= nil then
 	html[#html+1] = '<legend>' .. T"Transmission GUI" .. '</legend>'
 	html[#html+1] = ui_helper.createAlertBlock(T"This will install transmission and transmission-webui", info_box)
 	append_app_status("transmission_webui", T"Transmission GUI")
-	local transmission_direct_link = format("http://%s:9091/transmission",mapParams.local_ip_modem)
+	local transmission_direct_link = format("http://%s:9091/transmission", webui_host)
 	html[#html+1] = T"Webui on: " .. '<a target="_blank" href="' .. transmission_direct_link .. '">' .. transmission_direct_link .. "</a>"
 	html[#html+1] = "<br/>"
 	html[#html+1] = "<br/>"
@@ -316,7 +343,7 @@ if StateParams["adguardhome_application"] ~= nil then
 		end
 		adguard_config:close()
 	end
-	local adguard_link = format("http://%s:%s", mapParams.local_ip_modem, adguard_port)
+	local adguard_link = format("http://%s:%s", webui_host, adguard_port)
 	append_extension_card(
 		"adguardhome_application",
 		"adguardhome",
@@ -328,7 +355,7 @@ if StateParams["adguardhome_application"] ~= nil then
 end
 
 if StateParams["openspeedtest_application"] ~= nil then
-	local openspeedtest_link = format("http://%s:5678", mapParams.local_ip_modem)
+	local openspeedtest_link = format("http://%s:5678", webui_host)
 	append_extension_card(
 		"openspeedtest_application",
 		"openspeedtest",
@@ -418,6 +445,110 @@ if StateParams["dumaos_application"] ~= nil then
 	)
 end
 
+if StateParams["voipblock_for_mmpbx"] ~= nil then
+	html[#html+1] = '<div class="application-card">'
+	html[#html+1] = "<fieldset>"
+	html[#html+1] = '<legend>' .. T"Voipblock for mmpbx" .. '</legend>'
+	html[#html+1] = ui_helper.createAlertBlock(T"This will install Voipblock for mmpbx", info_box)
+	append_app_status("voipblock_for_mmpbx", T"Voipblock for mmpbx")
+	html[#html+1] = "<br/>"
+	html[#html+1] = "<br/>"
+	if mapParams["voipblock_for_mmpbx"] and mapParams["voipblock_for_mmpbx"] == "1" then
+		html[#html+1] = ui_helper.createSimpleButton(T"Remove".." Voipblock for mmpbx", "fa fa-times-circle", btn_table.voipblockmmpbx.remove)
+	else
+		html[#html+1] = ui_helper.createSimpleButton(T"Install".." Voipblock for mmpbx", "fa fa-download", btn_table.voipblockmmpbx.install)
+	end
+	html[#html+1] = "</fieldset>"
+	html[#html+1] = "<br/>"
+	html[#html+1] = "</div>"
+end
+
+if StateParams["voipblock_for_asterisk"] ~= nil then
+	html[#html+1] = '<div class="application-card">'
+	html[#html+1] = "<fieldset>"
+	html[#html+1] = '<legend>' .. T"Voipblock for asterisk" .. '</legend>'
+	html[#html+1] = ui_helper.createAlertBlock(T"This will install Voipblock for asterisk", info_box)
+	append_app_status("voipblock_for_asterisk", T"Voipblock for asterisk")
+	html[#html+1] = "<br/>"
+	html[#html+1] = "<br/>"
+	if mapParams["voipblock_for_asterisk"] and mapParams["voipblock_for_asterisk"] == "1" then
+		html[#html+1] = ui_helper.createSimpleButton(T"Remove".." Voipblock for asterisk", "fa fa-times-circle", btn_table.voipblockasterisk.remove)
+	else
+		html[#html+1] = ui_helper.createSimpleButton(T"Install".." Voipblock for asterisk", "fa fa-download", btn_table.voipblockasterisk.install)
+	end
+	html[#html+1] = "</fieldset>"
+	html[#html+1] = "<br/>"
+	html[#html+1] = "</div>"
+end
+
+if StateParams["blacklist_application"] ~= nil then
+	btn_table.blacklist.installempty = {
+		button = {
+			id = "btn-install_blacklist_empty"
+		}
+	}
+	html[#html+1] = '<div class="application-card">'
+	html[#html+1] = "<fieldset>"
+	html[#html+1] = '<legend>' .. T"Blacklist App" .. '</legend>'
+	html[#html+1] = ui_helper.createAlertBlock(T"This will install the blacklist application", info_box)
+	append_app_status("blacklist_application", T"Blacklist App")
+	local blacklist_link = "http://blacklist.satellitar.it/"
+	html[#html+1] = T"Support site: " .. '<a  target="_blank" href="' .. blacklist_link .. '">' .. blacklist_link .."</a>"
+	html[#html+1] = "<br/>"
+	html[#html+1] = "<br/>"
+	local empty_blacklist_msg = ""
+	if mapParams["blacklist_application"] and mapParams["blacklist_application"] == "1" then
+		html[#html+1] = ui_helper.createSimpleButton(T"Remove".." Blacklist", "fa fa-times-circle", btn_table.blacklist.remove)
+		empty_blacklist_msg = T"Update blacklist app"
+	else
+		html[#html+1] = ui_helper.createSimpleButton(T"Install".." Blacklist", "fa fa-download", btn_table.blacklist.install)
+		empty_blacklist_msg = T"Install empty blacklist"
+	end
+	html[#html+1] = ui_helper.createSimpleButton(empty_blacklist_msg, "fa fa-download", btn_table.blacklist.installempty)
+
+	html[#html+1] = "</fieldset>"
+	html[#html+1] = "</div>"
+end
+
+if StateParams["xupnp_application"] ~= nil then
+	html[#html+1] = '<div class="application-card">'
+	html[#html+1] = "<fieldset>"
+	html[#html+1] = '<legend>' .. T"XUPnP App" .. '</legend>'
+	html[#html+1] = ui_helper.createAlertBlock(T"This will install the XUPnP application", info_box)
+	append_app_status("xupnp_application", T"XUPnP App")
+	local xupnp_link = format("http://%s:4044/ui/", webui_host)
+	html[#html+1] = T"Webui on: " .. '<a target="_blank" href="' .. xupnp_link .. '">' .. xupnp_link .."</a>"
+	html[#html+1] = "<br/>"
+	html[#html+1] = "<br/>"
+	if mapParams["xupnp_application"] and mapParams["xupnp_application"] == "1" then
+		html[#html+1] = ui_helper.createSimpleButton(T"Remove".." XUPnP", "fa fa-times-circle", btn_table.xupnp.remove)
+	else
+		html[#html+1] = ui_helper.createSimpleButton(T"Install".." XUPnP", "fa fa-download", btn_table.xupnp.install)
+	end
+	html[#html+1] = "</fieldset>"
+	html[#html+1] = "<br/>"
+	html[#html+1] = "</div>"
+end
+
+if StateParams["telstra_webui"] ~= nil then
+	html[#html+1] = '<div class="application-card">'
+	html[#html+1] = "<fieldset>"
+	html[#html+1] = '<legend>' .. T"Telstra GUI" .. '</legend>'
+	html[#html+1] = ui_helper.createAlertBlock(T"This will install Telstra webui", info_box)
+	append_app_status("telstra_webui", T"Telstra GUI")
+	local telstra_gui = "/telstra-gui.lp"
+	html[#html+1] = T"Webui on: " .. '<a target="_blank" href="' .. telstra_gui .. '">' .. telstra_gui .."</a>"
+	html[#html+1] = "<br/>"
+	html[#html + 1] = T "Change the default page in system-extra to set this GUI as default"
+	html[#html+1] = "<br/>"
+	if mapParams["telstra_webui"] and mapParams["telstra_webui"] == "1" then
+		html[#html+1] = ui_helper.createSimpleButton(T"Remove" .. " " .. T"Telstra GUI", "fa fa-times-circle", btn_table.telstra.remove)
+	else
+		html[#html+1] = ui_helper.createSimpleButton(T"Install" .. " " .. T"Telstra GUI", "fa fa-download", btn_table.telstra.install)
+	end
+	html[#html+1] = "</fieldset>"
+	html[#html+1] = "</div>"
+end
 ngx.print(notices)
 ngx.print('<div class="applications-grid">')
 ngx.print(html)

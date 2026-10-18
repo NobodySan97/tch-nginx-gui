@@ -397,7 +397,12 @@ SYSTEM_MODGUI_APP_.set = {
     local appScript = "/usr/share/transformer/scripts/appInstallRemoveUtility.sh"
     local extra_arg = commdParse[3] and tostring(commdParse[3]):gsub("[^%w%._%-]", "") or ""
     local command =
-      string.format('%s "%s %s %s %s"', wrapper, appScript, commdParse[1], commdParse[2], extra_arg)
+      -- lasync terminates foreground commands after 30 seconds. Package
+      -- downloads must outlive that timeout, just like GUI upgrades do.
+      string.format('start-stop-daemon -S -b -x %s -- "%s %s %s %s"', wrapper, appScript, commdParse[1], commdParse[2], extra_arg)
+    SYSTEM_MODGUI_SCRIPTREQUEST_.set.state(nil, "state", "Requested")
+    local log = io.open("/tmp/command_log", "w")
+    if log then log:close() end
     async_exec({[command] = true})
   end
 }
