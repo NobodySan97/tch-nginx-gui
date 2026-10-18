@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.84 (Stable)
+---------------------------------------------------------------------------
+- **Risoluzione Timeout 30s di Transformer (Exit Code 137) Durante Upgrade GUI**:
+  - In `system.modgui.map`, incapsulato `upgradegui` (e `genSysupgradeBackup`) con `start-stop-daemon -S -b`: previene che il timeout hardcoded di 30 secondi di `lasync.so` invii SIGTERM e SIGKILL (exit code 137) al processo di aggiornamento durante la copia su memoria flash JFFS2 permanente (`/root/GUI.tar.bz2`).
+  - Ottimizzata la procedura di terminazione (`_terminate`) per individuare con precisione il target del comando e non interrompere l'aggiornamento in corso.
+  - Testato e validato con successo sul modem gateway live (`192.168.0.2`).
+
 9.8.83 (Stable)
 ---------------------------------------------------------------------------
 - **Risoluzione Aggiornamento WebUI e Ripristino Transformer Async**:
