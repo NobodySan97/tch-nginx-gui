@@ -22,6 +22,12 @@ local app_list = {
 	"openvpn",
 	"tailscale",
 	"dumaos",
+	"amule",
+	"voipblockmmpbx",
+	"voipblockasterisk",
+	"blacklist",
+	"xupnp",
+	"telstra",
 }
 
 local marketing_version = proxy.get("uci.version.version.@version[0].marketing_version")
