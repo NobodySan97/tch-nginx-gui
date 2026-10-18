@@ -1,6 +1,21 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.80 (Stable)
+---------------------------------------------------------------------------
+- **Integrazione Upstream Ansuel/master (9 commit fino a v9.8.43)**:
+  - **Integrazione Wireless Nativa per LuCI**: Aggiunto modulo dedicato `luci_wireless` per configurazione avanzata wireless su LuCI (`tch_wireless.lua`, viste e QTN worker) e studio di fattibilità (`docs/luci-wireless-feasibility.md`).
+  - **Estensioni WebUI con Hostname Dinamico**: I link rapidi alle WebUI delle estensioni (LuCI, Aria2, Transmission, AdGuard Home, OpenSpeedTest, ecc.) utilizzano ora `ngx.var.host` invece dell'IP locale statico, risolvendo l'accesso in modalità bridge.
+  - **Fix Cambio Tema / Skin**: Risolto il problema nel cambio skin che richiedeva un preventivo evento di modifica globale per salvare le impostazioni.
+  - **Ripristino Helper Firewall NAT ALG**: Ripristinati automaticamente gli helper ALG firewall (FTP, TFTP, SIP, PPTP, Amanda, RTSP, SNMP) nel setup network.
+  - **Riparazione Prefisso IPv6 ULA**: Introdotto fix automatico per preservare e correggere `ula_prefix` in `network.globals` tra i riavvii.
+  - **Validazione TUN & WireGuard**: Controllo preventivo dell'architettura (`armv7l`) e versione esatta del kernel Linux (4.1.52) prima di abilitare l'installazione del modulo TUN.
+  - **Preservazione Configurazione uhttpd**: L'attivazione di LuCI ora preserva le impostazioni preesistenti di uhttpd senza sovrascriverle.
+- **Affidabilità & Test Suite Multipiattaforma**:
+  - Adattata l'intera suite di regressione (89 test) per compatibilità trasparente su ambienti Windows e Linux.
+- **Pipeline CI / Autobuild Resiliente**:
+  - Aggiornato il workflow GitHub Actions per utilizzare token runner nativi (`GITHUB_TOKEN`) e clone Git diretto (`ref: master`), eliminando le dipendenze da rate limit REST API personali.
+
 9.8.79 (Stable)
 ---------------------------------------------------------------------------
 - **Supporto TIM HUB+ DGA4331 (PR #1228 upstream / ZioCook)**:
