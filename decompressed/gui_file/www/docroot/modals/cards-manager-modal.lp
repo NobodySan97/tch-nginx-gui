@@ -31,6 +31,8 @@ local cards_catalog = {
     { id = "lan", uci_sec = "lan_card", file = "005_LAN.lp", title = T"Local Network (LAN)", icon = "fas fa-network-wired", cat = "network", desc = T"LAN IP address, subnet mask and DHCP status" },
     { id = "devices", uci_sec = "devices_card", file = "006_Devices.lp", title = T"Connected Devices", icon = "fas fa-laptop", cat = "network", desc = T"List of Ethernet and Wi-Fi connected devices" },
     { id = "wanservices", uci_sec = "wanservices_card", file = "007_wanservices.lp", title = T"WAN Services", icon = "fas fa-server", cat = "network", desc = T"DMZ, UPnP and Dynamic DNS (DDNS)" },
+    { id = "datausage", uci_sec = "datausage_card", file = "011_datausage.lp", title = T"Data Usage", icon = "fas fa-chart-pie", cat = "network", desc = T"Data traffic volume, bitrate and quota threshold monitoring", check_fn = function() return file_exists("/etc/config/datausage") and file_exists("/usr/bin/datausaged") end },
+    { id = "wifiextender", uci_sec = "wifiExtender_card", file = "020_wifiExtender.lp", title = T"Wi-Fi Extender (EasyMesh)", icon = "fas fa-network-wired", cat = "network", desc = T"EasyMesh Wi-Fi network extenders and topology", check_fn = function() local ok, em = pcall(require, "easymesh_helper"); return ok and em and em.is_supported and em.is_supported() end },
     { id = "xdsl", uci_sec = "xdsl_card", file = "093_xdsl.lp", title = T"xDSL Details", icon = "fas fa-chart-line", cat = "network", desc = T"Detailed bitrates, attenuation and SNR margins" },
     { id = "iproutes", uci_sec = "iproutes_card", file = "015_iproutes.lp", title = T"Static Routes", icon = "fas fa-route", cat = "network", desc = T"Custom IP routing tables and gateways" },
     { id = "relaysetup", uci_sec = "relaysetup_card", file = "018_relaysetup.lp", title = T"Relay Setup", icon = "fas fa-random", cat = "network", desc = T"DHCP and PPPoE Relay configurations" },
@@ -42,6 +44,7 @@ local cards_catalog = {
     { id = "parental", uci_sec = "parental_card", file = "013_parental.lp", title = T"Parental Control", icon = "fas fa-user-lock", cat = "security", desc = T"Time and URL based device access restriction" },
     { id = "natalghelper", uci_sec = "natalghelper_card", file = "092_natalghelper.lp", title = T"NAT Helpers (ALG's)", icon = "fas fa-bolt", cat = "security", desc = T"Application Layer Gateways (FTP, SIP, RTSP, PPTP)", check_fn = function() return false end },
     { id = "tod", uci_sec = "tod_card", file = "015_tod.lp", title = T"Time of Day (ToD)", icon = "fas fa-clock", cat = "security", desc = T"Scheduled Wi-Fi and Internet access control" },
+    { id = "certificates", uci_sec = "certificates_card", file = "021_certificates.lp", title = T"Paired Devices (Certificates)", icon = "fas fa-certificate", cat = "security", desc = T"Digital certificates and paired client authorizations", check_fn = function() return file_exists("/etc/config/certificates") or file_exists("/etc/ssl/certs") end },
 
     -- Category: vpn
     { id = "wireguard", uci_sec = "wireguard_card", file = "016_wireguard.lp", title = T"WireGuard", icon = "fas fa-shield-virus", cat = "vpn", desc = T"Fast modern VPN server and tunnels", check_fn = function() return file_exists("/usr/bin/wg") or file_exists("/etc/init.d/wireguard") end },
@@ -253,7 +256,7 @@ ngx.print('\
 \
   $(document).on("click.cardsmgr", "#btn-cards-hide-optional", function(e){\
     e.preventDefault();\
-    var optionalCards = ["natalghelper", "printersharing", "contentsharing", "assistance", "tod", "nfc", "lte", "relaysetup", "asterisk", "tailscale", "wireguard", "openvpnserver", "adblock"];\
+    var optionalCards = ["natalghelper", "printersharing", "contentsharing", "assistance", "tod", "nfc", "lte", "relaysetup", "asterisk", "tailscale", "wireguard", "openvpnserver", "adblock", "datausage", "wifiextender", "certificates"];\
     $(".card-mgr-item").each(function(){\
       var cardId = $(this).attr("data-card-id");\
       if (optionalCards.indexOf(cardId) !== -1) {\
