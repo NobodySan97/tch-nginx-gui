@@ -30,7 +30,7 @@ MODULAR_DIRS = [
     "telstra_gui", "ledfw_support-specificTG788", "ledfw_support-specificTG789",
     "ledfw_support-specificTG799", "ledfw_support-specificTG800",
     "ledfw_support-specificDGA", "ledfw_support-specificDGA4131",
-    "ledfw_support-specificDGA4331"
+    "ledfw_support-specificDGA4331", "luci_wireless"
 ]
 
 
@@ -552,7 +552,7 @@ def build_release(src_dir, dest_dir, channel="stable", manual_ver=None, dry_run=
         tmp_dir = total_dir / "tmp"
         tmp_dir.mkdir(parents=True, exist_ok=True)
         for mod in MODULAR_DIRS:
-            if not mod.startswith("upgrade-pack-"):
+            if not mod.startswith("upgrade-pack-") and mod != "luci_wireless":
                 mod_tar = modular_dest / f"{mod}.tar.bz2"
                 if mod_tar.exists():
                     shutil.copy2(mod_tar, tmp_dir / f"{mod}.tar.bz2")

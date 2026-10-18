@@ -171,7 +171,7 @@ ngx.print('\
         html[#html + 1] = [[ </a></li><li class="divider"></li> ]]
         end
         if cui.transmission_webui == "1" then
-          html[#html + 1] = [[ <li><a tabindex="-1" target="_blank" href="/"
+          html[#html + 1] = [[ <li><a tabindex="-1" target="_blank" href="/transmission"
                 onclick="javascript:event.target.port=9091;event.target.protocol='http'"> ]]
         html[#html + 1] = T"Transmission Webui"
         html[#html + 1] = [[ </a></li><li class="divider"></li> ]]

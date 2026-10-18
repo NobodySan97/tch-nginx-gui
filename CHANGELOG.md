@@ -1,6 +1,29 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.81 (Stable)
+---------------------------------------------------------------------------
+- **Correzione Critica Syntax Error Lua nel Firewall Modal**:
+  - Risolto errore di sintassi fatale in `firewall-modal.lp` dovuto a snippet JS con virgolette singole e newline non escapati all'interno della stringa multilinea Lua (HTTP 500 al caricamento).
+- **Correzione Download LuCI Wireless su ARMv7**:
+  - In `appInstallRemoveUtility.sh`, corretto il repository per il download del pacchetto `luci_wireless.tar.bz2` (`NobodySan97/gui-dev-build-auto/master/modular`), risolvendo l'errore 404 durante l'installazione.
+  - Integrato `luci_wireless` nei `MODULAR_DIRS` del motore di release (`build_release.py`), garantendo la compilazione, il checksum deterministico e il deployment automatico del pacchetto modulare.
+- **Risoluzione Riavvio Processi su Terminazione Transformer**:
+  - In `system.modgui.map`, aggiunto `return` immediato al comando di stop/terminate prevenendo il rilancio asincrono immediato dei processi appena terminati.
+- **Robustezza Script di Configurazione & Router Non-Quantenna**:
+  - In `04_config.sh`, protetta l'iniezione dei vecchi helper ALG firewall verificando che non sia già presente `/etc/config/firewall_helpers` (firmware 18.x/19.x/20.x).
+  - In `modgui-luci-qtn`, aggiunto controllo hardware per `/usr/sbin/qtn_call_qcsapi.sh` per prevenire polling a vuoto su router Broadcom (es. DGA4132).
+  - In `modgui-modal.lp`, esteso `wait_for_completion` per terminare istantaneamente anche in presenza di stati di `Error` o `Failed`.
+- **Miglioramenti WebUI, Link Estensioni & Prevenzione Memory Leak**:
+  - In `header.lp`, corretto il link a Transmission WebUI su `/transmission` evitando l'errore HTTP 409 Conflict.
+  - In `009_extensions.lp` e `applications-modal.lp`, inserito fallback sicuro per `ngx.var.host` in contesti privi di intestazione HTTP.
+  - In `diagnostics-network-modal.lp`, corrette le chiusure dei tag HTML malformati (`</p>`).
+  - In `parental-modal.lp`, inizializzata `text_mac` per prevenire crash da valore nil su chiamate GET.
+  - In `shared-script.js`, introdotto controllo di presenza DOM nel polling AJAX delle card per prevenire leak di timer dopo la navigazione.
+- **Suite di Test & Automazione CI/CD**:
+  - Aggiornato `test_asterisk_manager.py` per validare le chiamate Dial senza parametro `,r)` e testare veri errori di sintassi dialplan.
+  - Integrata l'esecuzione preventiva automatica dei test unitari (`python -m unittest discover tests -v`) con dipendenze di sistema (`lua5.1`, `gawk`, `bzip2`) nel workflow di release CI (`autobuild.yml`).
+
 9.8.80 (Stable)
 ---------------------------------------------------------------------------
 - **Integrazione Upstream Ansuel/master (9 commit fino a v9.8.43)**:

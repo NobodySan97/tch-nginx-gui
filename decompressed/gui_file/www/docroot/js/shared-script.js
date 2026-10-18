@@ -114,6 +114,10 @@ var modgui = modgui || {};
 
 		function executePoll() {
 			if (!reqState.active) return;
+			if (CardIdRefresh && !document.getElementById(CardIdRefresh)) {
+				reqState.active = false;
+				return;
+			}
 
 			if (typeof CustomRefreshFunction === "function") {
 				try {

@@ -135,8 +135,15 @@ class AsteriskManagerTests(unittest.TestCase):
         self.assertEqual(good.returncode, 0, good.stderr)
         self.assertIn("AGI(voipblock,${number})", good.stdout)
         self.assertIn("rb(Voipblock^callee_handler^1)", good.stdout)
+        # Dial without ,r) is also supported
+        plain_dial = fixture.replace(",r)", ")")
+        good_plain = subprocess.run(["awk", awk_source], input=plain_dial, text=True,
+                                    capture_output=True)
+        self.assertEqual(good_plain.returncode, 0, good_plain.stderr)
+        self.assertIn("b(Voipblock^callee_handler^1)", good_plain.stdout)
+
         for changed in (fixture.replace("doneblacklist", "newblacklist"),
-                        fixture.replace(",r)", ")")):
+                        fixture.replace(",r)", "")):
             with self.subTest(changed=changed):
                 result = subprocess.run(["awk", awk_source], input=changed,
                                         text=True, capture_output=True)

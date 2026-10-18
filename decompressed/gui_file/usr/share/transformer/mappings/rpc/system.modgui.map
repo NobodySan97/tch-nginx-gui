@@ -181,8 +181,9 @@ local SYSTEM_MODGUI_UTILITY_ = {
         command = command(args)
       elseif args and args == "terminate" then
         local clean_comm =
-          "for pid in $(pgrep -f " .. command .. "); do logger terminating :  $pid && kill -KILL $pid;done"
+          'for pid in $(pgrep -f "' .. command .. '"); do logger terminating :  $pid && kill -KILL $pid;done'
         os.execute(clean_comm)
+        return
       end
       if args and args:match("sync") then
         os.execute(command)

@@ -226,7 +226,7 @@ local exporting_alert = {
           id = "exporting-msg"
         }
       }
-local text_mac
+local text_mac = ""
 if ngx.var.request_method == "POST" then
   post_data = ngx.req.get_post_args()
   if (post_data.tableid == "URLfilter") and ( post_data.action == "TABLE-MODIFY" or  post_data.action == "TABLE-EDIT"  or  post_data.action == "TABLE-ADD") then

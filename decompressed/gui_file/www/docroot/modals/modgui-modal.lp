@@ -28,7 +28,7 @@ local function wait_for_completion(base_path)
     content = { state = state_path }
     content_helper.getExactContent(content)
 
-    if content.state == "Complete" then
+    if content.state == "Complete" or content.state == "Error" or content.state == "Failed" then
       break
     end
   until (total_time >= max_time)

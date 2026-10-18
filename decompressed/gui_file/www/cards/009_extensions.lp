@@ -80,7 +80,7 @@ end
 content_helper.getExactContent(mapParams)
 
 local function webui_url(port, path)
-	local address = ngx.var.host
+	local address = ngx.var.host or "192.168.1.1"
 	if address:find(":", 1, true) and address:sub(1, 1) ~= "[" then
 		address = "[" .. address .. "]"
 	end

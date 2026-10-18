@@ -51,6 +51,15 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install Test Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1 gawk bzip2
+
+      - name: Run Unit Tests
+        run: |
+          python -m unittest discover -s tests -v
+
       - name: Run Build and Release Script
         id: build_step
         env:

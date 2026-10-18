@@ -422,7 +422,7 @@ app_luci() {
       ;;
     esac
     if [ "$cpu_type" = "armv7l" ]; then
-      install_from_github "" luci_wireless specificapp install || return 1
+      install_from_github NobodySan97/gui-dev-build-auto/master/modular luci_wireless specificapp install || return 1
     fi
     uci set modgui.app.luci_webui="1"
     uci commit modgui

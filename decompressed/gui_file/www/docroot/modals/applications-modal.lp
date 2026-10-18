@@ -53,7 +53,7 @@ if ngx.req.get_method() == "POST" then
 end
 
 -- Use the hostname of the page request, including access through other interfaces.
-local webui_host = ngx.var.host
+local webui_host = ngx.var.host or "192.168.1.1"
 if webui_host:find(":", 1, true) and webui_host:sub(1, 1) ~= "[" then
 	webui_host = "[" .. webui_host .. "]"
 end
