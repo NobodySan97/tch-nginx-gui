@@ -41,6 +41,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: NobodySan97/gui-dev-build-auto
+          ref: master
           path: gui-dev-build-auto
           token: ${{ secrets.AUTOBUILD_PAT || secrets.GITHUB_TOKEN }}
           fetch-depth: 1
@@ -76,7 +77,7 @@ jobs:
 
       - name: Publish GitHub Release
         env:
-          GH_TOKEN: ${{ secrets.AUTOBUILD_PAT || secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           NEW_VER="${{ steps.build_step.outputs.version }}"
           IS_PRERELEASE="${{ steps.build_step.outputs.is_prerelease }}"
