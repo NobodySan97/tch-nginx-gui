@@ -3,22 +3,13 @@
 
 9.8.84 (Stable)
 ---------------------------------------------------------------------------
+- **Integrazione Completa Schede Dashboard in Customize Cards (100% Coverage)**:
+  - In `cards-manager-modal.lp`, integrate le schede `Data Usage` (011_datausage.lp), `Wi-Fi Extender / EasyMesh` (020_wifiExtender.lp) e `Paired Devices / Certificates` (021_certificates.lp) con controlli automatici di rilevamento backend.
+  - Aggiornato l'array `optionalCards` per supportare il pulsante "Hide Optional".
 - **Risoluzione Timeout 30s di Transformer (Exit Code 137) Durante Upgrade GUI**:
   - In `system.modgui.map`, incapsulato `upgradegui` (e `genSysupgradeBackup`) con `start-stop-daemon -S -b`: previene che il timeout hardcoded di 30 secondi di `lasync.so` invii SIGTERM e SIGKILL (exit code 137) al processo di aggiornamento durante la copia su memoria flash JFFS2 permanente (`/root/GUI.tar.bz2`).
   - Ottimizzata la procedura di terminazione (`_terminate`) per individuare con precisione il target del comando e non interrompere l'aggiornamento in corso.
   - Testato e validato con successo sul modem gateway live (`192.168.0.2`).
-
-9.8.83 (Stable)
----------------------------------------------------------------------------
-- **Risoluzione Aggiornamento WebUI e Ripristino Transformer Async**:
-  - In `system.modgui.map`, rimosso il blocco improprio `return` nel ramo `terminate` del comando `sendcmd`: quando dalla WebUI viene richiesto l'aggiornamento GUI (`system_upgrade_gui`), il comando esegue la pulizia dei processi pendenti e avvia correttamente lo script `upgradegui` in background invece di abortire.
-  - Testato e validato direttamente sul router gateway live (`192.168.0.2`).
-
-9.8.82 (Stable)
----------------------------------------------------------------------------
-- **Integrazione Completa Schede Dashboard in Customize Cards (100% Coverage)**:
-  - In `cards-manager-modal.lp`, integrate le schede `Data Usage` (011_datausage.lp), `Wi-Fi Extender / EasyMesh` (020_wifiExtender.lp) e `Paired Devices / Certificates` (021_certificates.lp) con controlli automatici di rilevamento backend.
-  - Aggiornato l'array `optionalCards` per supportare il pulsante "Hide Optional".
 
 9.8.81 (Stable)
 ---------------------------------------------------------------------------
