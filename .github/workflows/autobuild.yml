@@ -55,10 +55,23 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y lua5.1 gawk bzip2
+          sudo ln -sf /usr/bin/lua5.1 /usr/bin/lua || true
+          sudo ln -sf /usr/bin/luac5.1 /usr/bin/luac || true
 
       - name: Run Unit Tests
         run: |
-          python -m unittest discover -s tests -v
+          set -o pipefail
+          python -m unittest discover -s tests -v 2>&1 | tee test_run.log || {
+            echo "### ❌ Unit Test Failures" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            cat test_run.log >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          }
+          echo "### ✅ Unit Tests Passed" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat test_run.log >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run Build and Release Script
         id: build_step
