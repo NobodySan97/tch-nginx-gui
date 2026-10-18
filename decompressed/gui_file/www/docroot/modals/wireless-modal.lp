@@ -117,7 +117,13 @@ elseif getWifiAnalyzer and getargs.getAcsData then
 end
 
 local radios = {}
-for i,v in ipairs(proxy.getPN("rpc.wireless.radio.", true) or {}) do
+local radio_pn = proxy.getPN("rpc.wireless.radio.", true)
+if not radio_pn or #radio_pn == 0 then
+    ngx.log(ngx.ERR, "Wireless radio backend unavailable")
+    ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
+    return
+end
+for i,v in ipairs(radio_pn) do
     local radio = match(v.path, "rpc%.wireless%.radio%.@([^%.]+)%.")
     if radio then
         radios[#radios+1] = radio
@@ -136,12 +142,23 @@ ajax_helper.handleAjaxQuery({
         content["phy_rate"] = content["phy_rate"] / 1000 .. "Mbps"
     end)
 
+local ap_pn = proxy.getPN("rpc.wireless.ap.", true)
+if not ap_pn or #ap_pn == 0 then
+    ngx.log(ngx.ERR, "Wireless AP backend unavailable")
+    ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
+    return
+end
 local ap_paths = {}
-for i,v in ipairs(proxy.getPN("rpc.wireless.ap.", true) or {}) do
+for i,v in ipairs(ap_pn) do
   ap_paths[#ap_paths+1] = v.path.."ssid"
 end
 
-local wl_list = (#ap_paths > 0 and proxy.get(unpack(ap_paths))) or {}
+local wl_list = proxy.get(unpack(ap_paths))
+if not wl_list then
+    ngx.log(ngx.ERR, "Wireless SSID backend unavailable")
+    ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
+    return
+end
 local wls = {}
 local cur_ssid
 for i,v in ipairs(wl_list) do

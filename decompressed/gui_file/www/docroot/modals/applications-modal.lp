@@ -60,6 +60,7 @@ end
 
 local mapParams = {
 	telstra_webui = "uci.modgui.app.telstra_webui",
+	xupnp_application = "uci.modgui.app.xupnp_app",
 }
 if marketing_version >= 16.3 then
 	mapParams.luci_webui = "uci.modgui.app.luci_webui"
@@ -69,6 +70,9 @@ mapParams.transmission_webui = "uci.modgui.app.transmission_webui"
 mapParams.adblock_application = "uci.modgui.app.adblock_app"
 mapParams.rsyncd_application = "uci.modgui.app.rsyncd_app"
 mapParams.openspeedtest_application = "uci.modgui.app.openspeedtest_app"
+if cputype:match("^mips") then
+	mapParams.amule_webui = "uci.modgui.app.amule_webui"
+end
 if cputype:match("^armv7") or cputype:match("^mips") then
 	mapParams.l2tpipsec_application = "uci.modgui.app.l2tpipsec_app"
 end
