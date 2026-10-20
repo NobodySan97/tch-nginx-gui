@@ -1,6 +1,24 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.85 (Stable)
+---------------------------------------------------------------------------
+- **Integrazione Completa Ottimizzazioni & Funzionalità Upstream (17 Commit fino a v9.8.44)**:
+  - **Dashboard Batching & Polling Intelligente**: Integrato l'endpoint `/ajax/dashboard_sync.lua` (capture multi OpenResty) con sincronizzazione atomica delle letture UCI e pausa automatica delle richieste AJAX in background quando la scheda browser è nascosta (`document.hidden`).
+  - **Campionamento Traffico WAN Nativo (netrate.lua)**: Eliminati tutti i fork di sottoprocessi shell per il calcolo del bitrate WAN; campionamento diretto da `/proc/net/dev` e sysfs con gestione integrata del rollover dei contatori a 32-bit.
+  - **Modal Applicazioni - Rilevamento Spazio & Badge USB**: Visualizzazione dinamica dello spazio libero nella memoria interna (`statvfs` su `/usr`) e montaggio dischi USB con avvisi e badge dedicati per app che richiedono storage esterno (Aria2, Transmission).
+  - **Protezione Sicurezza HTTPS**: Aggiunta verifica preventiva del listener locale su porta 443 e regole firewall LAN in `modgui-modal.lp` per prevenire lockout accidentali nell'abilitazione del redirect forzato HTTPS.
+  - **Scansione Dinamica Bande EasyMesh**: Integrazione di `easymesh_helper.lua` per la rilevazione automatica e selezione delle bande radio disponibili (2.4GHz, 5GHz, 6GHz).
+  - **Ottimizzazione Esecuzione Inizializzazione di Sistema**: In `system.init.map`, sostituito il polling ciclico con grep su `/etc/init.d/` con lettura diretta dei file in Lua, eliminando decine di shell fork per richiesta.
+  - **Compatibilità Estesa Gestione Schede**: Supporto unificato delle preferenze utente `visible` e del controllo accessi `hide` in `cards.lua` e `cards-manager-modal.lp`, garantendo piena compatibilità con tutte le 36 schede configurabili.
+  - **Miglioramenti Bridge Grouping & Robustezza WAN**: Risolti casi limite su interfacce WAN multiple e prive di ifname; gestione migliorata di PPPoA, PPPoE e IPv6 prefix assignment.
+  - **Suite di Test Completa**: Integrati tutti i test di regressione upstream (157 test Python e 4 test suite Node.js) con validazione al 100%.
+- **Preservazione Integrale Personalizzazioni NobodySan97**:
+  - Mantenute le opzioni e le configurazioni grafiche avanzate per Chart.js v4 in `004_graph.lp`.
+  - Preservata la pipeline di distribuzione e auto-aggiornamento `NobodySan97/gui-dev-build-auto`.
+  - Preservato il meccanismo anti-timeout Transformer (`start-stop-daemon -S -b`).
+  - Preservate le 36 schede nel Dashboard Cards Manager con auto-rilevamento e opzione "Nascondi Opzionali".
+
 9.8.84 (Stable)
 ---------------------------------------------------------------------------
 - **Integrazione Completa Schede Dashboard in Customize Cards (100% Coverage)**:
