@@ -376,10 +376,6 @@ if ngx.req.get_method() == "POST" then
                 ngx.exit(ngx.HTTP_OK)
                 return
         end
-        if proxy.get("uci.web.sessionmgr.@default.force_https")[1].value ~= post_args.gui_forcehttps then
-                local mngr = require("web.sessioncontrol").loadmgr("default")
-                mngr.force_https = post_args.gui_forcehttps
-        end
         if action == "debug_report" then
 
                 local debuglog_path = "rpc.system.modgui.debuglog."
@@ -525,6 +521,7 @@ if ngx.req.get_method() == "POST" and ngx.req.get_post_args().action == "SAVE" t
                 require("web.sessioncontrol").loadmgr("default").force_https = saved.force_https
         end
 end
+local visibility_changed = false
 
 ngx.print(ui_helper.createHeader(T"GUI Settings & Utility", false, false))
 ngx.print('\

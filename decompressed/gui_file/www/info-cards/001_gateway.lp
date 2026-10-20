@@ -46,8 +46,14 @@ if not ( content.friendly_product_name == "" ) and not ( content.friendly_produc
 end
 
 content["uptime"] = content_helper.readfile("/proc/uptime","number",math.floor)
-content["connection"] = content_helper.readfile("/proc/sys/net/netfilter/nf_conntrack_count") or content_helper.readfile("/proc/sys/net/ipv4/netfilter/ip_conntrack_count") or "0"
-content["total_connection"] = content_helper.readfile("/proc/sys/net/nf_conntrack_max") or content_helper.readfile("/proc/sys/net/netfilter/nf_conntrack_max") or content_helper.readfile("/proc/sys/net/ipv4/netfilter/ip_conntrack_max") or "65536"
+content["connection"] = content_helper.readfile("/proc/sys/net/netfilter/nf_conntrack_count")
+content["total_connection"] = ""
+for _, path in ipairs({"/proc/sys/net/nf_conntrack_max",
+    "/proc/sys/net/ipv4/netfilter/ip_conntrack_max",
+    "/proc/sys/net/netfilter/nf_conntrack_max"}) do
+    local maximum = content_helper.readfile(path)
+    if tonumber(maximum) then content["total_connection"] = maximum; break end
+end
 content["system_time"] = os.date("%d/%m/%Y %Hh:%Mm:%Ss",os.time())
 
   ngx.print('\

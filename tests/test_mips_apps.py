@@ -1,13 +1,15 @@
 """Regression cases from legacy MIPS extension installation failures."""
 from pathlib import Path
+import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 import uuid
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = (ROOT / 'decompressed/gui_file/usr/share/transformer/scripts/appInstallRemoveUtility.sh').read_text()
+SOURCE = (ROOT / 'decompressed/gui_file/usr/share/transformer/scripts/appInstallRemoveUtility.sh').read_text(encoding='utf-8')
 SH = shutil.which('sh')
 
 
@@ -19,6 +21,15 @@ def function(name, following):
 @unittest.skipUnless(SH, 'sh required')
 class MipsApps(unittest.TestCase):
     def run_sh(self, source):
+        if sys.platform == 'win32':
+            with tempfile.NamedTemporaryFile('w', delete=False, suffix='.sh', encoding='utf-8') as f:
+                f.write(source)
+                tmp_path = f.name
+            try:
+                return subprocess.run([SH, tmp_path.replace('\\', '/')], capture_output=True, text=True, timeout=10)
+            finally:
+                try: os.unlink(tmp_path)
+                except OSError: pass
         return subprocess.run(['sh', '-c', source], text=True, capture_output=True, timeout=10)
 
     def test_usb_prerequisite_never_sets_false_installed_flags(self):
@@ -98,6 +109,7 @@ marketing_version=''' + version + '\napp_luci install')
     def test_luci_checksum_failure_rolls_back_without_touching_vendor_uci(self):
         helper = SOURCE[SOURCE.index('luci_mips_state='):SOURCE.index('require_usb_storage() {')]
         with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory).as_posix()
             root = Path(directory)
             for path in ['etc/config', 'etc/opkg', 'usr/lib/lua', 'usr/lib/opkg/info', 'tmp']:
                 (root / path).mkdir(parents=True, exist_ok=True)

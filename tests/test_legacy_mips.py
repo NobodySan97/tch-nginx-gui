@@ -1,13 +1,15 @@
 """USB-backed MIPS lifecycle and rollback regressions."""
 from pathlib import Path
+import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / 'decompressed/gui_file/usr/share/transformer/scripts'
-INSTALLER = (SCRIPTS / 'appInstallRemoveUtility.sh').read_text()
+INSTALLER = (SCRIPTS / 'appInstallRemoveUtility.sh').read_text(encoding='utf-8')
 HELPER = INSTALLER[INSTALLER.index('legacy_mips_record_packages() {'):
                    INSTALLER.index('extract_bzip_archive() (')]
 SH = shutil.which('sh')
@@ -16,6 +18,15 @@ SH = shutil.which('sh')
 @unittest.skipUnless(SH, 'sh required')
 class LegacyMips(unittest.TestCase):
     def run_sh(self, script):
+        if sys.platform == 'win32':
+            with tempfile.NamedTemporaryFile('w', delete=False, suffix='.sh', encoding='utf-8') as f:
+                f.write(script)
+                tmp_path = f.name
+            try:
+                return subprocess.run([SH, tmp_path.replace('\\', '/')], capture_output=True, text=True, timeout=10)
+            finally:
+                try: os.unlink(tmp_path)
+                except OSError: pass
         return subprocess.run(['sh', '-c', script], capture_output=True, text=True, timeout=10)
 
     def test_usb_mount_discovery_supports_whole_disks_and_partitions(self):
@@ -29,9 +40,10 @@ class LegacyMips(unittest.TestCase):
         ]
         for mounts, expected in cases:
             with self.subTest(mounts=mounts), tempfile.TemporaryDirectory() as directory:
+                directory = Path(directory).as_posix()
                 fixture = Path(directory) / 'mounts'
                 fixture.write_text(mounts)
-                script = block.replace('/proc/mounts', str(fixture)) + '''
+                script = block.replace('/proc/mounts', fixture.as_posix()) + '''
 mktemp() { echo probe; }
 rm() { :; }
 require_usb_storage || exit 1
@@ -45,6 +57,7 @@ echo "$modgui_usb_root"
                     self.assertNotEqual(result.returncode, 0)
 
     def isolated_helper(self, directory):
+        directory = Path(directory).as_posix()
         source = HELPER
         for prefix in ['/etc/', '/usr/', '/tmp/']:
             source = source.replace(prefix, directory + prefix)
@@ -52,12 +65,13 @@ echo "$modgui_usb_root"
 
     def test_bad_archive_rolls_back_without_installing_packages_or_overwriting_data(self):
         with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory).as_posix()
             root = Path(directory)
-            usb = root / 'tmp/run/mountd/sda'
-            usb.mkdir(parents=True)
+            usb = (root / 'tmp/run/mountd/sda').as_posix()
+            Path(usb).mkdir(parents=True)
             (root / 'etc/config').mkdir(parents=True)
             (root / 'mounts').write_text(f'/dev/sda {usb} vfat rw 0 0\n')
-            original = usb / 'sharing/config/aria2/aria2.conf'
+            original = Path(usb) / 'sharing/config/aria2/aria2.conf'
             original.parent.mkdir(parents=True)
             original.write_text('existing-user-settings\n')
             source = self.isolated_helper(directory)
@@ -80,19 +94,20 @@ legacy_mips_app install aria2
             self.assertNotIn('UNEXPECTED_PACKAGE', result.stdout)
             self.assertEqual(original.read_text(), 'existing-user-settings\n')
             self.assertFalse((root / 'etc/.modgui-mips-aria2').exists())
-            self.assertFalse((usb / '.modgui-apps/aria2').exists())
+            self.assertFalse((Path(usb) / '.modgui-apps/aria2').exists())
 
     def test_remove_preserves_modified_accounts_and_existing_packages(self):
         with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory).as_posix()
             root = Path(directory)
             state = root / 'etc/.modgui-mips-aria2'
             state.mkdir(parents=True)
             (root / 'etc/config').mkdir()
-            usb = root / 'tmp/run/mountd/sda'
-            private = usb / '.modgui-apps/aria2'
-            private.mkdir(parents=True)
+            usb = (root / 'tmp/run/mountd/sda').as_posix()
+            private = (Path(usb) / '.modgui-apps/aria2').as_posix()
+            Path(private).mkdir(parents=True)
             (root / 'mounts').write_text(f'/dev/sda {usb} vfat rw 0 0\n')
-            for name, value in [('usb', str(usb)), ('private', str(private)), ('packages', '')]:
+            for name, value in [('usb', usb), ('private', private), ('packages', '')]:
                 (state / name).write_text(value + '\n' if value else '')
             created = {'passwd': 'aria2:x:6800:6800::/var/run/aria2:/bin/false',
                        'group': 'aria2:x:6800:', 'shadow': 'aria2:*:0:0:99999:7:::'}
@@ -110,19 +125,20 @@ legacy_mips_app remove aria2
             self.assertIn('Modified aria2 account was preserved', result.stdout)
             self.assertEqual((root / 'etc/passwd').read_text(), customized)
             self.assertEqual((root / 'etc/group').read_text(), created['group'] + '\n')
-            self.assertFalse(private.exists())
+            self.assertFalse(Path(private).exists())
 
     def test_transmission_start_enables_config_and_requires_its_original_usb(self):
         for mounted in (True, False):
             with self.subTest(mounted=mounted), tempfile.TemporaryDirectory() as directory:
+                directory = Path(directory).as_posix()
                 root = Path(directory)
                 state = root / 'etc/.modgui-mips-transmission'
                 state.mkdir(parents=True)
                 init = root / 'etc/init.d/transmission'
                 init.parent.mkdir()
-                trace = root / 'trace'
-                usb = root / 'tmp/run/mountd/sda'
-                (state / 'usb').write_text(str(usb))
+                trace = (root / 'trace').as_posix()
+                usb = (root / 'tmp/run/mountd/sda').as_posix()
+                (state / 'usb').write_text(usb)
                 (root / 'mounts').write_text(f'/dev/sda {usb} vfat rw 0 0\n' if mounted else '')
                 init.write_text(f'#!/bin/sh\necho "service $1" >> "{trace}"\n')
                 init.chmod(0o755)
@@ -132,11 +148,11 @@ legacy_mips_app start transmission
 ''')
                 if mounted:
                     self.assertEqual(result.returncode, 0, result.stderr)
-                    self.assertEqual(trace.read_text().splitlines(), [
+                    self.assertEqual(Path(trace).read_text().splitlines(), [
                         'set transmission.@transmission[0].enabled=1', 'commit transmission', 'service start'])
                 else:
                     self.assertNotEqual(result.returncode, 0)
-                    self.assertFalse(trace.exists())
+                    self.assertFalse(Path(trace).exists())
 
     def test_service_stop_and_unmanaged_actions_preserve_lifecycle(self):
         cases = [
@@ -152,12 +168,13 @@ legacy_mips_app start transmission
         for app, managed, action, status, expected in cases:
             with self.subTest(app=app, managed=managed, action=action, status=status):
                 with tempfile.TemporaryDirectory() as directory:
+                    directory = Path(directory).as_posix()
                     root = Path(directory)
                     init = root / 'etc/init.d' / app
                     init.parent.mkdir(parents=True)
                     if managed:
                         (root / 'etc' / ('.modgui-mips-' + app)).mkdir()
-                    trace = root / 'trace'
+                    trace = (root / 'trace').as_posix()
                     init.write_text(f'#!/bin/sh\necho "service $1" >> "{trace}"\nexit {status}\n')
                     init.chmod(0o755)
                     # No USB is mounted: stopping must still work.
@@ -166,32 +183,33 @@ uci() {{ echo "uci $*" >> '{trace}'; }}
 legacy_mips_app {action} {app}
 ''')
                     self.assertEqual(result.returncode, status, result.stderr)
-                    self.assertEqual(trace.read_text().splitlines(), expected)
+                    self.assertEqual(Path(trace).read_text().splitlines(), expected)
 
     def test_remove_restores_current_ca_store_after_removing_owned_bundle(self):
         with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory).as_posix()
             root = Path(directory)
             state = root / 'etc/.modgui-mips-transmission'
             state.mkdir(parents=True)
             ca = root / 'etc/ssl/certs/ca-certificates.crt'
             ca.parent.mkdir(parents=True)
-            ca.write_text('user-refreshed-roots')
-            (state / 'ca-original').write_text('original-roots')
+            ca.write_text('user-refreshed-roots', newline='\n')
+            (state / 'ca-original').write_text('original-roots', newline='\n')
             (state / 'installed').touch()
-            (state / 'packages').write_text('ca-bundle\n')
-            usb = root / 'tmp/run/mountd/sda'
-            private = usb / '.modgui-apps/transmission'
-            private.mkdir(parents=True)
-            (state / 'private').write_text(str(private))
-            (state / 'usb').write_text(str(usb))
-            (root / 'mounts').write_text(f'/dev/sda {usb} vfat rw 0 0\n')
-            package = root / 'bundle-installed'
-            package.touch()
+            (state / 'packages').write_text('ca-bundle\n', newline='\n')
+            usb = (root / 'tmp/run/mountd/sda').as_posix()
+            private = (Path(usb) / '.modgui-apps/transmission').as_posix()
+            Path(private).mkdir(parents=True)
+            (state / 'private').write_text(private, newline='\n')
+            (state / 'usb').write_text(usb, newline='\n')
+            (root / 'mounts').write_text(f'/dev/sda {usb} vfat rw 0 0\n', newline='\n')
+            package = (root / 'bundle-installed').as_posix()
+            Path(package).touch()
             result = self.run_sh(self.isolated_helper(directory) + f'''
 opkg() {{
   case "$1" in
     list-installed) [ ! -f '{package}' ] || echo 'ca-bundle - 1';;
-    remove) rm -f '{package}' '{ca}';;
+    remove) rm -f '{package}' '{ca.as_posix()}';;
     status) [ ! -f '{package}' ] || echo 'Status: install ok installed';;
   esac
 }}
@@ -200,10 +218,11 @@ legacy_mips_app remove transmission
 ''')
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(ca.read_text(), 'user-refreshed-roots')
-            self.assertFalse(package.exists())
+            self.assertFalse(Path(package).exists())
 
     def test_unmanaged_package_is_not_reported_as_removed(self):
         with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory).as_posix()
             result = self.run_sh(self.isolated_helper(directory) + '''
 opkg() { echo 'Status: install ok installed'; }
 legacy_mips_app remove aria2

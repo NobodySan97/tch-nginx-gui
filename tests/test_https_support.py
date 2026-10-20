@@ -9,7 +9,7 @@ LUA = shutil.which('lua')
 
 
 def regression_script():
-    source = (ROOT / 'www/docroot/modals/modgui-modal.lp').read_text()
+    source = (ROOT / 'www/docroot/modals/modgui-modal.lp').read_text(encoding='utf-8')
     block = source[source.index('local https_support = {}'):source.index('local https_available, https_reason')]
     return r'''
 local rules, sockets, closes, policy_error = {}, {}, 0, nil
@@ -69,7 +69,7 @@ class HttpsSupport(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_rejected_form_cannot_modify_live_redirect(self):
-        source = (ROOT / 'www/docroot/modals/modgui-modal.lp').read_text()
+        source = (ROOT / 'www/docroot/modals/modgui-modal.lp').read_text(encoding='utf-8')
         self.assertNotIn('mngr.force_https = post_args.gui_forcehttps', source)
         block = source[source.index('-- Update the live manager only'):source.index('local visibility_changed')]
         script = '''
