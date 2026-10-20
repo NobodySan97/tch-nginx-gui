@@ -42,8 +42,8 @@ ngx.print('\
 	ngx.print('\
 	<script src="/js/Chart.min.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" defer></script>\
 	<script async src="/js/srp-min.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" ></script>');
-	local lfs = require("lfs")
-	if lfs.attributes(string.format("/www/docroot/theme/%s/script.js", cui.gui_skin), "mode") == "file" then
+	local script_file_presence = content_helper.fileExists(string.format("/www/docroot/theme/%s/script.js", cui.gui_skin))
+	if script_file_presence then
 		ngx.print('<script src="/theme/');  ngx.print( cui.gui_skin ); ngx.print('/script.js?v=1788174128&version='); ngx.print(cui.gui_version); ngx.print('" defer></script>');
 	end
 ngx.print('\

@@ -7,11 +7,10 @@ local proxy = require("datamodel")
 local json = require("dkjson")
 local post_helper = require("web.post_helper")
 local ngx = ngx
-
 local datatype
+
 if ngx.req.get_method() == "POST" then
-	local uri_args = ngx.req.get_uri_args()
-	datatype = uri_args and uri_args.datatype
+	datatype = ngx.req.get_uri_args().datatype
 end
 
 local data= {}
@@ -20,7 +19,7 @@ if datatype and datatype== "xdsl" then
 	local sub, format, floor = string.sub, string.format, math.floor
 
 	data = {
-		status = "sys.class.xdsl.@line0.Status",
+		status = "sys.class.xdsl.@line0.LinkStatus",
 		dsl_linerate_up_max = "sys.class.xdsl.@line0.UpstreamMaxRate",
 		dsl_linerate_down_max = "sys.class.xdsl.@line0.DownstreamMaxRate",
 		dsl_linerate_up = "sys.class.xdsl.@line0.UpstreamCurrRate",
@@ -34,12 +33,6 @@ if datatype and datatype== "xdsl" then
 		dsl_type = "sys.class.xdsl.@line0.ModulationType",
 		dsl_margin_SNRM_up = "sys.class.xdsl.@line0.UpstreamSNRMpb",
 		dsl_margin_SNRM_down = "sys.class.xdsl.@line0.DownstreamSNRMpb",
-		dslam_chipset = "rpc.xdslctl.DslamChipset",
-		dslam_version = "rpc.xdslctl.DslamVersion",
-		dsl_profile = "rpc.xdslctl.DslProfile",
-		dsl_port = "rpc.xdslctl.DslamPort",
-		dslam_version_raw = "rpc.xdslctl.DslamVersionRaw",
-		dsl_serial = "rpc.xdslctl.DslamSerial",
 	}
 
 	content_helper.getExactContent(data)
@@ -62,26 +55,38 @@ if datatype and datatype== "xdsl" then
 		-- This endpoint is also installed on Ethernet/GPON-only devices.
 		data = {}
 	elseif data.dsl_linerate_down ~= "0" then
-		data.dsl_linerate_up = formatRate(data.dsl_linerate_up)
-		data.dsl_linerate_down = formatRate(data.dsl_linerate_down)
-		data.dsl_linerate_up_max = formatRate(data.dsl_linerate_up_max)
-		data.dsl_linerate_down_max = formatRate(data.dsl_linerate_down_max)
+		-- DSLAM identity is only displayed when the line has a nonzero rate.
+		-- Avoid asking the driver for fields discarded on an idle line.
+		local dslam = {
+			dslam_chipset = "rpc.xdslctl.DslamChipset",
+			dslam_version = "rpc.xdslctl.DslamVersion",
+			dsl_profile = "rpc.xdslctl.DslProfile",
+			dsl_port = "rpc.xdslctl.DslamPort",
+			dslam_version_raw = "rpc.xdslctl.DslamVersionRaw",
+			dsl_serial = "rpc.xdslctl.DslamSerial",
+		}
+		content_helper.getExactContent(dslam)
+		for key, value in pairs(dslam) do data[key] = value end
+			data.dsl_linerate_up = formatRate(data.dsl_linerate_up)
+			data.dsl_linerate_down = formatRate(data.dsl_linerate_down)
+			data.dsl_linerate_up_max = formatRate(data.dsl_linerate_up_max)
+			data.dsl_linerate_down_max = formatRate(data.dsl_linerate_down_max)
 
-		if not string.match(data.dsl_type or "", "ADSL") then
-			data.dsl_margin_down = data.dsl_margin_SNRM_down
-			data.dsl_margin_up = data.dsl_margin_SNRM_up
-		end
+			if not string.match(data.dsl_type or "", "ADSL") then
+				data.dsl_margin_down = data.dsl_margin_SNRM_down
+				data.dsl_margin_up = data.dsl_margin_SNRM_up
+			end
 
-		if string.match(data.dslam_chipset or "", "BDCM") then
-			data.dslam_chipset = "Broadcom" .. " ( " .. data.dslam_chipset .. " )"
-		elseif string.match(data.dslam_chipset or "", "IFTN") then
-			data.dslam_chipset = "Infineon" .. " ( " .. data.dslam_chipset .. " )"
-		end
+			if string.match(data.dslam_chipset or "", "BDCM") then
+				data.dslam_chipset = "Broadcom" .. " ( " .. data.dslam_chipset .. " )"
+			elseif string.match(data.dslam_chipset or "", "IFTN") then
+				data.dslam_chipset = "Infineon" .. " ( " .. data.dslam_chipset .. " )"
+			end
 
-		data.dslam_version_raw = data.dslam_version_raw or ""
-		if not ( string.sub(data.dslam_version_raw, 1, 2) == "0x" ) then
-			if data.dslam_version_raw == "" then
-				data.dslam_chipset = T"Can't recover DSLAM version."
+			data.dslam_version_raw = data.dslam_version_raw or ""
+			if not ( string.sub(data.dslam_version_raw, 1, 2) == "0x" ) then
+				if data.dslam_version_raw == "" then
+					data.dslam_chipset = T"Can't recover DSLAM version."
 			else
 				data.dslam_chipset = format(T"Invalid version, can't convert. Raw value: %s", data.dslam_version_raw)
 			end
@@ -89,14 +94,16 @@ if datatype and datatype== "xdsl" then
 
 		data.dslam_version_raw = nil
 
-		if string.match(data.status or "", "Showtime") then
-			data["status"] = T"Connected"
-		elseif not data.status or data.status == "" then
-			data["status"] = T"Disconnected"
+			if string.match(data.status or "", "Showtime") then
+				data["status"] = T"Connected"
+			elseif not data.status or data.status == "" then
+				data["status"] = T"Disconnected"
 		else
 			data["status"] = T(data.status)
 		end
 	else
+		for _, key in ipairs({"dslam_chipset", "dslam_version", "dsl_profile",
+			"dsl_port", "dslam_version_raw", "dsl_serial"}) do data[key] = "N/A" end
 		for index in pairs(data) do
 			if not ( index == "status" ) then
 				data[index] = "N/A"
@@ -104,7 +111,7 @@ if datatype and datatype== "xdsl" then
 		end
 	end
 else
-	local ppp_status, ppp_light_map, ppp_state_map
+	local ppp_status, ppp_light, ppp_state, ipv6_light, ipv6_state
 
 	local table = table
 	local format = string.format
@@ -119,7 +126,7 @@ else
 
 	local wan_interface = "wan"
 
-	if content_uci.wan_mode == "bridge" then
+	if content_uci.wan_mode == "bridge" and content_uci.wan_ifname and content_uci.wan_ifname ~= "" then
 		wan_interface = content_uci.wan_ifname
 	end
 
@@ -140,7 +147,15 @@ else
 		content_rpc[v6Key] = v6Value
 	end
 
-	content_helper.getExactContent(content_rpc)
+	internethelper.getOptionalContent(content_rpc)
+	-- Bridge ifname may be a kernel device (e.g. br-lan), whereas RPC
+	-- network.interface exposes logical interfaces. Preserve a real down
+	-- value, but use the WAN status if the device has no RPC entry.
+	if content_rpc.up == "" and wan_interface ~= "wan" then
+		content_rpc.up = internethelper.getValue("rpc.network.interface.@wan.up")
+	end
+	content_rpc.ip6addr = content_rpc.ip6addr or ""
+	content_rpc.ip6prefix = content_rpc.ip6prefix or ""
 
 	if content_rpc.dns_wan:match(",") then
 		content_rpc.dns_wan = content_rpc.dns_wan:gsub(","," , ")
@@ -179,10 +194,9 @@ else
 	setmetatable(ipv6_light_map, untaint_mt)
 
 	local status_light
-	local ppp_status, ppp_light, ppp_state, WAN_IP, ipv6_light, ipv6_state
 	local attributes = { light = { } ,span = { } }
 
-	if content_uci.wan_mode == "pppoe" then
+	if content_uci.wan_mode == "pppoe" or content_uci.wan_mode == "pppoa" then
 		local ppp_state_map = {
 			disabled = T"PPP disabled",
 			disconnecting = T"PPP disconnecting",
@@ -232,6 +246,7 @@ else
 		ppp_status = "disabled"
 		end
 
+		local WAN_IP
 		if ppp_status then
 			ppp_light = ppp_light_map[ppp_status]
 			ppp_state = ppp_state_map[ppp_status]
@@ -268,7 +283,7 @@ else
 		status_light = ui_helper.createSimpleLight(static_light_map[static_state], static_state_map[static_state] , attributes , "fa-at")
 	end
 
-	local wan_uptime = content_rpc["wan_uptime"]
+	local wan_uptime = tonumber(content_rpc["wan_uptime"]) or 0
 	local wan_uptime_time = post_helper.secondsToTimeShort(wan_uptime)
 
 	data = {

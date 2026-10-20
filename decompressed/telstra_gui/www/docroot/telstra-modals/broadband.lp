@@ -16,6 +16,7 @@ local ui_helper = require("web.ui_helper")
 local message_helper = require("web.uimessage_helper")
 local post_helper = require("web.post_helper")
 local content_helper = require("web.content_helper")
+local internethelper = require("internethelper")
 local string = string
 local format, gmatch = string.format, string.gmatch
 local floor = math.floor
@@ -27,7 +28,7 @@ local content_wan = {
   wwan_ipaddr = "rpc.network.interface.@wwan.ipaddr",
   wwan_ip6addr = "rpc.network.interface.@wwan.ip6addr",
 }
-content_helper.getExactContent(content_wan)
+internethelper.getOptionalContent(content_wan)
 
 local wan_intf ="wan"
 local wan6_intf ="wan6"
@@ -39,12 +40,12 @@ if content_wan.wan_proto == ""  then
   -- wansensing is in L3Sense state
   wan_mode = "PPPoE"
   l3sense = true
-  if content_wan.wwan_ipaddr and content_wan.wwan_ipaddr:len() ~= 0 then
+  if content_wan.wwan_ipaddr:len() ~= 0 then
     wan_intf = "wwan"
     wan_mode = "Mobile"
   end
 else
-  if (content_wan.wwan_ipaddr and content_wan.wwan_ipaddr:len() ~= 0) or (content_wan.wwan_ip6addr and content_wan.wwan_ip6addr:len() ~= 0) then
+  if content_wan.wwan_ipaddr:len() ~= 0 or content_wan.wwan_ip6addr:len() ~= 0 then
     wan_intf = "wwan"
     wan_mode = "Mobile"
   elseif content_wan.wan_proto == "pppoe" then
@@ -78,7 +79,10 @@ local mapValid = {
     uci_wan_password = vNES,
 }
 
-local content, helpmsg = post_helper.handleQuery(mapParams, mapValid)
+local content, helpmsg = {}, {}
+if wan_mode == "PPPoE" then
+  content, helpmsg = post_helper.handleQuery(mapParams, mapValid)
+end
 -- End POST process
 
 local content_rpc = {
@@ -91,7 +95,7 @@ local content_rpc = {
     tx_bytes = "rpc.network.interface.@" .. wan_intf .. ".tx_bytes",
     rx_bytes = "rpc.network.interface.@" .. wan_intf .. ".rx_bytes",
 }
-content_helper.getExactContent(content_rpc)
+internethelper.getOptionalContent(content_rpc)
 
 local primary_dns ="0.0.0.0"
 local secondary_dns ="0.0.0.0"
@@ -141,7 +145,7 @@ if wan_mode ~= "Mobile" and not l3sense then
   elseif content_wan6.ip6dns ~= "" then
     primary_ip6dns=content_wan6.ip6dns
   end
-elseif wan_mode == "Mobile" and content_wan.wwan_ip6addr and content_wan.wwan_ip6addr:len() ~= 0 then
+elseif wan_mode == "Mobile" and content_wan.wwan_ip6addr:len() ~= 0 then
   wanip6addr = content_wan.wwan_ip6addr
   ipv6status = "IPv6 connected"
 end
@@ -149,7 +153,7 @@ end
 if content_rpc.ipaddr=="" then
    content_rpc.ipaddr ="0.0.0.0"
 elseif (wan_mode == "PPPoE" and content_rpc.wan_ppp_state == "connected" and content_rpc.dns ~="")
-  or (wan_mode == "IPoE") or (wan_mode == "Mobile" and content_wan.wwan_ipaddr and content_wan.wwan_ipaddr:len() ~= 0) then
+  or (wan_mode == "IPoE") or (wan_mode == "Mobile" and content_wan.wwan_ipaddr:len() ~= 0) then
    ipv4status = "IPv4 connected"
 end
 
@@ -253,6 +257,7 @@ ngx.print(html)
   ngx.print('\
 </fieldset>\
 ');  
+  if wan_mode == "PPPoE" then
   -- PPP username
   local class_username = {
       input = {
@@ -272,6 +277,7 @@ ngx.print(html)
   html[#html + 1] = "</fieldset>"
   ngx.print(html)
   lp.include("save.lp")
+  end
   ngx.print('\
 </div>\
 </form>\

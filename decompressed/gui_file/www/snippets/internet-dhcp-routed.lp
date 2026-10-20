@@ -5,6 +5,8 @@
 gettext.textdomain('webui-core')
 
 local proxy = require("datamodel")
+local internethelper = require("internethelper")
+local getValue = internethelper.getValue
 local content_helper = require("web.content_helper")
 local ui_helper = require("web.ui_helper")
 local message_helper = require("web.uimessage_helper")
@@ -86,7 +88,7 @@ end
 
 local function split(str, ang)
 	local tab = {}
-	for vari in string.gmatch(format("%s",str), ang) do
+	for vari in string.gfind(format("%s",str), ang) do
 		table.insert(tab, vari)
 	end
 	return tab
@@ -137,7 +139,7 @@ local firewall_value = {["uci.firewall.forwarding.@"..forwdnum..".src"] = "wan",
                         ["uci.firewall.forwarding.@"..forwdnum..".name"] = "for_w2l"}
 local function validateNat(value, object, key)
   local valid, msg = post_helper.validateBoolean(value, object, key)
-  if valid and zonenum ~= "" and value ~= proxy.get("uci.firewall.zone."..zonenum..".masq")[1].value then
+  if valid and zonenum ~= "" and value ~= getValue("uci.firewall.zone."..zonenum..".masq") then
     proxy.set("uci.firewall.zone."..zonenum..".conntrack", "1")
     local key = "forwarding"..post_helper.getRandomKey()
     if value == "1" then
@@ -164,6 +166,7 @@ end
 
 -- Configurable data
 local mapParams = {
+    uci_wan_mtu = "uci.network.interface.@wan.mtu",
     uci_wan_auto = "uci.network.interface.@wan.auto",
     uci_wan_masq = "uci.firewall.zone."..zonenum..".masq",
 	uci_wan_ipv6 = "uci.network.interface.@wan.ipv6",
@@ -176,30 +179,23 @@ local mapParams = {
 local vB = post_helper.validateBoolean
 
 local function IPv6andUsername(value, object, key)
-	local valid, msg = vB(value)
-	
-	if valid then
-	local r6 = proxy.get("uci.env.var.ppp_realm_ipv6")
-local ipv6_realm = (r6 and r6[1] and r6[1].value) or ""
-	local r4 = proxy.get("uci.env.var.ppp_realm_ipv4")
-local ipv4_realm = (r4 and r4[1] and r4[1].value) or ""
-		if value == "1" then
-			proxy.set("uci.network.interface.@wan6.auto", "1")
-			proxy.set("uci.network.interface.@wan.username", ipv6_realm)
-			proxy.set("uci.network.device.@waneth4.ipv6", "1")
-			proxy.set("uci.network.device.@wanptm0.ipv6", "1")			
-		else
-			proxy.set("uci.network.interface.@wan6.auto", "0")
-			proxy.set("uci.network.interface.@wan.username", ipv4_realm)
-			proxy.set("uci.network.device.@waneth4.ipv6", "0")
-			proxy.set("uci.network.device.@wanptm0.ipv6", "0")
-		end
-	proxy.apply()
-	end
-	return valid, msg
+  local valid, msg = vB(value)
+  if valid and getValue("uci.network.interface.@wan.ipv6") ~= value then
+    local realm = getValue(value == "1" and "uci.env.var.ppp_realm_ipv6" or "uci.env.var.ppp_realm_ipv4")
+    proxy.set("uci.network.interface.@wan6.auto", value)
+    -- Firmware without an ISP realm must keep the configured PPP username.
+    if realm ~= "" then
+      proxy.set("uci.network.interface.@wan.username", realm)
+    end
+    proxy.set("uci.network.device.@waneth4.ipv6", value)
+    proxy.set("uci.network.device.@wanptm0.ipv6", value)
+    proxy.apply()
+  end
+  return valid, msg
 end
 
 local mapValid = {
+    uci_wan_mtu = internethelper.getMtuValidator("dhcp"),
     uci_wan_auto = vB,
     uci_wan_masq = validateNat,
 	uci_wan_ipv6 = IPv6andUsername,
@@ -264,7 +260,6 @@ local cs = {
     dns_loopback = "rpc.network.interface.@loopback.dnsservers", -- Added to include static dns servers configured on loopback interface (for TI custo)
 }
 
-local internethelper = require("internethelper")
 
 for v6Key, v6Value in pairs(internethelper.getIpv6Content()) do
 	cs[v6Key] = v6Value
@@ -286,19 +281,13 @@ end
 ajax_helper.handleAjaxQuery(cs, function(c)
     -- this will add the HTML for the light
     local ds = get_dhcp_state(content["uci_wan_auto"], c["ipaddr"])
-    local loop_dns_res = proxy.get("rpc.network.interface.@loopback.dnsservers")
-    local loop_dns = (loop_dns_res and loop_dns_res[1] and loop_dns_res[1].value) or ""
-    local dnstab = split(loop_dns, "[^%,]+")
+    local dnstab = split(getValue("rpc.network.interface.@loopback.dnsservers"), "[^%,]+")
     local dnsv4, dnsv6 = dns_filter(dnstab)
     ajax_attr_light.light.class = dhcp_light_map[ds]
     c.wan_status = ui_helper.createSimpleLight(nil, dhcp_state_map[ds], ajax_attr_light)
-    local wan_auto_res = proxy.get("uci.network.interface.@wan.auto")
-    local wan_auto = (wan_auto_res and wan_auto_res[1] and wan_auto_res[1].value) or ""
-    if wan_auto == "1" then
-        local wan_dns_res = proxy.get("rpc.network.interface.@wan.dnsservers")
-        local wan_dns = (wan_dns_res and wan_dns_res[1] and wan_dns_res[1].value) or ""
-        c.dns = content_helper.getMergedList(wan_dns, dnsv4)
-    else
+	if getValue("uci.network.interface.@wan.auto") == "1" then
+          c.dns = content_helper.getMergedList(getValue("rpc.network.interface.@wan.dnsservers"), dnsv4)
+        else
 		c.dns = dnsv4
 	end
     local ipv6_enabled = proxy.get("uci.network.interface.@wan.ipv6")
@@ -311,7 +300,7 @@ ajax_helper.handleAjaxQuery(cs, function(c)
     end
 end)
 -- will stop in handleAjaxQuery if it is an actual AJAX query
-content_helper.getExactContent(cs)
+internethelper.getOptionalContent(cs)
 
 local dnstab = split(cs.dns, "[^%,]+")
 local dnsv4, dnsv6 = dns_filter(dnstab)
@@ -355,6 +344,7 @@ ngx.print(ui_helper.createMessages(message_helper.popMessages()))
     html[#html + 1] = ui_helper.createSwitch(T"NAT", "uci_wan_masq", content.uci_wan_masq)
     html[#html + 1] = ui_helper.createSwitch(T"IPv6", "uci_wan_ipv6", content.uci_wan_ipv6)
     html[#html + 1] = ui_helper.createInputText(T"MAC Spoof (Wan MAC)","uci_wan_mac", content["uci_wan_mac"], nil, helpmsg["uci_wan_mac"])
+    html[#html + 1] = ui_helper.createInputText(T"MTU", "uci_wan_mtu", content["uci_wan_mtu"], nil, helpmsg["uci_wan_mtu"])
 	html[#html + 1] = ui_helper.createInputText(T"VendorID","uci_wan_vendorid", content["uci_wan_vendorid"], nil, helpmsg["uci_wan_vendorid"])
     ajax_attr.span.id = "leaseobtained"
     html[#html+1] = ui_helper.createLabel(T"Lease obtained", cs["leaseobtained"], ajax_attr)
@@ -390,7 +380,6 @@ ngx.print(ui_helper.createMessages(message_helper.popMessages()))
     html[#html+1] = ui_helper.createSwitch(T"Auto Discover DNS", "uci_wan_peerdns", content["uci_wan_peerdns"])
     html[#html+1] = format('<label class="control-label">%s</label><div class="controls">', T"DNS servers")
     html[#html+1] = ui_helper.createTable(dns_columns, dns_data, dns_options, nil, dns_helpmsg)
-    html[#html+1] = '</div>'
 
     ngx.print(html)
   ngx.print('\

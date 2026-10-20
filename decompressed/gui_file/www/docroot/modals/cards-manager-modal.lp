@@ -109,9 +109,13 @@ end
 uci:unload("web")
 local card_states = {}
 for _, card in ipairs(cards_catalog) do
+    local vis_val = uci:get("web", card.uci_sec, "visible")
     local hide_val = uci:get("web", card.uci_sec, "hide")
-    -- Default is shown (hide='0' or missing -> "1"), hidden is "0"
-    card_states[card.id] = (hide_val == "1") and "0" or "1"
+    if vis_val == "0" or (vis_val == nil and hide_val == "1") then
+        card_states[card.id] = "0"
+    else
+        card_states[card.id] = "1"
+    end
 end
 
 -- Build auto-detect map for unused services

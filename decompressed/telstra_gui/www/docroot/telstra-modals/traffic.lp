@@ -15,6 +15,7 @@ local ui_helper = require("web.ui_helper")
 local message_helper = require("web.uimessage_helper")
 local post_helper = require("web.post_helper")
 local content_helper = require("web.content_helper")
+local internethelper = require("internethelper")
 local string, ngx, os = string, ngx, os
 local tonumber = tonumber
 local format, match = string.format, string.match
@@ -53,10 +54,9 @@ table.sort(wls, function(a,b)
     end
 end)
 
-local wan_intf = "wan"
-local ip_res = proxy.get("rpc.network.interface.@wwan.ipaddr")
-local ipaddr = ip_res and ip_res[1] and ip_res[1].value or ""
-if ipaddr ~= "" then
+local wan_intf ="wan"
+local ipaddr = internethelper.getValue("rpc.network.interface.@wwan.ipaddr")
+if ipaddr:len() ~= 0 then
   wan_intf = "wwan"
 end
 
@@ -65,7 +65,7 @@ local content_wan = {
   rx_bytes = "rpc.network.interface.@" .. wan_intf .. ".rx_bytes",
   ifname = "uci.network.interface.@" .. wan_intf .. ".ifname",
 }
-content_helper.getExactContent(content_wan)
+internethelper.getOptionalContent(content_wan)
 
 local content_lan = {
   tx_bytes = "rpc.network.interface.@lan.tx_bytes",
@@ -206,7 +206,7 @@ end
 _, wanTx, wanTxTime = pcall(getTrafficData, "tx_bytes", graph_interface)
 _, wanRx, wanRxTime = pcall(getTrafficData, "rx_bytes", graph_interface)
 _, lanTx, lanTxTime = pcall(getTrafficData, "tx_bytes", "br-lan")
-_, lanRx, lanRxTime = pcall(getTrafficData, "rx_bytes", "br-lan")
+_, lanRx, lanTxTime = pcall(getTrafficData, "rx_bytes", "br-lan")
 _, wifiTx, wifiTxTime = pcall(getTrafficData, "tx_bytes", curiface)
 _, wifiRx, wifiRxTime = pcall(getTrafficData, "rx_bytes", curiface)
 proxy.set("rpc.system.lock.free", "0")

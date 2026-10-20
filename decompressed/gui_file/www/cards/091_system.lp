@@ -12,16 +12,6 @@ local proxy = require("datamodel")
 local modalPath = "/modals/system-modal.lp"
 local syslog_present = "disabled"
 
--- Check availability of file, return true if found, else false
-local function file_check(file_name)
-  local file_found = io.open(file_name, "rb")
-  if file_found then
-    file_found:close()
-    return true
-  end
-  return false
-end
-
 local Syslog = proxy.get("uci.system.system.@system[0].log_ip", "uci.system.system.@system[0].log_filter_ip")
 if Syslog and ((Syslog[1] and Syslog[1].value ~= "") or (Syslog[2] and Syslog[2].value ~= "")) then
     syslog_present = "enabled"
@@ -76,7 +66,7 @@ local SSH_light_map = {
   enabled = "1",--"green"
 }
 
-local telnet_available = file_check("/bin/busybox_telnet")
+local telnet_available = content_helper.fileExists("/bin/busybox_telnet")
 local telnet_state = "NotAvailable"
 
 if telnet_available then
