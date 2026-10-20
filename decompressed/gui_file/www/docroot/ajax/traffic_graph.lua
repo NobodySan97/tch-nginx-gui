@@ -1,51 +1,34 @@
--- Enable localization
-gettext.textdomain('webui-mobiled')
-
 local json = require("dkjson")
+local netrate = require("netrate")
 local ngx = ngx
-local tonumber, tostring = tonumber, tostring
-local format = string.format
+local data = {valid = false}
 
-local old_rx_value = "1000"
-local old_tx_value = "1000"
-local interface = "ptm0"
-
-local args = ngx.req.get_uri_args()
-if args then
-  old_rx_value = args.oldrx or "1000"
-  old_tx_value = args.oldtx or "1000"
-  if args.interface and tostring(args.interface):match("^[a-zA-Z0-9_%.%-]+$") then
-    interface = tostring(args.interface)
-  end
-end
-
-local function read_net_stat(intf, stat)
-  local path = format("/sys/class/net/%s/statistics/%s", intf, stat)
-  local f = io.open(path, "r")
-  if f then
-    local val = f:read("*l") or f:read("*a")
-    f:close()
-    if val then
-      return val:gsub("%s+", "")
+if ngx.req.get_method() == "POST" then
+    local args = ngx.req.get_uri_args()
+    local sample, reason = netrate.sample(args.interface)
+    if sample then
+        local rate
+        rate, reason = netrate.rate({rx = args.oldrx, tx = args.oldtx, time = args.oldtime}, sample)
+        data = {
+            valid = true,
+            old_rx_traffic = args.oldrx or "1000",
+            old_tx_traffic = args.oldtx or "1000",
+            rx_traffic = string.format("%.0f", sample.rx),
+            tx_traffic = string.format("%.0f", sample.tx),
+            sample_time = sample.time,
+            rx_bytes_per_second = rate and rate.rx,
+            tx_bytes_per_second = rate and rate.tx,
+        }
     end
-  end
-  return "0"
+    data.reason = reason
 end
 
-local rx_traffic = read_net_stat(interface, "rx_bytes")
-local tx_traffic = read_net_stat(interface, "tx_bytes")
-
-local data = {
-	old_rx_traffic = old_rx_value,
-	old_tx_traffic = old_tx_value,
-	rx_traffic = rx_traffic,
-	tx_traffic = tx_traffic
-}
-
+ngx.header["Content-Type"] = "application/json"
+ngx.header["Cache-Control"] = "no-store"
 local buffer = {}
-if json.encode(data, { indent = false, buffer = buffer }) then
-	ngx.say(buffer)
+if json.encode(data, {indent = false, buffer = buffer}) then
+    ngx.say(buffer)
 else
-	ngx.say("{}")
+    ngx.say("{}")
 end
 ngx.exit(ngx.HTTP_OK)

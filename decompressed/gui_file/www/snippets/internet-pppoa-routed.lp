@@ -6,6 +6,8 @@
 gettext.textdomain('webui-core')
 
 local proxy = require("datamodel")
+local internethelper = require("internethelper")
+local getValue = internethelper.getValue
 local content_helper = require("web.content_helper")
 local ui_helper = require("web.ui_helper")
 local message_helper = require("web.uimessage_helper")
@@ -94,7 +96,7 @@ end
 
 local function split(str, ang)
 	local tab = {}
-	for vari in string.gmatch(format("%s",str), ang) do
+	for vari in string.gfind(format("%s",str), ang) do
 		table.insert(tab, vari)
 	end
 	return tab
@@ -140,6 +142,7 @@ for _, v in ipairs(firewall_forwarding_path) do
     end
 end
 local mapParams = {
+  uci_wan_mtu = "uci.network.interface.@wan.mtu",
   uci_wan_auto = "uci.network.interface.@wan.auto",
   uci_wan_username = "uci.network.interface.@wan.username",
   uci_wan_password = "uci.network.interface.@wan.password",
@@ -208,7 +211,7 @@ local firewall_value = {["uci.firewall.forwarding.@"..forwdnum..".src"] = "wan",
                         ["uci.firewall.forwarding.@"..forwdnum..".name"] = "for_w2l"}
 local function validateNat(value, object, key)
   local valid, msg = post_helper.validateBoolean(value, object, key)
-  if valid and zonenum ~= "" and value ~= proxy.get("uci.firewall.zone."..zonenum..".masq")[1].value then
+  if valid and zonenum ~= "" and value ~= getValue("uci.firewall.zone."..zonenum..".masq") then
     proxy.set("uci.firewall.zone."..zonenum..".conntrack", "1")
     local key = "forwarding"..post_helper.getRandomKey()
     if value == "1" then
@@ -239,24 +242,15 @@ end
 
 local function IPv6andUsername(value, object, key)
   local valid, msg = vB(value)
-
-  local ipv6_state = proxy.get("uci.network.interface.@wan.ipv6")[1].value
-  if valid and ipv6_state ~= value then
-    local r6 = proxy.get("uci.env.var.ppp_realm_ipv6")
-local ipv6_realm = (r6 and r6[1] and r6[1].value) or ""
-    local r4 = proxy.get("uci.env.var.ppp_realm_ipv4")
-local ipv4_realm = (r4 and r4[1] and r4[1].value) or ""
-    if value == "1" then
-      proxy.set("uci.network.interface.@wan6.auto", "1")
-      proxy.set("uci.network.interface.@wan.username", ipv6_realm)
-      proxy.set("uci.network.device.@waneth4.ipv6", "1")
-      proxy.set("uci.network.device.@wanptm0.ipv6", "1")
-    else
-      proxy.set("uci.network.interface.@wan6.auto", "0")
-      proxy.set("uci.network.interface.@wan.username", ipv4_realm)
-      proxy.set("uci.network.device.@waneth4.ipv6", "0")
-      proxy.set("uci.network.device.@wanptm0.ipv6", "0")
+  if valid and getValue("uci.network.interface.@wan.ipv6") ~= value then
+    local realm = getValue(value == "1" and "uci.env.var.ppp_realm_ipv6" or "uci.env.var.ppp_realm_ipv4")
+    proxy.set("uci.network.interface.@wan6.auto", value)
+    -- Firmware without an ISP realm must keep the configured PPP username.
+    if realm ~= "" then
+      proxy.set("uci.network.interface.@wan.username", realm)
     end
+    proxy.set("uci.network.device.@waneth4.ipv6", value)
+    proxy.set("uci.network.device.@wanptm0.ipv6", value)
     proxy.apply()
   end
   return valid, msg
@@ -265,6 +259,7 @@ end
 -- Validation allows empty values if wan access disabled but will stil check for validity if the parameter is set
 -- if wan is enabled then it checks for validaty anyway
 local mapValid = {
+  uci_wan_mtu = internethelper.getMtuValidator("pppoa"),
   uci_wan_auto = vB,
   uci_wan_username = gCV(isWanEnabled, validateUsername, gOV(validateUsername)),
   uci_wan_password = gCV(isWanEnabled, gVP(vNES), gVP()),
@@ -294,7 +289,6 @@ local content_rpc = {
     dns_loopback = "rpc.network.interface.@loopback.dnsservers", -- Added to include static dns servers configured on loopback interface (for TI custo)
 }
 
-local internethelper = require("internethelper")
 
 for v6Key, v6Value in pairs(internethelper.getIpv6Content()) do
 	content_rpc[v6Key] = v6Value
@@ -302,21 +296,13 @@ end
 
 ajax_helper.handleAjaxQuery(content_rpc, function(c)
     -- this will add the HTML for the light
-    local ppp_state_res = proxy.get("rpc.network.interface.@wan.ppp.state")
-    local ppp_err_res = proxy.get("rpc.network.interface.@wan.ppp.error")
-    local loop_dns_res = proxy.get("rpc.network.interface.@loopback.dnsservers")
-    local ppp_state = (ppp_state_res and ppp_state_res[1] and ppp_state_res[1].value) or ""
-    local ppp_err = (ppp_err_res and ppp_err_res[1] and ppp_err_res[1].value) or ""
-    local loop_dns = (loop_dns_res and loop_dns_res[1] and loop_dns_res[1].value) or ""
-    local ds = get_dhcp_state(content["uci_wan_auto"], ppp_state, ppp_err, c["ipaddr"])
-	local dnstab = split(loop_dns, "[^%,]+")
+    local ds = get_dhcp_state(content["uci_wan_auto"], getValue("rpc.network.interface.@wan.ppp.state"), getValue("rpc.network.interface.@wan.ppp.error"), c["ipaddr"])
+	local dnstab = split(getValue("rpc.network.interface.@loopback.dnsservers"), "[^%,]+")
 	local dnsv4, dnsv6 = dns_filter(dnstab)
     ajax_attr_light.light.class = ppp_light_map[ds]
     c.wan_status = ui_helper.createSimpleLight(nil, ppp_state_map[ds], ajax_attr_light)
-    if ppp_state == "connected" then
-		local wan_dns_res = proxy.get("rpc.network.interface.@wan.dnsservers")
-		local wan_dns = (wan_dns_res and wan_dns_res[1] and wan_dns_res[1].value) or ""
-		c.dns = content_helper.getMergedList(wan_dns, dnsv4)
+    if getValue("rpc.network.interface.@wan.ppp.state") == "connected" then
+	c.dns = content_helper.getMergedList(getValue("rpc.network.interface.@wan.dnsservers"), dnsv4)
     else
         c.dns = dnsv4
     end
@@ -326,7 +312,7 @@ ajax_helper.handleAjaxQuery(content_rpc, function(c)
     end
 end)
 
-content_helper.getExactContent(content_rpc)
+internethelper.getOptionalContent(content_rpc)
 
 local dnstab = split(content_rpc.dns, "[^%,]+")
 local dnsv4, dnsv6 = dns_filter(dnstab)
@@ -426,6 +412,7 @@ ngx.print(ui_helper.createMessages(message_helper.popMessages()))
     -- PPP password
     local class_password = class_username
     html[#html + 1] = ui_helper.createInputText(T"Password", "uci_wan_password", content["uci_wan_password"], class_username, helpmsg["uci_wan_password"])
+    html[#html + 1] = ui_helper.createInputText(T"MTU", "uci_wan_mtu", content["uci_wan_mtu"], nil, helpmsg["uci_wan_mtu"])
 end
 ajax_attr.span.id = "ipaddr"
 html[#html+1] = ui_helper.createLabel(T"IP address", content_rpc["ipaddr"],ajax_attr)

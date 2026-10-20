@@ -108,15 +108,16 @@ $(document).ready(
     var overlay = document.querySelector('.apprise-overlay');
     if (overlay) {
         overlay.style.opacity = "";
-        overlay.addEventListener('click', function (e) {
-            closeNav();
-        });
     }
     $(document).off("touchend", '[data-toggle\x3d"modal"]');
     $(document).off("touchend", ".smallcard");
 
 	themescript();
 	closeNav();
+
+    $(document).on('click', '.apprise-overlay', function (e) {
+        closeNav();
+    });
   
 	//
 	$("#switchViewButton").on("switchcard", function() {

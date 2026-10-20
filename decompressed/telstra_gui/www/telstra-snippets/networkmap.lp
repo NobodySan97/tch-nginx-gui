@@ -9,6 +9,7 @@ local floor, ipairs = math.floor, ipairs
 gettext.textdomain('webui-telstra')
 
 local content_helper = require("web.content_helper")
+local internethelper = require("internethelper")
 local proxy = require("datamodel")
 
 local dcols = {
@@ -245,7 +246,7 @@ local wan_intf = "wan"
 local content_wwan = {
   ipaddr = "rpc.network.interface.@wwan.ipaddr",
 }
-content_helper.getExactContent(content_wwan)
+internethelper.getOptionalContent(content_wwan)
 
 if content_wwan.ipaddr and content_wwan.ipaddr:len() ~= 0 then
   wan_intf = "wwan"
@@ -259,14 +260,11 @@ local content = {
     fwversion = "uci.version.version.@version[0].version",
     hostname = "uci.system.system.@system[0].hostname",
 }
-content_helper.getExactContent(content)
+internethelper.getOptionalContent(content)
 
 if content.fwversion then
     local version = content.fwversion
-    local dash_pos = find(version, "%-")
-    if dash_pos then
-        content.fwversion = sub(version, 1, dash_pos - 1)
-    end
+    content.fwversion = sub(version, 1, (find(version, "%-") or (#version + 1)) - 1)
 end
 
 local wan_type = "Ethernet"

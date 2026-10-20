@@ -61,128 +61,96 @@ var modgui = modgui || {};
 	}
 
 	function createAjaxUpdateCard(CardIdRefresh, ajaxLink, IntervalVar, RefreshTime, CustomRefreshFunction) {
+        var element = document.getElementById(CardIdRefresh);
+        if (!element) return;
+        var previous = KoRequest[IntervalVar];
+        if (previous && previous.element === element) return;
 
-		var element = document.getElementById(CardIdRefresh);
-		if (!element) return ;
+        var ElementBinding = {};
+        var ElementBindingList = [];
+        $("#" + CardIdRefresh).find("[data-bind]").each(function () {
+            var observable = $(this).data("bind").split(":")[1].trim();
+            ElementBindingList.push(observable);
+            ElementBinding[observable] = ko.observable();
+        });
 
-		var existingData = ko.dataFor(element);
-		var ElementBinding = existingData || {};
-		var ElementBindingList = [];
-		var ObserveElement;
-		$("#" + CardIdRefresh).find("[data-bind]").each(function () {
-			ObserveElement = $(this).data("bind").split(":")[1].trim();
-			ElementBindingList.push(ObserveElement);
-			if (!ElementBinding[ObserveElement]) {
-				ElementBinding[ObserveElement] = ko.observable();
-			}
-		});
-
-		var arrayLength = ElementBindingList.length;
-		var fullUrl = "";
-		if (ajaxLink && typeof ajaxLink === "string") {
-			var updateLink = (ajaxLink.indexOf("?") !== -1 ? "&" : "?") + "auto_update=true";
-			fullUrl = ajaxLink + updateLink;
-		}
-
-		if (KoRequest[IntervalVar]) {
-			if (KoRequest[IntervalVar].timer) clearTimeout(KoRequest[IntervalVar].timer);
-			if (KoRequest[IntervalVar].interval) clearInterval(KoRequest[IntervalVar].interval);
-			if (KoRequest[IntervalVar].xhr && KoRequest[IntervalVar].xhr.readyState !== 4) {
-				KoRequest[IntervalVar].xhr.abort();
-			}
-		}
-
-		var reqState = {
-			cardId: CardIdRefresh,
-			active: true,
-			timer: null,
-			interval: null,
-			xhr: null,
-			binding: ElementBinding,
-			refreshTime: RefreshTime || 3000,
-			url: ajaxLink,
-			customFn: CustomRefreshFunction
-		};
-		KoRequest[IntervalVar] = reqState;
-
-		function scheduleNext() {
-			if (!reqState.active) return;
-			if (reqState.timer) clearTimeout(reqState.timer);
-			reqState.timer = setTimeout(executePoll, reqState.refreshTime);
-			reqState.interval = reqState.timer;
-		}
-
-		function executePoll() {
-			if (!reqState.active) return;
-			if (CardIdRefresh && !document.getElementById(CardIdRefresh)) {
-				reqState.active = false;
-				return;
-			}
-
-			if (typeof CustomRefreshFunction === "function") {
-				try {
-					CustomRefreshFunction(ElementBinding);
-				} catch (err) {
-					console.error("Error in custom refresh function:", err);
-				}
-				scheduleNext();
-				return;
-			}
-
-			if (!fullUrl) return;
-
-			reqState.xhr = $.ajax({
-				url: fullUrl,
-				type: "POST",
-				data: [tch.elementCSRFtoken()],
-				dataType: "json",
-				timeout: 8000
-			})
-			.done(function (data) {
-				if (!reqState.active) return;
-				for (var i = 0; i < arrayLength; i++) {
-					var key = ElementBindingList[i];
-					if (data && data[key] !== undefined && ElementBinding[key]() !== data[key]) {
-						ElementBinding[key](data[key]);
-					}
-				}
-				if (connectionissue === 1) {
-					if ($("#popUp").is(":visible")) tch.removeProgress();
-					connectionissue = 0;
-				}
-			})
-			.fail(function (data, textStatus) {
-				if (textStatus === "abort") return;
-				connectionissue = 1;
-				if ($("#commandlogmodal").length > 0 || window.isUpgrading) return;
-				if (data && data.status === 200 && data.responseText && data.responseText.indexOf("sign-me-in") !== -1) {
-					if (!$("#popUp").is(":visible")) tch.showProgress(loginMsg);
-					window.location.href = "/";
-				}
-			})
-			.always(function () {
-				reqState.xhr = null;
-				scheduleNext();
-			});
-		}
-
-		executePoll();
-
-		if (!ko.dataFor(element))
-			ko.applyBindings(ElementBinding, element);
-	}
-
-	$(document).on("visibilitychange", function() {
-		if (!document.hidden) {
-			for (var key in KoRequest) {
-				if (KoRequest.hasOwnProperty(key) && KoRequest[key] && KoRequest[key].active) {
-					if (typeof KoRequest[key].customFn === "function") {
-						try { KoRequest[key].customFn(KoRequest[key].binding); } catch(e) {}
-					}
-				}
-			}
-		}
-	});
+        var registration = {};
+        var pending = false;
+        var request = null;
+        function isCurrent() {
+            return document.getElementById(CardIdRefresh) === element && KoRequest[IntervalVar] === registration;
+        }
+        function abort() {
+            if (request) request.abort();
+        }
+        var AjaxRefresh = typeof CustomRefreshFunction === "function" ? CustomRefreshFunction : function () {
+            if (pending) return;
+            pending = true;
+            var separator = ajaxLink.indexOf("?") === -1 ? "?" : "&";
+            var send = typeof window.modguiDashboardRequest === "function" ? window.modguiDashboardRequest : $.ajax;
+            request = send({
+                url: ajaxLink + separator + "auto_update=true",
+                type: "POST",
+                data: [tch.elementCSRFtoken()],
+                dataType: "json",
+                timeout: 8000,
+                success: function (data) {
+                    if (!isCurrent() || !data || typeof data !== "object") return;
+                    for (var i = 0; i < ElementBindingList.length; i++) {
+                        var key = ElementBindingList[i];
+                        if (data[key] !== undefined) ElementBinding[key](data[key]);
+                    }
+                }
+            }).done(function () {
+                if (!isCurrent()) return;
+                if (connectionissue == 1) {
+                    if ($("#popUp").is(":visible")) tch.removeProgress();
+                    connectionissue = 0;
+                }
+            }).fail(function (data) {
+                if (!isCurrent() || data.statusText === "abort") return;
+                connectionissue = 1;
+                switch (data.status) {
+                    case 200:
+                        if (typeof data.responseText === "string" && data.responseText.indexOf("sign-me-in") !== -1) {
+                            if (!$("#popUp").is(":visible")) tch.showProgress(loginMsg);
+                            window.location.href = "/";
+                        }
+                        break;
+                    case 500:
+                        window.location.href = "/error.lp?status=" + data.status + "&err=" + data.getResponseHeader("error-msg");
+                        break;
+                    default:
+                        if (!$("#popUp").is(":visible")) tch.showProgress(connectionLost + " " + data.statusText);
+                }
+            }).always(function () {
+                pending = false;
+                request = null;
+            });
+        };
+        function refresh(binding) {
+            if (!isCurrent()) {
+                clearInterval(registration.interval);
+                abort();
+                if (KoRequest[IntervalVar] === registration) delete KoRequest[IntervalVar];
+                return;
+            }
+            if (!document.hidden) AjaxRefresh(binding);
+        }
+        registration.element = element;
+        registration.function = refresh;
+        registration.binding = ElementBinding;
+        registration.refreshTime = RefreshTime;
+        registration.abort = abort;
+        KoRequest[IntervalVar] = registration;
+        if (previous) {
+            clearInterval(previous.interval);
+            if (typeof previous.abort === "function") previous.abort();
+        }
+        refresh(ElementBinding);
+        if (!ko.dataFor(element)) ko.applyBindings(ElementBinding, element);
+        registration.interval = setInterval(refresh, RefreshTime, ElementBinding);
+    }
 
 	function linkCheckUpdate() {
 		$(".check_update").on("click", function (e) {
