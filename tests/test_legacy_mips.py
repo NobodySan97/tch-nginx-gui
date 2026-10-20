@@ -1,6 +1,7 @@
 """USB-backed MIPS lifecycle and rollback regressions."""
 from pathlib import Path
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -58,9 +59,7 @@ echo "$modgui_usb_root"
 
     def isolated_helper(self, directory):
         directory = Path(directory).as_posix()
-        source = HELPER
-        for prefix in ['/etc/', '/usr/', '/tmp/']:
-            source = source.replace(prefix, directory + prefix)
+        source = re.sub(r'/(etc/|usr/|tmp/)', lambda m: f'{directory}/{m.group(1)}', HELPER)
         return source.replace('/proc/mounts', directory + '/mounts')
 
     def test_bad_archive_rolls_back_without_installing_packages_or_overwriting_data(self):

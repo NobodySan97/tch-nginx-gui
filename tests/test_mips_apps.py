@@ -1,6 +1,7 @@
 """Regression cases from legacy MIPS extension installation failures."""
 from pathlib import Path
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -119,8 +120,7 @@ marketing_version=''' + version + '\napp_luci install')
             manifest.write_text('/usr/lib/lua/uci.so\n')
             # Run the real rollback against isolated paths and a corrupt
             # downloaded archive. No package installation may be attempted.
-            for prefix in ['/etc/', '/usr/', '/tmp/', '/www_luci']:
-                helper = helper.replace(prefix, directory + prefix)
+            helper = re.sub(r'/(etc/|usr/|tmp/|www_luci)', lambda m: f'{directory}/{m.group(1)}', helper)
             result = self.run_sh(helper + '''
 require_free_space() { return 0; }
 opkg() { [ "$1" = list-installed ] && echo 'base - 1'; }
