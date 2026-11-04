@@ -50,7 +50,8 @@ end
 local function adjustIPCount(self, remoteIP, delta)
   local ipcount = self._session_tracker.ipcount
   if remoteIP then
-    ipcount[remoteIP] = (ipcount[remoteIP] or 0) + delta
+    local count = (ipcount[remoteIP] or 0) + delta
+    ipcount[remoteIP] = count > 0 and count or nil
   end
 end
 
@@ -309,7 +310,10 @@ local function newSession(mgr, address)
       end
     end
     if sessionLimitReached(mgr, address.remote) then
-      ngx.log(ngx.ERR, "Session limit reached")
+      ngx.log(ngx.ERR, "Session limit reached for manager ", mgr.name,
+        ": total=", mgr._session_tracker.count, "/", mgr.maxsessions,
+        ", per_ip=", mgr._session_tracker.ipcount[address.remote] or 0,
+        "/", mgr.maxsessions_per_ip)
       return
     end
   end
@@ -334,7 +338,7 @@ end
 local function redirectIfServiceNotAvailable(session)
   if not session then
 	ngx.log(ngx.ERR, "Service not available")
-    ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE, "Service not available. Probably too much session open. Wait 20 seconds and retry.")
+    ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE, "Session limit reached. Retry after an inactive session expires.")
   end
 end
 

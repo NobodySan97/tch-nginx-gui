@@ -12,6 +12,7 @@ local function contains(elem, tbl)
 	local v
 	
 	if not tbl then
+		new_rule = true
 		return nil
 	end
 	

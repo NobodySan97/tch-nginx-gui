@@ -32,7 +32,8 @@ purge_telemetry() { #disable TIM telemetry services
     [ -f /rom/chroot/Acotel_UA/Acotel_run.log ] && cp /rom/chroot/Acotel_UA/Acotel_run.log /chroot/Acotel_run.log 2>/dev/null
   fi
 
-  if [ -f /etc/init.d/bulkdata ] && [ "$(uci -q get bulkdata.global.enabled)" != "0" ]; then
+  if [ -x /etc/init.d/bulkdata ] && uci -q get bulkdata.global >/dev/null &&
+    [ "$(uci -q get bulkdata.global.enabled)" != "0" ]; then
     logecho "Disabling bulkdata telemetry..."
     uci set bulkdata.global.enabled='0'
     uci commit bulkdata
@@ -41,7 +42,7 @@ purge_telemetry() { #disable TIM telemetry services
   fi
 
   #nanocdn/mabr is the TIMVision TV cache, keep it when IPTV is configured
-  if [ -f /etc/init.d/nanocdn ] && [ -e /etc/rc.d/S99nanocdn ]; then
+  if [ -x /etc/init.d/nanocdn ] && [ -e /etc/rc.d/S99nanocdn ]; then
     if ! uci -q show network 2>/dev/null | grep -q "iptv"; then
       logecho "Disabling nanocdn (no IPTV configured)..."
       /etc/init.d/nanocdn stop
@@ -246,8 +247,16 @@ cwmp_specific_TIM() {
   fi
   logecho "CWMP Server detected: $detected_acs"
 
-  logecho "Resetting unlock bit..."
-  uci -q set env.var.unlockedstatus='0'
+  # The env backend only accepts variables exposed by the firmware.
+  # Older firmware may not provide this flag; do not try to create it.
+  if unlocked_status="$(uci -q get env.var.unlockedstatus)"; then
+    if [ "$unlocked_status" != "0" ]; then
+      logecho "Resetting unlock bit..."
+      uci -q set env.var.unlockedstatus='0'
+    fi
+  else
+    logecho "Unlock bit unavailable on this firmware, skipping reset..."
+  fi
 
   [ -z "$cwmp_url" ] && cwmp_url="None"
 
@@ -314,7 +323,12 @@ setup_ISP() {
       uci -q set dhcp.dnsmasq.server='151.99.125.1'
       restart_dnsmasq=1
     fi
-    [ ! "$(uci get -q mmpbxrvsipnet.sip_net.user_param_value)" ] && uci -q set mmpbxrvsipnet.sip_net.user_param_value=phone
+    # Some firmware has no Technicolor VoIP stack. Do not create its options
+    # without a parent section, or overwrite an explicitly configured value.
+    if uci -q get mmpbxrvsipnet.sip_net >/dev/null &&
+      [ -z "$(uci -q get mmpbxrvsipnet.sip_net.user_param_value)" ]; then
+      uci set mmpbxrvsipnet.sip_net.user_param_value=phone
+    fi
     ;;
   Other)
     check_clean Other
