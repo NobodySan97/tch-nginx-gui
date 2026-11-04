@@ -32,6 +32,7 @@ end
 marketing_version = mv
 
 local mapParams = {
+	smartphone_application = "uci.modgui.app.smartphone_app",
 	telstra_webui = "uci.modgui.app.telstra_webui",
 	xupnp_application = "uci.modgui.app.xupnp_app",
 }
@@ -44,7 +45,7 @@ mapParams.transmission_webui = "uci.modgui.app.transmission_webui"
 mapParams.adblock_application = "uci.modgui.app.adblock_app"
 mapParams.rsyncd_application = "uci.modgui.app.rsyncd_app"
 mapParams.openspeedtest_application = "uci.modgui.app.openspeedtest_app"
-if cputype:match("^mips") then
+if cputype:match("^mips") or cputype:match("^armv7") then
 	mapParams.amule_webui = "uci.modgui.app.amule_webui"
 end
 if cputype:match("^armv7") or cputype:match("^mips") then
@@ -113,6 +114,7 @@ for Params in pairs(mapParams) do
 end
 
 local extension_items = {
+	{ key = "smartphone_application", title = T"Smartphone USB" },
 	{ key = "luci_webui", title = T"LuCI", url = webui_url("9080") },
 	{ key = "aria2_webui", title = T"Aria2", url = "/aria" },
 	{ key = "transmission_webui", title = T"Transmission", url = webui_url("9091", "/transmission") },

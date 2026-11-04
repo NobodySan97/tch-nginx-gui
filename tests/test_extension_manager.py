@@ -1,6 +1,7 @@
 """Regression tests for the native Extensions manager integrations."""
 
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import tempfile
@@ -26,6 +27,7 @@ EXTENSIONS = {
     "l2tpipsec": "l2tpipsec_app",
     "openvpn": "openvpn_app",
     "tailscale": "tailscale_app",
+    "smartphone": "smartphone_app",
     "dumaos": "dumaos_app",
 }
 SH = shutil.which("sh") or (str(Path("C:/Program Files/Git/bin/sh.exe")) if Path("C:/Program Files/Git/bin/sh.exe").exists() else None)
@@ -249,12 +251,15 @@ dofile(arg[1])
                     if architecture == "mips" and title == "AdGuard Home":
                         continue
                     self.assertIn(f'href="{url}">{title}</a>', result.stdout)
+                # On ARMv7 both the aMule WebUI (follow-up gate fix) and DumaOS are linked.
                 architecture_url, architecture_title = (
                     ("/desktop/", "DumaOS") if architecture == "armv7"
                     else (f"http://{address}:4711/", "aMule")
                 )
                 self.assertIn(f'href="{architecture_url}">{architecture_title}</a>', result.stdout)
-                self.assertEqual(result.stdout.count('class="card-direct-link"'), 8 if architecture == "armv7" else 7)
+                if architecture == "armv7":
+                    self.assertIn(f'href="http://{address}:4711/">aMule</a>', result.stdout)
+                self.assertEqual(result.stdout.count('class="card-direct-link"'), 9 if architecture == "armv7" else 7)
                 self.assertNotIn('>WireGuard</a>', result.stdout)
                 modal = subprocess.run(
                     ["lua", "-", str(MODAL), installed, architecture, host], input=harness,
@@ -784,6 +789,43 @@ uci() { return 1; }
         self.assertNotIn("firewall.dumaos_ui=rule", dumaos)
         self.assertNotIn("curl | sh", dumaos)
         self.assertNotIn("curl | ash", dumaos)
+
+    def test_smartphone_app_lifecycle_is_selfcontained_and_gated(self):
+        installer = INSTALLER.read_text()
+        start = installer.index("app_smartphone()")
+        end = installer.index("\ncall_app_type()", start)
+        function = installer[start:end]
+        # A subshell isolates the installer's traps, exits and helpers.
+        self.assertTrue(function.startswith("app_smartphone() ("))
+        self.assertIn("trap rollback EXIT", function)
+        self.assertIn("trap 'exit 1' HUP INT TERM", function)
+        self.assertIn("trap - EXIT HUP INT TERM", function)
+        # ADB comes from the configured feeds and is only removed when owned.
+        self.assertIn("ensure_adb", function)
+        self.assertIn('printf \'adb\\n\' > "$adb_owned"', function)
+        self.assertIn("opkg remove adb", function)
+        # Fresh installs refuse foreign files, refresh restores the backup.
+        self.assertIn("Refusing to overwrite a pre-existing Smartphone app file", function)
+        self.assertIn("Incomplete Smartphone app archive", function)
+        self.assertIn("tar -xzf \"$backup\" -C \"$stage\"", function)
+        self.assertIn("sha256sum \"$archive\" | awk '{print $1}' > \"$archive_hash\"", function)
+        # Legacy DNS hook migrates into the single uplink init script.
+        self.assertIn("/etc/init.d/modgui-smartphone-dns", function)
+        self.assertIn("/etc/init.d/modgui-smartphone-uplink enable", function)
+        # Removal must not strand a reachable VPN-sharing policy on the phone.
+        self.assertIn("VPN_SHARE|Attiva", function)
+        self.assertIn("stop_vpn", function)
+        self.assertIn("set_state 1", function)
+        self.assertIn("set_state 0", function)
+
+    def test_smartphone_install_list_matches_deck(self):
+        installer = INSTALLER.read_text()
+        start = installer.index("app_smartphone()")
+        files_match = re.search(r'files="([^"]+)"', installer[start:start + 2000])
+        self.assertIsNotNone(files_match)
+        deck = ROOT / "decompressed/smartphone"
+        for file in files_match.group(1).split():
+            self.assertTrue((deck / file).is_file(), file)
 
     def test_arm_only_extensions_are_hidden_on_mips(self):
         modal = MODAL.read_text()

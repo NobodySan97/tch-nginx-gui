@@ -1,5 +1,6 @@
 """Test the privileged Android RPC and voice form with the real form framework."""
 from pathlib import Path
+import os
 import shutil
 import subprocess
 import unittest
@@ -18,7 +19,9 @@ class SmartphoneVoiceTest(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_distributed_modals_compile_and_have_access_rules(self):
-        self.assertTrue((PHONE / 'usr/bin/phone_stats.sh').stat().st_mode & 0o111)
+        # Windows filesystems do not export the executor bit through stat().
+        if os.name == 'posix':
+            self.assertTrue((PHONE / 'usr/bin/phone_stats.sh').stat().st_mode & 0o111)
         self.assertIn('"smartphone"', (ROOT / 'inizialize_gui.sh').read_text())
         rules = (GUI / 'tmp/web_unlock').read_text()
         self.assertNotIn('/modals/smartphone-modal.lp', rules)

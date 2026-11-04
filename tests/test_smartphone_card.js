@@ -2,7 +2,7 @@ const assert = require('assert');
 const fs = require('fs');
 const vm = require('vm');
 const card = fs.readFileSync('decompressed/smartphone/www/cards/017_smartphone.lp', 'utf8');
-const client = card.match(/<script>\n([\s\S]*?)\n<\/script>/)[1];
+const client = card.match(/<script>\r?\n([\s\S]*?)\r?\n<\/script>/)[1];
 const shared = fs.readFileSync('decompressed/gui_file/www/docroot/js/shared-script.js', 'utf8');
 const factory = shared.slice(shared.indexOf('\tfunction createAjaxUpdateCard('), shared.indexOf('\n\tfunction linkCheckUpdate()'));
 let element = {}, requests = [], timers = new Map(), nextTimer = 0;

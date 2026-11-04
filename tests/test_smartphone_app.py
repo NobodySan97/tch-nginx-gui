@@ -20,11 +20,14 @@ class SmartphoneAppTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
+        # MSYS sh cannot keep backslash escapes in unquoted assignments;
+        # use forward slashes so the installed root survives every quoting style.
+        self.rootdir = str(self.root).replace(os.sep, '/') if os.sep != '/' else str(self.root)
         for folder in ('tmp', 'opt', 'etc', 'bin', 'usr/bin'):
             (self.root / folder).mkdir(parents=True, exist_ok=True)
         self.bindir = self.root / 'bin'
-        self.env = dict(os.environ, PATH=f'{self.bindir}:/usr/bin:/bin',
-                        APP_FIXTURE=str(self.root), APP_REAL_TAR=shutil.which('tar'))
+        self.env = dict(os.environ, PATH=f'{self.rootdir}/bin:/usr/bin:/bin',
+                        APP_FIXTURE=self.rootdir, APP_REAL_TAR=shutil.which('tar'))
         self.write_mock('tar', '''
 # Match the reduced tar feature set shipped by Technicolor BusyBox.
 case "$1" in *j*) echo 'unsupported tar bzip2 option' >&2; exit 1 ;; esac
@@ -49,11 +52,12 @@ esac
         self.archive()
         source = INSTALLER.read_text()
         for prefix in ('/tmp/', '/opt/', '/etc/', '/usr/', '/var/run/'):
-            source = source.replace(prefix, str(self.root) + prefix)
-        source = source.replace('"/$file"', f'"{self.root}/$file"')
-        source = source.replace('-C /', '-C ' + shlex.quote(str(self.root)))
-        source = source.replace(str(self.root / 'etc/init.d/transformer'), str(self.bindir / 'restart'))
-        source = source.replace(str(self.root / 'etc/init.d/nginx'), str(self.bindir / 'restart'))
+            source = source.replace(prefix, self.rootdir + prefix)
+        source = source.replace('"/$file"', f'"{self.rootdir}/$file"')
+        source = source.replace('-C /', '-C ' + shlex.quote(self.rootdir))
+        source = source.replace('mkdir -p /opt', 'mkdir -p ' + shlex.quote(self.rootdir + '/opt'))
+        source = source.replace(self.rootdir + '/etc/init.d/transformer', self.rootdir + '/bin/restart')
+        source = source.replace(self.rootdir + '/etc/init.d/nginx', self.rootdir + '/bin/restart')
         self.script = self.root / 'installer.sh'
         self.script.write_text(source)
 
@@ -94,7 +98,9 @@ esac
         self.assert_ok(self.run_app('install'))
         self.assertTrue((self.root / 'etc/.modgui-smartphone-installed').exists())
         self.assertTrue((self.root / 'www/cards/017_smartphone.lp').is_file())
-        self.assertTrue((self.root / 'usr/bin/phone_stats.sh').stat().st_mode & 0o111)
+        # Windows filesystems do not export the executor bit through stat().
+        if os.name == 'posix':
+            self.assertTrue((self.root / 'usr/bin/phone_stats.sh').stat().st_mode & 0o111)
         commands = (self.root / 'opkg.log').read_text()
         self.assertEqual(commands.splitlines(), ['update', 'install adb'])
         self.assertIn('web.smartphonemodal.target=/modals/smartphone-modal.lp',
@@ -175,8 +181,8 @@ esac
         start = source.index('  if [ -f /etc/.modgui-smartphone-installed ]; then')
         block = source[start:source.index('  # Reconcile stale flags', start)]
         for prefix in ('/tmp/', '/opt/', '/etc/', '/usr/', '/www/'):
-            block = block.replace(prefix, str(self.root) + prefix)
-        manager = str(self.root / 'usr/share/transformer/scripts/appInstallRemoveUtility.sh')
+            block = block.replace(prefix, self.rootdir + prefix)
+        manager = self.rootdir + '/usr/share/transformer/scripts/appInstallRemoveUtility.sh'
         block = block.replace(manager, 'sh ' + shlex.quote(str(self.script)))
         result = subprocess.run(['sh', '-c', 'logecho() { :; }\n' + block],
                                 env=self.env, capture_output=True, text=True, timeout=10)
