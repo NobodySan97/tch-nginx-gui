@@ -176,7 +176,7 @@ ngx = {
 }
 package.preload["datamodel"] = function()
     return { get = function(path)
-        return {{value = path:find("CPUtype") and arg[3] or "19.4"}}
+        return {{value = path:find("Supported$") and (arg[5] or "1") or (path:find("CPUtype") and arg[3] or "19.4")}}
     end }
 end
 package.preload["web.content_helper"] = function()
@@ -195,7 +195,11 @@ package.preload["web.ui_helper"] = function()
         end,
     }, { __index = function() return function() return "" end end })
 end
-io.popen = function() return {read = function() return "0" end, close = function() end} end
+io.popen = function(command)
+    assert(not command:find("check tun", 1, true), "Web worker must not run opkg probes")
+    assert(not command:find("check wireguard", 1, true), "Web worker must not run opkg probes")
+    return {read = function() return "0" end, close = function() end}
+end
 io.open = function(path)
     if path ~= "/opt/AdGuardHome/AdGuardHome.yaml" then return nil end
     local lines = {"http:", "  address: 0.0.0.0:8081", "dns:", "  port: 53"}
@@ -354,7 +358,8 @@ dofile(arg[1])
         self.assertIn("option allow_lan '0'", defaults)
         self.assertIn("option allow_wan '0'", defaults)
         self.assertNotIn("firewall.modgui_wireguard_udp=rule", wireguard)
-        self.assertIn("kernel_has_tun", modal)
+        self.assertIn("rpc.system.modgui.TunSupported", modal)
+        self.assertIn("rpc.system.modgui.WireGuardSupported", modal)
         self.assertIn("no reviewed TUN module", modal)
 
     @unittest.skipUnless(SH, "POSIX shell required")

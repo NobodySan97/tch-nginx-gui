@@ -14,29 +14,15 @@ local cputype = (cputype_res and cputype_res[1] and cputype_res[1].value) or ""
 
 local extension_supported = 0
 
-local _kernel_has_tun = nil
-local function kernel_has_tun()
-	if _kernel_has_tun ~= nil then
-		return _kernel_has_tun
-	end
-	local command = io.popen("[ -c /dev/net/tun ] || zcat /proc/config.gz 2>/dev/null | grep -q '^CONFIG_TUN=y$'; echo $?", "r")
-	if not command then
-		_kernel_has_tun = false
-		return false
-	end
-	local result = command:read("*line")
-	command:close()
-	_kernel_has_tun = (result == "0")
-	return _kernel_has_tun
+-- Capability probes must not run in the nginx worker: legacy opkg locks
+-- even for reads, so the root-side result is exposed by the RPC mapper.
+local function vpn_supported(name)
+    local result = proxy.get("rpc.system.modgui." .. name)
+    return result and result[1] and result[1].value == "1"
 end
 
 local function tun_install_supported()
-	if kernel_has_tun() then return true end
-	local command = io.popen("[ \"$(uname -r)\" = 4.1.52 ] && { [ \"$(uci -q get version.@version[0].kernel)\" = ac8d9a0575131475c4002132bf4995cb96c6f99d ] || uci -q get version.@version[0].version | grep -q '^19\\.4'; }; echo $?", "r")
-	if not command then return false end
-	local result = command:read("*line")
-	command:close()
-	return result == "0"
+    return vpn_supported("TunSupported")
 end
 
 local mv = 0

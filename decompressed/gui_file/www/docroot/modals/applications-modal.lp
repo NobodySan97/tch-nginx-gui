@@ -235,23 +235,14 @@ local function append_extension_card(state_key, app, title, description, link, c
 	html[#html+1] = "</div>"
 end
 
-local function kernel_has_tun()
-	local command = io.popen("[ -c /dev/net/tun ] || zcat /proc/config.gz 2>/dev/null | grep -q '^CONFIG_TUN=y$'; echo $?", "r")
-	if not command then
-		return false
-	end
-	local result = command:read("*line")
-	command:close()
-	return result == "0"
+local function native_wireguard_supported()
+    local result = proxy.get("rpc.system.modgui.WireGuardSupported")
+    return result and result[1] and result[1].value == "1"
 end
 
 local function tun_install_supported()
-	if kernel_has_tun() then return true end
-	local command = io.popen("[ \"$(uname -m)\" = armv7l ] && [ \"$(uname -r)\" = 4.1.52 ]; echo $?", "r")
-	if not command then return false end
-	local result = command:read("*line")
-	command:close()
-	return result == "0"
+    local result = proxy.get("rpc.system.modgui.TunSupported")
+    return result and result[1] and result[1].value == "1"
 end
 
 if StateParams["luci_webui"] ~= nil then
@@ -428,12 +419,12 @@ if StateParams["openspeedtest_application"] ~= nil then
 end
 
 if StateParams["wireguard_application"] ~= nil then
-	if tun_install_supported() then
+	if native_wireguard_supported() or tun_install_supported() then
 		append_extension_card(
 			"wireguard_application",
 			"wireguard",
 			T"WireGuard",
-			T"Installs the checksum-verified userspace WireGuard runtime and a native card to configure the tunnel interface, peers and firewall rules. Everything stays disabled until configured.",
+			T"Installs native WireGuard matching the running kernel from the configured package feeds, or the userspace runtime when unavailable, and a card to configure the tunnel interface, peers and firewall rules. Everything stays disabled until configured.",
 			nil,
 			false
 		)

@@ -50,12 +50,76 @@ device_type="${device_type:-$(uci get -q env.var.prod_name)}"
 marketing_version="$(uci get -q version.@version[0].marketing_version)"
 cpu_type="$(uname -m)"
 
+# opkg also reads /etc/opkg/*.conf. Check each source name separately so
+# partially configured feeds are completed without duplicating custom feeds.
+append_missing_opkg_feeds() {
+  local feed_type feed_name feed_url config
+  set -- "$opkg_file"
+  for config in "$opkg_config_dir"/*.conf; do
+    [ ! -f "$config" ] || set -- "$@" "$config"
+  done
+  while read -r feed_type feed_name feed_url; do
+    if ! awk -v name="$feed_name" '
+      ($1 == "src" || $1 == "src/gz") && $2 == name { found = 1 }
+      END { exit !found }
+    ' "$@"; then
+      printf '%s %s %s\n' "$feed_type" "$feed_name" "$feed_url" >> "$opkg_file"
+    fi
+  done
+}
+
+# Add the published application feed and the index for the running kernel.
+# Probe only the kernel index: unsupported releases must not add a dead feed.
+append_gui_vpn_feeds() {
+  local running_kernel platform profile feed_url has_kernel_feed
+  running_kernel="$(uname -r)"
+  case "$running_kernel" in ''|*[!A-Za-z0-9._+-]*) return 1 ;; esac
+  append_missing_opkg_feeds <<EOF
+src/gz modgui_base https://francyesco.github.io/GUI_ipk/base
+EOF
+  platform="$(uci -q get 'version.@version[0].product' 2>/dev/null || true)"
+  platform="$(printf '%s' "${platform%%_*}" | tr -cd 'A-Za-z0-9' | tr 'A-Z' 'a-z')"
+  has_kernel_feed=0
+  for profile in "" ${platform:+"$platform"}; do
+    feed_url="https://francyesco.github.io/GUI_ipk/kernel/$running_kernel${profile:+-$profile}"
+    if curl -fsL "$feed_url/Packages.gz" -o /dev/null; then
+      has_kernel_feed=1
+      append_missing_opkg_feeds <<EOF
+src/gz modgui_kernel_$running_kernel${profile:+_$profile} $feed_url
+EOF
+    fi
+  done
+  # The standalone Broadcom packages use the SDK architecture alias.
+  if [ "$has_kernel_feed" = 1 ] && ! opkg print-architecture | awk '$2 == "brcm963xx" {found=1} END {exit !found}'; then
+    printf '\narch brcm963xx 100\n' >> "$opkg_file"
+  fi
+  return 0
+}
+
+remove_legacy_kernel_feed() {
+  local config feed_name directory
+  for config in "$opkg_file" "$opkg_config_dir"/*.conf; do
+    [ -f "$config" ] || continue
+    for feed_name in $(awk '$1 ~ /^src(\/gz)?$/ && $3 ~ /^https?:\/\/raw\.githubusercontent\.com\/Ansuel\/GUI_ipk\/kernel-4\.1\/target\/packages\/?$/ {print $2}' "$config"); do
+      case "$feed_name" in ''|*[!A-Za-z0-9_.-]*) continue ;; esac
+      # Removed feeds can leave usable stale indexes after opkg update.
+      for directory in /var/opkg-lists /tmp/opkg-lists /usr/lib/opkg/lists $(awk '$1 == "lists_dir" {print $NF}' "$opkg_file" "$opkg_config_dir"/*.conf 2>/dev/null); do
+        rm -f "$directory/$feed_name"
+      done
+    done
+    sed -i '\|^[[:space:]]*src[^[:space:]]*[[:space:]][[:space:]]*[^[:space:]]*[[:space:]][[:space:]]*https\?://raw\.githubusercontent\.com/Ansuel/GUI_ipk/kernel-4\.1/target/packages/*[[:space:]]*\(#.*\)\{0,1\}$|d' "$config"
+  done
+}
+
 apply_right_opkg_repo() {
   logecho "Checking opkg feeds..."
 
   opkg_file="/etc/opkg.conf"
+  opkg_config_dir="/etc/opkg"
+  remove_legacy_kernel_feed
 
   if [ "$cpu_type" = "armv7l" ]; then
+    append_gui_vpn_feeds
     case $marketing_version in
     "19."* | "20."*)
       sed -i '/homeware\/18\/brcm63xx-tch/d' /etc/opkg.conf #remove old setted feeds
@@ -72,7 +136,6 @@ src/gz chaos_calmer_packages https://raw.githubusercontent.com/Ansuel/GUI_ipk/ke
 src/gz chaos_calmer_luci https://raw.githubusercontent.com/Ansuel/GUI_ipk/kernel-4.1/luci
 src/gz chaos_calmer_routing https://raw.githubusercontent.com/Ansuel/GUI_ipk/kernel-4.1/routing
 src/gz chaos_calmer_telephony https://raw.githubusercontent.com/Ansuel/GUI_ipk/kernel-4.1/telephony
-src/gz chaos_calmer_core https://raw.githubusercontent.com/Ansuel/GUI_ipk/kernel-4.1/target/packages
 EOF
       fi
       sed -i '/repository\.macoers\.com/d' /etc/opkg.conf #remove unmaintained macoers feeds
@@ -88,19 +151,16 @@ src/gz chaos_calmer_packages https://raw.githubusercontent.com/Ansuel/GUI_ipk/ke
 src/gz chaos_calmer_luci https://raw.githubusercontent.com/Ansuel/GUI_ipk/kernel-4.1/luci
 src/gz chaos_calmer_routing https://raw.githubusercontent.com/Ansuel/GUI_ipk/kernel-4.1/routing
 src/gz chaos_calmer_telephony https://raw.githubusercontent.com/Ansuel/GUI_ipk/kernel-4.1/telephony
-src/gz chaos_calmer_core https://raw.githubusercontent.com/Ansuel/GUI_ipk/kernel-4.1/target/packages
 EOF
       fi
       sed -i '/repository\/homeware\/18\/brcm63xx-tch/d' /etc/opkg.conf #remove old setted feeds
-      if ! grep -q "homeware/18/brcm63xx-tch" $opkg_file; then
-        cat <<EOF >>$opkg_file
+      append_missing_opkg_feeds <<EOF
 src/gz chaos_calmer_base_macoers https://repository.macoers.com/homeware/18/brcm63xx-tch/VANTW/base
 src/gz chaos_calmer_packages_macoers https://repository.macoers.com/homeware/18/brcm63xx-tch/VANTW/packages
 src/gz chaos_calmer_luci_macoers https://repository.macoers.com/homeware/18/brcm63xx-tch/VANTW/luci
 src/gz chaos_calmer_routing_macoers https://repository.macoers.com/homeware/18/brcm63xx-tch/VANTW/routing
 src/gz chaos_calmer_telephony_macoers https://repository.macoers.com/homeware/18/brcm63xx-tch/VANTW/telephony
 EOF
-      fi
       ;;
     "17.3"*)
       sed -i '/roleo\/public\/agtef\/brcm63xx-tch/d' /etc/opkg.conf #remove old setted feeds

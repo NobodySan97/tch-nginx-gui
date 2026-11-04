@@ -92,7 +92,11 @@ elif [ -z "${kernel_ver##4.1.38*}" ]; then
          /tmp/upgrade-pack-specificDGA/usr/lib/opkg \
          /tmp/upgrade-pack-specificDGA/tmp/ripdrv.ko 2>/dev/null || true
   move_files_and_clean /tmp/upgrade-pack-specificDGA/
-  opkg install /tmp/4.1.38_ipk/*
+
+  #Replace the wget applet provided by BusyBox to fix https repos download issue
+  opkg --force-overwrite install /tmp/4.1.38_ipk/wget_*.ipk
+  #Install telnet, openssl-util and update openssl (for security reason)
+  opkg install /tmp/4.1.38_ipk/*.ipk
   rm -rf /tmp/4.1.38_ipk
 
 else # modern kernels (19.x/20.x using 4.1.52)

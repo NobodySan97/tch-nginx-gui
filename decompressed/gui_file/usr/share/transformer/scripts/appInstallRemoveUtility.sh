@@ -3,6 +3,10 @@
 marketing_version="$(uci get -q version.@version[0].marketing_version)"
 cpu_type="$(uname -m)"
 
+dumaos_platform_supported() {
+  case "$cpu_type:$(uname -r)" in armv7*:4.1.52*) return 0 ;; *) return 1 ;; esac
+}
+
 # Shared TUN lifecycle for WireGuard, OpenVPN and Tailscale.  The reviewed
 # DGA4130 module is for ARMv7 kernel 4.1.52; other platforms may use their matching
 # kmod-tun package.  Per-extension users prevent one VPN from removing a
@@ -17,6 +21,20 @@ modgui_tun_boot="/etc/modules.d/30-modgui-tun"
 modgui_has_tun() {
   [ -c /dev/net/tun ] && return 0
   [ -r /proc/config.gz ] && zcat /proc/config.gz 2>/dev/null | grep -q '^CONFIG_TUN=y$'
+}
+
+modgui_wait_tun() {
+  # Manual-only modules need a misc device node on older mdev firmwares.
+  if [ ! -e /dev/net/tun ] && [ "$(cat /sys/class/misc/tun/dev 2>/dev/null)" = 10:200 ]; then
+    mkdir -p /dev/net && mknod /dev/net/tun c 10 200 || return 1
+  fi
+  tun_attempt=0
+  until modgui_has_tun; do
+    tun_attempt=$((tun_attempt + 1))
+    [ "$tun_attempt" -lt 4 ] || return 1
+    # hotplug may create /dev/net/tun after modprobe/insmod has returned.
+    sleep 1
+  done
 }
 
 modgui_reviewed_tun_build() {
@@ -39,6 +57,42 @@ modgui_tun_migrate_owners() {
 modgui_install_tun() {
   consumer="$1"
   modgui_tun_migrate_owners
+  # A device node proves registration, not ABI compatibility. The legacy
+  # ARM 4.1.38 package can load and crash only when creating an interface.
+  if ! modgui_reviewed_tun_build; then
+    tun_installed="$(opkg status kmod-tun 2>/dev/null)"
+    if printf '%s\n' "$tun_installed" | grep -q '^Status:.*installed'; then
+      tun_candidate="$(modgui_kernel_package '^kmod-tun(-|$)')"
+      [ -n "$tun_candidate" ] || return 1
+      tun_selected="$(opkg status "$tun_candidate" 2>/dev/null)"
+      if ! printf '%s\n' "$tun_selected" | grep -q '^Status:.*installed' ||
+          ! modgui_kernel_abi_matches "$tun_candidate" "$tun_selected"; then
+        [ -f "$modgui_tun_owned" ] || {
+          echo "An unverified TUN is installed; replace it with $tun_candidate before starting a VPN"
+          return 1
+        }
+        # Upgrade only GUI-owned modules, using the normal opkg dependency
+        # resolver. An active tunnel must prevent migration before any write.
+        tun_migration_unloaded=0
+        if grep -q '^tun ' /proc/modules; then
+          rmmod tun 2>/dev/null || { echo "TUN is in use; stop its VPNs before upgrading"; return 1; }
+          tun_migration_unloaded=1
+        fi
+        if ! opkg install "$tun_candidate"; then
+          # A failed preinst must not leave the previous installation unloaded.
+          [ "$tun_migration_unloaded" = 0 ] || modprobe tun 2>/dev/null || true
+          return 1
+        fi
+        tun_selected="$(opkg status "$tun_candidate" 2>/dev/null)"
+        printf '%s\n' "$tun_selected" | grep -q '^Status:.*installed' &&
+          modgui_kernel_abi_matches "$tun_candidate" "$tun_selected" || return 1
+        modprobe tun 2>/dev/null || insmod "/lib/modules/$(uname -r)/tun.ko" 2>/dev/null || return 1
+        modgui_wait_tun || return 1
+        printf '%s\n' "$tun_candidate" > "$modgui_tun_package_owned"
+        printf 'tun\n' > "$modgui_tun_boot"
+      fi
+    fi
+  fi
   if modgui_has_tun; then
     [ ! -f "$modgui_tun_owned" ] || touch "/etc/.modgui-tun-user-$consumer"
     return 0
@@ -59,7 +113,9 @@ modgui_install_tun() {
         rm -f "$tun_tmp"
         return 1
       }
+      mkdir -p "$(dirname "$modgui_tun_file")" || { rm -f "$tun_tmp"; return 1; }
       cp "$tun_tmp" "$modgui_tun_file" || { rm -f "$tun_tmp"; return 1; }
+      chmod 644 "$modgui_tun_file"
       rm -f "$tun_tmp"
     fi
     modprobe tun 2>/dev/null || insmod "$modgui_tun_file" 2>/dev/null || return 1
@@ -69,16 +125,22 @@ modgui_install_tun() {
     return 0
   fi
 
-  if ! opkg list-installed 2>/dev/null | grep -q '^kmod-tun '; then
-    opkg install kmod-tun || return 1
-    touch "$modgui_tun_package_owned"
+  tun_candidate="$(modgui_kernel_package '^kmod-tun(-|$)')"
+  [ -n "$tun_candidate" ] || {
+    echo "No TUN package with matching kernel/ABI is available"
+    return 1
+  }
+  if ! opkg list-installed 2>/dev/null | awk -v package="$tun_candidate" '$1 == package {found=1} END {exit !found}'; then
+    opkg install "$tun_candidate" || return 1
+    printf '%s\n' "$tun_candidate" > "$modgui_tun_package_owned"
   fi
-  modprobe tun 2>/dev/null || true
-  modgui_has_tun || {
+  modprobe tun 2>/dev/null || insmod "/lib/modules/$(uname -r)/tun.ko" 2>/dev/null || true
+  modgui_wait_tun || {
     echo "No compatible TUN module is available for this firmware"
     return 1
   }
   [ ! -f "$modgui_tun_package_owned" ] || {
+    printf 'tun\n' > "$modgui_tun_boot"
     touch "$modgui_tun_owned" "/etc/.modgui-tun-user-$consumer"
   }
 }
@@ -99,7 +161,10 @@ modgui_release_tun() {
   fi
   rm -f "$modgui_tun_boot"
   if [ -f "$modgui_tun_package_owned" ]; then
-    opkg remove kmod-tun >/dev/null 2>&1 || return 0
+    tun_owned_package="$(cat "$modgui_tun_package_owned")"
+    [ -n "$tun_owned_package" ] || tun_owned_package=kmod-tun
+    case "$tun_owned_package" in kmod-tun|kmod-tun-*) ;; *) return 1 ;; esac
+    opkg remove "$tun_owned_package" >/dev/null 2>&1 || return 0
     rm -f "$modgui_tun_package_owned"
   elif [ -f "$modgui_tun_file" ] &&
     [ "$(sha256sum "$modgui_tun_file" | awk '{print $1}')" = "$modgui_tun_sha256" ]; then
@@ -1590,6 +1655,192 @@ CONF_END
   esac
 }
 
+# Reject an explicit dependency mismatch, or a different virtual kernel ABI
+# published alongside the module. Release/vermagic alone does not establish ABI compatibility.
+modgui_kernel_abi_matches() (
+  abi_package="$1"
+  abi_metadata="$2"
+  installed_kernel="$(opkg status kernel 2>/dev/null | sed -n 's/^Version: //p' | head -n 1)"
+  [ -n "$installed_kernel" ] || return 0
+  required_kernel="$(printf '%s\n' "$abi_metadata" | sed -n 's/.*kernel (= \([^)]*\)).*/\1/p' | head -n 1)"
+  if [ -n "$required_kernel" ]; then
+    [ "$required_kernel" = "$installed_kernel" ]
+    return $?
+  fi
+  abi_confirmed=0
+  set -- /var/opkg-lists /usr/lib/opkg/lists
+  for config in /etc/opkg.conf /etc/opkg/*.conf; do
+    [ -f "$config" ] || continue
+    for directory in $(awk '$1 == "lists_dir" {print $NF}' "$config"); do
+      set -- "$@" "$directory"
+    done
+  done
+  for directory in "$@"; do
+    for index in "$directory"/*; do
+      [ -f "$index" ] || continue
+      # opkg can retain gzip-compressed indexes on these firmwares.
+      feed_kernel="$( (gzip -dc "$index" 2>/dev/null || cat "$index") | awk -v wanted="$abi_package" '
+        BEGIN {RS=""; FS="\n"}
+        {
+          name=""; version=""
+          for (i=1; i<=NF; i++) {
+            if ($i ~ /^Package: /) name=substr($i,10)
+            if ($i ~ /^Version: /) version=substr($i,10)
+          }
+          if (name == wanted) has_module=1
+          if (name == "kernel") kernel=version
+        }
+        END {if (has_module && kernel != "") print kernel}
+      ')"
+      [ -n "$feed_kernel" ] || continue
+      abi_confirmed=1
+      if [ "$feed_kernel" != "$installed_kernel" ]; then
+        echo "Kernel ABI mismatch for $abi_package: installed $installed_kernel, feed $feed_kernel" >&2
+        return 1
+      fi
+    done
+  done
+  [ "$abi_confirmed" = 1 ] || {
+    echo "Unverified kernel ABI for $abi_package: refusing an unpinned module" >&2
+    return 1
+  }
+  return 0
+)
+
+# Resolve modules from configured opkg indexes for the running kernel.
+modgui_kernel_package() (
+  package_pattern="$1"
+  running_kernel="$(uname -r)"
+  # Never choose an unpinned legacy build ahead of a model-specific package.
+  # Complete each opkg read before starting another (old opkg locks for reads).
+  candidates="$(opkg list | awk -v pattern="$package_pattern" '$1 ~ pattern {print $1}')"
+  for selection in pinned legacy; do
+    for candidate in $candidates; do
+      metadata="$(opkg info "$candidate")"
+      dependency_kernel="$(printf '%s\n' "$metadata" | sed -n 's/.*kernel (= \([^)]*\)).*/\1/p' | head -n 1)"
+      if [ "$selection" = pinned ]; then
+        [ -n "$dependency_kernel" ] || continue
+      else
+        [ -z "$dependency_kernel" ] || continue
+      fi
+      modgui_kernel_abi_matches "$candidate" "$metadata" || continue
+      package_kernel="$(printf '%s\n' "$metadata" | sed -n 's/^Version: //p' | head -n 1)"
+      case "$package_kernel" in
+        "$running_kernel"|"$running_kernel"-*|"$running_kernel"+*) printf '%s\n' "$candidate"; return 0 ;;
+      esac
+      case "$dependency_kernel" in
+        "$running_kernel"|"$running_kernel"-*|"$running_kernel"+*) printf '%s\n' "$candidate"; return 0 ;;
+      esac
+    done
+  done
+)
+
+modgui_load_wireguard() {
+  modprobe udp_tunnel 2>/dev/null || return 1
+  modprobe ip6_udp_tunnel 2>/dev/null || return 1
+  grep -q '^wireguard ' /proc/modules && return 0
+  modprobe wireguard 2>/dev/null || insmod "/lib/modules/$(uname -r)/wireguard.ko"
+}
+
+# Migration only: wireguard-tools replaces Go-owned files. Keep the installed
+# package for rollback if installing the native tools fails.
+modgui_backup_wireguard_go() (
+  backup_dir="$1"
+  mkdir -p "$backup_dir/control" || exit 1
+  opkg status wireguard-go | awk '
+    /^Status:|^Installed-Time:/ {next}
+    /^Conffiles:/ {skip=1; next}
+    skip && /^ / {next}
+    {skip=0; print}
+  ' > "$backup_dir/control/control"
+  grep -q '^Package: wireguard-go$' "$backup_dir/control/control" || exit 1
+  for script in preinst postinst prerm postrm conffiles; do
+    [ ! -f "/usr/lib/opkg/info/wireguard-go.$script" ] ||
+      cp -p "/usr/lib/opkg/info/wireguard-go.$script" "$backup_dir/control/$script" || exit 1
+  done
+  opkg files wireguard-go | while IFS= read -r path; do
+    case "$path" in
+      /*) [ ! -d "$path" ] || [ -L "$path" ] || continue; printf '%s\n' "${path#/}" ;;
+    esac
+  done > "$backup_dir/files"
+  [ -s "$backup_dir/files" ] || exit 1
+  tar -czf "$backup_dir/data.tar.gz" -C / -T "$backup_dir/files" &&
+    tar -czf "$backup_dir/control.tar.gz" -C "$backup_dir/control" . || exit 1
+  printf '2.0\n' > "$backup_dir/debian-binary"
+  tar -czf "$backup_dir/go.ipk" -C "$backup_dir" debian-binary control.tar.gz data.tar.gz
+)
+
+modgui_install_native_wireguard() (
+  module_package="$1"
+  [ -n "$module_package" ] || exit 1
+  if [ -f /etc/.modgui-wireguard-native-installed ]; then
+    opkg install "$module_package" wireguard-tools && modgui_load_wireguard
+    exit $?
+  fi
+  if opkg list-installed | grep -q '^wireguard-go '; then
+    [ -f /etc/.modgui-wireguard-go-installed ] || {
+      echo "A pre-existing Go runtime must be migrated manually"; exit 1;
+    }
+    if uci -q show network | grep "\.proto='wireguard'" | grep -v modgui_wg0 >/dev/null 2>&1; then
+      echo "Other interfaces still use the Go runtime"; exit 1
+    fi
+    migrate_go=1
+  else
+    migrate_go=0
+  fi
+  umask 077
+  stage="$(mktemp -d /tmp/modgui-native.XXXXXX)" || exit 1
+  go_removed=0
+  tools_attempted=0
+  tunnel_stopped=0
+  module_owned=0
+  tools_owned=0
+  opkg list-installed | grep -q "^$module_package " || module_owned=1
+  opkg list-installed | grep -q '^wireguard-tools ' || tools_owned=1
+  rollback() {
+    result=$?
+    if [ "$result" != 0 ]; then
+      [ "$tools_attempted" = 0 ] || opkg remove wireguard-tools
+      [ "$module_owned" = 0 ] || opkg remove "$module_package"
+      rm -f /etc/.modgui-wireguard-native-installed /etc/modules.d/40-modgui-wireguard
+      if [ "$go_removed" = 1 ]; then
+        opkg install "$stage/go.ipk" || echo "Restore Go from $stage/go.ipk before retrying"
+      fi
+      [ "$tunnel_stopped" = 0 ] || ifup modgui_wg0
+      if [ "$go_removed" = 1 ] && ! opkg list-installed | grep -q '^wireguard-go '; then
+        return
+      fi
+    fi
+    rm -rf "$stage"
+  }
+  trap rollback EXIT
+  trap 'exit 1' HUP INT TERM
+  # opkg checks downloaded packages against its current feed metadata.
+  opkg install "$module_package" || exit 1
+  modgui_load_wireguard || exit 1
+  if [ "$migrate_go" = 1 ]; then
+    modgui_backup_wireguard_go "$stage" || exit 1
+    if [ "$(uci -q get wireguard.wg.enabled)" = 1 ]; then
+      tunnel_stopped=1
+      ifdown modgui_wg0 || exit 1
+    fi
+    opkg remove wireguard-go || exit 1
+    go_removed=1
+  fi
+  if [ "$tools_owned" = 1 ]; then
+    tools_attempted=1
+    opkg install wireguard-tools || exit 1
+  fi
+  /usr/bin/wg --version && [ -x /lib/netifd/proto/wireguard.sh ] || exit 1
+  mkdir -p /etc/modules.d || exit 1
+  printf 'udp_tunnel\nip6_udp_tunnel\nwireguard\n' > /etc/modules.d/40-modgui-wireguard || exit 1
+  { if [ "$module_owned" = 1 ]; then echo "$module_package"; fi
+    if [ "$tools_owned" = 1 ]; then echo wireguard-tools; fi
+  } > /etc/.modgui-wireguard-native-installed || exit 1
+  [ "$tunnel_stopped" = 0 ] || ifup modgui_wg0 || exit 1
+  rm -f /etc/.modgui-wireguard-go-installed
+)
+
 app_wireguard() {
   wireguard_commit="7ac8fe29a7ab64eb0c9c9774bb36cf2c7648399e"
   wireguard_version="2023.09.29"
@@ -1699,6 +1950,21 @@ app_wireguard() {
 
   case "$1" in
   install)
+    wireguard_module_package="$(modgui_kernel_package '^kmod-wireguard(-|$)')"
+    if [ -n "$wireguard_module_package" ]; then
+      opkg update || return 1
+      require_free_space 1024 /usr || return 1
+      modgui_install_native_wireguard "$wireguard_module_package" || return 1
+      wireguard_prepare_config || return 1
+      wireguard_register_gui
+      wireguard_backup_gui || return 1
+      /usr/share/transformer/scripts/wireguardApply.sh || return 1
+      modgui_release_tun wireguard
+      set_extension_state wireguard_app 1
+      /etc/init.d/transformer restart
+      /etc/init.d/nginx restart
+      return 0
+    fi
     case "$cpu_type" in
     armv7*)
       wireguard_arch="arm_cortex-a9"
@@ -1756,7 +2022,7 @@ app_wireguard() {
     /etc/init.d/nginx restart
     ;;
   remove)
-    if [ ! -f "$wireguard_owned" ] && opkg list-installed | grep -q '^wireguard-go '; then
+    if [ ! -f /etc/.modgui-wireguard-native-installed ] && [ ! -f "$wireguard_owned" ] && opkg list-installed | grep -q '^wireguard-go '; then
       echo "A pre-existing WireGuard runtime is installed; refusing to remove it"
       return 1
     fi
@@ -1776,6 +2042,14 @@ app_wireguard() {
     fi
     if [ -f "$wireguard_owned" ] && opkg list-installed | grep -q '^wireguard-go '; then
       opkg remove wireguard-go || return 1
+    fi
+    if [ -f /etc/.modgui-wireguard-native-installed ]; then
+      while read -r package; do
+        case "$package" in wireguard-tools|kmod-wireguard|kmod-wireguard-*)
+          opkg remove "$package" || return 1 ;;
+        esac
+      done < /etc/.modgui-wireguard-native-installed
+      rm -f /etc/modules.d/40-modgui-wireguard /etc/.modgui-wireguard-native-installed
     fi
     wireguard_remove_tun
     uci -q delete web.wireguard_card
@@ -2174,7 +2448,17 @@ app_openvpn() {
       return 1
     }
     if modgui_reviewed_tun_build; then
-      opkg install openvpn-easy-rsa openssl-util liblzo &&
+      # The reviewed standalone TUN avoids the incompatible legacy kmod-tun.
+      # Still install the additional userspace dependencies of newer runtimes.
+      openvpn_runtime_deps=""
+      openvpn_metadata="$(opkg info openvpn-openssl)"
+      for dependency in libcap-ng liblz4; do
+        if printf '%s\n' "$openvpn_metadata" | sed -n 's/^Depends: //p' |
+          tr ',' '\n' | grep -Eq "^[[:space:]]*$dependency([[:space:](]|$)"; then
+          openvpn_runtime_deps="$openvpn_runtime_deps $dependency"
+        fi
+      done
+      opkg install openvpn-easy-rsa openssl-util liblzo $openvpn_runtime_deps &&
         opkg install --nodeps --force-depends openvpn-openssl
     else
       opkg install openvpn-openssl openvpn-easy-rsa
@@ -2880,6 +3164,14 @@ call_app_type() {
 }
 
 case "$1" in
+check)
+  case "$2" in
+    dumaos) dumaos_platform_supported ;;
+    tun) modgui_has_tun || modgui_reviewed_tun_build || [ -n "$(modgui_kernel_package '^kmod-tun(-|$)')" ] ;;
+    wireguard) [ -d /sys/module/wireguard ] || [ -n "$(modgui_kernel_package '^kmod-wireguard(-|$)')" ] ;;
+    *) return 1 ;;
+  esac
+  ;;
 install | remove | stop | start | refresh)
   call_app_type "$1" "$2" "$3"
   ;;
