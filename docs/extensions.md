@@ -7,15 +7,17 @@ background, so reopen the card after an operation to refresh its state.
 | Extension | Architectures | Source | Notes |
 | --- | --- | --- | --- |
 | Adblock | ARM and MIPS | Configured `opkg` feeds | Enabled after installation and managed by its init service. |
+| aMule | ARMv7 and MIPS | ARM: configured `opkg` feed; MIPS: pinned checksum-verified legacy IPKs | Installs stopped. Writable USB storage is required to start; configuration and downloads survive removal. WebUI uses port 4711. |
 | rsyncd | ARM and MIPS | Configured `opkg` feeds | No unauthenticated shares are created. Configure `/etc/rsyncd.conf` before starting it. |
-| Ookla Speedtest | ARM, ARM64 | Official Ookla archive | A run is started from the card; reopen it to display the latest result. |
+| Ookla Speedtest | ARM, ARM64 | Official Ookla archive | Start opens the terminal with live progress and the result; the latest result is also retained in the card. |
 | OpenSpeedTest | All | Pinned OpenSpeedTest archive | Browser-based LAN/Wi-Fi test on port 5678; requires about 40 MB of free persistent storage. |
 | AdGuard Home | ARM, ARM64 | Official AdGuard stable archive | Installed under `/opt/AdGuardHome`; initial setup is available on port 3000. |
-| WireGuard | ARM, ARM64 with built-in or reviewed installable TUN | Pinned `openwrt-wireguard-go` package | Installs the userspace runtime and a card to manage the tunnel interface, peers and an opt-in firewall zone; everything stays disabled until configured. |
+| WireGuard | Matching native kernel package via opkg, else ARM/ARM64/MIPS with reviewed or GUI-installed TUN | Configured opkg feeds (native), legacy `wireguard-go` fallback | Prefers a native kernel package with kernel ABI validation over the userspace runtime; installs a card to manage the tunnel interface, peers and an opt-in firewall zone; everything stays disabled until configured. |
 | L2TP/IPsec VPN | ARMv7 and MIPS | Pinned `modgui-vpn`, configured opkg feeds | Adds the legacy strongSwan/xl2tpd server card; installation leaves the server disabled. |
 | OpenVPN | ARMv7 and MIPS with TUN | `openvpn-openssl`, `openvpn-easy-rsa` | Adds server and client tabs, user management, profile export and optional SSID-to-client routing; both modes install disabled. |
 | Tailscale | ARMv7, ARM64 with kernel TUN | Official pinned Tailscale static archive | Adds a native status card and controls for tailnet login, subnet routes, exit-node advertising, accepted routes and Tailscale SSH; installs disabled. |
-| DumaOS | ARMv7 | Pinned `dumaos-repack` 2.0-32 IPK | Installs the DumaOS 3.3.90 UI/QoS stack and links its authenticated interface from the Extensions card; requires a reboot after installation and removal. |
+| Smartphone USB | All (requires Android phone with USB tethering) | Bundled `decompressed/smartphone` module | Tethers the GUI to a smartphone uplink (fallback/primary) via ADB, with LTE stats, screen view and VPN sharing toggles. |
+| DumaOS | Supported ARMv7, kernel 4.1.52 | Pinned `dumaos-repack` 2.0-46 IPK | Installs the DumaOS 3.3.90 UI/QoS stack and links its authenticated interface from the Extensions card; other kernels (including 4.1.38) are rejected before installation. |
 
 AdGuard Home installation deliberately does not stop dnsmasq, claim DNS port 53,
 or change DHCP settings. Complete its first-run wizard and choose non-conflicting
@@ -74,15 +76,37 @@ removed when the service or extension is disabled. Removing the extension also
 deletes its local node identity, so the old machine entry may still need to be removed
 from the Tailscale admin console.
 
-The DumaOS integration pins the latest reviewed `dumaos-repack` release, `2.0-32`
-at commit `884a5351b3a7659f7bf8397ee079eec5ea33cfe0`, and verifies both the IPK and the
-optional Linux 4.1.52 `act_connmark` QoS module before installation. It is shown
-only on ARMv7 gateways and requires about 40 MB of persistent free space. The
-package replaces core `ubus` components with compatible MR22 versions, so reboot
-the gateway after installation and again after removal. Its name in the Extensions
+The DumaOS integration pins `dumaos-repack` release `2.0-46` and verifies both the IPK
+and the optional Linux 4.1.52 `act_connmark` QoS module before installation. It is shown
+only on supported ARMv7 gateways and requires about 40 MB of persistent free space. The
+published package supports kernel 4.1.52 and the AGTEF firmware ABI: the Extensions
+modal reports unsupported kernels (including 4.1.38) instead of offering installation.
+The package activates the MR22 `ubus` ABI transactionally, with a verified stock backup
+and automatic rollback on failed health checks; removal restores the stock stack.
+Its name in the Extensions
 card opens the authenticated DumaOS interface through the main gateway web server.
 The separate DumaOS card is removed on installation and GUI upgrades; the Extensions
 modal can still start and stop the two DumaOS services.
+
+aMule uses the configured feed on ARMv7 (`3.0.0-1`). MIPS uses the checksum-verified
+legacy archive at commit `4a262ed51847dc192d96a4e2c938540cc89a41db`, without running its
+upstream setup or removal scripts. Installation records the packages it adds; removal
+never forces dependency removal or removes packages that were already installed. An
+unmanaged installation is left intact and reported as such.
+
+The service starts only with writable USB storage, detects both whole disks and
+partitions, and keeps configuration under `sharing/config/amule` and downloads
+under `sharing/download/amule`. A new configuration uses a unique WebUI password
+stored in `/etc/modgui-amule.password` (readable by root) and available in the
+authenticated Extensions modal through a masked field with a Show password toggle.
+The original stays root-only; a separate mode-0400 copy is readable only by the
+nginx worker, and is deleted on removal. No password RPC is published. It binds external
+control to loopback. The password and USB data survive removal and reinstallation.
+Existing USB configuration, including its password, is preserved. No firewall or
+UPnP rule is added. Installation leaves the service stopped; Start and Stop are
+available on both architectures. The installer generates `/etc/init.d/amule`
+directly, without requiring a separate GUI init asset. Stop also terminates the matching `amuleweb`
+child that otherwise survives the daemon on older firmware.
 
 ## Hardware validation
 
