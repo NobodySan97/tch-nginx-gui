@@ -2,6 +2,8 @@
 import json
 import os
 from pathlib import Path
+import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -10,14 +12,31 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / 'decompressed/smartphone/usr/bin/phone_stats.sh'
 
+# NOTE(fork): the helper is a POSIX shell script; on Windows execute it with
+# the Git for Windows bundled sh and keep the mock bindir on a POSIX PATH.
+SH = shutil.which('sh') or shutil.which('sh.exe') or \
+     str(Path(os.environ.get('ProgramFiles', 'C:/Program Files'),
+              'Git', 'bin', 'sh.exe'))
+SH = SH if Path(SH).exists() else None
 
+
+def _msys_path(path):
+    """Convert a "C:/..." path to "/c/...": MSYS sh only resolves POSIX PATHs."""
+    path = str(path).replace(os.sep, '/')
+    if len(path) >= 3 and path[1:2] == ':':
+        return '/' + path[0].lower() + path[2:]
+    return path
+
+
+@unittest.skipUnless(SH, 'POSIX shell required')
 class PhoneStatsTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.directory = Path(self.temp.name)
         self.env = dict(os.environ, PATH=f'{self.directory}:/usr/bin:/bin',
-                        PHONE_TEST_DIR=str(self.directory))
+                        PHONE_TEST_DIR=str(self.directory),
+                        PHONE_TEST_SH=SH)
         self.write('timeout', '''#!/bin/sh
 if [ "$1" = --help ]; then
     if [ "$TIMEOUT_LEGACY" = 1 ]; then echo 'Usage: timeout [-t SECS] PROG ARGS';
@@ -29,7 +48,7 @@ case "$1" in ''|*[!0-9]*) exit 91 ;; esac
 shift
 exec "$@"
 ''')
-        self.write('adb', f'#!{sys.executable}\n' + '''import json, os, pathlib, subprocess, sys
+        self.write('adb', '''import json, os, pathlib, subprocess, sys
 root = pathlib.Path(os.environ['PHONE_TEST_DIR'])
 args = sys.argv[1:]
 with (root / 'adb.log').open('a') as log:
@@ -85,12 +104,12 @@ elif len(args) == 2 and args[1].startswith("su -c '"):
         print('0')
         print('TCH_STATUS|0')
     elif 'cleanup()' in command:
-        status = subprocess.run(['sh', '-c', command]).returncode
+        status = subprocess.run([os.environ.get('PHONE_TEST_SH', 'sh'), '-c', command]).returncode
         print('TCH_STATUS|' + str(status))
         sys.exit(0)
-''')
+''', python=True)
         # Simulate enough kernel state to execute the original remote transaction.
-        self.write('iptables', f'#!{sys.executable}\n' + '''import json, os, pathlib, sys
+        self.write('iptables', '''import json, os, pathlib, sys
 root = pathlib.Path(os.environ['PHONE_TEST_DIR']); args = sys.argv[1:]
 path = root / 'firewall.json'
 state = json.loads(path.read_text()) if path.exists() else []
@@ -115,8 +134,8 @@ elif op == '-S':
 elif op in ('-F', '-X'):
     state = [item for item in state if item[:2] != [table, chain]]
 path.write_text(json.dumps(state))
-''')
-        self.write('ip', f'#!{sys.executable}\n' + '''import os, pathlib, sys
+''', python=True)
+        self.write('ip', '''import os, pathlib, sys
 root = pathlib.Path(os.environ['PHONE_TEST_DIR']); args = sys.argv[1:]
 rule = root / 'rule'; route = root / 'route'
 if args == ['-o', '-4', 'addr', 'show', 'dev', 'usb0']:
@@ -135,27 +154,52 @@ elif args[:2] == ['route', 'add']:
     route.write_text('default dev tun0')
 elif args[:2] == ['route', 'flush']:
     if route.exists(): route.unlink()
-''')
+''', python=True)
         self.write('chown', '#!/bin/sh\nexit 0\n')
         self.write('od', '#!/bin/sh\nexit 127\n')  # Simulate a minimal BusyBox environment.
 
-    def write(self, name, content):
+    def write(self, name, content, python=False):
         path = self.directory / name
-        path.write_text(content)
+        if python:
+            # Shebangs cannot launch Python on Windows: wrap the fixture in an
+            # sh script that execs the interpreter with its source file.
+            module = self.directory / (name + '.py')
+            module.write_text(content)
+            interpreter = sys.executable.replace(os.sep, '/')
+            path.write_text(
+                '#!/bin/sh\nexec ' + shlex.quote(interpreter) +
+                ' ' + shlex.quote(str(module).replace(os.sep, '/')) + ' "$@"\n',
+                newline='\n')
+        else:
+            path.write_text(content, newline='\n')
         path.chmod(0o755)
 
     def run_phone(self, action='get_stats', **env):
         script = self.directory / 'phone_stats.sh'
-        source = SCRIPT.read_text().replace(
+        directory = str(self.directory).replace(os.sep, '/')
+        # Normalize CRLF checkouts: the PATH header must be spliced on an LF line.
+        source = SCRIPT.read_text().replace('\r\n', '\n').replace(
             '/usr/share/modgui-smartphone/radio.awk',
-            str(ROOT / 'decompressed/smartphone/usr/share/modgui-smartphone/radio.awk'))
-        source = source.replace('/sys/bus/usb/devices', str(self.directory / 'usb'))
-        source = source.replace('/sys/module/', str(self.directory / 'modules') + '/')
-        source = source.replace('/etc/modgui-smartphone-drivers.status', str(self.directory / 'drivers.status'))
-        source = source.replace('/usr/share/modgui-smartphone/uplink.lua', str(self.directory / 'uplink.lua'))
-        script.write_text(source.replace('/var/run/modgui-smartphone-screen', str(self.directory / 'screen')))
+            (ROOT / 'decompressed/smartphone/usr/share/modgui-smartphone/radio.awk').as_posix())
+        source = source.replace('/sys/bus/usb/devices', directory + '/usb')
+        source = source.replace('/sys/module/', directory + '/modules/')
+        source = source.replace('/etc/modgui-smartphone-drivers.status', directory + '/drivers.status')
+        source = source.replace('/usr/share/modgui-smartphone/uplink.lua', directory + '/uplink.lua')
+        source = source.replace('/var/run/modgui-smartphone-screen', directory + '/screen')
+        # Windows cannot create "2-1:1.0" directory names (colon = NTFS ADS);
+        # on Windows the interface glob marker is translated to "@" instead.
+        if os.name != 'posix':
+            source = source.replace('"$usb":*', '"$usb"@*')
+        # Bake the mock PATH into the rewritten helper: an exported PATH
+        # inherited via the process environment would be re-converted by MSYS
+        # when spawning POSIX binaries, so the script would fall back to the
+        # real system tools instead of the mocked bindir.
+        source = source.replace('#!/bin/sh\n', '#!/bin/sh\n' +
+                                'PATH=' + _msys_path(directory) + ':/usr/bin:/bin\nexport PATH\n', 1)
+        script.write_text(source, newline='\n')
         script.chmod(0o755)
-        return subprocess.run([str(script), action], env={**self.env, **env},
+        self.env['PATH'] = _msys_path(directory) + ':/usr/bin:/bin'
+        return subprocess.run([SH, str(script), action], env={**self.env, **env},
                               capture_output=True, text=True, timeout=15)
 
     def firewall(self):
@@ -189,7 +233,9 @@ elif args[:2] == ['route', 'flush']:
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         frame = self.directory / 'screen/frame.png'
         self.assertEqual(frame.read_bytes()[:8], bytes.fromhex('89504e470d0a1a0a'))
-        self.assertEqual(frame.stat().st_mode & 0o777, 0o640)
+        # Windows filesystems do not expose POSIX modes through os.stat().
+        if os.name == 'posix':
+            self.assertEqual(frame.stat().st_mode & 0o777, 0o640)
         self.assertFalse(list((self.directory / 'screen').glob('.capture.*')))
         self.assertIn('rm', (self.directory / 'adb.log').read_text())
 
@@ -267,19 +313,22 @@ elif args[:2] == ['route', 'flush']:
     def test_usb_identity_is_available_without_an_adb_transport(self):
         usb = self.directory / 'usb' / '2-1'
         usb.mkdir(parents=True)
-        (usb / 'idVendor').write_text('22b8\n')
-        (usb / 'product').write_text('moto g32\n')
-        interface = usb.with_name('2-1:1.0')
+        (usb / 'idVendor').write_text('22b8\n', newline='\n')
+        (usb / 'product').write_text('moto g32\n', newline='\n')
+        # NOTE(fork): Windows cannot store ":" in a file name; the interface
+        # glob marker is translated to "@" by run_phone() on Windows.
+        separator = ':' if os.name == 'posix' else '@'
+        interface = usb.with_name('2-1' + separator + '1.0')
         interface.mkdir()
         for name, value in [('Class', 'ef'), ('SubClass', '04'), ('Protocol', '01')]:
-            (interface / ('bInterface' + name)).write_text(value + '\n')
+            (interface / ('bInterface' + name)).write_text(value + '\n', newline='\n')
         net = interface / 'net/usb0'
         net.mkdir(parents=True)
-        (net / 'flags').write_text('0x1003\n')
-        (net / 'carrier').write_text('1\n')
-        (usb / 'speed').write_text('12\n')
+        (net / 'flags').write_text('0x1003\n', newline='\n')
+        (net / 'carrier').write_text('1\n', newline='\n')
+        (usb / 'speed').write_text('12\n', newline='\n')
         (self.directory / 'modules/rndis_host').mkdir(parents=True)
-        (self.directory / 'drivers.status').write_text('USB drivers loaded.\n')
+        (self.directory / 'drivers.status').write_text('USB drivers loaded.\n', newline='\n')
         result = self.run_phone(ADB_STATE='absent', TIMEOUT_LEGACY='1', HOST_TEST_IP='1')
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('ERROR_CODE|usb_only', result.stdout)

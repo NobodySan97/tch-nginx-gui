@@ -1,9 +1,28 @@
 """Synthetic Android snapshots; no captured device data is used."""
+import os
 from pathlib import Path
+import shutil
 import subprocess
 import unittest
 
 PARSER = Path(__file__).resolve().parents[1] / 'decompressed/smartphone/usr/share/modgui-smartphone/radio.awk'
+
+# NOTE(fork): upstream CI relied on awk being in PATH; on Windows resolve the
+# GNU awk shipped with Git for Windows so the same parser implementation runs.
+def _find_awk():
+    for name in ('awk', 'gawk'):
+        found = shutil.which(name)
+        if found:
+            return found
+    program_files = os.environ.get('ProgramFiles', 'C:/Program Files')
+    for relative in ('Git/usr/bin/awk.exe', 'Git/usr/bin/gawk.exe',
+                     'Git/bin/awk.exe', 'Git/bin/gawk.exe'):
+        candidate = Path(program_files, *relative.split('/'))
+        if candidate.exists():
+            return str(candidate)
+    return None
+
+AWK = _find_awk()
 
 
 def snapshot(eci=123456, pci=123, channel=1300, bands='', snr=-5):
@@ -15,11 +34,13 @@ mPhysicalChannelConfigs=[{{mConnectionStatus=PrimaryServing,mNetworkType=LTE,mPh
 '''
 
 
+@unittest.skipUnless(AWK, 'awk interpreter required (GNU awk or Git for Windows)')
 class RadioParserTest(unittest.TestCase):
     def parse(self, text, sdk=33):
-        result = subprocess.run(['awk', '-v', 'mode=metrics', '-v', f'sdk={sdk}', '-f', str(PARSER)],
-                                input=text, capture_output=True, text=True, check=True)
-        return dict(line.split('|', 1) for line in result.stdout.splitlines())
+        # Keep the stdin payload LF-only: text-mode stdin would insert CRLF.
+        result = subprocess.run([AWK, '-v', 'mode=metrics', '-v', f'sdk={sdk}', '-f', str(PARSER)],
+                                input=text.encode(), capture_output=True, check=True)
+        return dict(line.split('|', 1) for line in result.stdout.decode().splitlines())
 
     def test_identity_and_unknown_band_fallback(self):
         d = self.parse(snapshot())

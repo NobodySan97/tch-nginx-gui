@@ -16,10 +16,16 @@ class Cron(unittest.TestCase):
             path = Path(directory) / 'crontab'
             if initial is not None:
                 path.write_text(initial)
+            # NOTE(fork): getRandomKey() seeds rule IDs from /dev/urandom,
+            # which does not exist on Windows; supply an equivalent local
+            # fixture so the same hashing path is exercised.
+            urandom = Path(directory) / 'urandom'
+            urandom.write_bytes(bytes(range(16)))
             setup = '''
 local originalOpen = io.open
 io.open = function(path, mode)
   if path == '/etc/crontabs/root' then path = CRON_PATH end
+  if path == '/dev/urandom' then path = URANDOM_PATH end
   return originalOpen(path, mode)
 end
 local now = 100
@@ -39,6 +45,7 @@ local function readCron()
 end
 local parent, entries = loadMapping()
 '''.replace('CRON_PATH', repr(str(path))).replace(
+                'URANDOM_PATH', repr(str(urandom))).replace(
                 'MAPPING_PATH', repr(str(ROOT / 'usr/share/transformer/mappings/rpc/system.cron.map')))
             result = subprocess.run([LUA, '-'], input=setup + script, text=True, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stderr)

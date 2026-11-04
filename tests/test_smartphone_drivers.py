@@ -1,6 +1,8 @@
 """Exercise feed-based USB dependencies across kernel layouts and failures."""
 import os
 from pathlib import Path
+import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -12,7 +14,23 @@ PACKAGES = {'kmod-usb-net': 'usbnet', 'kmod-usb-net-cdc-ether': 'cdc_ether',
             'kmod-usb-net-rndis': 'rndis_host', 'kmod-usb-net-cdc-ncm': 'cdc_ncm',
             'kmod-usb-net-cdc-eem': 'cdc_eem', 'kmod-usb-net-cdc-subset': 'cdc_subset'}
 
+# NOTE(fork): the manager is a POSIX shell script; on Windows execute it with
+# the Git for Windows bundled sh and keep the mock bindir on a POSIX PATH.
+SH = shutil.which('sh') or shutil.which('sh.exe') or \
+     str(Path(os.environ.get('ProgramFiles', 'C:/Program Files'),
+              'Git', 'bin', 'sh.exe'))
+SH = SH if Path(SH).exists() else None
 
+
+def _msys_path(path):
+    """Convert a "C:/..." path to "/c/...": MSYS sh only resolves POSIX PATHs."""
+    path = str(path).replace(os.sep, '/')
+    if len(path) >= 3 and path[1:2] == ':':
+        return '/' + path[0].lower() + path[2:]
+    return path
+
+
+@unittest.skipUnless(SH, 'POSIX shell required')
 class SmartphoneDriversTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -20,8 +38,9 @@ class SmartphoneDriversTest(unittest.TestCase):
         self.root = Path(self.temp.name)
         for directory in ('bin', 'etc/modules.d', 'sys/module', 'lib/modules', 'state'):
             (self.root / directory).mkdir(parents=True)
-        self.env = dict(os.environ, PATH=str(self.root / 'bin') + ':/usr/bin:/bin',
-                        FIXTURE=str(self.root), KERNEL_RELEASE='6.6.42-vendor',
+        self.rootdir = str(self.root).replace(os.sep, '/')
+        self.env = dict(os.environ, PATH=f'{self.rootdir}:/usr/bin:/bin',
+                        FIXTURE=self.rootdir, KERNEL_RELEASE='6.6.42-vendor',
                         KERNEL_ABI='6.6.42-build-abcd', FEED_ABI='6.6.42-build-abcd')
         self.mock('uname', 'echo "$KERNEL_RELEASE"')
         self.mock('modprobe', '''echo "modprobe $1" >> "$FIXTURE/modules.log"
@@ -34,8 +53,7 @@ module=${1##*/}; module=${module%.ko}
 [ "$FAIL_LOAD" != "$module" ] || exit 1
 mkdir -p "$FIXTURE/sys/module/$module"
 ''')
-        self.mock('opkg', f'''#!{sys.executable}
-import os, pathlib, sys
+        self.mock('opkg', f'''import os, pathlib, sys
 r = pathlib.Path(os.environ['FIXTURE']); args = sys.argv[1:]
 with (r/'opkg.log').open('a') as f: f.write(' '.join(args)+'\\n')
 assert not any(a.startswith('--force') for a in args), args
@@ -61,20 +79,33 @@ elif op == 'install':
         (folder/(packages[name]+'.ko')).write_text('module from feed')
 else: raise AssertionError(args)
 ''', python=True)
-        source = MANAGER.read_text()
+        source = MANAGER.read_text().replace('\r\n', '\n')
         for prefix in ('/etc/', '/lib/', '/sys/'):
-            source = source.replace(prefix, str(self.root) + prefix)
+            source = source.replace(prefix, self.rootdir + prefix)
+        source = source.replace('#!/bin/sh\n', '#!/bin/sh\n' +
+                                'PATH=' + _msys_path(self.rootdir) + '/bin:/usr/bin:/bin\nexport PATH\n', 1)
         self.script = self.root / 'drivers.sh'
-        self.script.write_text(source)
+        self.script.write_text(source, newline='\n')
+        self.script.chmod(0o755)
 
     def mock(self, name, body, python=False):
         file = self.root / 'bin' / name
-        file.write_text(body if python else '#!/bin/sh\n' + body + '\n')
+        if python:
+            # Shebangs cannot launch Python on Windows: wrap the fixture in an
+            # sh script that execs the interpreter with its source file.
+            module = self.root / 'bin' / (name + '.py')
+            module.write_text(body)
+            interpreter = sys.executable.replace(os.sep, '/')
+            file.write_text('#!/bin/sh\nexec ' + shlex.quote(interpreter) +
+                            ' ' + shlex.quote(str(module).replace(os.sep, '/')) + ' "$@"\n',
+                            newline='\n')
+        else:
+            file.write_text('#!/bin/sh\n' + body + '\n', newline='\n')
         file.chmod(0o755)
 
     def run_manager(self, **env):
-        return subprocess.run(['sh', str(self.script)], text=True, capture_output=True,
-                              env={**self.env, **env}, timeout=15)
+        return subprocess.run([SH, str(self.script)], text=True, capture_output=True,
+                              env={**self.env, **env}, timeout=60)
 
     def test_installs_native_packages_across_kernel_versions_and_layouts(self):
         for release, layout in [('4.1.38', ''), ('4.1.52', 'kernel/drivers/net/usb'),

@@ -1,6 +1,31 @@
 local root,folder,case=arg[1],arg[2],arg[3]
+-- NOTE(fork): Windows os.execute runs cmd.exe, which cannot interpret the
+-- POSIX redirects used here, and the CRT os.rename refuses to replace an
+-- existing file. Only the Windows harness adapts: mkdir/rmdir keep POSIX
+-- semantics through the LuaJIT FFI (same CRT syscalls os.execute would use
+-- through /bin/sh on POSIX), and rename drops the existing target first so
+-- the production atomic-write flow still completes end-to-end.
+local ffi_ok,ffi = pcall(require, 'ffi')
+if ffi_ok then ffi.cdef('int _mkdir(const char *path); int _rmdir(const char *path);') end
+if not ffi_ok then
+  local function exec(s)
+    local a,_,c=os.execute(s)
+    return a==0 or (a==true and (c==nil or c==0))
+  end
+end
+local function sh_mkdir(path)
+  if ffi_ok then return ffi.C._mkdir(path)==0 end
+  return exec('mkdir '..string.format('%q',path)..' 2>/dev/null')
+end
+local function sh_rmdir(path)
+  if ffi_ok then return ffi.C._rmdir(path)==0 end
+  return exec('rmdir '..string.format('%q',path)..' 2>/dev/null')
+end
+if pcall(function() return jit.os end) and jit.os=='Windows' then
+  local original_rename=os.rename
+  os.rename=function(from,to) os.remove(to); return original_rename(from,to) end
+end
 local function copy(t) if type(t)~='table' then return t end local n={} for k,v in pairs(t) do n[k]=copy(v) end return n end
-local function exec(s) local a,_,c=os.execute(s); return a==0 or a==true and (c==nil or c==0) end
 local function encode(v)
     if type(v)=='table' then
         local keys={}; for k in pairs(v) do keys[#keys+1]=k end
@@ -56,8 +81,8 @@ local function key(a) local p={} for _,v in ipairs(a) do p[#p+1]=tostring(v) end
 local env={uci=u,bus=bus,runtime=folder..'/runtime',config_path=folder..'/config',pid='12345',usb=function() return 'phone0' end}
 env.run=function(a)
     local cmd=key(a); commands[#commands+1]=cmd
-    if a[1]=='mkdir' and a[2]==folder..'/runtime/control.lock' then return exec('mkdir '..string.format('%q',a[2])..' 2>/dev/null') end
-    if a[1]=='rmdir' then return exec('rmdir '..string.format('%q',a[2])..' 2>/dev/null') end
+    if a[1]=='mkdir' and a[2]==folder..'/runtime/control.lock' then return sh_mkdir(a[2]) end
+    if a[1]=='rmdir' then return sh_rmdir(a[2]) end
     if a[1]=='kill' then return a[3]~='888' end
     if cmd==fail then
         fail=nil
@@ -95,7 +120,8 @@ end
 env.restore=function(name,body) db[name]=package.loaded.dkjson.decode(body) end
 local app=M.new(env)
 local function state()
-    local s=assert(io.open(folder..'/runtime/status.json')):read('*a')
+    local f=assert(io.open(folder..'/runtime/status.json'))
+    local s=f:read('*a'); f:close()
     return package.loaded.dkjson.decode(s)
 end
 local before=encode(db)
@@ -116,7 +142,7 @@ elseif case=='concurrent' then
     assert(db.dhcp.main.resolvfile==folder..'/original.resolv')
     assert(table.concat(db.firewall.wan.network,',')=='wan,wan6,other_network')
 elseif case=='lock' then
-    assert(exec('mkdir '..string.format('%q',folder..'/runtime/control.lock')))
+    assert(sh_mkdir(folder..'/runtime/control.lock'))
     local path=folder..'/runtime/control.lock/pid'
     local f=assert(io.open(path,'w')); f:write('777'); f:close()
     assert(not pcall(app.control,'fallback')); assert(encode(db)==before)
