@@ -15,6 +15,22 @@ APP = ROOT / 'decompressed/smartphone'
 INSTALLER = GUI / 'usr/share/transformer/scripts/appInstallRemoveUtility.sh'
 
 
+def _msys_path(p):
+    """Convert a "C:/Users/..." path to "/c/Users/...": MSYS sh silently
+    ignores C:/ style PATH entries, so test mocks would fall through to the
+    real система binaries."""
+    p = str(p).replace(os.sep, '/')
+    if len(p) >= 3 and p[1:2] == ':':
+        return '/' + p[0].lower() + p[2:]
+    return p
+# POSIX shell is required to run the installer: resolve Git's bundled sh on Windows.
+SH = shutil.which('sh')
+if not SH:
+    _candidate = Path(os.environ.get('ProgramFiles', 'C:/Program Files')) / 'Git' / 'bin' / 'sh.exe'
+    if _candidate.exists():
+        SH = str(_candidate)
+
+
 class SmartphoneAppTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -26,12 +42,23 @@ class SmartphoneAppTest(unittest.TestCase):
         for folder in ('tmp', 'opt', 'etc', 'bin', 'usr/bin'):
             (self.root / folder).mkdir(parents=True, exist_ok=True)
         self.bindir = self.root / 'bin'
-        self.env = dict(os.environ, PATH=f'{self.rootdir}/bin:/usr/bin:/bin',
+        self.env = dict(os.environ,
+                        PATH=f'{_msys_path(self.rootdir)}/bin:/usr/bin:/bin',
                         APP_FIXTURE=self.rootdir, APP_REAL_TAR=shutil.which('tar'))
         self.write_mock('tar', '''
 # Match the reduced tar feature set shipped by Technicolor BusyBox.
 case "$1" in *j*) echo 'unsupported tar bzip2 option' >&2; exit 1 ;; esac
-exec "$APP_REAL_TAR" "$@"
+# Convert "C:/..." arguments to the "/c/..." form so that both GNU tar (inside
+# MSYS sh, which treats "C:" as a remote host) and native bsdtar work.
+tar_args=""
+for a in "$@"; do
+  case "$a" in
+    ?:*) tar_args="$tar_args /$(printf '%s' "${a%%:*}" | tr 'A-Z' 'a-z')${a#?:}" ;;
+    *) tar_args="$tar_args ${a}" ;;
+  esac
+done
+# shellcheck disable=SC2086
+exec "$APP_REAL_TAR" $tar_args
 ''')
         self.write_mock('uci', 'printf "%s\\n" "$*" >> "$APP_FIXTURE/uci.log"\n')
         self.write_mock('restart', 'echo restart >> "$APP_FIXTURE/restarts"\n[ "${FAIL_RESTART:-0}" = 0 ]\n')
@@ -59,6 +86,12 @@ esac
         source = source.replace(self.rootdir + '/etc/init.d/transformer', self.rootdir + '/bin/restart')
         source = source.replace(self.rootdir + '/etc/init.d/nginx', self.rootdir + '/bin/restart')
         self.script = self.root / 'installer.sh'
+        # Bake the mock PATH into the rewritten installer itself: an exported
+        # PATH inherited via the process environment is re-converted by MSYS
+        # when spawning POSIX binaries, so child shells would fall back to the
+        # real system tools instead of the mock bindir.
+        bindir_path = _msys_path(self.rootdir) + '/bin:/usr/bin:/bin'
+        source = source.replace('#!/bin/sh\n', '#!/bin/sh\n' + f'PATH={bindir_path}\nexport PATH\n', 1)
         self.script.write_text(source)
 
     def write_mock(self, name, body):
@@ -88,8 +121,17 @@ esac
                     archive.add(file, arcname=relative)
 
     def run_app(self, action, **env):
-        return subprocess.run(['sh', str(self.script), action, 'smartphone'], capture_output=True,
-                              text=True, env={**self.env, **env}, timeout=10)
+        # MSYS sh mangles POSIX-style PATH entries received via the process
+        # environment (env vars are Windows-converted on import): the mock
+        # bindir PATH is therefore baked into the rewritten installer itself
+        # and re-exported here for the outer shell.
+        result = subprocess.run(
+            [SH, '-c',
+             'export PATH=' + shlex.quote(_msys_path(self.rootdir) + '/bin:/usr/bin:/bin') +
+             '; exec "$0" "$@"',
+             str(self.script), action, 'smartphone'], capture_output=True,
+            text=True, env={**self.env, **env}, timeout=10)
+        return result
 
     def assert_ok(self, result):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
@@ -183,9 +225,12 @@ esac
         for prefix in ('/tmp/', '/opt/', '/etc/', '/usr/', '/www/'):
             block = block.replace(prefix, self.rootdir + prefix)
         manager = self.rootdir + '/usr/share/transformer/scripts/appInstallRemoveUtility.sh'
-        block = block.replace(manager, 'sh ' + shlex.quote(str(self.script)))
-        result = subprocess.run(['sh', '-c', 'logecho() { :; }\n' + block],
-                                env=self.env, capture_output=True, text=True, timeout=10)
+        block = block.replace(manager, shlex.quote(SH) + ' ' + shlex.quote(str(self.script)))
+        result = subprocess.run(
+            [SH, '-c',
+             'export PATH=' + shlex.quote(_msys_path(self.rootdir) + '/bin:/usr/bin:/bin') +
+             '; logecho() { :; }\n' + block],
+            env=self.env, capture_output=True, text=True, timeout=10)
         self.assert_ok(result)
         self.assertTrue(radio.is_file())
 
@@ -193,7 +238,7 @@ esac
         source = (GUI / 'etc/modgui_scripts/04_config.sh').read_text()
         function = source[source.index('check_webui_config() {'):source.index('check_variant_friendly_name() {')]
         function = function.replace('/tmp/web_unlock', str(self.root / 'missing-web-unlock'))
-        result = subprocess.run(['sh', '-c', function + '\ncheck_webui_config\n'],
+        result = subprocess.run([SH, '-c', function + '\ncheck_webui_config\n'],
                                 env=self.env, capture_output=True, text=True, timeout=5)
         self.assertEqual(result.returncode, 0, result.stderr)
         calls = (self.root / 'uci.log').read_text()
