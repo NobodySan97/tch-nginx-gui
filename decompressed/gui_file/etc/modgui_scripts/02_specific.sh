@@ -245,7 +245,7 @@ ledfw_extract() {
 }
 
 ledfw_rework_TG788() {
-  if [ ! "$(uci get -q button.info.button)" ] || [ "$(uci get -q button.info.button)" = "BTN_3" ]; then
+  if [ ! "$(uci get -q button.info)" ] || [ "$(uci get -q button.info)" = "BTN_3" ]; then
     logecho "Setting up status (wifi) button..."
     uci del button.easy_reset
     uci set button.info=button

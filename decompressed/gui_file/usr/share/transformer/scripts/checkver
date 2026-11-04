@@ -53,8 +53,7 @@ else
 fi
 
 if [ "$1" ]; then
-	if [ "$1" = "Schedule" ]; then
-		RANDOM=$(awk -v min=1 -v max=3600 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
+	if [ "$1" = "Schedule" ]; then	RANDOM=$(awk -v min=1 -v max=3600 'BEGIN{srand(); print int(min+rand()*(max-min+1))}')
 		sleep "$RANDOM"
 	fi
 fi
@@ -75,6 +74,104 @@ enum() {
 	res="$(echo "$1" | tr -cd '0-9')"
 	echo "${res:-0}"
 }
+
+############APP ASSET DOWNLOAD (DownloadInstalled)##################
+# Fork counterpart of the upstream release-install channel: the release repo
+# keeps the current artifacts in modular/ and exposes the channel versions as
+# stable.version / preview.version / latest.version at the root. Per-version
+# checksum manifests ($version/MD5SUMS) are published by build_release.py;
+# when absent (older releases) the download still proceeds with a warning.
+release_channel_version() {
+	case "$1" in stable|preview|dev) ;; *) return 1 ;; esac
+	case "$1" in
+		stable)  version_file=$STABLE_VERSION ;;
+		preview) version_file=$PREVIEW_VERSION ;;
+		dev)     version_file=$DEV_VERSION ;;
+	esac
+	response=$(curl -m 30 -k -s -f -L -w '\n%{http_code}' "$BASE_DIR/$version_file") || return 1
+	http_status=$(printf '%s\n' "$response" | tail -n 1)
+	[ "$http_status" = "200" ] || return 1
+	version=$(printf '%s\n' "$response" | sed '$d')
+	printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || return 1
+	printf '%s\n' "$version"
+}
+
+md5_verify_asset() {
+	# $1 = version, $2 = asset basename. Exit 0 = verified, 2 = manifest absent
+	# (older releases), 1 = mismatch or broken manifest (abort the download).
+	manifest=$(curl -m 20 -k -s -f -L "$BASE_DIR/$1/MD5SUMS" 2>/dev/null) || {
+		manifest=$(curl -m 20 -k -s -f -L "$BASE_DIR/MD5SUMS" 2>/dev/null) || return 2
+	}
+	expected=$(printf '%s\n' "$manifest" | awk -v asset="$2" '{ s=$NF; n=length(asset); if (substr(s, length(s) - n + 1, n) == asset) { print $1; exit } }')
+	case "$expected" in ''|*[!0-9a-f]*) return 2 ;; esac
+	[ ${#expected} -eq 32 ] || return 2
+	modbus=$(md5sum "$3" 2>/dev/null | awk '{print $1}')
+	[ "$modbus" = "$expected" ] || {
+		logger -s -t "CheckVer Script" "Checksum mismatch for $2 (expected $expected, got $modbus)"
+		return 1
+	}
+}
+
+# Usage: checkver DownloadInstalled <asset.tar.bz2> <dest>
+#        checkver DownloadVersion   <version> <asset.tar.bz2> <dest>
+#        checkver DownloadStable    <dest>
+install_asset_download() (
+	version="$1"; shift
+	asset="$1"; shift
+	destination="$1"; shift
+	case "$asset" in ''|*[!a-zA-Z0-9._-]*) return 1 ;; esac
+	case "$destination" in ''|*[!a-zA-Z0-9._/:\\-]*) return 1 ;; esac
+	# Fetch per-version first (upstream layout), fall back to modular/ (fork layout).
+	if ! curl -m 120 -k -s -f -L "$BASE_DIR/$version/$asset" -o "$destination.tmp"; then
+		curl -m 120 -k -s -f -L "$BASE_DIR/modular/$asset" -o "$destination.tmp" || return 1
+	fi
+	md5_verify_asset "$version" "$asset" "$destination.tmp"
+	case $? in
+	0)
+		:
+		;;
+	2)
+		# No manifest for this artifact (legacy layout): warn and trust transport.
+		logger -s -t "CheckVer Script" "No MD5SUMS manifest found for $asset (checksum skipped)"
+		;;
+	*)
+		rm -f "$destination.tmp"
+		return 1
+		;;
+	esac
+	mv "$destination.tmp" "$destination" || rm -f "$destination.tmp"
+)
+#################################################
+
+############UPDATE-CHECK DISPATCH##################
+case "$1" in
+	DownloadInstalled|DownloadVersion|DownloadStable)
+		case "$1" in
+			DownloadInstalled)
+				[ "$#" -eq 3 ] || exit 1
+				version=$(release_channel_version stable) || exit 1
+				asset="$2"
+				destination="$3"
+				;;
+			DownloadVersion)
+				[ "$#" -eq 4 ] || exit 1
+				version="$2"
+				case "$version" in ''|*[!0-9.]*) exit 1 ;; esac
+				asset="$3"
+				destination="$4"
+				;;
+			DownloadStable)
+				[ "$#" -eq 2 ] || exit 1
+				version=$(release_channel_version stable) || exit 1
+				asset=GUI.tar.bz2
+				destination="$2"
+				;;
+		esac
+		install_asset_download "$version" "$asset" "$destination"
+		exit $?
+		;;
+esac
+# Update-check flow (only reached without the download subcommands)
 
 if [ "$connectivity" = "yes" ]; then
 	if [ ! "$(uci get -q modgui.gui.update_branch)" ] || [ "$(uci get -q modgui.gui.update_branch)" = "stable" ]; then

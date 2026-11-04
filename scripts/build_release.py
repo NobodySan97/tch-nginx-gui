@@ -607,6 +607,29 @@ def build_release(src_dir, dest_dir, channel="stable", manual_ver=None, dry_run=
         new_version_content = f"{gui_md5} {version} [{channel.upper()}]\n" + "\n".join(filtered_lines) + "\n"
         v_file.write_bytes(new_version_content.encode("utf-8"))
 
+        # 7b. Generate MD5SUMS manifests for the release-check assets
+        # checkver DownloadInstalled verifies each asset against
+        # $version/MD5SUMS (per-version, canonical for upstream layout) and
+        # falls back to the root ./MD5SUMS for the current release.
+        manifest_lines = []
+
+        def _md5s_line(rel_path: str) -> str:
+            return f"{md5_file(build_target_dir / rel_path)}  ./{rel_path}\n"
+
+        for archive in ["GUI.tar.bz2", "GUI_preview.tar.bz2", "GUI_dev.tar.bz2"]:
+            p = build_target_dir / archive
+            if p.exists():
+                manifest_lines.append(_md5s_line(archive))
+        if modular_dest.is_dir():
+            for p in sorted(modular_dest.glob("*.tar.bz2")):
+                manifest_lines.append(f"{md5_file(p)}  ./modular/{p.name}\n")
+        if manifest_lines:
+            version_dir = build_target_dir / version
+            version_dir.mkdir(exist_ok=True)
+            (version_dir / "MD5SUMS").write_text("".join(manifest_lines), encoding="utf-8")
+            (build_target_dir / "MD5SUMS").write_text("".join(manifest_lines), encoding="utf-8")
+            print(f"MD5SUMS manifest written (root + {version}/, {len(manifest_lines)} assets)")
+
         print(f"\nSuccessfully built {channel.upper()} release v{version}!")
         print(f"Archive:  {gui_tar.name} ({gui_tar.stat().st_size:,} bytes)")
         print(f"MD5 Sum:  {gui_md5}")
