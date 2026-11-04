@@ -1,0 +1,153 @@
+const assert = require('assert');
+const fs = require('fs');
+const vm = require('vm');
+const card = fs.readFileSync('decompressed/smartphone/www/cards/017_smartphone.lp', 'utf8');
+const client = card.match(/<script>\n([\s\S]*?)\n<\/script>/)[1];
+const shared = fs.readFileSync('decompressed/gui_file/www/docroot/js/shared-script.js', 'utf8');
+const factory = shared.slice(shared.indexOf('\tfunction createAjaxUpdateCard('), shared.indexOf('\n\tfunction linkCheckUpdate()'));
+let element = {}, requests = [], timers = new Map(), nextTimer = 0;
+const classes = {}, attributes = {}, visibility = {}, labels = {
+  'data-connected': 'Connected', 'data-tether-off': 'USB tethering disabled',
+  'data-data-off': 'Mobile data disabled', 'data-unavailable': 'Phone unavailable', 'data-checking': 'Checking connection',
+  'data-adb-error': 'ADB connection failed', 'data-adb-server-error': 'ADB server failed to start',
+  'data-telemetry-error': 'ADB connected; telemetry unavailable', 'data-telemetry-timeout': 'Phone telemetry timed out',
+  'data-helper-error': 'Smartphone backend unavailable', 'data-request-timeout': 'Smartphone request timed out',
+  'data-usb-diagnostics-error': 'USB detected; diagnostics unavailable', 'data-unauthorized': 'ADB unauthorized', 'data-offline': 'ADB device offline',
+  'data-no-device': 'Phone not detected on USB', 'data-multiple-devices': 'Multiple ADB devices',
+  'data-adb-missing': 'ADB not installed', 'data-usb-only': 'USB detected; ADB unavailable',
+  'data-link-up': 'Link up', 'data-link-down': 'Link down', 'data-no-interface': 'Interface not detected',
+  'data-phone-active': 'Phone', 'data-wan-active': 'WAN', 'data-uplink-checking': 'Checking uplinks'
+};
+function selection(name) {
+  return {
+    attr(key, value) {
+      if (value === undefined) return name === '.content' ? labels[key] : attributes[name + ':' + key];
+      attributes[name + ':' + key] = value; return this;
+    },
+    toggleClass(key, value) { classes[name + ':' + key] = !!value; return this; },
+    toggle(value) { visibility[name] = !!value; return this; },
+    each(callback) {
+      if (name === '[data-bind]') {
+        for (const field of ['phoneDevice', 'phoneBattery', 'phoneStatus', 'phoneNetwork', 'phoneSignal', 'phoneTether', 'phoneUplink']) callback.call({bind: 'text: ' + field});
+      } else { for (let i = 0; i < 5; i++) callback.call('bar' + i, i); }
+      return this;
+    }
+  };
+}
+function $(value) {
+  if (typeof value === 'function') { value(); return; }
+  if (value && value.bind) return {data: () => value.bind};
+  if (value === element || value === '#smartphone-card') return {find: selection};
+  return selection(String(value));
+}
+$.ajax = options => {
+  const handle = {
+    options, done(callback) { this.success = callback; return this; },
+    fail(callback) { this.failure = callback; return this; },
+    always(callback) { this.finish = callback; return this; },
+    abort() { this.aborted = true; this.failure({statusText: 'abort'}, 'abort'); this.finish(); },
+    deliver(data) { this.success(data); this.finish(); },
+    reject() { this.failure({}, 'error'); this.finish(); }
+  };
+  requests.push(handle); return handle;
+};
+const context = {
+  $, jQuery: $, window: {}, document: {hidden: false, getElementById: () => element}, KoRequest: {},
+  setInterval(callback, delay, binding) {
+    assert.strictEqual(delay, 30000);
+    timers.set(++nextTimer, () => callback(binding)); return nextTimer;
+  },
+  clearInterval(id) { timers.delete(id); },
+  ko: {
+    observable() { let value; return function(next) { if (arguments.length) value = next; return value; }; },
+    dataFor: node => node.bindings,
+    applyBindings: (bindings, node) => { node.bindings = bindings; }
+  },
+  tch: {elementCSRFtoken: () => ({name: 'CSRFtoken', value: 'fixture'})}
+};
+vm.createContext(context);
+vm.runInContext(factory, context);
+context.modgui = {createAjaxUpdateCard: context.createAjaxUpdateCard};
+vm.runInContext(client, context);
+assert.strictEqual(requests.length, 1);
+assert.strictEqual(requests[0].options.url, '/modals/smartphone-modal.lp');
+assert.strictEqual(requests[0].options.data[1].value, 'get_stats');
+assert.strictEqual(requests[0].options.data[0].name, 'CSRFtoken');
+const binding = element.bindings;
+assert.strictEqual(binding.phoneStatus(), 'Checking connection');
+const sample = {DEV: 'Example phone', BATT: '72%', BATT_STAT: 'In Carica', OPER: 'VERY',
+  NET: '5G (NSA)', SIGNAL_RAW: '-90', TETHER: 'Attivo (rndis0)', DATA_ST: '1'};
+const tick = () => timers.get(context.KoRequest.SmartphoneCardInterval.interval)();
+tick(); assert.strictEqual(requests.length, 1, 'Shared polling must prevent overlap');
+requests[0].deliver(sample);
+assert.strictEqual(binding.phoneStatus(), 'Connected (VERY)');
+assert.strictEqual(binding.phoneBattery(), '(⚡ 72%)');
+assert.strictEqual(binding.phoneNetwork(), '5G (NSA)');
+assert.strictEqual(binding.phoneSignal(), '75% (-90 dBm)');
+assert(visibility['.smartphone-network-row'] && visibility['.smartphone-signal-row'] && visibility['.smartphone-signal-bars']);
+assert(classes['.light:green']);
+assert.strictEqual([0,1,2,3,4].filter(i => classes['bar' + i + ':bar-small-active']).length, 4);
+tick(); requests[1].deliver({...sample, TETHER: 'Inattivo', SIGNAL_RAW: '2147483647', BATT: '999%'});
+assert.strictEqual(binding.phoneStatus(), 'USB tethering disabled (VERY)');
+assert(!classes['.light:green'] && classes['.light:orange']);
+assert.strictEqual(binding.phoneSignal(), '');
+assert.strictEqual(binding.phoneBattery(), '');
+assert(!visibility['.smartphone-signal-row'] && !visibility['.smartphone-signal-bars']);
+assert(![0,1,2,3,4].some(i => classes['bar' + i + ':bar-small-active']));
+tick(); requests[2].deliver({...sample, DATA_ST: '0', OPER: '<img src=x onerror=evil()>'});
+assert.strictEqual(binding.phoneStatus(), 'Mobile data disabled (<img src=x onerror=evil()>)');
+tick(); requests[3].deliver({ERROR: 'USB authorization required'});
+assert.strictEqual(binding.phoneStatus(), 'Phone unavailable');
+assert.strictEqual(binding.phoneNetwork(), '');
+assert(!visibility['.smartphone-network-row'] && !visibility['.smartphone-signal-row']);
+assert.strictEqual(attributes['.smartphone-status:title'], 'USB authorization required');
+for (const [code, label] of Object.entries({unauthorized: 'ADB unauthorized', offline: 'ADB device offline',
+  adb_error: 'ADB connection failed', adb_server_error: 'ADB server failed to start',
+  telemetry_error: 'ADB connected; telemetry unavailable', telemetry_timeout: 'Phone telemetry timed out',
+  request_timeout: 'Smartphone request timed out', helper_error: 'Smartphone backend unavailable', no_device: 'Phone not detected on USB', multiple_devices: 'Multiple ADB devices', adb_missing: 'ADB not installed'})) {
+  // Reuse the last response handler without advancing lifecycle request counts.
+  requests[3].success({ERROR: 'Specific connection error', ERROR_CODE: code});
+  assert.strictEqual(binding.phoneStatus(), label);
+  assert(!classes['.light:green']);
+}
+requests[3].success({ERROR: 'Unknown error', USB_DEV: 'Example phone'});
+assert.strictEqual(binding.phoneStatus(), 'USB detected; diagnostics unavailable');
+assert.strictEqual(binding.phoneDevice(), '(Example phone)');
+requests[3].success({ERROR: 'Unknown error', ERROR_CODE: 'toString'});
+assert.strictEqual(binding.phoneStatus(), 'Phone unavailable');
+requests[3].success({ERROR: 'Enable USB debugging', ERROR_CODE: 'usb_only', USB_DEV: 'moto g32',
+  HOST_IF: 'usb0', HOST_ADMIN: 'up', HOST_CARRIER: '1', HOST_IPV4: '10.1.2.3/24', UPLINK_MODE: 'fallback', UPLINK_ACTIVE: 'wan'});
+assert.strictEqual(binding.phoneStatus(), 'USB detected; ADB unavailable');
+assert.strictEqual(binding.phoneDevice(), '(moto g32)');
+assert(classes['.light:orange'] && !classes['.light:off']);
+assert.strictEqual(attributes['.simple-desc:title'], 'moto g32');
+assert.strictEqual(binding.phoneTether(), 'usb0 · Link up');
+assert.strictEqual(binding.phoneUplink(), 'WAN');
+assert(visibility['.smartphone-tether-row']);
+assert.strictEqual(attributes['.smartphone-tether-row:title'], '10.1.2.3/24');
+requests[3].success({ERROR: 'Accept the RSA prompt', ERROR_CODE: 'unauthorized', USB_DEV: 'moto g32'});
+assert.strictEqual(binding.phoneStatus(), 'ADB unauthorized');
+assert(!visibility['.smartphone-tether-row']);
+context.document.hidden = true;
+tick(); assert.strictEqual(requests.length, 4);
+context.document.hidden = false;
+tick(); assert.strictEqual(requests.length, 5);
+requests[4].failure({}, 'timeout');
+assert.strictEqual(binding.phoneStatus(), 'Smartphone request timed out');
+requests[4].reject();
+assert.strictEqual(binding.phoneStatus(), 'Smartphone backend unavailable');
+tick();
+const pending = requests[5];
+element = {};
+vm.runInContext(client, context);
+assert(pending.aborted, 'Replacing the card must abort the previous request');
+assert.strictEqual(timers.size, 1);
+pending.success(sample);
+assert.strictEqual(binding.phoneStatus(), 'Smartphone backend unavailable', 'Stale responses must not update old bindings');
+const active = requests[6];
+element = null;
+tick();
+assert(active.aborted, 'Removing the card must abort its request');
+assert.strictEqual(timers.size, 0);
+assert.strictEqual(context.KoRequest.SmartphoneCardInterval, undefined);
+console.log('Smartphone card: shared lifecycle, Knockout, mobile indicators and telemetry states passed');
