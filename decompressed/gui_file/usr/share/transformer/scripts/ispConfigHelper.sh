@@ -1,6 +1,8 @@
 #!/bin/sh
 
 restart_dnsmasq=0
+INIT=/etc/init.d
+policy_mode=apply
 
 debug="${debug:-0}"
 logecho() {
@@ -41,14 +43,55 @@ purge_telemetry() { #disable TIM telemetry services
     /etc/init.d/bulkdata disable
   fi
 
-  #nanocdn/mabr is the TIMVision TV cache, keep it when IPTV is configured
-  if [ -x /etc/init.d/nanocdn ] && [ -e /etc/rc.d/S99nanocdn ]; then
-    if ! uci -q show network 2>/dev/null | grep -q "iptv"; then
-      logecho "Disabling nanocdn (no IPTV configured)..."
-      /etc/init.d/nanocdn stop
-      /etc/init.d/nanocdn disable
-    fi
+  # Disable the TIMVision nanoCDN cache by default; stock IPTV interfaces
+  # do not imply it is in use. The UCI flag also gates LAN-triggered starts
+  # and the statistics poller in rc.local, independently of the boot symlink.
+  if [ -n "$(uci -q get system.mabr)" ] && [ "$(uci -q get system.mabr.enabled)" != "0" ]; then
+    logecho "Disabling mABR..."
+    uci set system.mabr.enabled='0'
+    uci commit system
   fi
+  if [ -f /etc/init.d/nanocdn ]; then
+    logecho "Stopping and disabling nanocdn..."
+    /etc/init.d/nanocdn stop
+    /etc/init.d/nanocdn disable
+  fi
+}
+
+purge_default_services() {
+  # Only disable the factory iPerf server. Preserve custom configurations
+  # and skip firmware without a readable factory baseline or this UCI flag.
+  if [ -x /etc/init.d/iperf ] && [ "$(uci -q get iperf.iperf.enabled)" = "1" ] &&
+    [ -f /rom/etc/config/iperf ] &&
+    cmp -s /etc/config/iperf /rom/etc/config/iperf &&
+    cmp -s /etc/init.d/iperf /rom/etc/init.d/iperf; then
+    logecho "Disabling factory iperf server..."
+    # Some old stop scripts only kill the server while enabled is still 1.
+    /etc/init.d/iperf stop || return 1
+    /etc/init.d/iperf disable || return 1
+    uci set iperf.iperf.enabled='0' || return 1
+    uci commit iperf || return 1
+  fi
+
+  # The stock xl2tpd init starts even with no LAC/LNS configured. Leave
+  # customized servers, netifd L2TP clients and the VPN extension untouched.
+  [ -x /etc/init.d/xl2tpd ] || return 0
+  [ -f /rom/etc/xl2tpd/xl2tpd.conf ] || return 0
+  cmp -s /etc/init.d/xl2tpd /rom/etc/init.d/xl2tpd || return 0
+  cmp -s /etc/xl2tpd/xl2tpd.conf /rom/etc/xl2tpd/xl2tpd.conf || return 0
+  [ ! -f /etc/.modgui-l2tp-ipsec-installed ] || return 0
+  [ ! -e /etc/init.d/l2tp-ipsec-server ] || return 0
+  [ ! -e /etc/init.d/modgui-ipsec ] || return 0
+  if grep -Eiq '^[[:space:]]*\[(lac|lns)([[:space:]]|\])' /etc/xl2tpd/xl2tpd.conf; then
+    return 0
+  fi
+  default_services_network="$(uci -q show network)" || return 0
+  if printf '%s\n' "$default_services_network" | grep -Eq "\\.proto='?(l2tp|l2tpv2|l2tpv3)'?$"; then
+    return 0
+  fi
+  logecho "Disabling unconfigured factory xl2tpd..."
+  /etc/init.d/xl2tpd stop || return 1
+  /etc/init.d/xl2tpd disable
 }
 
 firewall_specific_sip_rules_FASTWEB() {
@@ -378,28 +421,241 @@ autodetect_isp() { #Detect ISP based on cwmp or wan settings (Italian only)
   fi
 }
 
+service_action() {
+  [ -x "$INIT/$1" ] || return 0
+  "$INIT/$1" "$2"
+}
+
+stop_services() {
+  stop_status=0
+  for stop_name in "$@"; do
+    service_action "$stop_name" stop || stop_status=1
+    service_action "$stop_name" disable || stop_status=1
+  done
+  return "$stop_status"
+}
+
+# rc.common reload on older firmware need not start a stopped process.
+# Restore boot links when the UI enables a function. Installation synchronizes
+# the links without restarting features which are already enabled.
+activate() {
+  service_action "$1" enable || return 1
+  [ "$policy_mode" = sync ] || service_action "$1" restart
+}
+
+parental_policy() {
+  case "$(uci -q get parental.general.enable)" in
+    0) stop_services weburl dnsfilter ;;
+    1)
+      mode=$(uci -q get parental.general.mode)
+      case "$mode" in
+        dns) stop_services weburl && activate dnsfilter ;;
+        web|'') stop_services dnsfilter && activate weburl ;;
+        *) [ "$policy_mode" = sync ] || service_action weburl restart ;;
+      esac ;;
+    *) [ "$policy_mode" = sync ] || service_action weburl restart ;;
+  esac
+}
+
+dlna_policy() {
+  case "$(uci -q get dlnad.config.enabled)" in
+    0)
+      stop_services dlnad mud mvfs ;;
+    1)
+      activate mvfs && activate mud && activate dlnad ;;
+    *) [ "$policy_mode" = sync ] || service_action dlnad reload ;;
+  esac
+}
+
+# Do not overwrite custom init implementations or act on unknown firmware.
+factory_service() {
+  [ -x "$INIT/$1" ] && [ -r "/rom/etc/init.d/$1" ] &&
+    cmp -s "$INIT/$1" "/rom/etc/init.d/$1"
+}
+
+# Missing config is unconfigured; an existing but unreadable config is unknown.
+read_config() {
+  if [ ! -e "/etc/config/$1" ] && [ ! -L "/etc/config/$1" ]; then return 0; fi
+  uci -q show "$1"
+}
+
+gre_unused() {
+  gre_config=$(read_config gre_hotspotd) || return 1
+  tunnel_config=$(read_config gre_intf) || return 1
+  [ -z "$gre_config$tunnel_config" ]
+}
+
+pnp_unused() {
+  read_config generic_app >/dev/null || return 1
+  # Preserve customized provisioning, including unknown config layouts.
+  if [ -e /etc/config/generic_app ] || [ -L /etc/config/generic_app ]; then
+    cmp -s /etc/config/generic_app /rom/etc/config/generic_app || return 1
+  fi
+  [ -z "$(uci -q get generic_app.pnpserver.url)" ] || return 1
+  case "$(uci -q get generic_app.pnpserver.registered)" in ''|0) ;; *) return 1 ;; esac
+  if [ -e /etc/ssl/paired ] || [ -L /etc/ssl/paired ]; then
+    [ -d /etc/ssl/paired ] && [ -r /etc/ssl/paired ] && [ -x /etc/ssl/paired ] || return 1
+    paired_files=$(find /etc/ssl/paired ! -type d) || return 1
+    [ -z "$paired_files" ] || return 1
+  fi
+}
+
+isp_policy() {
+  [ "$(uci -q get modgui.var.keep_isp_services)" != 1 ] || return 0
+  isp_status=0
+  if factory_service gre-hotspotd && gre_unused; then
+    service_action gre-hotspotd stop && service_action gre-hotspotd disable || isp_status=1
+  fi
+  if factory_service generic_pnpd && pnp_unused; then
+    service_action generic_pnpd stop && service_action generic_pnpd disable || isp_status=1
+  fi
+  return "$isp_status"
+}
+
+# These apply hooks also restore the boot service when provisioning is configured.
+isp_apply() {
+  case "$1" in
+    gre) name=gre-hotspotd; unused=gre_unused ;;
+    pnp) name=generic_pnpd; unused=pnp_unused ;;
+  esac
+  if [ "$(uci -q get modgui.var.keep_isp_services)" != 1 ] &&
+    factory_service "$name" && "$unused"; then
+    service_action "$name" stop && service_action "$name" disable
+  else
+    service_action "$name" enable && service_action "$name" restart
+  fi
+}
+
+sync_services() {
+  policy_mode=sync
+  sync_status=0
+  parental_policy || sync_status=1
+  dlna_policy || sync_status=1
+  isp_policy || sync_status=1
+  return "$sync_status"
+}
+
 isp_helper() {
   purge_telemetry
+  purge_default_services
   if [ "$1" = "refresh" ]; then
     autodetect_isp
-    setup_ISP "$(uci get -q modgui.var.isp)"
+    setup_ISP "$(uci get -q modgui.var.isp)" || return 1
   elif [ "$1" = "force" ]; then
-    setup_ISP "$(uci get -q modgui.var.isp)"
+    setup_ISP "$(uci get -q modgui.var.isp)" || return 1
   elif [ "$1" = "setup" ]; then
     if [ -z "$2" ]; then
       echo "Specify ISP_NAME (Supported Tiscali, TIM, Fastweb, Other)"
       return 1
     fi
-    setup_ISP "$2"
+    setup_ISP "$2" || return 1
   fi
+  sync_services
+}
+
+apply_cwmp_service() {
+  # Apply the GUI state to the service as well as the protocol configuration.
+  # Preserve the fork's dynamic cwmpd section detection (upstream hardcodes
+  # cwmpd_config; see 41d3a6ea).
+  cwmp_sec="$(get_cwmp_section)"
+  case "$(uci -q get cwmpd.$cwmp_sec.state)" in
+    0)
+      /etc/init.d/cwmpd disable || exit 1
+      /etc/init.d/cwmpd stop
+      ;;
+    1)
+      /etc/init.d/cwmpd enable || exit 1
+      # Older rc.common scripts may not implement the procd 'running' command.
+      if pidof cwmpd >/dev/null 2>&1 || /etc/init.d/cwmpd running >/dev/null 2>&1; then
+        /etc/init.d/cwmpd reload
+      else
+        /etc/init.d/cwmpd start
+      fi
+      ;;
+    *)
+      echo "Invalid CWMP state" >&2
+      exit 1
+      ;;
+  esac
+}
+
+apply_samba_service() {
+  action="${1:-reload}"
+  case "$action" in reload | restart) ;; *) exit 1 ;; esac
+
+  # Only NQE uses this lifecycle policy. Older firmware has native Samba
+  # scripts whose reload/restart behavior must be preserved.
+  nqe=0
+  if [ -x /etc/init.d/nqe ]; then
+    case "$(readlink /etc/init.d/samba 2>/dev/null)" in
+      /etc/init.d/nqe | ../init.d/nqe | nqe) nqe=1 ;;
+    esac
+  fi
+
+  if [ "$nqe" = 1 ]; then
+    filesharing="$(uci -q get samba.samba.filesharing)"
+    printersharing="$(uci -q get printersharing.config.enabled)"
+    printershare="$(uci -q get samba.printers.enabled)"
+    enabled="$(uci -q get samba.samba.enabled)"
+    needed=""
+    case "$filesharing:$printersharing:$printershare" in
+      1:* | 0:1:1 | 0:1:) needed=1 ;;
+      0:0:* | 0:*:0) needed=0 ;;
+    esac
+
+    # Fall back to the firmware implementation for unknown configuration
+    # layouts. Do not invent missing UCI options on older firmware.
+    case "$enabled:$needed" in
+      0:0 | 0:1 | 1:0 | 1:1)
+        if [ "$enabled" != "$needed" ]; then
+          uci set samba.samba.enabled="$needed" || exit 1
+          uci commit samba || exit 1
+        fi
+
+        # Boot starts 'nqe', whereas older GUI applies may have started the
+        # same binaries as 'samba'. Clear the alias instance and boot links.
+        /etc/init.d/samba disable || exit 1
+        /etc/init.d/samba stop || exit 1
+        if [ "$needed" = 0 ]; then
+          /etc/init.d/nqe disable || exit 1
+          /etc/init.d/nqe stop
+        else
+          /etc/init.d/nqe enable || exit 1
+          # NQE's reload signals the hardcoded 'samba' procd instance;
+          # restart the canonical service to apply all settings reliably.
+          /etc/init.d/nqe restart
+        fi
+        exit $?
+        ;;
+    esac
+  fi
+
+  if [ -x /etc/init.d/samba ]; then
+    /etc/init.d/samba "$action" || exit 1
+  fi
+  if [ "$action" = reload ] && [ -x /etc/init.d/samba-nmbd ]; then
+    /etc/init.d/samba-nmbd reload
+  fi
+  exit 0
 }
 
 case "$1" in
+parental) parental_policy ;;
+dlna) dlna_policy ;;
+isp) isp_policy ;;
+gre|pnp) isp_apply "$1" ;;
+sync) sync_services ;;
+cwmp)
+  apply_cwmp_service
+  ;;
+samba)
+  apply_samba_service "$2"
+  ;;
 refresh | setup | force)
   isp_helper "$1" "$2"
   ;;
 *)
-  echo "usage: refresh, force or setup ISP_NAME" 1>&2
+  echo "usage: refresh, force, setup ISP_NAME, cwmp, samba [reload|restart], parental, dlna, isp, gre, pnp or sync" 1>&2
   return 1
   ;;
 esac

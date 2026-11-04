@@ -125,9 +125,16 @@ local telstra_check_rule = {
 
 --Check every element in table
 for _ , elem in pairs(check_rule) do
-	if not contains(elem.name, ruleset) then
+	local listed = contains(elem.name, ruleset)
+	-- A ruleset entry alone does not grant access: repair missing or stale
+	-- rule sections too, otherwise hasAccess hides the tab and returns 404.
+	if uci:get('web', elem.name) ~= 'rule' or
+		uci:get('web', elem.name, 'target') ~= elem.target then
 		uci:set('web', elem.name ,'rule')
 		uci:set('web', elem.name , 'target', elem.target)
+		new_rule = true
+	end
+	if not listed then
 		uci:set('web', elem.name , 'roles', {'admin','engineer'})
 		ruleset[#ruleset+1] = elem.name
 	end

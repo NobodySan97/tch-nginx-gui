@@ -1,12 +1,19 @@
 """Exercise bridge/routed transitions against firmware-shaped datamodels."""
 from pathlib import Path
 import json
+import os
 import shutil
 import subprocess
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1] / 'decompressed/gui_file'
 LUA = shutil.which('lua')
+# POSIX shell is required for the stop-check test: resolve Git's bundled sh on Windows.
+SH = shutil.which('sh')
+if not SH:
+    _candidate = Path(os.environ.get('ProgramFiles', 'C:/Program Files')) / 'Git' / 'bin' / 'sh.exe'
+    if _candidate.exists():
+        SH = str(_candidate)
 
 
 @unittest.skipUnless(LUA, 'Lua interpreter required')
@@ -777,7 +784,7 @@ pidof() {
     esac
 }
 '''.replace('BEHAVIOR', behavior)
-                result = subprocess.run(['/bin/sh', '-c', prelude + command], capture_output=True, text=True)
+                result = subprocess.run([SH, '-c', prelude + command], capture_output=True, text=True)
                 self.assertEqual(result.returncode, expected, result.stderr)
 
     def test_legacy_local_bridge_recovers_only_unique_configured_wan_port(self):
