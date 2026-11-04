@@ -151,7 +151,7 @@ function runReplacement(entry) {
     assert.strictEqual(options.cache, false);
     let done, always;
     const req = {aborted: false, done(fn) {done = fn; return this;}, always(fn) {always = fn; return this;},
-      resolve() {done('valid'); always();}, reject() {always();}, abort() {this.aborted = true; always();}};
+      resolve(html) {done(html === undefined ? 'valid' : html); always();}, reject() {always();}, abort() {this.aborted = true; always();}};
     requests.push(req); return req;
   };
   const context = {document, $, KoRequest: {}, modgui: {}, ko: {dataFor: () => true},

@@ -2,8 +2,8 @@
 
 Ported from upstream ddeb7d60/e2150b75; the Smartphone card additionally
 proves the custom-refresh ownership handshake and the fork `.card` identities.
-The VPN extension entries require the shared-polling client wired in their
-own owning wave and are skipped until then (see tests/test_extension_cards.js).
+The VPN extension entries render through the shared-polling client wired in
+their owning wave (upstream ddeb7d60), matching tests/test_extension_cards.js.
 """
 from pathlib import Path
 from html.parser import HTMLParser
@@ -97,6 +97,54 @@ io.write(table.concat(output))
                 layers.feed(html)
                 self.assertTrue(layers.foreground)
                 self.assertEqual(layers.stack, [])
+
+    @unittest.skipUnless(shutil.which('lua'), 'Lua required')
+    def test_vpn_cards_snapshots_and_access(self):
+        for name, filename, connected, stopped in [
+            ('tailscale', '016_tailscale.lp', 'Tailscale connected', 'Tailscale disconnected'),
+            ('wireguard', '016_wireguard.lp', 'Peers connected', 'Tunnel disabled'),
+            ('openvpn', '015_openvpn-server.lp', 'OpenVPN server enabled', 'OpenVPN server disabled'),
+        ]:
+            for enabled in ('0', '1'):
+                for access in ('yes', 'no'):
+                    with self.subTest(name=name, enabled=enabled, access=access):
+                        result = subprocess.run(['lua', '-', str(CARDS / filename), name, enabled, access,
+                                                 connected if enabled == '1' else stopped], input=r'''
+local output = {}
+T = function(value) return value end
+N = function(single, plural, count) return count == 1 and single or plural end
+gettext = {textdomain = function() end}
+string.untaint = function(value) return value end
+ngx = {ctx = {session = {hasAccess = function() return arg[4] == "yes" end}},
+ print = function(...) for _, value in ipairs({...}) do output[#output + 1] = tostring(value) end end}
+-- The fork cards keep the `file_exists` auto-hide guard: make every probed
+-- path visible without writing to the host filesystem.
+io.open = function()
+  return {read = function() return "" end, close = function() end}
+end
+package.preload["web.ui_helper"] = function() return {
+ createCardHeader = function(title) return title end,
+ createSimpleLight = function(_, text) return '<span><i class="light"></i>' .. text .. '</span>' end
+} end
+package.preload["web.content_helper"] = function() return {getExactContent = function(content)
+ for key in pairs(content) do content[key] = "" end
+ content.enabled = arg[3]; content.client_enabled = "0"; content.connected_clients = "2"
+end} end
+io.popen = function(command)
+ assert(command:find(arg[2], 1, true))
+ local lines = arg[3] == "1" and {'online=true', 'running=true', 'live=2', 'peers=3', 'ip=<unsafe>&'} or {}
+ local i = 0
+ return {lines = function() return function() i = i + 1; return lines[i] end end, close = function() end}
+end
+assert(loadfile(arg[1]))()
+local html = table.concat(output)
+assert(html:find('id="' .. arg[2] .. '-card"', 1, true))
+assert(html:find(arg[5], 1, true))
+assert(not html:find('<unsafe>', 1, true))
+if arg[2] ~= "openvpn" and arg[3] == "1" then assert(html:find('&lt;unsafe&gt;&amp;', 1, true)) end
+assert((html:find('new modgui.createAjaxUpdateCard(', 1, true) ~= nil) == (arg[4] == "yes"))
+''', text=True, capture_output=True, timeout=5)
+                        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_extensions_card_wiring(self):
         card = (CARDS / '009_extensions.lp').read_text()

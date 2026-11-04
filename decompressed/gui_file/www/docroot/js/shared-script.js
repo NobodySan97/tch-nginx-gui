@@ -163,21 +163,28 @@ var modgui = modgui || {};
     }
 
 	function linkCheckUpdate() {
-		$(".check_update").on("click", function (e) {
+		var target = "/modals/modgui-modal.lp?auto_update=true";
+		$(".check_update").off("click.guiUpdate").on("click.guiUpdate", function (e) {
+			e.preventDefault();
 			e.stopPropagation();
-			if (KoRequest.CheckVer) return;
-			postAction("checkver", false, false, '/modals/modgui-modal.lp?auto_update=true');
+			if (KoRequest.CheckVer) return false;
+			$(".check_update_error").remove();
+			postAction("checkver", false, false, target);
 			$(".check_update_spinner").addClass("fa-spin");
+			var link = $(this);
 
 			var pollCount = 0;
 			var hasSeenChecking = false;
 
-			function stopCheckVer() {
+			function stopCheckVer(error) {
 				if (KoRequest.CheckVer && KoRequest.CheckVer.interval) {
 					clearInterval(KoRequest.CheckVer.interval);
 				}
 				KoRequest.CheckVer = null;
 				$(".check_update_spinner").removeClass("fa-spin");
+				// Polling failures must not stop silently: show the reason close
+				// to the caller (upstream efeb7642 error surfacing).
+				if (error) $("<span>").addClass("check_update_error text-error").attr("role", "alert").text(error).appendTo(link.parent());
 			}
 
 			function applyVersionUpdate(versionText, isOutdated) {
@@ -200,7 +207,7 @@ var modgui = modgui || {};
 					pollCount++;
 					// Hard watchdog timeout after 20 seconds
 					if (pollCount > 20) {
-						stopCheckVer();
+						stopCheckVer("Update check timed out. Please retry.");
 						return;
 					}
 
@@ -227,12 +234,18 @@ var modgui = modgui || {};
 						},
 						error: function () {
 							if (pollCount > 15) {
-								stopCheckVer();
+								stopCheckVer("Unable to check updates. Please retry.");
 							}
 						}
 					});
 				}, 1000)
 			};
+			return false;
+		});
+		$(".upgrade_gui").off("click.guiUpdate").on("click.guiUpdate", function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			return postAction("system_upgrade_gui", 1, null, target);
 		});
 	};
 

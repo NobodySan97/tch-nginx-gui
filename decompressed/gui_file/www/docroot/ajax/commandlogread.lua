@@ -41,7 +41,7 @@ if action[untaint(data.state)] then
 	end
 
 else
-	if ngx.req.get_uri_args().auto_update == "true" then
+	if ngx.req and ngx.req.get_uri_args and ngx.req.get_uri_args().auto_update == "true" then
 		local new_ver = proxy.get("uci.modgui.gui.new_ver")
 		if new_ver and new_ver[1] and new_ver[1].value and new_ver[1].value ~= "" then
 			data["new_version_text"] = new_ver[1].value
@@ -55,6 +55,9 @@ else
 	if file then
 		local content = file:read('*a')
 		file:close()
+		-- CLI progress rewrites the current line with a carriage return.
+		-- Normalize it before the multistage upgrade reporting sees it.
+		content = (content or ""):gsub("\r\n", "\n"):gsub("[^\r\n]*\r", "")
 		local last_pct = nil
 		for p in content:gmatch("(%d+%.?%d*)%%") do
 			last_pct = p

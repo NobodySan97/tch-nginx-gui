@@ -4,6 +4,14 @@
 gettext.textdomain('webui-core')
 
 local ui_helper = require("web.ui_helper")
+-- Ookla/plain terminal state labels (upstream e87789d4): keep the raw state
+-- for the fork multistage upgrade logic, translate only the header text.
+local labels = require("dkjson").encode({
+        Requested = T"Executing",
+        ["In Progress"] = T"Executing",
+        Complete = T"Complete",
+        login = T"Login Required",
+})
 
 local header = '<span id="header_title">'..T"Executing"..'</span><span id="show_progress"></span>'
 
@@ -55,6 +63,11 @@ html[#html + 1] = [[
   </form>
 </div>
 <script>
+]]
+-- Rendered labels arrive as JSON so the header can translate plain states
+-- (Executing / Complete) and the login fallback without a rewrite pass.
+html[#html + 1] = '\tvar commandLogLabels = ' .. labels .. ';\n'
+html[#html + 1] = [[
 	var requestInProgress = false;
 	var isUpgradeComplete = false;
 	var hasStartedExecution = false;
@@ -117,7 +130,8 @@ html[#html + 1] = [[
 				}
 
 				var header_text = $("#header_title").text();
-				if (data.state && header_text != data.state) $("#header_title").text(data.state);
+				var state_text = commandLogLabels[data.state] || data.state;
+				if (data.state && header_text != state_text) $("#header_title").text(state_text);
 
 				var targetProgress = 5;
 				var stageText = "Avvio procedura di aggiornamento...";
@@ -264,6 +278,11 @@ html[#html + 1] = [[
 			.fail(function(data) {
 				consecutiveFailures++;
 				var isAuthRedirect = (data.status == 200 && data.responseText && data.responseText.indexOf("sign-me-in") !== -1);
+				// Session expired during a plain utility run: tell the user to
+				// log in again instead of leaving the stale executing header.
+				if (isAuthRedirect && !isUpgradeComplete && lastProgress < 75) {
+					$("#header_title").text(commandLogLabels.login);
+				}
 				
 				// Se Nginx ha riavviato i servizi, ha azzerato le sessioni in memoria. Se l'aggiornamento era già in fase avanzata (>= 75% o almeno 12 fallimenti di transizione), l'update è completato!
 				if (isAuthRedirect && (lastProgress >= 75 || consecutiveFailures >= 12)) {
