@@ -1,8 +1,28 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.86 (Stable)
+---------------------------------------------------------------------------
+- **Sincronizzazione Upstream Agosto-Ottobre 2026 (39 Commit edd9e386..upstream/master, "Ondate 1-7")**:
+  - **Smartphone Tethering USB + Advanced VoIP (upstream #1232, `3eb64e8d`…`c5268da2`)**: nuova app `smartphone` (tethering ADB con uplink manager fallback/primary, statistiche telefoniche da `/usr/bin/phone_stats.sh`, screenshot schermo, parser radio, diagnostica USB/ADB), card Extensions dedicata, modale `mmpbx-advanced-modal` (STUN, keep-alive, jitter buffer, DND/ACR/transfer) con mappe mmpbx aggiornate, lifecycle self-contained con rollback.
+  - **Service Policies (`661a1117`,`6374d803`,`a114d1cf`)**: framework `service_action`/`sync_services` in `ispConfigHelper.sh` con `parental_policy`/`dlna_policy`/`isp_policy`, stop completo samba (NQE-aware)/cwmpd/nanocdn quando disabilitati dalla GUI, purge di fabbrica di `iperf`/`xl2tpd`, flag `keep_isp_services`; `.ca` commitapply byte-integrati + nuovo `uci_generic_pnpd.ca`.
+  - **Bridge Helper & Runner Queues (`d2918d6a`,`8183a726`)**: nuovo `www/lua/bridgehelper.lua` (enter/exit bridge, `protectRunnerQueues`/`restoreRunnerQueues` con opzione `bridge_qos_devices` per preservare le code QoS dell'Ethernet in bridge mode), rework transizioni broad-bond con wan-sensing coordinato (restart canonico in `uci_wansensing.ca`), nuovi snippets `002_broadband_bridge`/`002_broadband_docsis`, modalità connessione DHCP esposta da `internet.lua`/`internethelper.lua`.
+  - **Infrastruttura VPN & TUN (`4074838d`,`bf0d28eb`,`ba9d786c`,`7873819b`)**: validazione kernel ABI sui feed opkg (inclusi indici gzip), migrazione kmod-tun legacy verso pacchetti feed verificati, installazione WireGuard NATIVO da `GUI_ipk` con rollback, rimozione del feed kernel`chaos_calmer` legacy, capability proxy RPC `TunSupported`/`WireGuardSupported` con cache 30s (fix card 18.x/MIPS), replacement busybox `wget` su kernel 4.1.38.
+  - **aMule completo (`42fb0684`)**: rewrite app ARMv7+MIPS, WebUI password (`/etc/modgui-amule.web.password` realizzata con umask 077, copia worker nginx chmod 400), procd init con probe USB, rollback installazione con tracking pacchetti, rimosso il vecchio limite `mips-only` nella UI.
+  - **Sessioni & Cron (`9d323cf5`,`e6f53090`)**: fix leak memoria `ipcount`, gestione timer sessioni (reclaim forzato), cron manager aggiornato con regex step (`*/5`), `cronLine()` in `add`, guard cache `system.cron.map`, modal ri-sincronizzata.
+  - **Speedtest Live & Card VPN (`e87789d4`,`ddeb7d60`,`efeb7642`)**: streaming live Ookla (FIFO+tee) nel terminale con progress EverySecond, refresh periodico (30s) delle card OpenVPN/Tailscale/WireGuard via `createAjaxUpdateCard` con ownership custom-function in `shared-script.js`, anchor "GUI is outdated" cliccabile per avvio update + banner errore visibile per il check updates.
+  - **Wireless (`6074e27c`,`01252964`,`725082cb`)**: fix selezione 5GHz DGA4331 (standard risolto da `curRadio` con supporto strutture Wi-Fi 6 e `native_channelwidth` AGTHF), guard re-inizializzazione slider noUi, gestione LuCI wireless anche su MIPS con controller Chaos-Calmer e abilitazione quantenna condizionata.
+  - **Fix core & retroporte**: fix LED power rosso TG788vn/TelMex (status LED eventing non rientra IPTV su sezione assente), rename sezione dnsmasq anonymous prima della creazione (ordine pre-ISP), guard `-x`/sezione in `ispConfigHelper.sh`, `web_unlock` con regole `mmpbxadvancedmodal`/`systeminitmodal`/`systemcronmodal`, wrapper.sh state machine (In Progress/Error/Complete), riordino `06_network.sh`.
+- **Casi Particolari di Integrazione**:
+  - Conservato il fork `get_cwmp_section()` dinamico (41d3a6ea) in `apply_cwmp_service()`.
+  - Conservate le LRU-eviction sessioni, supersett polling/dashboard, pipeline autobuild `NobodySan97`, guard `file_exists` auto-hide; `broadbandmode_helper.lua` segue la re-scrittura upstream (delegante a `bridgehelper.lua`, necessaria alla suite `test_bridge_modes`).
+  - **ℹ️ Cambio Decisione**: immagini del docroot ottimizzate (versione compresse upstream, −1.2 MB rispetto alla precedente scelta "pristine lossless").
+  - Versione: allineata per-build (rootdevice via `build_release.py`).
+
+
 9.8.85 (Stable)
 ---------------------------------------------------------------------------
+
 - **Integrazione Completa Ottimizzazioni & Funzionalità Upstream (17 Commit fino a v9.8.44)**:
   - **Dashboard Batching & Polling Intelligente**: Integrato l'endpoint `/ajax/dashboard_sync.lua` (capture multi OpenResty) con sincronizzazione atomica delle letture UCI e pausa automatica delle richieste AJAX in background quando la scheda browser è nascosta (`document.hidden`).
   - **Campionamento Traffico WAN Nativo (netrate.lua)**: Eliminati tutti i fork di sottoprocessi shell per il calcolo del bitrate WAN; campionamento diretto da `/proc/net/dev` e sysfs con gestione integrata del rollover dei contatori a 32-bit.
