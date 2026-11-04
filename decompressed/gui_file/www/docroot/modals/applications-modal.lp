@@ -76,7 +76,7 @@ mapParams.transmission_webui = "uci.modgui.app.transmission_webui"
 mapParams.adblock_application = "uci.modgui.app.adblock_app"
 mapParams.rsyncd_application = "uci.modgui.app.rsyncd_app"
 mapParams.openspeedtest_application = "uci.modgui.app.openspeedtest_app"
-if cputype:match("^mips") then
+if cputype:match("^mips") or cputype:match("^armv7") then
 	mapParams.amule_webui = "uci.modgui.app.amule_webui"
 end
 if cputype:match("^armv7") or cputype:match("^mips") then
@@ -190,7 +190,7 @@ storage[#storage+1] = '</div>'
 notices[#notices+1] = table.concat(storage)
 
 local usb_required = {
-	amule_webui = cputype and cputype:match("^mips"),
+	amule_webui = true,
 	aria2_webui = true,
 	transmission_webui = true,
 }
@@ -275,10 +275,18 @@ if StateParams["amule_webui"] ~= nil then
 	html[#html+1] = T"Webui on: " .. '<a target="_blank" href="' .. amule_direct_link .. '">' .. amule_direct_link .. "</a>"
 	html[#html+1] = "<br/>"
 	if mapParams["amule_webui"] and mapParams["amule_webui"] == "1" then
-        if cputype:match("mips") then
-            html[#html+1] = ui_helper.createSimpleButton(T"Start".." aMule", "fa fa-play", btn_table.amule.start)
-            html[#html+1] = ui_helper.createSimpleButton(T"Stop".." aMule", "fa fa-stop", btn_table.amule.stop)
-        end
+		local password_file = io.open("/etc/modgui-amule-web.password", "r")
+		if password_file then
+			local password = (password_file:read(256) or ""):gsub("[\r\n]+$", "")
+			password_file:close()
+			if password ~= "" then
+				html[#html+1] = '<label for="amule-web-password">' .. T"WebUI password" .. '</label>'
+				html[#html+1] = '<input id="amule-web-password" class="input-block-level" type="password" readonly autocomplete="off" value="' .. escape_html(password) .. '">'
+				html[#html+1] = '<label class="checkbox" for="amule-show-password"><input id="amule-show-password" type="checkbox" aria-controls="amule-web-password">' .. T"Show password" .. '</label>'
+			end
+		end
+		html[#html+1] = ui_helper.createSimpleButton(T"Start".." aMule", "fa fa-play", btn_table.amule.start)
+		html[#html+1] = ui_helper.createSimpleButton(T"Stop".." aMule", "fa fa-stop", btn_table.amule.stop)
 		html[#html+1] = ui_helper.createSimpleButton(T"Remove".." aMule", "fa fa-times-circle", btn_table.amule.remove)
 	else
 		html[#html+1] = ui_helper.createSimpleButton(T"Install".." aMule", "fa fa-download", btn_table.amule.install)
@@ -612,6 +620,9 @@ ngx.print('\
 \
 <script>\
 (function() {\
+    $("#amule-show-password").on("change", function() {\
+      $("#amule-web-password").attr("type", this.checked ? "text" : "password");\
+    });\
     $("div[id^=\'btn-\']").on("click", function() {\
       var btnact = $(this).attr("id").replace("btn-", "");\
       var showLog = (btnact.indexOf("install") === 0 || btnact.indexOf("remove") === 0) ? 1 : 0;\

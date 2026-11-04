@@ -33,7 +33,7 @@ if args.download == "1" then
   local port = untaint(getvalue("uci.openvpn.openvpn.@server.port"))
   ngx.header.content_type = "application/x-openvpn-profile"
   ngx.header.content_disposition = 'attachment; filename="modgui-openvpn-client.ovpn"'
-  ngx.print("client\ndev tun\nproto ", proto, "\nremote ", host, " ", port, "\nresolv-retry infinite\nnobind\npersist-key\npersist-tun\nremote-cert-tls server\nauth-user-pass\ncipher AES-256-CBC\nauth SHA256\nverb 3\n<ca>\n", ca, "\n</ca>\n<cert>\n", cert, "\n</cert>\n<key>\n", key, "\n</key>\n")
+  ngx.print("client\ndev tun\nproto ", proto, "\nremote ", host, " ", port, "\nresolv-retry infinite\nnobind\npersist-key\npersist-tun\nremote-cert-tls server\nauth-user-pass\ncipher AES-256-CBC\nsetenv opt data-ciphers AES-256-CBC\nauth SHA256\nverb 3\n<ca>\n", ca, "\n</ca>\n<cert>\n", cert, "\n</cert>\n<key>\n", key, "\n</key>\n")
   return ngx.exit(ngx.HTTP_OK)
 end
 

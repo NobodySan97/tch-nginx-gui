@@ -90,9 +90,21 @@ require_free_space 16384 /usr
         result = self.run_sh(function('app_amule', 'app_aria2') + '''
 opkg() { :; }
 uci() { :; }
+set_extension_state() { :; }
 app_amule remove
 ''')
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_amule_reports_supported_architectures_before_any_state_change(self):
+        result = self.run_sh(function('app_amule', 'app_aria2') + '''
+cpu_type=aarch64
+opkg() { echo UNEXPECTED_OPKG; }
+uci() { echo UNEXPECTED_STATE; }
+set_extension_state() { echo UNEXPECTED_STATE; }
+app_amule install
+''')
+        self.assertEqual(result.stdout, 'aMule supports ARMv7 and MIPS gateways\n')
+        self.assertNotEqual(result.returncode, 0)
 
     def test_luci_mips_dispatch_uses_integrated_storage_guard_on_supported_firmware(self):
         helper = SOURCE[SOURCE.index('luci_mips_state='):SOURCE.index('require_usb_storage() {')]
