@@ -2068,8 +2068,16 @@ function confirmationDialogue(t, e) {
 		}),
 		$(".modal").load(t, n, function (t, e, n) {
 			$.xhrPool = [],
-			m(),
-			403 === n.status || 0 < $("#sign-me-in").length ? (p(loginMsg), window.location = "/login.lp") : (("error" === e || "timeout" === e) && httpErrorMessage(n), i(), a && r(), (typeof o === "function") && o(t, e, n))
+			m();
+			if (403 === n.status || 0 < $("#sign-me-in").length) {
+				p(loginMsg), window.location = "/login.lp";
+				return
+			}
+			if ("error" === e || "timeout" === e) {
+				httpErrorMessage(n);
+				return
+			}
+			i(), a && r(), (typeof o === "function") && o(t, e, n)
 		})
 	}
 	function i() {
@@ -2090,10 +2098,12 @@ function confirmationDialogue(t, e) {
 				s(this, !0)
 			}), $(".noUiSlider.slider-select").each(function () {
 				var t = $(this),
+				initialized = t.hasClass("noUi-target"),
 				e = t.children("select"),
 				n = e.find("option").length,
 				i = e.prop("selectedIndex"),
 				o = t.next(".noUiSlider-text");
+				if (initialized) return;
 				t.noUiSlider({
 					start: i,
 					range: {

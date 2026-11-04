@@ -1,5 +1,6 @@
 """Exercise the native LuCI bridge without a router or real credentials."""
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import unittest
@@ -155,6 +156,7 @@ end
 local data = {radio="radio_2G",ssid="New network",network="lan",password="Fixture-only-password",enabled="0"}
 local adds, writes, dels, applied = {}, {}, {}, 0
 local proxy = {
+ getPN=function() return {} end,
  add=function(path,id) adds[#adds+1]=id; return id end,
  set=function(values) writes[#writes+1]=values; return true end,
  apply=function() applied=applied+1; return true end,
@@ -178,6 +180,43 @@ adds = {}; assert(not b.create(snapshot,data,cursor,proxy)); assert(#adds == 0)
 snapshot.radios[1].type = "broadcom"
 cursor.get=function() return "occupied" end
 assert(not b.create(snapshot,data,cursor,proxy))
+''')
+
+    def test_create_refreshes_stale_transformer_names_before_reuse(self):
+        self.run_lua('''
+config["wifi-iface"]={{[".name"]="wl0",device="radio_2G"}}
+config.interface={{[".name"]="lan"}}
+local stale, calls = {}, {}
+for _, path in ipairs({"uci.wireless.wifi-iface.","uci.wireless.wifi-ap."}) do stale[path]=true end
+local proxy={
+ getPN=function(path,nextlevel)
+  assert(nextlevel == true); calls[#calls+1]="refresh:"..path; stale[path]=false; return {}
+ end,
+ add=function(path,id)
+  assert(not stale[path], "Object name already in use")
+  calls[#calls+1]="add:"..path; stale[path]=true; return id
+ end,
+ set=function() return true end, apply=function() return true end,
+ del=function() return true end
+}
+local data={radio="radio_2G",network="lan",ssid="Fixture",password="Fixture-password",enabled="1"}
+for attempt=1,2 do
+ calls={}
+ assert(b.create(snapshot,data,cursor,proxy)=="wl0_1")
+ assert(calls[1]=="refresh:uci.wireless.wifi-iface.")
+ assert(calls[2]=="refresh:uci.wireless.wifi-ap.")
+ assert(calls[3]=="add:uci.wireless.wifi-iface.")
+ assert(calls[4]=="add:uci.wireless.wifi-ap.")
+end
+proxy.set=function() error(data.password) end
+local ok,err=b.create(snapshot,data,cursor,proxy)
+assert(not ok and err:find("saving wireless settings",1,true))
+assert(err:find("new sections removed",1,true) and not err:find(data.password,1,true))
+proxy.getPN=function() return nil end
+proxy.apply=function() error("Must not apply after a failed refresh") end
+ok,err=b.create(snapshot,data,cursor,proxy)
+assert(not ok and err:find("refreshing wireless interfaces",1,true))
+assert(err:find("no new sections created",1,true))
 ''')
 
     def test_remove_only_owned_networks(self):
@@ -288,7 +327,38 @@ assert(not pcall(assert(loadstring(source))))
 assert(files[path] == "-- Unsupported version")
 io.open, os.remove, os.rename = real_open, real_remove, real_rename
 '''
-        self.run_lua("local INSTALLER = " + repr(str(INSTALLER)) + "\n" + code)
+        for overview in ("cbi", "template"):
+            with self.subTest(overview=overview):
+                fixture = code.replace('arcombine(cbi("admin_network/wifi_overview")',
+                                       f'arcombine({overview}("admin_network/wifi_overview")')
+                self.run_lua("local INSTALLER = " + repr(str(INSTALLER)) + "\n" + fixture)
+
+    def test_templates_render_without_modern_url_global(self):
+        code = '''
+package.loaded['luci.model.tch_wireless'] = b
+package.loaded['luci.dispatcher'] = {build_url=function(...) return '/' .. table.concat({...}, '/') end}
+url = nil; token = nil; resource = '/resources'
+pcdata = function(value) assert(type(value) == 'string'); return value end
+translate = function(value) return value end
+self = {snapshot=snapshot, creation={radios={}, unavailable={}}}
+'''
+        for filename in ('tch_wireless_overview.htm', 'tch_wireless_back.htm'):
+            template = (BACKEND.parents[1] / 'view' / filename).read_text()
+            chunks = ['do\n']
+            for part in re.split(r'(<%.*?%>)', template, flags=re.S):
+                if not part.startswith('<%'):
+                    chunks.append('io.write([====[' + part + ']====])\n')
+                elif part.startswith('<%#'):
+                    continue
+                elif part.startswith('<%:'):
+                    chunks.append('io.write([====[' + part[3:-2] + ']====])\n')
+                elif part.startswith('<%='):
+                    chunks.append('io.write(tostring(' + part[3:-2] + '))\n')
+                else:
+                    chunks.append(part[2:-2] + '\n')
+            chunks.append('end\n')
+            code += ''.join(chunks)
+        self.run_lua(code)
 
 
 if __name__ == "__main__":
