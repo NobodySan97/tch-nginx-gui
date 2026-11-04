@@ -60,10 +60,12 @@ if cputype:match("^armv7") or cputype == "aarch64" or cputype == "arm64" then
 	mapParams.speedtest_application = "uci.modgui.app.speedtest_app"
 	mapParams.adguardhome_application = "uci.modgui.app.adguardhome_app"
 	if tun_install_supported() then
-		mapParams.wireguard_application = "uci.modgui.app.wireguard_app"
-	end
-	if tun_install_supported() then
 		mapParams.tailscale_application = "uci.modgui.app.tailscale_app"
+	end
+end
+if cputype:match("^armv7") or cputype == "aarch64" or cputype == "arm64" or cputype == "mips" then
+	if vpn_supported("WireGuardSupported") or tun_install_supported() then
+		mapParams.wireguard_application = "uci.modgui.app.wireguard_app"
 	end
 end
 if cputype:match("^armv7") then

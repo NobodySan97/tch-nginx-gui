@@ -90,8 +90,10 @@ end
 if cputype:match("^armv7") or cputype == "aarch64" or cputype == "arm64" then
 	mapParams.speedtest_application = "uci.modgui.app.speedtest_app"
 	mapParams.adguardhome_application = "uci.modgui.app.adguardhome_app"
-	mapParams.wireguard_application = "uci.modgui.app.wireguard_app"
 	mapParams.tailscale_application = "uci.modgui.app.tailscale_app"
+end
+if cputype:match("^armv7") or cputype == "aarch64" or cputype == "arm64" or cputype == "mips" then
+	mapParams.wireguard_application = "uci.modgui.app.wireguard_app"
 end
 if cputype:match("^armv7") then
 	mapParams.dumaos_application = "uci.modgui.app.dumaos_app"

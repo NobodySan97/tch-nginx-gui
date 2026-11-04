@@ -8,9 +8,10 @@ dumaos_platform_supported() {
 }
 
 # Shared TUN lifecycle for WireGuard, OpenVPN and Tailscale.  The reviewed
-# DGA4130 module is for ARMv7 kernel 4.1.52; other platforms may use their matching
-# kmod-tun package.  Per-extension users prevent one VPN from removing a
-# module still needed by another.
+# DGA4130 module is for ARMv7 kernel 4.1.52; the legacy MIPS module is limited
+# to MIPS Homeware 17.2 with kernel 3.4.11-rt19. Other
+# platforms may use their matching kmod-tun package. Per-extension users prevent
+# one VPN from removing a module still needed by another.
 modgui_tun_file="/lib/modules/4.1.52/tun.ko"
 modgui_tun_sha256="374b8399951a4fa75a0b9c68b6eced9d064cc442d3150d2210d75623c275354e"
 modgui_tun_commit="1587d4a113de414f4409ea80b11a8d03c115f17c"
@@ -38,7 +39,29 @@ modgui_wait_tun() {
 }
 
 modgui_reviewed_tun_build() {
-  [ "$cpu_type" = "armv7l" ] && [ "$(uname -r)" = "4.1.52" ]
+  case "$cpu_type:$(uname -r)" in
+    armv7l:4.1.52) return 0 ;;
+    mips:3.4.11-rt19)
+      case "$marketing_version" in 17.2|17.2.*|17.2\ *) return 0 ;; esac ;;
+  esac
+  return 1
+}
+
+modgui_tun_profile() {
+  modgui_reviewed_tun_build || return 1
+  modgui_tun_url="https://raw.githubusercontent.com/FrancYescO/GUI_ipk/$modgui_tun_commit/artifacts/tun-vbntj-damson-4.1.52.ko"
+  modgui_tun_archive_sha256=""
+  if [ "$cpu_type" = mips ]; then
+    # GPL TUN module from Alastair D'Silva, also used by the TG788/UNO report:
+    # https://alastair.d-silva.org/sites/default/files/2023-04/mips.tun_.ko_.tbz
+    # Source archive SHA256: ff673e7841df6de1dc0d3595352c17eb375480be2f93406b2aa596c8f7afa698
+    # Download at app install time; bzcat handles the archive even when the
+    # legacy tar command lacks its -j option.
+    modgui_tun_file="/lib/modules/3.4.11-rt19/tun.ko"
+    modgui_tun_url="https://alastair.d-silva.org/sites/default/files/2023-04/mips.tun_.ko_.tbz"
+    modgui_tun_archive_sha256="ff673e7841df6de1dc0d3595352c17eb375480be2f93406b2aa596c8f7afa698"
+    modgui_tun_sha256="241f06c8ba05e6779438520a345ab8fc6f7d1f34249abac77793ee26e67e5615"
+  fi
 }
 
 modgui_tun_migrate_owners() {
@@ -56,6 +79,7 @@ modgui_tun_migrate_owners() {
 
 modgui_install_tun() {
   consumer="$1"
+  modgui_tun_profile || true
   modgui_tun_migrate_owners
   # A device node proves registration, not ABI compatibility. The legacy
   # ARM 4.1.38 package can load and crash only when creating an interface.
@@ -99,27 +123,51 @@ modgui_install_tun() {
   fi
 
   if modgui_reviewed_tun_build; then
+    tun_created=0
     if [ -f "$modgui_tun_file" ]; then
       [ "$(sha256sum "$modgui_tun_file" | awk '{print $1}')" = "$modgui_tun_sha256" ] || {
         echo "An incompatible TUN module already exists; refusing to overwrite it"
         return 1
       }
     else
-      tun_tmp="/tmp/modgui-tun.$$.ko"
-      curl -kfL "https://raw.githubusercontent.com/FrancYescO/GUI_ipk/$modgui_tun_commit/artifacts/tun-vbntj-damson-4.1.52.ko" \
-        --output "$tun_tmp" || { rm -f "$tun_tmp"; return 1; }
+      tun_stage="/tmp/modgui-tun.$$"
+      (umask 077; mkdir "$tun_stage") || return 1
+      tun_tmp="$tun_stage/tun.ko"
+      if [ -n "$modgui_tun_archive_sha256" ]; then
+        curl -kfL "$modgui_tun_url" --output "$tun_stage/module.tbz" || { rm -rf "$tun_stage"; return 1; }
+        [ "$(sha256sum "$tun_stage/module.tbz" | awk '{print $1}')" = "$modgui_tun_archive_sha256" ] || {
+          echo "TUN archive checksum mismatch"; rm -rf "$tun_stage"; return 1;
+        }
+        bzcat "$tun_stage/module.tbz" > "$tun_stage/module.tar" &&
+          tar -xOf "$tun_stage/module.tar" tun.ko > "$tun_tmp" || { rm -rf "$tun_stage"; return 1; }
+      else
+        # Preserve the legacy downloader's stale-CA compatibility; the fixed
+        # module SHA256 below authenticates the downloaded bytes before use.
+        curl -kfL "$modgui_tun_url" --output "$tun_tmp" || { rm -rf "$tun_stage"; return 1; }
+      fi
       [ "$(sha256sum "$tun_tmp" | awk '{print $1}')" = "$modgui_tun_sha256" ] || {
         echo "TUN module checksum mismatch"
-        rm -f "$tun_tmp"
+        rm -rf "$tun_stage"
         return 1
       }
-      mkdir -p "$(dirname "$modgui_tun_file")" || { rm -f "$tun_tmp"; return 1; }
-      cp "$tun_tmp" "$modgui_tun_file" || { rm -f "$tun_tmp"; return 1; }
+      mkdir -p "$(dirname "$modgui_tun_file")" || { rm -rf "$tun_stage"; return 1; }
+      cp "$tun_tmp" "$modgui_tun_file" || {
+        rm -f "$modgui_tun_file"
+        rm -rf "$tun_stage"
+        return 1
+      }
       chmod 644 "$modgui_tun_file"
-      rm -f "$tun_tmp"
+      rm -rf "$tun_stage"
+      tun_created=1
     fi
-    modprobe tun 2>/dev/null || insmod "$modgui_tun_file" 2>/dev/null || return 1
-    modgui_has_tun || return 1
+    modprobe tun 2>/dev/null || insmod "$modgui_tun_file" 2>/dev/null || {
+      [ "$tun_created" = 0 ] || rm -f "$modgui_tun_file"
+      return 1
+    }
+    modgui_wait_tun || {
+      if [ "$tun_created" = 1 ] && rmmod tun 2>/dev/null; then rm -f "$modgui_tun_file"; fi
+      return 1
+    }
     printf 'tun\n' > "$modgui_tun_boot"
     touch "$modgui_tun_owned" "/etc/.modgui-tun-user-$consumer"
     return 0
@@ -147,6 +195,7 @@ modgui_install_tun() {
 
 modgui_release_tun() {
   consumer="$1"
+  modgui_tun_profile || true
   modgui_tun_migrate_owners
   rm -f "/etc/.modgui-tun-user-$consumer"
   [ -f "$modgui_tun_owned" ] || return 0
@@ -2045,6 +2094,38 @@ app_wireguard() {
     modgui_release_tun wireguard
   }
 
+  wireguard_prepare_mips_package() {
+    # Upstream publishes MIPS as a tar archive, rather than an opkg package.
+    # Repackage only its runtime files so opkg owns and removes them normally.
+    wireguard_stage="/tmp/modgui-wireguard-mips.$$"
+    (umask 077; mkdir "$wireguard_stage") || return 1
+    if ! curl -kfL "https://github.com/seud0nym/openwrt-wireguard-go/releases/download/$wireguard_version/openwrt-wireguard-go_mips.tgz" \
+      --output "$wireguard_stage/runtime.tgz"; then
+      rm -rf "$wireguard_stage"; return 1
+    fi
+    if [ "$(sha256sum "$wireguard_stage/runtime.tgz" | awk '{print $1}')" != "$wireguard_sha256" ]; then
+      echo "WireGuard archive checksum mismatch"
+      rm -rf "$wireguard_stage"; return 1
+    fi
+    mkdir "$wireguard_stage/data" "$wireguard_stage/control" || { rm -rf "$wireguard_stage"; return 1; }
+    tar -xzf "$wireguard_stage/runtime.tgz" -C "$wireguard_stage/data" || { rm -rf "$wireguard_stage"; return 1; }
+    # Do not install the upstream global forwarding sysctl: firewall access is
+    # managed per tunnel by the GUI and remains disabled until configured.
+    if ! tar -czf "$wireguard_stage/data.tar.gz" -C "$wireguard_stage/data" \
+      usr/bin/wireguard-go usr/bin/wg-go usr/bin/wg \
+      lib/netifd/proto/wireguard.sh etc/hotplug.d/net/10-wireguard; then
+      rm -rf "$wireguard_stage"; return 1
+    fi
+    printf 'Package: wireguard-go\nVersion: %s\nArchitecture: brcm63xx\nMaintainer: ModGUI\nDescription: Verified upstream MIPS userspace WireGuard runtime\n' \
+      "$wireguard_version" > "$wireguard_stage/control/control"
+    printf '2.0\n' > "$wireguard_stage/debian-binary"
+    tar -czf "$wireguard_stage/control.tar.gz" -C "$wireguard_stage/control" control &&
+      tar -czf "$wireguard_tmp" -C "$wireguard_stage" debian-binary control.tar.gz data.tar.gz
+    wireguard_pack_result=$?
+    rm -rf "$wireguard_stage"
+    return "$wireguard_pack_result"
+  }
+
   wireguard_register_gui() {
     uci -q del_list web.ruleset_main.rules=wireguardmodal
     uci add_list web.ruleset_main.rules=wireguardmodal
@@ -2118,18 +2199,21 @@ app_wireguard() {
   }
 
   wireguard_cleanup_network() {
-    for section in $(uci -q show network 2>/dev/null | awk -F'[.=]' '$2 ~ /^modgui_wg0/ {print $2}'); do
-      uci -q delete "network.$section"
-    done
-    uci -q delete firewall.modgui_wireguard_udp
-    uci -q delete firewall.modgui_wireguard_zone
-    uci -q delete firewall.modgui_wireguard_to_lan
-    uci -q delete firewall.modgui_lan_to_wireguard
-    uci -q delete firewall.modgui_wireguard_to_wan
-    uci -q commit network
-    uci -q commit firewall
-    /etc/init.d/network reload >/dev/null 2>&1
-    /etc/init.d/firewall reload >/dev/null 2>&1
+    wireguard_sections="$(uci -q show network 2>/dev/null | awk -F'[.=]' '$2 ~ /^modgui_wg0/ {print $2}' | sort -u)"
+    if [ -n "$wireguard_sections" ]; then
+      for section in $wireguard_sections; do uci -q delete "network.$section"; done
+      uci -q commit network
+      /etc/init.d/network reload >/dev/null 2>&1
+    fi
+    if uci -q show firewall 2>/dev/null | grep -Eq '^firewall\.modgui_(wireguard_(udp|zone|to_lan|to_wan)|lan_to_wireguard)='; then
+      uci -q delete firewall.modgui_wireguard_udp
+      uci -q delete firewall.modgui_wireguard_zone
+      uci -q delete firewall.modgui_wireguard_to_lan
+      uci -q delete firewall.modgui_lan_to_wireguard
+      uci -q delete firewall.modgui_wireguard_to_wan
+      uci -q commit firewall
+      /etc/init.d/firewall reload >/dev/null 2>&1
+    fi
   }
 
   case "$1" in
@@ -2158,6 +2242,11 @@ app_wireguard() {
       wireguard_arch="arm_cortex-a53"
       wireguard_sha256="1025b7cf216301c1f8db5d93a3cf683d11eea6d9a3bf19b620e27a083aefc0ff"
       ;;
+    mips)
+      modgui_reviewed_tun_build || { echo "This MIPS platform has not been validated for WireGuard"; return 1; }
+      wireguard_arch="brcm63xx"
+      wireguard_sha256="84a322e2a9cb3ce077e10eba608756265ccc004282568d2d9ccc2573f3b13972"
+      ;;
     *)
       echo "WireGuard userspace runtime is only supported on ARM devices"
       return 1
@@ -2173,21 +2262,31 @@ app_wireguard() {
       /etc/init.d/nginx restart
       return 0
     fi
-    require_free_space 8192 /usr || return 1
-    curl -kfL "https://raw.githubusercontent.com/seud0nym/openwrt-wireguard-go/$wireguard_commit/repository/$wireguard_arch/base/wireguard-go_${wireguard_version}_${wireguard_arch}.ipk" \
-      --output "$wireguard_tmp" || {
-        rm -f "$wireguard_tmp"
-        return 1
-      }
-    wireguard_actual_sha256="$(sha256sum "$wireguard_tmp" | awk '{print $1}')"
-    if [ "$wireguard_actual_sha256" != "$wireguard_sha256" ]; then
-      echo "WireGuard package checksum mismatch"
-      rm -f "$wireguard_tmp"
-      return 1
-    fi
+    case "$wireguard_arch" in
+      brcm63xx)
+        require_free_space 4096 /usr && wireguard_prepare_mips_package || {
+          rm -f "$wireguard_tmp"; wireguard_remove_tun; return 1;
+        } ;;
+      *)
+        require_free_space 8192 /usr || { wireguard_remove_tun; return 1; }
+        curl -kfL "https://raw.githubusercontent.com/seud0nym/openwrt-wireguard-go/$wireguard_commit/repository/$wireguard_arch/base/wireguard-go_${wireguard_version}_${wireguard_arch}.ipk" \
+          --output "$wireguard_tmp" || {
+            rm -f "$wireguard_tmp"
+            wireguard_remove_tun
+            return 1
+          }
+        wireguard_actual_sha256="$(sha256sum "$wireguard_tmp" | awk '{print $1}')"
+        if [ "$wireguard_actual_sha256" != "$wireguard_sha256" ]; then
+          echo "WireGuard package checksum mismatch"
+          rm -f "$wireguard_tmp"
+          wireguard_remove_tun
+          return 1
+        fi ;;
+    esac
     touch "$wireguard_owned"
     if ! opkg install "$wireguard_tmp"; then
       rm -f "$wireguard_tmp" "$wireguard_owned"
+      wireguard_remove_tun
       return 1
     fi
     rm -f "$wireguard_tmp"
@@ -2495,6 +2594,59 @@ app_openvpn() {
     modgui_release_tun openvpn
   }
 
+  openvpn_restart_services() {
+    /etc/init.d/transformer restart || return 1
+    openvpn_wait=0
+    while [ "$openvpn_wait" -lt 30 ]; do
+      lua -e 'local r=require("datamodel").get("sys.proc.CPUUsage", "uci.modgui.gui.gui_skin", "rpc.system.modgui.gui_version", "uci.openvpn.openvpn.@server.enabled"); os.exit(r and #r == 4 and 0 or 1)' >/dev/null 2>&1 && break
+      openvpn_wait=$((openvpn_wait + 1))
+      sleep 1
+    done
+    [ "$openvpn_wait" -lt 30 ] || { echo "Transformer did not become ready"; return 1; }
+    # Reload only after mappings are available, avoiding cached error values
+    # in templates rendered while the legacy Transformer service is starting.
+    nginx -t && nginx -s reload || /etc/init.d/nginx restart
+  }
+
+  openvpn_prepare_init() {
+    # Older feeds omit this supported OpenVPN option from the UCI renderer.
+    # Only adapt the service belonging to this managed OpenVPN installation.
+    [ -f /etc/init.d/openvpn ] || return 1
+    openvpn_options=/etc/init.d/openvpn
+    if grep -Fq '. /usr/share/openvpn/openvpn.options' /etc/init.d/openvpn; then
+      # Newer ARM packages source their whitelist instead of embedding it.
+      openvpn_options=/usr/share/openvpn/openvpn.options
+      [ -f "$openvpn_options" ] || return 1
+    fi
+    if ! grep -qw tls_version_min "$openvpn_options"; then
+      grep -qw tls_cipher "$openvpn_options" || return 1
+      sed -i 's/tls_cipher/tls_version_min tls_cipher/' "$openvpn_options" || return 1
+    fi
+    grep -qw tls_version_min "$openvpn_options"
+  }
+
+  openvpn_prepare_dh() {
+    # These are public RFC 7919 group parameters, not a private key. Preserve
+    # existing parameters and provision the standard group only when absent.
+    [ -s /etc/openvpn/dh2048.pem ] && return 0
+    openvpn_dh_stage="/tmp/modgui-openvpn-dh.$$"
+    (umask 077; mkdir "$openvpn_dh_stage") || return 1
+    if ! curl -kfL "https://raw.githubusercontent.com/mozilla/ssl-config-generator/99178dcaf7e1c0e5a0b5f783b1767cc47e1bf3e7/docs/ffdhe2048.txt" \
+      --output "$openvpn_dh_stage/params.pem"; then
+      rm -rf "$openvpn_dh_stage"; return 1
+    fi
+    [ "$(sha256sum "$openvpn_dh_stage/params.pem" | awk '{print $1}')" = 2ef7758563185ad0dc1dbc38ab3a91647701e3ebee344fcf86b52e643bacb721 ] || {
+      echo "OpenVPN DH parameter checksum mismatch"; rm -rf "$openvpn_dh_stage"; return 1;
+    }
+    openvpn_dh_target="/etc/openvpn/.dh2048.pem.$$"
+    mkdir -p /etc/openvpn && cp "$openvpn_dh_stage/params.pem" "$openvpn_dh_target" &&
+      mv "$openvpn_dh_target" /etc/openvpn/dh2048.pem
+    openvpn_dh_result=$?
+    rm -f "$openvpn_dh_target"
+    rm -rf "$openvpn_dh_stage"
+    return "$openvpn_dh_result"
+  }
+
   openvpn_prepare_openssl() {
     openssl version >/dev/null 2>&1 && return 0
     if [ -d "$openvpn_openssl_lib/usr/lib" ] &&
@@ -2502,16 +2654,30 @@ app_openvpn() {
       return 0
     fi
     modgui_reviewed_tun_build || return 1
-    curl -kfL "https://raw.githubusercontent.com/FrancYescO/GUI_ipk/$modgui_tun_commit/base/libopenssl_1.0.2t-1_arm_cortex-a9_neon.ipk" \
-      --output /tmp/modgui-openvpn-libopenssl.ipk || return 1
-    [ "$(sha256sum /tmp/modgui-openvpn-libopenssl.ipk | awk '{print $1}')" = "$openvpn_openssl_sha256" ] || {
+    case "$cpu_type" in
+      armv7l)
+        openvpn_openssl_url="https://raw.githubusercontent.com/FrancYescO/GUI_ipk/$modgui_tun_commit/base/libopenssl_1.0.2t-1_arm_cortex-a9_neon.ipk" ;;
+      mips)
+        openvpn_openssl_url="https://archive.openwrt.org/chaos_calmer/15.05.1/brcm63xx/generic/packages/base/libopenssl_1.0.2g-1_brcm63xx.ipk"
+        openvpn_openssl_sha256="7ab56484540c59948f84dff716dcfee38c7d7da9e2319ce8de96324e3ef56e4b" ;;
+      *) return 1 ;;
+    esac
+    openvpn_ssl_stage="/tmp/modgui-openvpn-ssl.$$"
+    (umask 077; mkdir "$openvpn_ssl_stage") || return 1
+    curl -kfL "$openvpn_openssl_url" --output "$openvpn_ssl_stage/package.ipk" || {
+      rm -rf "$openvpn_ssl_stage"; return 1;
+    }
+    [ "$(sha256sum "$openvpn_ssl_stage/package.ipk" | awk '{print $1}')" = "$openvpn_openssl_sha256" ] || {
       echo "OpenSSL library checksum mismatch"
+      rm -rf "$openvpn_ssl_stage"
       return 1
     }
-    mkdir -p "$openvpn_openssl_lib" || return 1
-    tar -xOzf /tmp/modgui-openvpn-libopenssl.ipk ./data.tar.gz |
-      tar -xzf - -C "$openvpn_openssl_lib" || return 1
-    rm -f /tmp/modgui-openvpn-libopenssl.ipk
+    mkdir -p "$openvpn_openssl_lib" &&
+      tar -xzf "$openvpn_ssl_stage/package.ipk" -C "$openvpn_ssl_stage" &&
+      tar -xzf "$openvpn_ssl_stage/data.tar.gz" -C "$openvpn_openssl_lib" || {
+        rm -rf "$openvpn_ssl_stage"; return 1;
+      }
+    rm -rf "$openvpn_ssl_stage"
     LD_LIBRARY_PATH="$openvpn_openssl_lib/usr/lib" openssl version >/dev/null 2>&1
   }
 
@@ -2569,8 +2735,7 @@ app_openvpn() {
     [ -f "$openvpn_gui_backup" ] || return 1
     tar -xzf "$openvpn_gui_backup" -C / || return 1
     openvpn_register_gui
-    /etc/init.d/transformer restart
-    /etc/init.d/nginx restart
+    openvpn_restart_services
   }
 
   openvpn_record_new_packages() {
@@ -2610,18 +2775,24 @@ app_openvpn() {
       if [ -f "$openvpn_owned" ]; then
         openvpn_install_tun || return 1
         openvpn_prepare_openssl || return 1
+        openvpn_prepare_init || return 1
+        openvpn_prepare_dh || return 1
         openvpn_register_client || return 1
         openvpn_backup_gui || return 1
         openvpn_register_gui
         set_extension_state openvpn_app 1
-        /etc/init.d/transformer restart
-        /etc/init.d/nginx restart
+        openvpn_restart_services
         return 0
       fi
       echo "A pre-existing OpenVPN installation was found; refusing to overwrite its configuration"
       return 1
     fi
-    require_free_space 16384 /usr || return 1
+    # Legacy MIPS uses the small 2.3.x runtime and easy-rsa 2; reserve space
+    # for packages, generated keys and staging without requiring 16 MiB.
+    case "$cpu_type" in
+      mips*) require_free_space 4096 /usr || return 1 ;;
+      *) require_free_space 16384 /usr || return 1 ;;
+    esac
     opkg list-installed | awk '{print $1}' > "$openvpn_before" || return 1
     opkg update || {
       rm -f "$openvpn_before"
@@ -2660,6 +2831,15 @@ app_openvpn() {
       openvpn_rollback_install
       return 1
     }
+    openvpn_prepare_init || {
+      echo "The OpenVPN service cannot render the required TLS options"
+      openvpn_rollback_install
+      return 1
+    }
+    openvpn_prepare_dh || {
+      openvpn_rollback_install
+      return 1
+    }
     openvpn_record_new_packages || return 1
     rm -f "$openvpn_before"
     touch "$openvpn_owned"
@@ -2676,8 +2856,7 @@ app_openvpn() {
     openvpn_backup_gui || return 1
     /usr/share/transformer/scripts/openvpnApply.sh
     set_extension_state openvpn_app 1
-    /etc/init.d/transformer restart
-    /etc/init.d/nginx restart
+    openvpn_restart_services
     ;;
   remove)
     if [ -f "$openvpn_owned" ]; then
@@ -2704,8 +2883,7 @@ app_openvpn() {
     uci commit web
     rm -f "$openvpn_owned" "$openvpn_packages" "$openvpn_before" "$openvpn_gui_backup"
     set_extension_state openvpn_app 0
-    /etc/init.d/transformer restart
-    /etc/init.d/nginx restart
+    openvpn_restart_services
     ;;
   start)
     [ -f "$openvpn_owned" ] || return 1
@@ -3181,6 +3359,10 @@ app_dumaos() {
       return 1
       ;;
     esac
+    dumaos_platform_supported || {
+      echo "DumaOS requires a supported ARMv7 gateway with kernel 4.1.52; this kernel is unsupported"
+      return 1
+    }
     if [ "$(dumaos_installed_version)" != "$dumaos_version" ]; then
       require_free_space 40960 /usr || return 1
       require_free_space 10240 /tmp || return 1

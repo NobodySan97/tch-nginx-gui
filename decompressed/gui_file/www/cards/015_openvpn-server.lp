@@ -27,7 +27,8 @@ local enabled = content.enabled == "1" and "1" or "0"
 local status_text = enabled == "1" and T"OpenVPN server enabled" or T"OpenVPN server disabled"
 local client_enabled = content.client_enabled == "1" and "1" or "0"
 local client_text = client_enabled == "1" and T"OpenVPN client enabled" or T"OpenVPN client disabled"
-local connected = tonumber(content.connected_clients) or 0
+local connected = enabled == "1" and tonumber(content.connected_clients) or 0
+connected = connected or 0
 local modal_path
 local session = ngx.ctx.session
 if session and session:hasAccess("/modals/openvpn-server-modal.lp") then modal_path = "/modals/openvpn-server-modal.lp" end
