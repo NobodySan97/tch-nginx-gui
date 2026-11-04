@@ -335,8 +335,10 @@ create_gui_type() {
     uci set modgui.app.smartphone_app="0"
   fi
   # Reconcile stale flags after a runtime is removed outside the GUI.
-  if [ -x /usr/bin/wireguard-go ] && [ -x /usr/bin/wg-go ] &&
-    [ -x /lib/netifd/proto/wireguard.sh ]; then
+  if { [ -f /etc/.modgui-wireguard-native-installed ] && [ -x /usr/bin/wg ] &&
+    [ -x /lib/netifd/proto/wireguard.sh ]; } ||
+    { [ -x /usr/bin/wireguard-go ] && [ -x /usr/bin/wg-go ] &&
+      [ -x /lib/netifd/proto/wireguard.sh ]; }; then
     uci set modgui.app.wireguard_app="1"
   else
     uci set modgui.app.wireguard_app="0"

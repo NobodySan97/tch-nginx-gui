@@ -30,7 +30,7 @@ MODULAR_DIRS = [
     "telstra_gui", "ledfw_support-specificTG788", "ledfw_support-specificTG789",
     "ledfw_support-specificTG799", "ledfw_support-specificTG800",
     "ledfw_support-specificDGA", "ledfw_support-specificDGA4131",
-    "ledfw_support-specificDGA4331", "luci_wireless"
+    "ledfw_support-specificDGA4331", "luci_wireless", "smartphone"
 ]
 
 
