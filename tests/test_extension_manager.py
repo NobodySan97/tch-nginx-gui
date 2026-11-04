@@ -367,6 +367,20 @@ dofile(arg[1])
         )
         self.assertIn("sha256sum", wireguard)
         self.assertIn("raw.githubusercontent.com/seud0nym/openwrt-wireguard-go/$wireguard_commit", wireguard)
+        # Upstream 155e5540: the reviewed legacy MIPS gateways reuse the same
+        # verified TUN lifecycle and a SHA-pinned userspace archive, repackaged
+        # as an opkg-owned brcm63xx package that excludes global sysctls.
+        self.assertIn(
+            'wireguard_sha256="84a322e2a9cb3ce077e10eba608756265ccc004282568d2d9ccc2573f3b13972"',
+            wireguard,
+        )
+        self.assertIn('modgui_reviewed_tun_build || { echo "This MIPS platform has not been validated for WireGuard"', wireguard)
+        self.assertIn("wireguard_prepare_mips_package", wireguard)
+        self.assertIn("require_free_space 4096 /usr", wireguard)
+        self.assertIn("etc/hotplug.d/net/10-wireguard", wireguard)
+        self.assertNotIn("etc/sysctl.d", wireguard)
+        self.assertIn("wireguard_remove_tun\n", wireguard)
+        self.assertIn("echo \"TUN archive checksum mismatch\"", installer)
         self.assertNotIn("uci set network.", wireguard)
         self.assertNotIn("uci set firewall.", wireguard)
         self.assertIn("wireguard.wg.enabled='0'", wireguard)
@@ -380,25 +394,33 @@ dofile(arg[1])
         self.assertIn("no reviewed TUN module", modal)
 
     @unittest.skipUnless(SH, "POSIX shell required")
-    def test_reviewed_tun_module_requires_armv7_and_matching_kernel(self):
+    def test_reviewed_tun_module_requires_matching_platform_and_kernel(self):
         installer = INSTALLER.read_text()
         start = installer.index("modgui_reviewed_tun_build() {")
         end = installer.index("\n}", start) + len("\n}")
         script = '''
 cpu_type="$1"
 test_kernel="$2"
+marketing_version="$3"
 uname() { [ "$1" = "-r" ] && printf '%s\\n' "$test_kernel"; }
-uci() { return 1; }
+        uci() { echo unexpected-model-lookup >&2; return 99; }
 ''' + installer[start:end] + "\nmodgui_reviewed_tun_build\n"
-        for cpu, kernel, supported in (
-            ("armv7l", "4.1.52", True),
-            ("armv7l", "4.1.51", False),
-            ("aarch64", "4.1.52", False),
-            ("mips", "4.1.52", False),
+        for cpu, kernel, version, supported in (
+            ("armv7l", "4.1.52", "19.4", True),
+            ("armv7l", "4.1.51", "19.4", False),
+            ("aarch64", "4.1.52", "19.4", False),
+            ("mips", "4.1.52", "17.2", False),
+            ("mips", "3.4.11-rt19", "17.2 Mint", True),
+            ("mips", "3.4.11-rt19", "17.2.1", True),
+            ("mips", "3.4.11-rt19", "17.2", True),
+            ("mips", "3.4.11-rt19", "16.3", False),
+            ("mips", "3.4.11", "17.2", False),
+            ("mips", "3.4.11-rt19", "17.20", False),
+            ("mipsel", "3.4.11-rt19", "17.2", False),
         ):
             with self.subTest(cpu=cpu, kernel=kernel):
                 result = subprocess.run(
-                    [SH, "-c", script, "tun-test", cpu, kernel],
+                    [SH, "-c", script, "tun-test", cpu, kernel, version],
                     text=True, capture_output=True,
                 )
                 self.assertEqual(result.returncode == 0, supported, result.stderr)
