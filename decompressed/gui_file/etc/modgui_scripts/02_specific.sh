@@ -127,6 +127,11 @@ apply_right_opkg_repo() {
       sed -i '/Ansuel\/GUI_ipk\/kernel-4.1/d' /etc/opkg.conf #remove old setted feeds
       sed -i '/repository\.macoers\.com\/homeware\/19\/brcm6xxx-tch/d' /etc/opkg.conf #remove broken 19 macoers feeds
       sed -i '/^arch /d' /etc/opkg.conf #remove duplicate arch lines
+      # This deduplication must not strip the SDK alias re-added by the
+      # append_gui_vpn_feeds probe above: kernel packages from those feeds are
+      # published for arch brcm963xx, otherwise opkg cannot select them later.
+      opkg print-architecture 2>/dev/null | grep -q 'brcm963xx 100' ||
+        printf '\narch brcm963xx 100\n' >> "$opkg_file"
       if ! grep -q "Ansuel/GUI_ipk/kernel-4.1" $opkg_file; then
         cat <<EOF >>$opkg_file
 arch all 100
