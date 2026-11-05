@@ -195,7 +195,13 @@ ngx.print('\
     }
 
     if cui.reboot_reason_msg ~= "" then
-        html[#html + 1] = ui_helper.createAlertBlock(format(T'A reboot is waiting! Reason: <strong>%s</strong>',cui.reboot_reason_msg),alert_style_upper)
+        local reason_is_acs = cui.reboot_reason_msg == "TIM ACS asked for firmware update. Go to Modgui Settings to allow this." or
+                cui.reboot_reason_msg:match("^ACS asked for firmware update from: .* Go to Modgui Settings to allow this%.$") ~= nil
+        local alert_action = ''
+        if reason_is_acs then
+            alert_action = ' <button type="button" id="dismiss-acs-notice" class="btn btn-warning btn-mini" style="margin-left: 12px; margin-top: -2px; font-weight: bold; padding: 2px 10px;"><i class="fa fa-times"></i> ' .. T'Dismiss' .. '</button>'
+        end
+        html[#html + 1] = ui_helper.createAlertBlock(format(T'A reboot is waiting! Reason: <strong>%s</strong>',cui.reboot_reason_msg) .. alert_action,alert_style_upper)
     end
 
     if cui.outdated_ver == "0" then

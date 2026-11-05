@@ -26,8 +26,25 @@ var modgui = modgui || {};
 		tch.showProgress(waitMsg);
 		window.location.reload(true);
 	}
-	function postAction(action, logModal, customCloseAction, customTarget) {
-		var onClose = ( typeof customCloseAction === "function" ) ? customCloseAction : ((customCloseAction === false) ? false : function() {
+	// Dismiss the ACS "blocked firmware update" notice banner rendered in the header.
+	$(document).off('click.acsnotice').on('click.acsnotice', '#dismiss-acs-notice', function() {
+		$.post(
+			"/modals/modgui-modal.lp",
+			{
+				action: "dismiss_acs_notice",
+				CSRFtoken: $("meta[name=CSRFtoken]").attr("content")
+			},
+			function(res) {
+				if (res && res.success === "true") {
+					$("#dismiss-acs-notice").closest(".alert").remove();
+				}
+			},
+			"json"
+		);
+		return false;
+	});
+
+	function postAction(action, logModal, customCloseAction, customTarget) {		var onClose = ( typeof customCloseAction === "function" ) ? customCloseAction : ((customCloseAction === false) ? false : function() {
 			tch.showProgress(waitMsg);
 			window.location.reload(true);
 		});

@@ -337,6 +337,21 @@ if ngx.req.get_method() == "POST" then
                 ngx.print('{"success":"true"}')
                 ngx.exit(ngx.HTTP_OK)
         end
+        if action == "dismiss_acs_notice" then
+                -- Slim variant of the upstream DISMISS_ACS_NOTICE: clears the
+                -- ACS/CWMP "blocked update" reboot-reason shown in the header.
+                local reboot_notice = { message = "uci.modgui.var.reboot_reason_msg" }
+                content_helper.getExactContent(reboot_notice)
+                if type(reboot_notice.message) == "string" and
+                        (reboot_notice.message == "TIM ACS asked for firmware update. Go to Modgui Settings to allow this." or
+                         reboot_notice.message:match("^ACS asked for firmware update from: .* Go to Modgui Settings to allow this%.$") ~= nil) then
+                        proxy.set("uci.modgui.var.reboot_reason_msg", "")
+                        proxy.apply()
+                end
+                ngx.header.content_type = "application/json"
+                ngx.print('{"success":"true"}')
+                ngx.exit(ngx.HTTP_OK)
+        end
         if action == "system_remove_root" then
                 return sendcmd("removeroot")
         end
