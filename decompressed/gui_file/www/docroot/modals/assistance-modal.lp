@@ -259,18 +259,18 @@ ngx.print('\
 \
 	function updateSrpCredentials() {\
 		var user = "'); ngx.print( assistant:username() ); ngx.print('";\
-		var password = $('input[name="password"]').val();\
+		var password = $(\'input[name="password"]\').val();\
 		if (password != "") {\
 			var srp = new SRP();\
 			srp.generateSaltAndVerifierTheCallback(user, password, function(salt, verifier) {\
-				$('input[name="salt"]').val(salt);\
-				$('input[name="verifier"]').val(verifier);\
-				$('input[name="password"]').val("");\
+				$(\'input[name="salt"]\').val(salt);\
+				$(\'input[name="verifier"]\').val(verifier);\
+				$(\'input[name="password"]\').val("");\
 			});\
 		}\
 	}\
 \
-	$('input[name="password"]').on("change blur", updateSrpCredentials);\
+	$(\'input[name="password"]\').on("change blur", updateSrpCredentials);\
 	$("#save-config").on("mousedown touchstart", updateSrpCredentials);\
 </script>\
 \
