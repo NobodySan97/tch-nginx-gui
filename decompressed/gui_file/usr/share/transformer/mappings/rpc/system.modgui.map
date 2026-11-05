@@ -453,9 +453,13 @@ SYSTEM_MODGUI_APP_.set = {
       -- lasync terminates foreground commands after 30 seconds. Package
       -- downloads must outlive that timeout, just like GUI upgrades do.
       string.format('start-stop-daemon -S -b -x %s -- "%s %s %s %s"', wrapper, appScript, commdParse[1], commdParse[2], extra_arg)
-    SYSTEM_MODGUI_SCRIPTREQUEST_.set.state(nil, "state", "Requested")
-    local log = io.open("/tmp/command_log", "w")
-    if log then log:close() end
+    -- prepare_command_log truncates the shared log and marks the state
+    -- Requested; surfacing its error stops a failed write from launching.
+    local ready, err = prepare_command_log()
+    if not ready then return nil, err end
+    -- Stamp the request time so the pending gate above rejects overlapping
+    -- requests within the 5s window instead of launching them twice.
+    appRequestedAt = os.time()
     async_exec({[command] = true})
   end
 }
