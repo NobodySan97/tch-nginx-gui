@@ -1,6 +1,15 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.88 (Preview)
+---------------------------------------------------------------------------
+- **Fix revisione finale (nel team di agenti) – nessuna regressioni a favore upstream**:
+  - `fix(assistance)`: escape apici JS dentro stringa Lua in `assistance-modal.lp` — la modal Assistance non compila più dopo l`overhaul lifecycle (`db614e08`).
+  - `fix(specific,vpn)`: conservare l'alias opkg `brcm963xx anche su ARM 19.x/20.x: il dedup fork-specifico rimuoveva l'archalias necessario WebGuard-native/TUN per kernel ABI (`354b05cb`).
+  - `fix(checkver)`: cleanup `.tmp` con trap EXIT nei download `DownloadVersion/Installed` — niente più file orfani su tmpfs dopo il download fallhalten (`fef6829a`).
+  - `chore(release)`: dry-run build_release (skipping LF sanitize e .md5sum regen) e ha letto README Release Channels (`0bdcc686`).
+
+
 9.8.87 (Preview)
 ---------------------------------------------------------------------------
 - **Recupero Automatico Connessioni ADB Smartphone (upstream `2d8a8297`)**:
