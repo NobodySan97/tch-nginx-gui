@@ -1,8 +1,18 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.87 (Preview)
+---------------------------------------------------------------------------
+- **Recupero Automatico Connessioni ADB Smartphone (upstream `2d8a8297`)**:
+  - Nouvo `watch_adb` eseguito da procd in background (respawn supervisionato, loop 30s con lock `/var/run/modgui-smartphone-adb`, cooldown 60s via `/proc/uptime`): recupera la connessione ADB se la discovery USB resta stantia (stato `USB_ADB|1` ma nessun transport), senza mai riavviare per errori di autorizzazione.
+  - `appInstallRemoveUtility`: enable/restart dell'uplink sempre attivo; remove ora ferma in modo pulito `stop_uplink` prima della disable.
+- **Card Smartphone – Layout Compatto (upstream `a625281b`)**: status (`+NET oper`) in un'unica riga ellisis e title arricchito; rimossi gli attributi data-phone-active/wan-active/uplink-checking e le righe Network/Uplink separate.
+- **LuCI – feed `modgui_target_userspace` reintrodotto (upstream `51448201`)**: dipendenze `iwinfo` Lua di LuCI dopo la rimozione del legacy feed.
+
+
 9.8.86 (Preview)
 ---------------------------------------------------------------------------
+
 - **Sincronizzazione Upstream Agosto-Ottobre 2026 (39 Commit edd9e386..upstream/master, "Ondate 1-7")**:
   - **Smartphone Tethering USB + Advanced VoIP (upstream #1232, `3eb64e8d`…`c5268da2`)**: nuova app `smartphone` (tethering ADB con uplink manager fallback/primary, statistiche telefoniche da `/usr/bin/phone_stats.sh`, screenshot schermo, parser radio, diagnostica USB/ADB), card Extensions dedicata, modale `mmpbx-advanced-modal` (STUN, keep-alive, jitter buffer, DND/ACR/transfer) con mappe mmpbx aggiornate, lifecycle self-contained con rollback.
   - **Service Policies (`661a1117`,`6374d803`,`a114d1cf`)**: framework `service_action`/`sync_services` in `ispConfigHelper.sh` con `parental_policy`/`dlna_policy`/`isp_policy`, stop completo samba (NQE-aware)/cwmpd/nanocdn quando disabilitati dalla GUI, purge di fabbrica di `iperf`/`xl2tpd`, flag `keep_isp_services`; `.ca` commitapply byte-integrati + nuovo `uci_generic_pnpd.ca`.
