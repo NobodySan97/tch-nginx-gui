@@ -6,8 +6,10 @@ import tempfile
 import unittest
 
 MODAL = Path(__file__).resolve().parents[1] / 'decompressed/gui_file/www/docroot/modals/applications-modal.lp'
+SH = shutil.which('sh') or (str(Path('C:/Program Files/Git/bin/sh.exe')) if Path('C:/Program Files/Git/bin/sh.exe').exists() else None)
 
 
+@unittest.skipUnless(SH, 'POSIX shell required')
 class InstallerStorage(unittest.TestCase):
     def test_unlimited_tmpfs_uses_ram_without_overriding_full_filesystems(self):
         source = (MODAL.parents[3] / "usr/share/transformer/scripts/appInstallRemoveUtility.sh").read_text()
@@ -24,10 +26,12 @@ class InstallerStorage(unittest.TestCase):
                 root = Path(directory)
                 (root / "mounts").write_text(f"tmpfs /tmp {filesystem} rw 0 0\n")
                 (root / "meminfo").write_text(memory)
-                private = function.replace("/proc/mounts", str(root / "mounts")).replace("/proc/meminfo", str(root / "meminfo"))
+                private = function.replace(
+                    '/proc/mounts', (root / 'mounts').as_posix()
+                ).replace('/proc/meminfo', (root / 'meminfo').as_posix())
                 script = private + '\ndf() { echo "Filesystem 1024-blocks Used Available Capacity Mounted"; echo "tmpfs DFTOTAL 0 DFFREE 0% /tmp"; }\nrequire_free_space 40960 /tmp/staging\n'
                 script = script.replace("DFTOTAL", str(total)).replace("DFFREE", str(free))
-                result = subprocess.run(["sh", "-c", script], capture_output=True, text=True)
+                result = subprocess.run([SH, '-c', script], capture_output=True, text=True)
                 self.assertEqual(result.returncode == 0, expected, result.stdout + result.stderr)
 
 

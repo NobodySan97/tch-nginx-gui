@@ -368,10 +368,15 @@ dofile(arg[1])
         self.assertIn("modgui_install_tun wireguard", wireguard)
         self.assertIn("wireguard_install_tun", wireguard)
         self.assertIn("wireguard_remove_tun", wireguard)
+        # The fork installs the kernel module from the configured opkg feeds,
+        # resolved for the running kernel (modgui_kernel_package), instead of
+        # pinning one upstream GitHub commit like the older onda-2 approach.
+        self.assertNotIn('wireguard_commit="7ac8fe29', wireguard)
         self.assertIn(
-            'wireguard_commit="7ac8fe29a7ab64eb0c9c9774bb36cf2c7648399e"',
+            "wireguard_module_package=\"$(modgui_kernel_package '^kmod-wireguard(-|$)')\"",
             wireguard,
         )
+        self.assertIn('modgui_install_native_wireguard "$wireguard_module_package"', wireguard)
         self.assertIn(
             'wireguard_sha256="0cd9777ae758b180a140a11e24eea1716c001fcd2ef82adb0b43225b4929610b"',
             wireguard,
@@ -918,14 +923,30 @@ uname() { [ "$1" = "-r" ] && printf '%s\\n' "$test_kernel"; }
 INSTALLER_SOURCE = INSTALLER.read_text()
 VPN_KERNEL_HELPER = INSTALLER_SOURCE[INSTALLER_SOURCE.index("modgui_kernel_abi_matches() ("):INSTALLER_SOURCE.index("app_wireguard() {")]
 
+# The fork deliberately does not integrate SPU (bcmspu) hardware offload: the
+# production utility ships no modgui_load_spu() implementation, so the upstream
+# SPU module-option checks cannot run without porting the feature.
+HAS_MODGUI_LOAD_SPU = re.search(r"^modgui_load_spu\(\) \{", INSTALLER_SOURCE, re.M) is not None
+HAS_GZIP = bool(SH) and subprocess.run(
+    [SH, "-c", "command -v gzip >/dev/null"], capture_output=True
+).returncode == 0
+
+
+def _posix(path) -> str:
+    """Bake a temporary directory path into a shell snippet with MSYS-safe slashes."""
+    return Path(path).as_posix()
+
 
 class KernelVPN(unittest.TestCase):
+    @unittest.skipUnless(SH, "POSIX shell required")
+    @unittest.skipUnless(HAS_GZIP, "gzip required to decompress opkg indexes")
     def test_compressed_index_supplies_legacy_kernel_abi(self):
         for abi in ('exact', 'wrong'):
             with self.subTest(abi=abi), tempfile.TemporaryDirectory() as directory:
                 Path(directory, 'feed').write_bytes(gzip.compress((
                     'Package: kernel\nVersion: 4.1.38-1-' + abi + '\n\n'
                     'Package: kmod-tun\nVersion: 4.1.38-1\n\n').encode()))
+                directory = _posix(directory)
                 helper = VPN_KERNEL_HELPER.replace('/var/opkg-lists', directory).replace('/usr/lib/opkg/lists', directory).replace('/etc/opkg', directory + '/opkg')
                 script = helper + '''
 uname() { echo 4.1.38; }
@@ -938,7 +959,7 @@ opkg() {
 }
 modgui_kernel_package '^kmod-tun(-|$)'
 '''
-                result = subprocess.run(['sh', '-c', script], capture_output=True, text=True)
+                result = subprocess.run([SH, '-c', script], capture_output=True, text=True)
                 self.assertEqual(result.stdout.strip(), 'kmod-tun' if abi == 'exact' else '')
 
     def test_pinned_module_is_preferred_over_legacy_generic(self):
@@ -954,11 +975,13 @@ opkg() {
 }
 modgui_kernel_package '^kmod-tun(-|$)'
 '''
-        result = subprocess.run(['sh', '-c', script], capture_output=True, text=True, check=True)
+        result = subprocess.run([SH, '-c', script], capture_output=True, text=True, check=True)
         self.assertEqual(result.stdout.strip(), 'kmod-tun-specific')
 
+    @unittest.skipUnless(SH, "POSIX shell required")
     def test_unpinned_module_without_abi_evidence_is_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
+            directory = _posix(directory)
             helper = VPN_KERNEL_HELPER.replace('/var/opkg-lists', directory).replace('/usr/lib/opkg/lists', directory).replace('/etc/opkg', directory + '/opkg')
             script = helper + '''
 uname() { echo 4.1.38; }
@@ -971,10 +994,11 @@ opkg() {
 }
 modgui_kernel_package '^kmod-tun(-|$)'
 '''
-            result = subprocess.run(['sh', '-c', script], capture_output=True, text=True)
+            result = subprocess.run([SH, '-c', script], capture_output=True, text=True)
             self.assertEqual(result.stdout, '')
             self.assertIn('Unverified kernel ABI', result.stderr)
 
+    @unittest.skipUnless(SH, "POSIX shell required")
     def test_list_finishes_before_another_opkg_read_takes_the_lock(self):
         with tempfile.TemporaryDirectory() as directory:
             script = VPN_KERNEL_HELPER + '''
@@ -990,9 +1014,10 @@ opkg() {
 testroot="$1"
 modgui_kernel_package '^kmod-wireguard(-|$)'
 '''
-            result = subprocess.run(["sh", "-c", script, "lock-test", directory], capture_output=True, text=True, check=True)
+            result = subprocess.run([SH, "-c", script, "lock-test", directory], capture_output=True, text=True, check=True)
             self.assertEqual(result.stdout.strip(), "kmod-wireguard")
 
+    @unittest.skipUnless(SH, "POSIX shell required")
     def test_same_release_with_different_feed_kernel_abi_is_rejected(self):
         for feed_abi in ("live-abi", "other-abi"):
             with self.subTest(feed_abi=feed_abi), tempfile.TemporaryDirectory() as directory:
@@ -1002,7 +1027,7 @@ modgui_kernel_package '^kmod-wireguard(-|$)'
                     "Package: kmod-tun\nVersion: 6.6.99-1\n\n"
                     "Package: kmod-bcmspu\nVersion: 6.6.99-1\n"
                 )
-                helper = VPN_KERNEL_HELPER.replace("/var/opkg-lists", directory)
+                helper = VPN_KERNEL_HELPER.replace("/var/opkg-lists", _posix(directory))
                 script = helper + '''
 uname() { echo 6.6.99; }
 opkg() {
@@ -1014,10 +1039,11 @@ opkg() {
 }
 modgui_kernel_package '^kmod-'
 '''
-                result = subprocess.run(["sh", "-c", script], capture_output=True, text=True, check=True)
+                result = subprocess.run([SH, "-c", script], capture_output=True, text=True, check=True)
                 self.assertEqual(bool(result.stdout.strip()), feed_abi == "live-abi")
                 self.assertEqual("ABI mismatch" in result.stderr, feed_abi != "live-abi")
 
+    @unittest.skipUnless(SH, "POSIX shell required")
     def test_module_selection_uses_current_kernel_without_firmware_lookup(self):
         for kernel in ("4.1.38", "4.1.52", "6.6.99"):
             with self.subTest(kernel=kernel):
@@ -1033,11 +1059,12 @@ opkg() {{
 }}
 modgui_kernel_package '^kmod-wireguard(-|$)'
 '''
-                result = subprocess.run(["sh", "-c", script], capture_output=True, text=True, check=True)
+                result = subprocess.run([SH, "-c", script], capture_output=True, text=True, check=True)
                 expected = "kmod-wireguard" if kernel == "4.1.38" else "kmod-wireguard-current"
                 self.assertEqual(result.stdout.strip(), expected)
                 self.assertEqual(result.stderr, "")
 
+    @unittest.skipUnless(SH, "POSIX shell required")
     def test_dependency_requires_exact_kernel_release(self):
         for dependency, expected in (("4.1.52-1", ""), ("4.1.5-1", "kmod-wireguard")):
             script = VPN_KERNEL_HELPER + f'''
@@ -1050,11 +1077,12 @@ opkg() {{
 }}
 modgui_kernel_package '^kmod-wireguard(-|$)'
 '''
-            result = subprocess.run(["sh", "-c", script], capture_output=True, text=True, check=True)
+            result = subprocess.run([SH, "-c", script], capture_output=True, text=True, check=True)
             self.assertEqual(result.stdout.strip(), expected)
 
+    @unittest.skipUnless(SH, "POSIX shell required")
     def test_missing_udp_dependency_stops_before_inserting_wireguard(self):
-        result = subprocess.run(["sh", "-c", VPN_KERNEL_HELPER + '''
+        result = subprocess.run([SH, "-c", VPN_KERNEL_HELPER + '''
 modprobe() { return 1; }
 insmod() { echo UNEXPECTED_INSERT; }
 modgui_load_wireguard
@@ -1062,6 +1090,12 @@ modgui_load_wireguard
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("UNEXPECTED_INSERT", result.stdout)
 
+    @unittest.skipUnless(SH, "POSIX shell required")
+    @unittest.skipUnless(
+        HAS_MODGUI_LOAD_SPU,
+        "SPU hardware offload is not integrated in the fork (deliberate); "
+        "production modgui_load_spu() would be required to run this check",
+    )
     def test_spu_only_sets_supported_module_options(self):
         for supports_option in (False, True):
             with self.subTest(supports_option=supports_option), tempfile.TemporaryDirectory() as directory:
@@ -1074,15 +1108,16 @@ modinfo() {{ echo {'blog_offload:ESP flow offload' if supports_option else 'othe
 modprobe() {{ echo "$*"; }}
 modgui_load_spu
 '''
-                result = subprocess.run(["sh", "-c", script], capture_output=True, text=True, check=True)
+                result = subprocess.run([SH, "-c", script], capture_output=True, text=True, check=True)
                 self.assertEqual(result.stdout.strip(), "bcmspu blog_offload=N" if supports_option else "bcmspu")
 
+    @unittest.skipUnless(SH, "POSIX shell required")
     def test_native_apply_needs_no_tun_and_stops_on_load_failure(self):
         script = (GUI / "usr/share/transformer/scripts/wireguardApply.sh").read_text()
         script = script[script.index('if [ "$native" = 0 ]; then'):]
         script = script.replace("modprobe udp_tunnel && modprobe ip6_udp_tunnel", "load_native")
         for status in (0, 1):
-            result = subprocess.run(["sh", "-c", f'''
+            result = subprocess.run([SH, "-c", f'''
 native=1
 load_native() {{ return {status}; }}
 grep() {{ return 0; }}
@@ -1091,63 +1126,71 @@ configure_network() {{ echo CONFIGURED; }}
             self.assertEqual(result.returncode, status)
             self.assertEqual("CONFIGURED" in result.stdout, status == 0)
 
+    @unittest.skipUnless(SH, "POSIX shell required")
     def test_go_backup_is_not_needed_for_fresh_install_or_failed_module_load(self):
         for go_installed, load_status in ((False, 0), (True, 1)):
             with self.subTest(go_installed=go_installed), tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
+                posix_root = _posix(root)
                 (root / "etc").mkdir()
                 if go_installed:
                     (root / "etc/.modgui-wireguard-go-installed").touch()
                     (root / "go-installed").touch()
                 (root / "wg").write_text("#!/bin/sh\nexit 0\n")
                 (root / "wg").chmod(0o755)
-                (root / "wireguard.sh").touch(mode=0o755)
-                helper = VPN_KERNEL_HELPER.replace("/etc/", directory + "/etc/")
-                helper = helper.replace("/usr/bin/wg", str(root / "wg"))
-                helper = helper.replace("/lib/netifd/proto/wireguard.sh", str(root / "wireguard.sh"))
+                (root / "wireguard.sh").write_text("#!/bin/sh\n")
+                (root / "wireguard.sh").chmod(0o755)
+                helper = VPN_KERNEL_HELPER.replace("/etc/", posix_root + "/etc/")
+                helper = helper.replace("/usr/bin/wg", posix_root + "/wg")
+                helper = helper.replace("/lib/netifd/proto/wireguard.sh", posix_root + "/wireguard.sh")
                 script = helper + f'''
 modgui_backup_wireguard_go() {{ echo UNEXPECTED_BACKUP; return 1; }}
 modgui_load_wireguard() {{ return {load_status}; }}
 uci() {{ return 0; }}
 opkg() {{
   case "$*" in
-    list-installed) [ ! -f '{directory}/go-installed' ] || echo 'wireguard-go - installed-version' ;;
+    list-installed) [ ! -f '{posix_root}/go-installed' ] || echo 'wireguard-go - installed-version' ;;
     remove*) echo "REMOVED:$2" ;;
   esac
   return 0
 }}
 modgui_install_native_wireguard kmod-wireguard
 '''
-                result = subprocess.run(["sh", "-c", script], capture_output=True, text=True)
+                # Passing the whole script through sh's argv loses quotes on
+                # MSYS command-line re-encoding; stdin is robust.
+                result = subprocess.run([SH, "-s"], input=script, capture_output=True, text=True)
                 self.assertEqual(result.returncode, load_status, result.stderr)
                 self.assertNotIn("UNEXPECTED_BACKUP", result.stdout)
                 self.assertNotIn("REMOVED:wireguard-go", result.stdout)
                 self.assertEqual((root / "etc/.modgui-wireguard-native-installed").exists(), not go_installed)
 
+    @unittest.skipUnless(SH, "POSIX shell required")
     def test_failed_tools_install_restores_installed_go_payload(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            posix_root = _posix(root)
             (root / "etc").mkdir()
             (root / "etc/.modgui-wireguard-go-installed").touch()
             (root / "go-installed").touch()
-            helper = VPN_KERNEL_HELPER.replace("/etc/", directory + "/etc/")
+            helper = VPN_KERNEL_HELPER.replace("/etc/", posix_root + "/etc/")
             script = helper + f'''
 modgui_backup_wireguard_go() {{ touch "$1/go.ipk"; }}
 modgui_load_wireguard() {{ return 0; }}
 uci() {{ return 0; }}
 opkg() {{
   case "$*" in
-    list-installed) [ ! -f '{directory}/go-installed' ] || echo 'wireguard-go - installed-version' ;;
-    'remove wireguard-go') rm '{directory}/go-installed' ;;
+    list-installed) [ ! -f '{posix_root}/go-installed' ] || echo 'wireguard-go - installed-version' ;;
+    'remove wireguard-go') rm '{posix_root}/go-installed' ;;
     'remove wireguard-tools'|'remove kmod-wireguard') return 0 ;;
     'install wireguard-tools') return 1 ;;
     'install kmod-wireguard') return 0 ;;
-    install*) touch '{directory}/go-installed'; echo GO_RESTORED ;;
+    install*) touch '{posix_root}/go-installed'; echo GO_RESTORED ;;
   esac
 }}
 modgui_install_native_wireguard kmod-wireguard
 '''
-            result = subprocess.run(["sh", "-c", script], capture_output=True, text=True)
+            # Same stdin/argv quoting reason as the go backup test above.
+            result = subprocess.run([SH, "-s"], input=script, capture_output=True, text=True)
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("GO_RESTORED", result.stdout)
             self.assertTrue((root / "go-installed").exists())

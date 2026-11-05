@@ -33,7 +33,9 @@ io.open = function(path, mode)
         if fail_log then return nil, "no space" end
         log = ""
     end
-    return {write = function() end, close = function() end}
+    -- The fork's executeCommand state reader opens the result file with "r"
+    -- and reads it, so the mocked handle must expose read as well as write.
+    return {read = function() return "" end, write = function() end, close = function() end}
 end
 local async_exec = function()
     assert(maps["rpc.system.modgui.executeCommand."].get.state() == "Requested")
@@ -63,8 +65,10 @@ assert(ok == nil and err == "no space" and launches == 1)
             opkg.write_text('#!/bin/sh\necho "$*" >> "$TEST_ROOT/actions"\nexit 7\n')
             opkg.chmod(0o755)
             result = subprocess.run(
-                ["sh", "-c", function + '\nmarketing_version=18.3; cpu_type=armv7l; app_luci install'],
-                env={**os.environ, "PATH": f"{root}:{os.environ['PATH']}", "TEST_ROOT": str(root)},
+                [SH, "-c", function + '\nmarketing_version=18.3; cpu_type=armv7l; app_luci install'],
+                env={**os.environ,
+                     "PATH": f"{root.as_posix()}{os.pathsep}{os.environ['PATH']}",
+                     "TEST_ROOT": root.as_posix()},
                 capture_output=True, text=True, timeout=5)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual((root / "actions").read_text(), "update\n")
