@@ -122,6 +122,9 @@ install_asset_download() (
 	case "$asset" in ''|*[!a-zA-Z0-9._-]*) return 1 ;; esac
 	case "$destination" in ''|*[!a-zA-Z0-9._/:\\-]*) return 1 ;; esac
 	# Fetch per-version first (upstream layout), fall back to modular/ (fork layout).
+	# Staged bytes are transient: curl writes .tmp before validating the transfer,
+	# so drop it on every failure path instead of accumulating orphans in /tmp.
+	trap 'rm -f "$destination.tmp"' EXIT
 	if ! curl -m 120 -k -s -f -L "$BASE_DIR/$version/$asset" -o "$destination.tmp"; then
 		curl -m 120 -k -s -f -L "$BASE_DIR/modular/$asset" -o "$destination.tmp" || return 1
 	fi
