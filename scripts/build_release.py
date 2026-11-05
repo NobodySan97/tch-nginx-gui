@@ -478,8 +478,11 @@ def build_release(src_dir, dest_dir, channel="stable", manual_ver=None, dry_run=
     print(f"Loaded {len(git_modes)} tracked file modes and {len(git_symlinks)} symlinks from git index.")
 
     # 1. Sanitize line endings to LF across all source text files in decompressed/
-    print("Sanitizing text file line endings to LF...")
-    sanitize_text_files_lf(src_dir / "decompressed")
+    # (skipped on --dry-run: the docstring promises not to alter the repo,
+    #  and on a CRLF/drifted tree this step would dirty the working directory)
+    if not dry_run:
+        print("Sanitizing text file line endings to LF...")
+        sanitize_text_files_lf(src_dir / "decompressed")
 
     # 2. Update version in rootdevice (or in-memory / restored if dry-run)
     rootdevice = src_dir / "decompressed" / "base" / "etc" / "init.d" / "rootdevice"
@@ -491,21 +494,24 @@ def build_release(src_dir, dest_dir, channel="stable", manual_ver=None, dry_run=
         print(f"Updated rootdevice: version_gui={version}-{short_sha}")
 
     # 3. Generate MD5 Checksums for modular components
-    status_led = src_dir / "decompressed" / "gui_file" / "tmp" / "status-led-eventing.lua_new"
-    if status_led.exists():
-        md5_val = md5_file(status_led)
-        (src_dir / "decompressed" / "gui_file" / "tmp" / "status-led-eventing.md5sum").write_bytes(
-            f"{md5_val}  tmp/status-led-eventing.lua_new\n".encode("utf-8")
-        )
+    # (skipped on --dry-run: they rewrite tracked files in the repository,
+    #  and the archives included in the dry-run are verified without them)
+    if not dry_run:
+        status_led = src_dir / "decompressed" / "gui_file" / "tmp" / "status-led-eventing.lua_new"
+        if status_led.exists():
+            md5_val = md5_file(status_led)
+            (src_dir / "decompressed" / "gui_file" / "tmp" / "status-led-eventing.md5sum").write_bytes(
+                f"{md5_val}  tmp/status-led-eventing.lua_new\n".encode("utf-8")
+            )
 
-    for mod in MODULAR_DIRS:
-        if "ledfw_support" in mod:
-            sm = src_dir / "decompressed" / mod / "etc" / "ledfw" / "stateMachines.lua"
-            if sm.exists():
-                md5_val = md5_file(sm)
-                (src_dir / "decompressed" / mod / "stateMachines.md5sum").write_bytes(
-                    f"{md5_val}  etc/ledfw/stateMachines.lua\n".encode("utf-8")
-                )
+        for mod in MODULAR_DIRS:
+            if "ledfw_support" in mod:
+                sm = src_dir / "decompressed" / mod / "etc" / "ledfw" / "stateMachines.lua"
+                if sm.exists():
+                    md5_val = md5_file(sm)
+                    (src_dir / "decompressed" / mod / "stateMachines.md5sum").write_bytes(
+                        f"{md5_val}  etc/ledfw/stateMachines.lua\n".encode("utf-8")
+                    )
 
     # Use temporary destination if dry-run
     build_target_dir = Path(tempfile.mkdtemp(prefix="tch_build_")) if dry_run else dest_dir

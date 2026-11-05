@@ -117,6 +117,22 @@ bzcat /tmp/GUI.tar.bz2 | tar -C / -xvf -
 
 ---
 
+### 3. Release Channels & Automated Build Pipeline
+
+The CI ("Autobuild and Publish GUI Release") publishes staged releases to the
+[gui-dev-build-auto](https://github.com/NobodySan97/gui-dev-build-auto) repository:
+
+| Trigger | Channel | Artifacts |
+| --- | --- | --- |
+| Push to `master` | **Preview** (automated) | `GUI_preview.tar.bz2`, version bumped from the top `CHANGELOG.md` entry |
+| Manual `workflow_dispatch` | Channel chosen in the run input (`stable` / `preview` / `dev`, with optional `custom_version` override) | `GUI.tar.bz2` / `GUI_preview.tar.bz2` / `GUI_dev.tar.bz2` |
+
+* The published state on the release repository is always tracked by `stable.version` / `preview.version` / `latest.version` together with the per-version `MD5SUMS` manifest (verified by the router update checker before install).
+* On-push builds never touch the `stable` channel — the Stable release is promoted manually via *Actions → Autobuild and Publish GUI Release → Run workflow (channel: stable)* after validation on real hardware.
+
+---
+
+
 ## 📸 Screenshots
 
 <div align="center">
