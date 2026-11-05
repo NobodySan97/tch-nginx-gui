@@ -73,6 +73,13 @@ jobs:
           cat test_run.log >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Upload Unit Test Log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-log
+          path: test_run.log
+
       - name: Run Build and Release Script
         id: build_step
         env:
