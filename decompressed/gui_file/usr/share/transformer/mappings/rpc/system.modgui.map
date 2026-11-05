@@ -171,6 +171,7 @@ local commands_helper = {
 }
 
 local async_exec = require("lasync").execute
+local prepare_command_log
 
 local SYSTEM_MODGUI_UTILITY_ = {
   objectType = {
@@ -209,6 +210,10 @@ local SYSTEM_MODGUI_UTILITY_ = {
         local clean_comm =
           'for pid in $(pgrep -f "' .. target .. '"); do [ "$pid" != "$$" ] && logger terminating :  $pid && kill -KILL $pid;done'
         os.execute(clean_comm)
+      end
+      if command:find("/scripts/wrapper.sh", 1, true) then
+        local ready, err = prepare_command_log()
+        if not ready then return nil, err end
       end
       if args and args:match("sync") then
         os.execute(command)
@@ -350,6 +355,14 @@ SYSTEM_MODGUI_SCRIPTREQUEST_.set = {
 
 register(SYSTEM_MODGUI_SCRIPTREQUEST_)
 
+prepare_command_log = function()
+  local log, err = io.open("/tmp/command_log", "w")
+  if not log then return nil, err end
+  log:close()
+  SYSTEM_MODGUI_SCRIPTREQUEST_.set.state(nil, "state", "Requested")
+  return true
+end
+
 local SYSTEM_MODGUI_APP_ = {
   objectType = {
     name = "rpc.system.modgui.app.",
@@ -406,8 +419,21 @@ end
 --
 -- Example install_blacklist_empty
 --         remove_luci
+local appRequestedAt = 0
 SYSTEM_MODGUI_APP_.set = {
   sendcmd = function(mapping, paramName, paramValue)
+    -- The extensions share one log and one result. A second request must not
+    -- erase the output or terminal state of an installation already running.
+    -- A persisted state can survive a killed worker, or a previous overlapping
+    -- request can mark a still-running command Complete. Check the process too.
+    local workers = io.popen("pgrep -f '[w]rapper.sh|[a]ppInstallRemoveUtility.sh'")
+    local running = workers and workers:read("*a") or ""
+    if workers then workers:close() end
+    local pending = (executeCommandRes == "Requested" or executeCommandRes == "In Progress")
+      and os.time() - appRequestedAt < 5
+    if running ~= "" or pending then
+      return nil, "Another command is already running"
+    end
     local commdParse = {}
 
     for s in paramValue:gmatch("[^%_]+") do

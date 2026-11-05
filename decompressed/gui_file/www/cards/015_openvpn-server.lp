@@ -34,7 +34,7 @@ local session = ngx.ctx.session
 if session and session:hasAccess("/modals/openvpn-server-modal.lp") then modal_path = "/modals/openvpn-server-modal.lp" end
 ngx.print('<div class="span3" id="openvpn-card"><div class="smallcard">')
 ngx.print(ui_helper.createCardHeader(T"OpenVPN", modal_path))
-ngx.print('<div class="content card_bg" data-bg-text="&#xf023;">', ui_helper.createSimpleLight(enabled, status_text), '<p class="subinfos">')
+ngx.print('<div class="content card_bg" data-bg-text="&#xf023;"><div class="divtable">', ui_helper.createSimpleLight(enabled, status_text), '<p class="subinfos">')
 ngx.print(format(N("<strong>%d client</strong> is connected", "<strong>%d clients</strong> are connected", connected), connected))
 ngx.print('</p>', ui_helper.createSimpleLight(client_enabled, client_text), '<p class="subinfos">')
 if client_enabled == "1" then

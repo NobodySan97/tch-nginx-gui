@@ -508,6 +508,10 @@ if StateParams["tailscale_application"] ~= nil then
 end
 
 if StateParams["dumaos_application"] ~= nil then
+	local check = io.popen("/usr/share/transformer/scripts/appInstallRemoveUtility.sh check dumaos; echo $?", "r")
+	local supported = check and check:read("*line") == "0"
+	if check then check:close() end
+	if supported or mapParams.dumaos_application == "1" then
 	local dumaos_link = "/desktop/"
 	append_extension_card(
 		"dumaos_application",
@@ -517,6 +521,11 @@ if StateParams["dumaos_application"] ~= nil then
 		dumaos_link,
 		true
 	)
+	else
+		html[#html+1] = '<div class="application-card"><fieldset><legend>' .. T"DumaOS" .. '</legend>'
+		html[#html+1] = ui_helper.createAlertBlock(T"Unavailable: DumaOS requires a supported ARMv7 gateway with kernel 4.1.52.", specific_box)
+		html[#html+1] = '</fieldset></div>'
+	end
 end
 
 if StateParams["voipblock_for_mmpbx"] ~= nil then

@@ -50,6 +50,17 @@ var modgui = modgui || {};
 		});
 
 		var target = customTarget ? customTarget : $(".modal form").attr("action");
+		function showStartError(data) {
+			if (!logModal) return;
+			var message = data && typeof data.error === "string" ? data.error : "Unable to start command.";
+			$("#command-start-error").remove();
+			$("<div>").attr({id: "command-start-error", role: "alert"})
+				.addClass("alert alert-error").text(message).prependTo(".modal .modal-body");
+		}
+		if (logModal) {
+			commandRequestInProgress = true;
+			$("#command-start-error").remove();
+		}
 		$.post(
 			target, {
 				action: action,

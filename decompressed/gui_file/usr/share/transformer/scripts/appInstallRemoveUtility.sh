@@ -433,11 +433,16 @@ app_telstra() {
 app_luci() {
   install() {
     luci_install_arm() {
-      opkg update || return 1
+      echo "Updating LuCI package feeds..."
+      opkg update || {
+        echo "Unable to update package feeds. Check network/repository access and whether another opkg process is running."
+        return 1
+      }
       if [ ! -f /rom/usr/lib/libjson-c.so.2 ] && [ ! -e /usr/lib/libjson-c.so.2 ]; then
         ln -s /usr/lib/libjson-c.so.4 /usr/lib/libjson-c.so.2 || return 1
       fi
       rm -f /usr/lib/lua/uci.so #remove to avoid lua-uci conflict during install
+      echo "Installing LuCI packages..."
       opkg install --force-reinstall libuci-lua luci rpcd uhttpd
       luci_opkg_status=$?
       # Restore the firmware binding even when opkg fails.
@@ -1422,7 +1427,22 @@ extract_bzip_archive() (
 require_free_space() {
   required_kb="$1"
   target_path="$2"
+  total_kb="$(df -Pk "$target_path" 2>/dev/null | awk 'END {print $2}')"
   available_kb="$(df -Pk "$target_path" 2>/dev/null | awk 'END {print $4}')"
+  # Some Homeware kernels report unlimited tmpfs as zero blocks. Do not
+  # mistake that for a full filesystem; bounded tmpfs and disks still use df.
+  if [ "$total_kb:$available_kb" = 0:0 ] && awk -v path="$target_path" '
+    $3 == "tmpfs" && ($2 == path || index(path, $2 "/") == 1) {found=1}
+    END {exit !found}
+  ' /proc/mounts; then
+    available_kb="$(awk '
+      /^MemAvailable:/ {available=$2; known=1}
+      /^MemFree:/ {free=$2}
+      /^Buffers:/ {buffers=$2}
+      /^Cached:/ {cached=$2}
+      END {if (known) print available; else printf "%.0f\n", free+buffers+cached}
+    ' /proc/meminfo)"
+  fi
   case "$available_kb" in
   *[!0-9]* | "")
     echo "Unable to determine free space on $target_path"
@@ -2075,10 +2095,7 @@ modgui_install_native_wireguard() (
 )
 
 app_wireguard() {
-  wireguard_commit="7ac8fe29a7ab64eb0c9c9774bb36cf2c7648399e"
-  wireguard_version="2023.09.29"
   wireguard_owned="/etc/.modgui-wireguard-go-installed"
-  wireguard_tmp="/tmp/wireguard-go-install.$$.ipk"
 
   wireguard_gui_backup="/opt/modgui-wireguard-gui.tar.gz"
 
@@ -2257,6 +2274,8 @@ app_wireguard() {
       wireguard_prepare_config || return 1
       wireguard_register_gui
       wireguard_backup_gui || return 1
+      /usr/share/transformer/scripts/wireguardApply.sh || return 1
+      modgui_release_tun wireguard
       set_extension_state wireguard_app 1
       /etc/init.d/transformer restart
       /etc/init.d/nginx restart
@@ -2292,9 +2311,7 @@ app_wireguard() {
     rm -f "$wireguard_tmp"
     if [ ! -x /usr/bin/wireguard-go ] || [ ! -x /usr/bin/wg-go ] ||
       [ ! -x /lib/netifd/proto/wireguard.sh ]; then
-      opkg remove wireguard-go 2>/dev/null
-      rm -f "$wireguard_owned"
-      wireguard_remove_tun
+      echo "No usable WireGuard runtime in the configured feeds"
       return 1
     fi
     wireguard_prepare_config || return 1
@@ -2309,11 +2326,11 @@ app_wireguard() {
       echo "A pre-existing WireGuard runtime is installed; refusing to remove it"
       return 1
     fi
-    if uci -q show network 2>/dev/null | grep "\.proto='wireguard'" | grep -v modgui_wg0 >/dev/null 2>&1; then
+    if uci -q show network 2>/dev/null | grep -E "\.proto='(modgui_)?wireguard'" | grep -v modgui_wg0 >/dev/null 2>&1; then
       echo "Remove manually configured WireGuard network interfaces before uninstalling the runtime"
       return 1
     fi
-    if [ -f "$wireguard_owned" ]; then
+    if [ -f "$wireguard_owned" ] || [ -f /etc/.modgui-wireguard-native-installed ]; then
       uci -q set wireguard.wg.enabled=0
       for section in $(uci -q show wireguard 2>/dev/null | awk -F'[.=]' '$3 == "peer" {print $2}'); do
         uci -q delete "wireguard.$section"
@@ -2341,7 +2358,7 @@ app_wireguard() {
     uci -q del_list web.ruleset_main.rules=wireguardmodal
     uci -q del_list web.ruleset_main.rules=wireguardprofile
     uci commit web
-    rm -f "$wireguard_owned" "$wireguard_tmp" "$wireguard_gui_backup" \
+    rm -f "$wireguard_owned" "$wireguard_gui_backup" \
       /tmp/modgui-wireguard-client.conf /tmp/modgui-wireguard-client.name
     if opkg list-installed | grep -q '^wireguard-go '; then
       set_extension_state wireguard_app 1
@@ -2352,7 +2369,7 @@ app_wireguard() {
     /etc/init.d/nginx restart
     ;;
   start)
-    [ -x /usr/bin/wireguard-go ] || return 1
+    [ -x /usr/bin/wg ] || [ -x /usr/bin/wireguard-go ] || return 1
     wireguard_prepare_config || return 1
     uci set wireguard.wg.enabled=1
     uci commit wireguard
@@ -2381,6 +2398,12 @@ app_l2tpipsec() {
   l2tpipsec_owned="/etc/.modgui-l2tp-ipsec-installed"
   l2tpipsec_packages="/etc/.modgui-l2tp-ipsec-packages"
   l2tpipsec_gui_backup="/opt/modgui-l2tp-ipsec-gui.tar.gz"
+
+  l2tpipsec_install_spu() {
+    opkg update || { echo "Cannot refresh SPU packages; using software crypto"; return 0; }
+    modgui_install_spu || echo "SPU installation failed; IPsec will use software crypto"
+    modgui_load_spu || echo "SPU unavailable; IPsec will use software crypto"
+  }
 
   l2tpipsec_backup_gui() {
     mkdir -p /opt || return 1
@@ -2477,6 +2500,7 @@ app_l2tpipsec() {
       ;;
     esac
     if opkg list-installed | grep -q '^modgui-vpn '; then
+      l2tpipsec_install_spu
       set_extension_state l2tpipsec_app 1
       return 0
     fi
@@ -2526,6 +2550,7 @@ app_l2tpipsec() {
     rm -f "$l2tpipsec_before"
     touch "$l2tpipsec_owned"
     l2tpipsec_backup_gui || return 1
+    l2tpipsec_install_spu
     l2tpipsec_set_enabled 0
     /etc/init.d/l2tp-ipsec-server stop 2>/dev/null
     /etc/init.d/modgui-ipsec stop 2>/dev/null
@@ -2555,6 +2580,7 @@ app_l2tpipsec() {
     /etc/init.d/nginx restart
     ;;
   start)
+    modgui_load_spu || echo "SPU unavailable; IPsec will use software crypto"
     l2tpipsec_set_enabled 1
     /etc/init.d/modgui-ipsec restart || return 1
     /etc/init.d/l2tp-ipsec-server restart

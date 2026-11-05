@@ -48,6 +48,7 @@ class CommandWrapper(unittest.TestCase):
         self.assertEqual(log, "first\nerror\nlast\n")
         self.assertIn("In Progress", states)
         self.assertIn("Complete", states)
+        self.assertNotIn("Error", states)
         self.assertNotIn("Idle", states)
 
     def test_failure_keeps_output_and_completes_polling(self):
