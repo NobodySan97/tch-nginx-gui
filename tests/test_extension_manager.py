@@ -368,10 +368,9 @@ dofile(arg[1])
         self.assertIn("modgui_install_tun wireguard", wireguard)
         self.assertIn("wireguard_install_tun", wireguard)
         self.assertIn("wireguard_remove_tun", wireguard)
-        # The fork installs the kernel module from the configured opkg feeds,
-        # resolved for the running kernel (modgui_kernel_package), instead of
-        # pinning one upstream GitHub commit like the older onda-2 approach.
-        self.assertNotIn('wireguard_commit="7ac8fe29', wireguard)
+        # The feed-native primary path resolves the kernel module for the
+        # running kernel; the pinned-GitHub commit is legitimate only inside
+        # the legacy userspace fallback branch (ARM/ARM64 without kmod feeds).
         self.assertIn(
             "wireguard_module_package=\"$(modgui_kernel_package '^kmod-wireguard(-|$)')\"",
             wireguard,

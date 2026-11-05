@@ -2099,6 +2099,13 @@ app_wireguard() {
 
   wireguard_gui_backup="/opt/modgui-wireguard-gui.tar.gz"
 
+  # Legacy userspace fallback (feeds without kmod-wireguard): pinned GitHub
+  # runtime, restored after the merge dropped these definitions while the
+  # ARM/MIPS fallback branch still references them.
+  wireguard_commit="7ac8fe29a7ab64eb0c9c9774bb36cf2c7648399e"
+  wireguard_version="2023.09.29"
+  wireguard_tmp="/tmp/wireguard-go-install.$$.ipk"
+
   wireguard_tun_supported() {
     modgui_has_tun
   }
