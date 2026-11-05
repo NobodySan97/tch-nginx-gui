@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -55,9 +56,15 @@ with (root / 'adb.log').open('a') as log:
     log.write(json.dumps(args) + '\\n')
 if args == ['start-server']:
     sys.exit(1 if os.environ.get('ADB_START_FAIL') else 0)
+if args == ['kill-server']:
+    (root / 'adb-restarted').touch()
+    sys.exit(0)
 if args == ['devices']:
     print('List of devices attached')
     state = os.environ.get('ADB_STATE', 'unauthorized' if os.environ.get('UNAUTHORIZED') else 'device')
+    if os.environ.get('ADB_STALE') and not (root / 'adb-restarted').exists(): state = 'absent'
+    if os.environ.get('ADB_STUCK'): state = 'absent'
+    if os.environ.get('ADB_RACE') and (root / 'adb.log').read_text().count('[\"devices\"]') == 1: state = 'absent'
     if state != 'absent':
         print('fixture\\t' + state)
     if os.environ.get('MULTIPLE_DEVICES'):
@@ -155,6 +162,8 @@ elif args[:2] == ['route', 'add']:
 elif args[:2] == ['route', 'flush']:
     if route.exists(): route.unlink()
 ''', python=True)
+        (self.directory / 'uptime').write_text('100.00 0.00\n', newline='\n')
+        self.write('logger', '#!/bin/sh\nexit 0\n')
         self.write('chown', '#!/bin/sh\nexit 0\n')
         self.write('od', '#!/bin/sh\nexit 127\n')  # Simulate a minimal BusyBox environment.
 
@@ -181,6 +190,8 @@ elif args[:2] == ['route', 'flush']:
         source = SCRIPT.read_text().replace('\r\n', '\n').replace(
             '/usr/share/modgui-smartphone/radio.awk',
             (ROOT / 'decompressed/smartphone/usr/share/modgui-smartphone/radio.awk').as_posix())
+        source = source.replace('/var/run/modgui-smartphone-adb', directory + '/adb-recovery')
+        source = source.replace('/proc/uptime', directory + '/uptime')
         source = source.replace('/sys/bus/usb/devices', directory + '/usb')
         source = source.replace('/sys/module/', directory + '/modules/')
         source = source.replace('/etc/modgui-smartphone-drivers.status', directory + '/drivers.status')
@@ -300,6 +311,109 @@ elif args[:2] == ['route', 'flush']:
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('ERROR_CODE|telemetry_error', result.stdout)
         self.assertIn('ADB connected', result.stdout)
+
+    def add_usb_adb(self):
+        usb = self.directory / 'usb/2-1'
+        usb.mkdir(parents=True)
+        (usb / 'idVendor').write_text('22b8\n', newline='\n')
+        (usb / 'product').write_text('Example phone\n', newline='\n')
+        # NOTE(fork): Windows cannot store ":" in a file name (NTFS ADS); the
+        # interface glob marker is translated to "@" by run_phone() on Windows.
+        separator = ':' if os.name == 'posix' else '@'
+        interface = usb.with_name('2-1' + separator + '1.0')
+        interface.mkdir()
+        for name, value in [('Class', 'ff'), ('SubClass', '42'), ('Protocol', '01')]:
+            (interface / ('bInterface' + name)).write_text(value + '\n', newline='\n')
+
+    def test_stale_server_recovers_only_with_usb_adb_and_no_transports(self):
+        self.add_usb_adb()
+        result = self.run_phone(ADB_STALE='1')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('BATT|75%', result.stdout)
+        calls = [json.loads(line) for line in (self.directory / 'adb.log').read_text().splitlines()]
+        self.assertEqual(calls[:6], [['start-server'], ['devices'], ['devices'],
+                                   ['kill-server'], ['start-server'], ['devices']])
+        self.assertFalse((self.directory / 'adb-recovery/lock').exists())
+
+    def test_failed_recovery_has_cooldown_and_retries_after_it_expires(self):
+        self.add_usb_adb()
+        for _ in range(2):
+            result = self.run_phone(ADB_STUCK='1')
+            self.assertIn('ERROR_CODE|usb_only', result.stdout)
+        log = self.directory / 'adb.log'
+        self.assertEqual(log.read_text().count('["kill-server"]'), 1)
+        (self.directory / 'uptime').write_text('161.00 0.00\n')
+        self.run_phone(ADB_STUCK='1')
+        self.assertEqual(log.read_text().count('["kill-server"]'), 2)
+
+    def test_known_or_concurrently_registered_transports_are_not_restarted(self):
+        self.add_usb_adb()
+        for env in ({}, {'UNAUTHORIZED': '1'}, {'ADB_STATE': 'offline'}, {'ADB_RACE': '1'}):
+            self.run_phone(**env)
+        self.assertNotIn('["kill-server"]', (self.directory / 'adb.log').read_text())
+
+    def test_recovery_lock_serializes_requests_and_recovers_dead_owner(self):
+        self.add_usb_adb()
+        lock = self.directory / 'adb-recovery/lock'
+        lock.mkdir(parents=True)
+        # NOTE(fork): MSYS sh cannot signal an arbitrary Windows PID, so the
+        # live owner is a POSIX sleeper whose pid is valid for `kill -0` on
+        # every platform (upstream uses os.getpid()).
+        sleeper = subprocess.Popen([SH, '-c', 'echo $$; exec sleep 30'],
+                                   stdout=subprocess.PIPE, text=True)
+        owner_pid = int(sleeper.stdout.readline())
+        (lock / 'pid').write_text(str(owner_pid) + '\n', newline='\n')
+        try:
+            self.run_phone(ADB_STALE='1')
+            self.assertFalse((self.directory / 'adb-restarted').exists())
+        finally:
+            sleeper.kill()
+            sleeper.wait(timeout=5)
+        (lock / 'pid').write_text('2147483647', newline='\n')
+        result = self.run_phone(ADB_STALE='1')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse(lock.exists())
+
+    def test_background_check_skips_absent_usb_and_never_collects_telemetry(self):
+        result = self.run_phone('check_adb')
+        self.assertEqual(result.returncode, 0)
+        self.assertFalse((self.directory / 'adb.log').exists())
+        self.add_usb_adb()
+        result = self.run_phone('check_adb', ADB_STALE='1')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        calls = [json.loads(line) for line in (self.directory / 'adb.log').read_text().splitlines()]
+        self.assertIn(['kill-server'], calls)
+        self.assertFalse(any(call[0] == 'shell' for call in calls))
+
+    def test_background_watcher_recovers_without_gui_and_stops_its_sleep(self):
+        self.add_usb_adb()
+        self.run_phone('check_adb')  # Prepare the relocated helper.
+        (self.directory / 'adb.log').write_text('')
+        # NOTE(fork): run the helper through the POSIX shell resolver also on
+        # Windows; SH is the same Git for Windows sh used by run_phone().
+        process = subprocess.Popen([SH, str(self.directory / 'phone_stats.sh'), 'watch_adb'],
+                                   env={**self.env, 'ADB_STALE': '1'},
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try:
+            deadline = time.monotonic() + 6
+            while time.monotonic() < deadline:
+                if '["get-state"]' in (self.directory / 'adb.log').read_text():
+                    break
+                time.sleep(0.05)
+            self.assertTrue((self.directory / 'adb-restarted').exists())
+            self.assertIn('["get-state"]', (self.directory / 'adb.log').read_text())
+            self.assertNotIn('["shell"', (self.directory / 'adb.log').read_text())
+        finally:
+            if os.name == 'posix':
+                process.terminate()
+                process.communicate(timeout=5)
+            else:
+                # NOTE(fork): TerminateProcess cannot signal the trap, and
+                # killing only the sh wrapper would leave the watcher's checks
+                # and sleeps holding the pipes; kill the whole process tree.
+                subprocess.run(['taskkill', '/F', '/T', '/PID', str(process.pid)],
+                               capture_output=True)
+                process.wait(timeout=5)
 
     def test_router_uplink_controls_do_not_require_adb_authorization(self):
         (self.directory / 'uplink.lua').write_text('fixture')
