@@ -627,8 +627,12 @@ require_free_space() { echo "$1"; return 1; }
                                                 hashlib.sha256(data).hexdigest())
                 prefix_private = prefix_private.replace('ff673e7841df6de1dc0d3595352c17eb375480be2f93406b2aa596c8f7afa698',
                                                         hashlib.sha256(downloaded).hexdigest())
-                for path in ['/etc/', '/lib/modules/', '/tmp/']:
-                    prefix_private = prefix_private.replace(path, testroot + path)
+                # Rewrite in one pass: a Linux /tmp fixture root itself
+                # contains "/tmp/", so sequential str.replace() would re-match
+                # the "/tmp/" inserted by earlier passes and double the root
+                # (same pitfall avoided by re.sub in the ARM download test).
+                prefix_private = re.sub(r'/etc/|/lib/modules/|/tmp/',
+                                        lambda match: testroot + match[0], prefix_private)
                 setup = '''
 testroot="$1"; scenario="$2"
 uname() { if [ "$1" = -m ]; then echo mips; else echo 3.4.11-rt19; fi; }
@@ -679,7 +683,7 @@ io.open = function(path)
  if not status then return nil end
  return {lines = function() return status:gmatch('[^\\n]+') end, close = function() closed = true end}
 end
-assert(load(SOURCE))()
+assert((loadstring or load)(SOURCE))()
 local object = objects['rpc.openvpn.server.']
 assert(object.objectType.parameters.connected_clients.access == 'readOnly')
 assert(object.get.connected_clients() == '0')
@@ -738,7 +742,7 @@ end} end
 ngx = {header = {}, var = {http_host = 'vpn.example.test'}, HTTP_OK = 200,
  req = {get_uri_args = function() return {download = '1'} end}, exit = function() end,
  print = function(...) for _, v in ipairs({...}) do output[#output + 1] = v end end}
-local export = assert(load(SOURCE))
+local export = assert((loadstring or load)(SOURCE))
 for _, test in ipairs({{'udp', 'udp'}, {'tcp', 'tcp-client'}, {'tcp-server', 'tcp-client'}}) do
  protocol, output = test[1], {}
  export()

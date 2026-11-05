@@ -93,6 +93,10 @@ esac
         bindir_path = _msys_path(self.rootdir) + '/bin:/usr/bin:/bin'
         source = source.replace('#!/bin/sh\n', '#!/bin/sh\n' + f'PATH={bindir_path}\nexport PATH\n', 1)
         self.script.write_text(source)
+        # run_app() does 'exec "$0" "$@"' through a real exec: POSIX sh needs
+        # the execute bit, while Windows stat() ignores it (so keep the call
+        # unconditional for OS-agnostic harnesses).
+        self.script.chmod(0o755)
 
     def write_mock(self, name, body):
         file = self.bindir / name

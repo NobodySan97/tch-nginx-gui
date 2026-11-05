@@ -101,6 +101,12 @@ exit "$TEST_STATUS"
                 command.chmod(0o755)
                 wrapper = root / "wrapper.sh"
                 wrapper.write_text((SCRIPTS / "wrapper.sh").read_text().replace("/tmp/command_log", rootdir + "/command_log"))
+                # The test boots the wrapper through 'exec "$0"' which needs the
+                # execute bit on POSIX; Windows stat() ignores it so the change
+                # is required there too. GNU/BusyBox tee is unbuffered, so once
+                # the wrapper runs, the FIFO reaches the log without extra
+                # flushing/timing work.
+                wrapper.chmod(0o755)
                 log = root / "command_log"
                 lua = root / "lua"
                 lua.write_text('#!/bin/sh\nprintf "%s\\n" "$2" >> "$TEST_ROOT/states"\n')

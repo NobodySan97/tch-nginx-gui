@@ -7,11 +7,12 @@ local root,folder,case=arg[1],arg[2],arg[3]
 -- the production atomic-write flow still completes end-to-end.
 local ffi_ok,ffi = pcall(require, 'ffi')
 if ffi_ok then ffi.cdef('int _mkdir(const char *path); int _rmdir(const char *path);') end
-if not ffi_ok then
-  local function exec(s)
-    local a,_,c=os.execute(s)
-    return a==0 or (a==true and (c==nil or c==0))
-  end
+-- Interpreters without the LuaJIT FFI (plain Lua on CI Linux) fall back to
+-- os.execute: define it outside the ffi branch or sh_mkdir/sh_rmdir would
+-- call the (nil) global 'exec'.
+local exec = function(s)
+  local a,_,c=os.execute(s)
+  return a==0 or (a==true and (c==nil or c==0))
 end
 local function sh_mkdir(path)
   if ffi_ok then return ffi.C._mkdir(path)==0 end

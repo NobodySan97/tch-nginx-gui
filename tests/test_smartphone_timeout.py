@@ -42,10 +42,13 @@ if sh then
     script:write('PATH=' .. os.getenv('TCH_FAKE_BINDIR') .. ':/usr/bin:/bin\nexport PATH\n')
     script:write(command)
     script:close()
-    -- Double-quote sandwich: cmd /c keeps the outer quotes when the string is
-    -- one quoted command, so the spaced sh path stays quoted and the script
-    -- path (no spaces) follows unquoted.
-    local pipe = original_popen('""' .. sh .. '" ' .. template .. '"')
+    -- /bin/sh parses the MSYS double-quote sandwich as concatenated words
+    -- ("/usr/bin/sh /tmp/tch_popen.1.sh: not found"), so keep the cmd.exe
+    -- double-quote sandwich only when the sh path itself is spaced, and use
+    -- plain POSIX quoting otherwise.
+    local pipe = sh:find('%s')
+        and original_popen('""' .. sh .. '" ' .. template .. '"')
+        or original_popen(sh .. ' "' .. template .. '"')
     return {
       read = function(_, ...) return pipe:read(...) end,
       close = function() os.remove(template); return pipe:close() end,
