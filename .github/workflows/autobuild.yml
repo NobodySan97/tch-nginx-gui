@@ -83,7 +83,7 @@ jobs:
       - name: Run Build and Release Script
         id: build_step
         env:
-          RELEASE_CHANNEL: ${{ github.event.inputs.channel }}
+          RELEASE_CHANNEL: ${{ github.event_name == 'push' && 'preview' || github.event.inputs.channel }}
           CUSTOM_VERSION: ${{ github.event.inputs.custom_version }}
         run: |
           python scripts/build_release.py "$GITHUB_WORKSPACE/gui-dev-build-auto"

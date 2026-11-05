@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
-9.8.86 (Stable)
+9.8.86 (Preview)
 ---------------------------------------------------------------------------
 - **Sincronizzazione Upstream Agosto-Ottobre 2026 (39 Commit edd9e386..upstream/master, "Ondate 1-7")**:
   - **Smartphone Tethering USB + Advanced VoIP (upstream #1232, `3eb64e8d`…`c5268da2`)**: nuova app `smartphone` (tethering ADB con uplink manager fallback/primary, statistiche telefoniche da `/usr/bin/phone_stats.sh`, screenshot schermo, parser radio, diagnostica USB/ADB), card Extensions dedicata, modale `mmpbx-advanced-modal` (STUN, keep-alive, jitter buffer, DND/ACR/transfer) con mappe mmpbx aggiornate, lifecycle self-contained con rollback.
