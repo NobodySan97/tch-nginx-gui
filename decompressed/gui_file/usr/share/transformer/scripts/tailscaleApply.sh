@@ -8,6 +8,40 @@ advertise_routes="$(uci -q get tailscale.service.advertise_routes)"
 advertise_exit_node="$(uci -q get tailscale.service.advertise_exit_node)"
 accept_routes="$(uci -q get tailscale.service.accept_routes)"
 ssh_enabled="$(uci -q get tailscale.service.ssh)"
+funnel_enabled="$(uci -q get tailscale.service.funnel_enabled)"
+funnel_port="$(uci -q get tailscale.service.funnel_port)"
+funnel_target_port="$(uci -q get tailscale.service.funnel_target_port)"
+funnel_target_ip="$(uci -q get tailscale.service.funnel_target_ip)"
+funnel_ssh_enabled="$(uci -q get tailscale.service.funnel_ssh_enabled)"
+funnel_ssh_port="$(uci -q get tailscale.service.funnel_ssh_port)"
+funnel_ssh_target_ip="$(uci -q get tailscale.service.funnel_ssh_target_ip)"
+funnel_ssh_target_port="$(uci -q get tailscale.service.funnel_ssh_target_port)"
+[ -n "$funnel_target_ip" ] || funnel_target_ip=127.0.0.1
+[ -n "$funnel_ssh_target_ip" ] || funnel_ssh_target_ip=127.0.0.1
+[ -n "$funnel_ssh_target_port" ] || funnel_ssh_target_port=22
+
+if [ "$funnel_enabled" = "1" ]; then
+  case "$funnel_port" in 443 | 8443 | 10000) ;; *) echo "Invalid Funnel HTTPS port" >&2; exit 1 ;; esac
+  /usr/share/modgui-tailscale/tailscale.connect validate-target "$funnel_target_ip" "$funnel_target_port" || {
+    echo "Invalid Funnel destination IP or port" >&2; exit 1;
+  }
+fi
+if [ "$funnel_ssh_enabled" = 1 ]; then
+  case "$funnel_ssh_port" in 443 | 8443 | 10000) ;; *) echo "Invalid SSH Funnel port" >&2; exit 1 ;; esac
+  [ "$funnel_enabled" != 1 ] || [ "$funnel_ssh_port" != "$funnel_port" ] || {
+    echo "HTTP and SSH Funnel must use different public ports" >&2; exit 1;
+  }
+  /usr/share/modgui-tailscale/tailscale.connect validate-target "$funnel_ssh_target_ip" "$funnel_ssh_target_port" || {
+    echo "Invalid SSH Funnel destination IP or port" >&2; exit 1;
+  }
+  if [ "$funnel_ssh_target_ip" = 127.0.0.1 ] &&
+    { [ "$funnel_ssh_target_port" = 22 ] || [ "$funnel_ssh_target_port" = 2222 ]; } &&
+    [ "$(uci -q get tailscale.service.funnel_ssh_password_auth)" != 1 ]; then
+    { [ -s /etc/dropbear/authorized_keys ] || [ -s /root/.ssh/authorized_keys ]; } || {
+      echo "Install an SSH public key before enabling SSH Funnel" >&2; exit 1;
+    }
+  fi
+fi
 
 [ "$enabled" = "1" ] || enabled=0
 [ "$connect" = "1" ] || connect=0
@@ -97,6 +131,8 @@ configure_network() {
 }
 
 if [ "$enabled" != "1" ]; then
+  /usr/share/modgui-tailscale/tailscale.connect funnel-stop || exit 1
+  /usr/share/modgui-tailscale/tailscale.connect funnel-ssh-stop || exit 1
   if [ -S /var/run/tailscale/tailscaled.sock ]; then
     /usr/sbin/tailscale down >/dev/null 2>&1
   fi
