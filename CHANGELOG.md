@@ -1,6 +1,23 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.89 (Preview)
+---------------------------------------------------------------------------
+- **Tailscale – Funnel & SSH Funnel (upstream `5c8d9d4c`,`6b032636`,`885a2144`)**:
+  - Configurazione Funnel HTTP(S) e SSH Funnel con validazioni completa (porte 443/8443/10000, `validate-target` con `tch.inet`, IPv6 bracket, differenziazione porte, chiave pubblica o password-auth), istanza procd `funnel`/`funnel_ssh` + `funnel_sshd` dinamico, retry approval, owned-port tracking e cleanup status in `/tmp`.
+  - `tailscale.apply` con fail-closed suiDisabled, `tailscaleStatus.sh` read-only con report funnel/ssh + card tri-stato (off/on-disconnected/connected) e `bootstrap` con `--statedir` per certificati TLS.
+  - Versione upgrade: Tailscale `1.102.4` → `1.104.5` (SHA256 arm/arm64 verificati).
+- **Wireless – MultiAP Native + Luci ownership (upstream `0f3eb996`,`05b808ea`)**:
+  - Route `ap.security/ssid` via `transformer.shared.bandsteerhelper` con transazioni e fail esplicito "Native MultiAP credential support is unavailable"; credential controller revocabili al fail.
+  - `registerNamedMultiMap` `web.network` (intf/cred/splitssid); ripristino `web_back`→`web` post-config.
+  - Luci wireless: ownership tracking UCI (`wireless.<sid>.modgui_luci=1`) con rollback, snapshot `owned` da flag, no più fallback `ap_display_name`; card `004_wireless.lp` senza cap 4 SSID.
+- **LuCI – feed `modgui_luci` + pacchetti extra 18.x/19.x + clear cache uhttpd (upstream `aae7648b`)**.
+- **Data Usage modal fix (upstream `48b99cac`)**: untaint argomenti HTTP, whitelist `valid_interface`, `no-store` header, hook `datausage_intercept.lua` pulito.
+- **Card smartphone: operatore accanto alla batteria (upstream `622bb525`)**: `phoneOperator` KO binding, reset su refresh.
+- **extensions-card height fix (upstream `15d04c7f`)**: rimozione blocco CSS ridondante.
+- Test: +20 test Funnel/Status, +MultiAP/DataUsage/WirelessCard/LuciInstaller/OpkgFeeds nuovi/adattati — suite **453+20 = completo verde**.
+
+
 9.8.88 (Preview)
 ---------------------------------------------------------------------------
 - **Fix revisione finale (nel team di agenti) – nessuna regressioni a favore upstream**:
