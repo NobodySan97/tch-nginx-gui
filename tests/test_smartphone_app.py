@@ -224,7 +224,7 @@ esac
         radio = self.root / 'usr/share/modgui-smartphone/radio.awk'
         radio.unlink()
         source = (GUI / 'etc/modgui_scripts/04_config.sh').read_text()
-        start = source.index('  if [ -f /etc/.modgui-smartphone-installed ]; then')
+        start = source.index('  if [ -f /tmp/smartphone.tar.bz2 ] && [ ! -f /www/cards/017_smartphone.lp ]; then')
         block = source[start:source.index('  # Reconcile stale flags', start)]
         for prefix in ('/tmp/', '/opt/', '/etc/', '/usr/', '/www/'):
             block = block.replace(prefix, self.rootdir + prefix)
