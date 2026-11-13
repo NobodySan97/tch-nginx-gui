@@ -338,7 +338,12 @@ create_gui_type() {
       uci set modgui.app.openspeedtest_app="0"
     fi
   fi
-  if [ -f /etc/.modgui-smartphone-installed ]; then
+  if [ -f /tmp/smartphone.tar.bz2 ] && [ ! -f /www/cards/017_smartphone.lp ]; then
+    # Fresh extraction from the modular package on first install/upgrade.
+    logecho "Installing Smartphone app from modular package..."
+    /usr/share/transformer/scripts/appInstallRemoveUtility.sh refresh smartphone >/dev/null 2>&1 || logecho "Smartphone app refresh failed"
+    uci set modgui.app.smartphone_app="1"
+  elif [ -f /etc/.modgui-smartphone-installed ]; then
     uci set modgui.app.smartphone_app="1"
     smartphone_archive_hash="$(sha256sum /tmp/smartphone.tar.bz2 2>/dev/null | awk '{print $1}')"
     smartphone_installed_hash="$(cat /etc/.modgui-smartphone-archive-sha256 2>/dev/null)"
