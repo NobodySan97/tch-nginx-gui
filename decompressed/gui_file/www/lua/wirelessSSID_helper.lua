@@ -16,17 +16,7 @@ local function getFrequencyBand(v)
   -- Primary: hostapd/ubus wireless.radio (works on hostapd-based firmware)
   local path = format("rpc.wireless.radio.@%s.supported_frequency_bands", v)
   local radio = getValue(path)
-  -- Fallback for Broadcom (wl) firmware where rpc.wireless.radio returns no
-  -- entries: derive the band from the radio name (radio_2G -> 2.4GHz, ...).
-  if radio == "" then
-    if v:match("2G") or v:match("2g") then
-      radio = "2.4GHz"
-    elseif v:match("5G") or v:match("5g") then
-      radio = "5GHz"
-    elseif v:match("6G") or v:match("6g") then
-      radio = "6GHz"
-    end
-  end
+  -- Cache only successful reads so a transient empty result can recover.
   if radio ~= "" then
     frequency[v] = radio
   end
@@ -82,8 +72,18 @@ function M.getSSID()
       if ap_display_name ~= "" then
         display_ssid = ap_display_name
       end
+      -- Derive frequency band from radio name (Broadcom wl firmware does not
+      -- expose rpc.wireless.radio, so getFrequencyBand() would return empty).
+      local radio_band = ""
+      if dev:match("2G") or dev:match("2g") then
+        radio_band = "2.4GHz"
+      elseif dev:match("5G") or dev:match("5g") then
+        radio_band = "5GHz"
+      elseif dev:match("6G") or dev:match("6g") then
+        radio_band = "6GHz"
+      end
       ssid_list[#ssid_list+1] = {
-        radio = getFrequencyBand(dev),
+        radio = radio_band,
         ssid = display_ssid,
         state = (state == "1" or state == "up") and "1" or "0",
       }
