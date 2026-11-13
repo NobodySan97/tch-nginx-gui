@@ -1,5 +1,6 @@
 """Exercise feed-based USB dependencies across kernel layouts and failures."""
 import os
+import re
 from pathlib import Path
 import shlex
 import shutil
@@ -54,7 +55,8 @@ module=${1##*/}; module=${module%.ko}
 [ "$FAIL_LOAD" != "$module" ] || exit 1
 mkdir -p "$FIXTURE/sys/module/$module"
 ''')
-        self.mock('opkg', f'''import os, pathlib, sys
+        self.mock('opkg', f'''import os
+import re, pathlib, sys
 r = pathlib.Path(os.environ['FIXTURE']); args = sys.argv[1:]
 with (r/'opkg.log').open('a') as f: f.write(' '.join(args)+'\\n')
 assert not any(a.startswith('--force') for a in args), args
@@ -85,8 +87,7 @@ elif op in ('install', 'upgrade'):
 else: raise AssertionError(args)
 ''', python=True)
         source = MANAGER.read_text().replace('\r\n', '\n')
-        for prefix in ('/etc/', '/lib/', '/sys/', '/tmp/'):
-            source = source.replace(prefix, self.rootdir + prefix)
+        source = re.sub(r'/etc/|/lib/|/sys/|/tmp/', lambda m: self.rootdir + m.group(0), source)
         source = source.replace('#!/bin/sh\n', '#!/bin/sh\n' +
                                 'PATH=' + _msys_path(self.rootdir) + '/bin:/usr/bin:/bin\nexport PATH\n', 1)
         self.script = self.root / 'drivers.sh'
