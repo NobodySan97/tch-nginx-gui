@@ -1,8 +1,17 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.91 (Preview)
+---------------------------------------------------------------------------
+- **Fix card Smartphone (primo install/aggiornamento)**: estrazione automatica di `/www/cards/017_smartphone.lp` dal pacchetto modulare quando `/tmp/smartphone.tar.bz2` è presente ma la card manca (`04_config.sh`).
+- **Fix test harness Linux (CI)**: mock curl scrive al `--output` reale (tailscale bootstrap), path root singolo-passaggio in test_smartphone_drivers, `loadstring` Lua 5.1.
+- **Merge ancestry upstream** (0 behind): allineamento completo `git merge upstream/master -X ours`.
+- **Review team fixes**: brcm963xx alias, checkver `.tmp` cleanup, assistance-modal escaping, wireguard vars, dry-run purity, README release channels, ACS dismiss banner, compat_nginx legacy, post_helper dedup, CHANGELOG typos.
+
+
 9.8.90 (Preview)
 ---------------------------------------------------------------------------
+
 - **Ondata 12 (10 commit upstream Nov 5–12)**:
   - DumaOS 2.0-47 con gestione modulo QoS (Enhanced QoS module management)
   - Tailscale persistent binaries + cache runtime archives (preferenza binari persistenti, cache archivi verificati)
