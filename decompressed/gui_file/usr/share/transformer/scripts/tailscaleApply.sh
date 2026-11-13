@@ -85,6 +85,9 @@ configure_network() {
   /etc/init.d/firewall reload >/dev/null 2>&1 || return 1
 }
 
+# Disabling must work even when connection settings are invalid or the
+# daemon cannot answer Funnel requests. Preserve failed Funnel ownership
+# markers for retry, but always stop the daemon and remove its network.
 if [ "$enabled" != "1" ]; then
   /usr/share/modgui-tailscale/tailscale.connect funnel-stop || echo "Cannot clear saved HTTP Funnel configuration; stopping daemon" >&2
   /usr/share/modgui-tailscale/tailscale.connect funnel-ssh-stop || echo "Cannot clear saved SSH Funnel configuration; stopping daemon" >&2
