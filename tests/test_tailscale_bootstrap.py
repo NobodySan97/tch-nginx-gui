@@ -61,7 +61,9 @@ uci() {
 }
 curl() {
  echo download >> "$TEST_ROOT/downloads"
- if [ "$TEST_BAD" = 1 ]; then echo corrupt > "$4"; else cp "$TEST_ROOT/payload.tgz" "$4"; fi
+ last=""
+ for arg in "$@"; do last="$arg"; done
+ if [ "$TEST_BAD" = 1 ]; then echo corrupt > "$last"; else cp "$TEST_ROOT/payload.tgz" "$last"; fi
 }
 '''
             result = subprocess.run([SH, '-c', prelude + source], text=True,
