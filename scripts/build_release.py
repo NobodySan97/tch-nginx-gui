@@ -632,8 +632,8 @@ def build_release(src_dir, dest_dir, channel="stable", manual_ver=None, dry_run=
         if manifest_lines:
             version_dir = build_target_dir / version
             version_dir.mkdir(exist_ok=True)
-            (version_dir / "MD5SUMS").write_text("".join(manifest_lines), encoding="utf-8")
-            (build_target_dir / "MD5SUMS").write_text("".join(manifest_lines), encoding="utf-8")
+            (version_dir / "MD5SUMS").write_bytes("".join(manifest_lines).encode("utf-8"))
+            (build_target_dir / "MD5SUMS").write_bytes("".join(manifest_lines).encode("utf-8"))
             print(f"MD5SUMS manifest written (root + {version}/, {len(manifest_lines)} assets)")
 
         print(f"\nSuccessfully built {channel.upper()} release v{version}!")

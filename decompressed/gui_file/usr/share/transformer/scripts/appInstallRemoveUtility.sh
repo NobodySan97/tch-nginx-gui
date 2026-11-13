@@ -3412,7 +3412,7 @@ app_dumaos() {
 
   dumaos_remove_qos_module() {
     if [ -f "$dumaos_qos_owned" ]; then
-      if lsmod | grep -q '^act_connmark '; then
+      if grep -q '^act_connmark ' /proc/modules 2>/dev/null; then
         rmmod act_connmark 2>/dev/null || {
           echo "act_connmark is still in use; keeping its packages"
           return 0
