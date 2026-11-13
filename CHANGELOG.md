@@ -1,6 +1,20 @@
 ---------------------------------------------------------------------------
 # Mainline 18.3 / 19.4 NobodySan97 Edition
 
+9.8.90 (Preview)
+---------------------------------------------------------------------------
+- **Ondata 12 (10 commit upstream Nov 5–12)**:
+  - DumaOS 2.0-47 con gestione modulo QoS (Enhanced QoS module management)
+  - Tailscale persistent binaries + cache runtime archives (preferenza binari persistenti, cache archivi verificati)
+  - EasyMesh native newEM pages + dependencies (import pagine native EasyMesh)
+  - EasyMesh card toggle logic refactored (logica toggle migliorata)
+  - MultiAP credentials native handling (gestione credenziali agent radio RPCs native)
+  - Wireless credential updates con MultiAP nativo (fix wifi save su 4331)
+  - Nginx SSL session timeout/cache ridotto (x2 commit)
+  - LuCI version update
+- Test: +3 nuovi test (easymesh card/switch, tailscale apply/bootstrap), suite full verde.
+
+
 9.8.89 (Preview)
 ---------------------------------------------------------------------------
 - **Tailscale – Funnel & SSH Funnel (upstream `5c8d9d4c`,`6b032636`,`885a2144`)**:
