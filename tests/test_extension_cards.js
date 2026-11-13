@@ -48,7 +48,7 @@ function runSmartphone(entry) {
       toggle(value) { attributes['visible:' + name] = !!value; return this; },
       each(callback) {
         if (name === '[data-bind]') {
-          for (const field of ['phoneDevice', 'phoneBattery', 'phoneStatus', 'phoneNetwork', 'phoneSignal', 'phoneTether', 'phoneUplink'])
+          for (const field of ['phoneOperator', 'phoneDevice', 'phoneBattery', 'phoneStatus', 'phoneNetwork', 'phoneSignal', 'phoneTether', 'phoneUplink'])
             callback.call({bind: 'text: ' + field});
         } else { for (let i = 0; i < 5; i++) callback.call('bar' + i, i); }
         return this;

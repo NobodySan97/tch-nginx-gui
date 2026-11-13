@@ -775,11 +775,11 @@ uname() { [ "$1" = "-r" ] && printf '%s\\n' "$test_kernel"; }
         config = CONFIG.read_text()
         dumaos_modal = (GUI / "www/docroot/modals/dumaos-modal.lp").read_text()
 
-        self.assertIn('dumaos_version="2.0-46"', dumaos)
+        self.assertIn('dumaos_version="2.0-47"', dumaos)
         self.assertIn('dumaos_tag="dumaos-repack-v$dumaos_version"', dumaos)
         self.assertIn('dumaos-repack_${dumaos_version}_arm_cortex-a9.ipk', dumaos)
         self.assertIn(
-            'dumaos_sha256="4fe83ddc7a34e1ada525302863f7683f54d1b37f21233c7db0750f253e50e4ef"',
+            'dumaos_sha256="45d8c456610b67bbbe9e6aaabf61e527c0a16fbdba15eab50911021b2ae64774"',
             dumaos,
         )
         self.assertIn("releases/download/$dumaos_tag/$dumaos_package", dumaos)
@@ -789,7 +789,9 @@ uname() { [ "$1" = "-r" ] && printf '%s\\n' "$test_kernel"; }
         self.assertNotIn("--force-overwrite", dumaos)
         self.assertIn("opkg remove dumaos-repack", dumaos)
         self.assertIn("dumaos_install_qos_module", dumaos)
-        self.assertIn("act-connmark-damson-4.1.52.ko", dumaos)
+        self.assertIn("modgui_kernel_package '^kmod-act-connmark(-|$)'", dumaos)
+        self.assertIn('opkg install "$dumaos_qos_package"', dumaos)
+        self.assertNotIn('act-connmark-damson-4.1.52.ko', dumaos)
         self.assertIn("/www/cards/015_dumaos.lp", dumaos)
         self.assertNotIn("uci set web.dumaos_card", dumaos)
         self.assertNotIn('[ -f /www/cards/015_dumaos.lp ]', dumaos)

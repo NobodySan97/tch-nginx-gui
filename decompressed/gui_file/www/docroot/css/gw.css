@@ -9343,3 +9343,14 @@ textarea:focus {
 }
 
 
+.flex-container{display:inline-flex;}
+
+.flex-container>div{width:50px;text-align:center;line-height:25px;font-size:10px;}
+
+.flex-container-agent{display:inline-flex;}
+
+.flex-container-agent>div{width:58.5px;text-align:center;line-height:25px;font-size:10px;}
+
+.green-bar{background-color:green!important;}
+
+.grey-bar{background-color:grey!important;}
