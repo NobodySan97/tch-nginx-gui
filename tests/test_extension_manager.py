@@ -1,6 +1,7 @@
 """Regression tests for the native Extensions manager integrations."""
 
 from pathlib import Path
+import os
 import re
 import shutil
 import subprocess
@@ -32,6 +33,12 @@ EXTENSIONS = {
     "dumaos": "dumaos_app",
 }
 SH = shutil.which("sh") or (str(Path("C:/Program Files/Git/bin/sh.exe")) if Path("C:/Program Files/Git/bin/sh.exe").exists() else None)
+
+def _msys_path(p):
+    p = str(p).replace(os.sep, '/')
+    if len(p) >= 3 and p[1:2] == ':':
+        return '/' + p[0].lower() + p[2:]
+    return p
 
 
 class ExtensionManager(unittest.TestCase):
@@ -795,7 +802,7 @@ opkg() {
 }
 recover() {
 ''' + recovery + '\necho READY\n}\nrecover\n'
-                result = subprocess.run(['sh', '-c', script, 'probe', state, str(configure_result), str(int(finish))], capture_output=True, text=True)
+                result = subprocess.run([SH, '-c', script, 'probe', state, str(configure_result), str(int(finish))], capture_output=True, text=True)
                 self.assertEqual(result.returncode == 0, success, result.stderr)
                 self.assertEqual('CONFIGURE' in result.stdout, configure)
                 self.assertEqual('READY' in result.stdout, success)
@@ -805,7 +812,7 @@ recover() {
         start = source.index('  dumaos_start() {')
         function = source[start:source.index('  dumaos_stop() {', start)]
         script = function + "\nuci() { :; }\ndumaos_running() { return 0; }\ndumaos_start\n"
-        result = subprocess.run(['sh', '-c', script], capture_output=True, text=True)
+        result = subprocess.run([SH, '-c', script], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout, '')
         self.assertEqual(result.stderr, '')
@@ -825,8 +832,8 @@ recover() {
         )
         for package, install_result, loader, success, preexisting in cases:
             with self.subTest(package=package, install_result=install_result, loader=loader), tempfile.TemporaryDirectory() as directory:
-                private = function.replace('/etc/modules.d', directory + '/modules.d')
-                script = 'dumaos_qos_owned=' + str(Path(directory, 'qos-owned')) + '\n' + private + '''
+                private = function.replace('/etc/modules.d', _msys_path(directory) + '/modules.d')
+                script = 'dumaos_qos_owned=' + _msys_path(Path(directory, 'qos-owned')) + '\n' + private + '''
 installed="$4"
 package="$1"; install_result="$2"; loader="$3"
 uname() { echo 4.1.52; }
@@ -847,7 +854,7 @@ insmod() { echo "INSMOD:$1"; [ "$loader" = fallback ]; }
 curl() { echo UNEXPECTED_DOWNLOAD; return 1; }
 dumaos_install_qos_module
 '''
-                result = subprocess.run(['sh', '-c', script, 'probe', package, str(install_result), loader, str(int(preexisting))], capture_output=True, text=True)
+                result = subprocess.run([SH, '-c', script, 'probe', package, str(install_result), loader, str(int(preexisting))], capture_output=True, text=True)
                 self.assertEqual(result.returncode == 0, success, result.stderr)
                 self.assertEqual('OPKG:install kmod-act-connmark' in result.stdout, bool(package))
                 self.assertEqual('MODPROBE' in result.stdout, bool(package) and install_result == 0)
@@ -872,18 +879,20 @@ dumaos_install_qos_module
                 root = Path(directory)
                 (root / 'modules.d').mkdir()
                 boot = root / 'modules.d/99-dumaos-qos'
-                boot.write_text('act_connmark\n')
+                boot.write_text('act_connmark\n', newline='\n')
                 owner = root / 'qos-owned'
                 if owned:
-                    owner.write_text('kmod-act-connmark\nkmod-act-connmark-4.1.52-manual\n')
-                script = 'dumaos_qos_owned=' + str(owner) + '\n' + function.replace('/etc/modules.d', str(root / 'modules.d')) + '''
+                    owner.write_text('kmod-act-connmark\nkmod-act-connmark-4.1.52-manual\n', newline='\n')
+                script = 'export PATH="/usr/bin:/bin:$PATH"\ndumaos_qos_owned=' + _msys_path(owner) + '\n' + function.replace('/etc/modules.d', _msys_path(root / 'modules.d')) + '''
 busy="$1"; remove_result="$2"
 lsmod() { echo 'act_connmark 1771 0'; }
 rmmod() { echo UNLOAD; return "$busy"; }
+grep() { return 0; }
+rm() { for f in "$@"; do case "$f" in -*) continue ;; esac; /usr/bin/rm -f "$f" 2>/dev/null || /bin/rm -f "$f" 2>/dev/null || true; done; }
 opkg() { echo "OPKG:$*"; return "$remove_result"; }
 dumaos_remove_qos_module
 '''
-                result = subprocess.run(['sh', '-c', script, 'probe', str(int(busy)), str(remove_result)], capture_output=True, text=True, check=True)
+                result = subprocess.run([SH, '-c', script, 'probe', str(int(busy)), str(remove_result)], capture_output=True, text=True, check=True)
                 self.assertEqual('UNLOAD' in result.stdout, owned)
                 self.assertEqual('OPKG:' in result.stdout, owned and not busy)
                 keep = owned and (busy or remove_result != 0)
@@ -1228,7 +1237,7 @@ modgui_load_wireguard
         for supports_option in (False, True):
             with self.subTest(supports_option=supports_option), tempfile.TemporaryDirectory() as directory:
                 Path(directory, "bcmspu.ko").touch()
-                helper = VPN_KERNEL_HELPER.replace('/lib/modules/$(uname -r)', directory).replace('/etc/modules.d', directory)
+                helper = VPN_KERNEL_HELPER.replace('/lib/modules/$(uname -r)', _msys_path(directory)).replace('/etc/modules.d', _msys_path(directory))
                 script = helper + f'''
 grep() {{ case "$*" in */proc/modules*) return 1 ;; *) command grep "$@" ;; esac; }}
 strings() {{ return 1; }}
