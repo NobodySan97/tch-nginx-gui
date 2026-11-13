@@ -29,6 +29,23 @@ PREVIEW_VERSION="preview.version"
 CURRENT_VERSION=$(grep -e 'version_gui' /etc/init.d/rootdevice | sed 's/version_gui=//' | cut -d'-' -f1)
 BASE_DIR="https://raw.githubusercontent.com/NobodySan97/gui-dev-build-auto/master"
 
+# Some minimal firmware images do not ship the busybox logger applet. Keep
+# diagnostics working without aborting the download/upgrade flow.
+if ! command -v logger >/dev/null 2>&1; then
+	logger() {
+		while [ $# -gt 0 ]; do
+			case "$1" in
+				-s) shift ;;
+				-t|-p) shift 2 ;;
+				--) shift; break ;;
+				-*) shift ;;
+				*) break ;;
+			esac
+		done
+		printf '%s\n' "$*" >&2
+	}
+fi
+
 ############TRANSFORMER UTILITY##################
 set_transformer() {
 	cmd="local dm = require('datamodel'); dm.set('$1', '$2'); dm.apply()"
@@ -99,12 +116,13 @@ release_channel_version() {
 md5_verify_asset() {
 	# $1 = version, $2 = asset basename. Exit 0 = verified, 2 = manifest absent
 	# (older releases), 1 = mismatch or broken manifest (abort the download).
+	case "$2" in '') return 1 ;; esac
 	manifest=$(curl -m 20 -k -s -f -L "$BASE_DIR/$1/MD5SUMS" 2>/dev/null) || {
 		manifest=$(curl -m 20 -k -s -f -L "$BASE_DIR/MD5SUMS" 2>/dev/null) || return 2
 	}
 	expected=$(printf '%s\n' "$manifest" | awk -v asset="$2" '{ s=$NF; n=length(asset); if (substr(s, length(s) - n + 1, n) == asset) { print $1; exit } }')
-	case "$expected" in ''|*[!0-9a-f]*) return 2 ;; esac
-	[ ${#expected} -eq 32 ] || return 2
+	case "$expected" in '') return 2 ;; *[!0-9a-f]*) return 1 ;; esac
+	[ ${#expected} -eq 32 ] || return 1
 	modbus=$(md5sum "$3" 2>/dev/null | awk '{print $1}')
 	[ "$modbus" = "$expected" ] || {
 		logger -s -t "CheckVer Script" "Checksum mismatch for $2 (expected $expected, got $modbus)"
