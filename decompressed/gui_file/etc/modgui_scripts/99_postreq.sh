@@ -14,8 +14,7 @@ check_gui_tmp() {
 	       /tmp/md5check \
 	       /tmp/ledfw* \
 	       /tmp/web_unlock \
-	       /tmp/dosprotect_orig \
-	       /total 2>/dev/null || true
+	       /tmp/dosprotect_orig 2>/dev/null || true
 }
 
 start_stop_nginx() {
