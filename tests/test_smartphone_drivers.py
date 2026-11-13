@@ -43,6 +43,7 @@ class SmartphoneDriversTest(unittest.TestCase):
                         FIXTURE=self.rootdir, KERNEL_RELEASE='6.6.42-vendor',
                         KERNEL_ABI='6.6.42-build-abcd', FEED_ABI='6.6.42-build-abcd')
         self.mock('uname', 'echo "$KERNEL_RELEASE"')
+        self.mock('lsmod', '')   # deterministico su Linux CI (altrimenti il runner può avere rndis_host caricato)
         self.mock('modprobe', '''echo "modprobe $1" >> "$FIXTURE/modules.log"
 [ "$FAIL_MODPROBE" != 1 ] || exit 1
 [ "$FAIL_LOAD" != "$1" ] || exit 1
@@ -136,7 +137,7 @@ else: raise AssertionError(args)
         self.assertEqual(module.read_text(), 'module from feed')
         self.assertIn('install kmod-usb-net-rndis', (self.root/'opkg.log').read_text())
         self.assertIn('reboot the router', result.stdout)
-        self.assertNotIn('modprobe rndis_host', (self.root/'modules.log').read_text())
+        self.assertNotIn('modprobe rndis_host', (self.root/'modules.log').read_text() if (self.root/'modules.log').exists() else '')
 
     def test_builtin_modules_do_not_require_installation_or_loading(self):
         folder = self.root/'lib/modules/6.6.42-vendor'
@@ -145,7 +146,7 @@ else: raise AssertionError(args)
         result = self.run_manager()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertNotIn('install kmod-usb-net-rndis', (self.root/'opkg.log').read_text())
-        self.assertNotIn('modprobe rndis_host', (self.root/'modules.log').read_text())
+        self.assertNotIn('modprobe rndis_host', (self.root/'modules.log').read_text() if (self.root/'modules.log').exists() else '')
         self.assertNotIn('rndis_host', (self.root/'etc/modules.d/60-modgui-smartphone-net').read_text())
 
     def test_kernel_dependency_rejection_is_not_bypassed(self):
@@ -172,7 +173,7 @@ else: raise AssertionError(args)
         result = self.run_manager(FAIL_LOAD='rndis_host')
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('could not be installed or loaded', result.stdout)
-        self.assertNotIn('rmmod', (self.root/'modules.log').read_text())
+        self.assertNotIn('rmmod', (self.root/'modules.log').read_text() if (self.root/'modules.log').exists() else '')
 
     def test_refresh_checks_feed_without_reloading_current_modules(self):
         self.assertEqual(self.run_manager().returncode, 0)
@@ -182,7 +183,7 @@ else: raise AssertionError(args)
         self.assertEqual(self.run_manager().returncode, 0)
         self.assertNotIn('install ', (self.root/'opkg.log').read_text())
         self.assertIn('upgrade kmod-usb-net-rndis', (self.root/'opkg.log').read_text())
-        self.assertEqual((self.root/'modules.log').read_text(), '')
+        self.assertEqual((self.root/'modules.log').read_text() if (self.root/'modules.log').exists() else '', '')
         self.assertFalse((self.root/'tmp/modgui-smartphone-drivers-reboot').exists())
 
     def test_feed_upgrade_of_loaded_driver_requires_reboot_until_next_boot(self):
@@ -193,7 +194,7 @@ else: raise AssertionError(args)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual((self.root/'state/kmod-usb-net-rndis').read_text(), '2.0')
         self.assertIn('reboot the router', result.stdout)
-        self.assertEqual((self.root/'modules.log').read_text(), '')
+        self.assertEqual((self.root/'modules.log').read_text() if (self.root/'modules.log').exists() else '', '')
         self.assertIn('reboot the router', self.run_manager(FEED_VERSION='2.0').stdout)
         failed_refresh = self.run_manager(FAIL_UPDATE='1')
         self.assertNotEqual(failed_refresh.returncode, 0)
@@ -221,7 +222,7 @@ else: raise AssertionError(args)
     def test_legacy_loading_fallback_finds_nested_module_files(self):
         result = self.run_manager(FAIL_MODPROBE='1', MODULE_LAYOUT='kernel/drivers/net/usb')
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('kernel/drivers/net/usb/rndis_host.ko', (self.root/'modules.log').read_text())
+        self.assertIn('kernel/drivers/net/usb/rndis_host.ko', (self.root/'modules.log').read_text() if (self.root/'modules.log').exists() else '')
 
     def test_no_available_drivers_does_not_claim_success(self):
         result = self.run_manager(MISSING=' '.join(PACKAGES))
