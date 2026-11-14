@@ -1386,9 +1386,9 @@ $(function() {\
     var currentlanip = "');  ngx.print( content["localdevIP"] ); ngx.print('";\
     $("[name=\'localdevIP\']").on("change", function(){\
 	  var NewIp = $(this).val();\
-	  var StartDHCP = $("[name=\'dhcpStartAddress\']").val().replace(currentlanip.match(/[0-9]+\.[0-9]+\.[0-9]+\./g),\'\');\
-	  var EndDHCP = $("[name=\'dhcpEndAddress\']").val().replace(currentlanip.match(/[0-9]+\.[0-9]+\.[0-9]+\./g),\'\');\
-	  var NewIpBase = NewIp.match(/[0-9]+\.[0-9]+\.[0-9]+\./g);\
+	  var StartDHCP = $("[name=\'dhcpStartAddress\']").val().replace(currentlanip.match(/[0-9]+\\.[0-9]+\\.[0-9]+\\./g),\'\');\
+	  var EndDHCP = $("[name=\'dhcpEndAddress\']").val().replace(currentlanip.match(/[0-9]+\\.[0-9]+\\.[0-9]+\\./g),\'\');\
+	  var NewIpBase = NewIp.match(/[0-9]+\\.[0-9]+\\.[0-9]+\\./g);\
       if (currentlanip == $("[name=\'dnsServer\']").val()){\
           $("[name=\'dnsServer\']").val(NewIp);\
           currentlanip = NewIp;\
